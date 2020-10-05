@@ -2,6 +2,7 @@
 using System.Diagnostics;
 namespace Communication.Proto
 {
+//怎么说，我觉得这玩意没什么卵用
     public static class Debug
     {
         public delegate void DebugFunc(string DebugMessage);

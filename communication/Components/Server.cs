@@ -9,12 +9,12 @@ namespace Communication.Components
     //internal delegate void OnReceiveCallback(Message message);
     internal delegate void OnAcceptCallback();
     internal delegate void OnClientQuit();
-    //改变一下架构，连接用onaccept和onclose维护
+    //server组件
     internal sealed class Server : IDisposable
     {
         private ConcurrentDictionary<int, IntPtr> clientList;
         private readonly TcpServer server;
-        private bool isListening;
+        private bool isListening;//或许叫full更贴切
         private object idLock = new object();
         public ushort Port
         {
@@ -27,11 +27,50 @@ namespace Communication.Components
             clientList = new ConcurrentDictionary<int, IntPtr>();
             server = new TcpPackServer();
             isListening = false;
-            server.OnReceive += delegate (IServer sender, IntPtr connid, byte[] data)
+            //client字典由accept和close维护，receive只处理数据
+            server.OnAccept += delegate (IServer sender, IntPtr connid, IntPtr client)
             {
-                Console.WriteLine($"Receive from {connid}:" + Encoding.Default.GetString(data));
+                lock (idLock)
+                {
+                    if (!isListening)
+                    {
+                        server.Disconnect(connid);
+                        return HandleResult.Ok;
+                    }
+                    int id = -1;
+                    for (int i = 0; ; i++)
+                    {
+                        if (!clientList.ContainsKey(i))
+                        {
+                            id = i;
+                            break;
+                        }
+                    }
+                    clientList.TryAdd(id, connid);
+                    Console.WriteLine($"ServerSide: Allocate ID #{id}");
+                    //此处应该触发一个event，做一些什么时候不再监听的判断（Agent与server各异）或向网站发送信息
+                }
+                return HandleResult.Ok;
+            };
+            server.OnClose += delegate (HPSocket.IServer sender, IntPtr connid, HPSocket.SocketOperation socketoperation, int errorcode)
+            {
+                int id = -1;
+                foreach (int key in clientList.Keys)
+                {
+                    if (clientList[key] == connid)
+                    {
+                        id = key;
+                        break;
+                    }
+                }
+                IntPtr tmp;
+                clientList.TryRemove(id, out tmp);//out也不懂
+                Console.WriteLine($"ServerSide: ID #{id } has quited");
+                server.Disconnect(tmp);
+                Resume();//改为监听状态
                 return HPSocket.HandleResult.Ok;
             };
+
         }
         public void Start()
         {
@@ -39,6 +78,7 @@ namespace Communication.Components
             Console.WriteLine($"Server has started on 0.0.0.0:{server.Port}");
             isListening = true;
             Console.WriteLine("Server is listening");
+
         }
         public void Pause()
         {
