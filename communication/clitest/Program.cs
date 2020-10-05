@@ -15,6 +15,7 @@ namespace clitest
             client.Connect("127.0.0.1", 7777);
             byte[] temp= Encoding.Default.GetBytes("hello world");
             client.Send(temp, 12);
+            client.Stop();
             Console.ReadLine();
         }
     }

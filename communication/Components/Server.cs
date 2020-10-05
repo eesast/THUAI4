@@ -92,14 +92,10 @@ namespace Communication.Components
         }
         public void Stop()
         {
-           // Constants.Debug("ServerSide: Stopping");
-            MemoryStream ostream = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(ostream);
-            //bw.Write((int)PacketType.Disconnected);
-            byte[] raw = ostream.ToArray();
-            foreach (IntPtr client in clientList.Values)
-                server.Send(client, raw, raw.Length);
+            //虽然client还没写，预计也是一边断了另一边直接就知道了
+            isListening = false;
             server.Stop();
+            Console.WriteLine("ServerSide has stopped.");
         }
         public void Dispose()
         {
