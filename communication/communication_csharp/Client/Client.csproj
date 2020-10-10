@@ -1,12 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="HPSocket.Net" Version="5.7.2.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\hesicheng\.nuget\packages\hpsocket.net\5.7.2.9\build\..\content\HPSocket\hpsocket_cn.txt" />
   </ItemGroup>
 
 </Project>
