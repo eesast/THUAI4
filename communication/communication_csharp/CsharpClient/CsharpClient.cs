@@ -3,17 +3,29 @@ using System.Threading;
 using System.Collections.Generic;
 using HPSocket;
 using HPSocket.Tcp;
-namespace Communication.Client
+namespace Communication.CsharpClient
 {
     public delegate void OnReceiveCallback(byte[] bytes);
-    class Csharpclient : IDisposable
+    public class Csharpclient : IDisposable
     {
         private TcpPackClient client;
+        private bool connected = false;
         public event OnReceiveCallback OnReceive;
 
         public Csharpclient()
         {
+            connected = false;
             client = new TcpPackClient();
+            client.OnConnect += delegate (IClient sender)
+            {
+                connected = true;
+                return HandleResult.Ok;
+            };
+            client.OnClose += delegate (IClient sender, SocketOperation socketOperation, int errorCode)
+            {
+                connected = false;
+                return HandleResult.Ok;
+            };
             client.OnReceive += delegate (IClient sender, byte[] bytes)
             {
                 OnReceive?.Invoke(bytes);
@@ -24,7 +36,9 @@ namespace Communication.Client
         {
             client.Address = IP;
             client.Port = port;
-            return client.Connect();
+            if (!client.Connect()) return false;
+            while (!client.IsConnected) Thread.Sleep(100);
+            return true;
         }
         public bool Send(byte[] bytes)
         {
@@ -41,29 +55,5 @@ namespace Communication.Client
         }
 
     }
-    /*class Test
-    {
-        static void Main(string[] args)
-        {
-            Csharpclient client = new Csharpclient();
-            client.OnReceive += delegate (byte[] bytes)
-            {
-                string temp = System.Text.Encoding.Default.GetString(bytes);
-                Console.WriteLine("Receive from server:" + temp);
-            };
-            client.Connect("127.0.0.1", 7777);
-            string sendstr;
-            byte[] bytes;
-            while (true)
-            {
-                sendstr = Console.ReadLine();
-                if (string.IsNullOrEmpty(sendstr)) break;
-                bytes = System.Text.Encoding.Default.GetBytes(sendstr);
-                client.Send(bytes);
-            }
-            client.Stop();
-            client.Dispose();
-        }
-    }*/
 }
 

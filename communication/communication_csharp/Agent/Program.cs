@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using Microsoft.Extensions.CommandLineUtils;
 using HPSocket;
@@ -15,7 +16,7 @@ namespace Communication.Agent
             var app = new CommandLineApplication();
             app.HelpOption("-h|--help");
             var server = app.Option("-s|--server", "game server endpoint.", CommandOptionType.SingleValue);
-            var port = app.Option("-p|--port", "agent port, 7777 in default", CommandOptionType.SingleValue);
+            var port = app.Option("-p|--port", "agent port, 7777 indefault", CommandOptionType.SingleValue);
             app.OnExecute(() =>
             {
                 string ep = server.Value();
@@ -30,13 +31,18 @@ namespace Communication.Agent
                     Console.WriteLine("Wrong format of server endpoint. IP:port");
                     return 0;
                 }
+                IPEndPoint serverend = new IPEndPoint(IPAddress.Parse(temp[0]), ushort.Parse(temp[1]));
                 string tt = port.Value();
-                return MainInternal(temp[0], ushort.Parse(temp[1]), string.IsNullOrEmpty(tt) ? (ushort)7777 : ushort.Parse(tt));
+                ushort agentport;
+                agentport = string.IsNullOrEmpty(tt) ? (ushort)7777 : ushort.Parse(tt);
+                Console.WriteLine("Server endpoint:"+serverend.Address.ToString()+":"+serverend.Port.ToString());
+                Console.WriteLine($"Agent port:{agentport}");
+                return MainInternal(serverend, agentport);
             });
             app.Execute(args);
             return 0;
         }
-        private static int MainInternal(string sip, ushort sport, ushort aport)
+        private static int MainInternal(IPEndPoint serverend, ushort agentport)
         {
             server.OnReceive += delegate (IServer sender, IntPtr connId, byte[] bytes)
             {
@@ -48,16 +54,35 @@ namespace Communication.Agent
                 List<IntPtr> temp = server.GetAllConnectionIds();
                 foreach (IntPtr connId in temp)
                 {
-                    server.Send(connId, bytes, bytes.Length);
+                    if (!server.Send(connId, bytes, bytes.Length))
+                    {
+                        Console.WriteLine($"向{connId}发送失败。");
+                        //如果有处理，就在这里加
+                        //Agent怎么处理这里呢……我不知道
+                    }
                 }
                 return HandleResult.Ok;
             };
-            client.Address = sip;
-            client.Port = sport;
-            client.Connect();
-            while (!client.IsConnected) Thread.Sleep(100);
-            server.Port = aport;
-            server.Start();
+            Console.WriteLine("Connecting......");
+            if(!client.Connect(serverend.Address.ToString(), (ushort)serverend.Port))
+            {
+                Console.WriteLine("Failed to connect with the game server.");
+                
+            }
+            else
+            {
+                while (!client.IsConnected) Thread.Sleep(100);
+                Console.WriteLine("Connect with the game server successfully.");
+            }
+            server.Port = agentport;
+            if (server.Start())
+            {
+                Console.WriteLine("Agent starts listening.");
+            }
+            else
+            {
+                Console.WriteLine("Agent starts unsuccessfully");
+            }
             Thread.Sleep(int.MaxValue);
             server.Stop();
             server.Dispose();
