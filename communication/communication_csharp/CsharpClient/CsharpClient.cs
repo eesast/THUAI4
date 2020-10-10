@@ -9,23 +9,11 @@ namespace Communication.CsharpClient
     public class Csharpclient : IDisposable
     {
         private TcpPackClient client;
-        private bool connected = false;
         public event OnReceiveCallback OnReceive;
-
+        private readonly int maxtimeout=30000;//ms，超时connect还没成功则认为连接失败
         public Csharpclient()
         {
-            connected = false;
             client = new TcpPackClient();
-            client.OnConnect += delegate (IClient sender)
-            {
-                connected = true;
-                return HandleResult.Ok;
-            };
-            client.OnClose += delegate (IClient sender, SocketOperation socketOperation, int errorCode)
-            {
-                connected = false;
-                return HandleResult.Ok;
-            };
             client.OnReceive += delegate (IClient sender, byte[] bytes)
             {
                 OnReceive?.Invoke(bytes);
@@ -37,8 +25,19 @@ namespace Communication.CsharpClient
             client.Address = IP;
             client.Port = port;
             if (!client.Connect()) return false;
-            while (!client.IsConnected) Thread.Sleep(100);
-            return true;
+            for(int i = 0; i < maxtimeout / 100; i++)
+            {
+                if (!client.IsConnected)
+                {
+                    Thread.Sleep(100);
+                }
+                else
+                {
+                    return true;
+                }
+                    
+            }
+            return false;
         }
         public bool Send(byte[] bytes)
         {

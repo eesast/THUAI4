@@ -71,8 +71,20 @@ namespace Communication.Agent
             }
             else
             {
-                while (!client.IsConnected) Thread.Sleep(100);
-                Console.WriteLine("Connect with the game server successfully.");
+                int i;
+                for(i = 0; i < 300; i++)
+                {
+                    if (client.IsConnected)
+                    {
+                        Console.WriteLine("Connect with the game server successfully.");
+                        break;
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
+                } 
+                if(i==300) Console.WriteLine("Failed to connect with the game server.");
             }
             server.Port = agentport;
             if (server.Start())
