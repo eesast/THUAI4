@@ -6,12 +6,12 @@ using HPSocket.Tcp;
 namespace Communication.CsharpClient
 {
     public delegate void OnReceiveCallback(byte[] bytes);
-    public class Csharpclient : IDisposable
+    public class CsharpClient : IDisposable
     {
         private TcpPackClient client;
         public event OnReceiveCallback OnReceive;
         private readonly int maxtimeout=30000;//ms，超时connect还没成功则认为连接失败
-        public Csharpclient()
+        public CsharpClient()
         {
             client = new TcpPackClient();
             client.OnReceive += delegate (IClient sender, byte[] bytes)
