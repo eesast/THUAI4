@@ -6,7 +6,7 @@ namespace clienttest
    {
        static void Main(string[] args)
        {
-           Csharpclient client = new Csharpclient();
+           CsharpClient client = new CsharpClient();
            client.OnReceive += delegate (byte[] bytes)
            {
                string temp = System.Text.Encoding.Default.GetString(bytes);

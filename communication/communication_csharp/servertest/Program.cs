@@ -16,7 +16,7 @@ namespace servertest
             server.OnReceive += delegate ()
             {
                 byte[] data;
-                if (server.Dequeue(out data))
+                if (server.TryTake(out data))
                 {
                     string temp;
                     temp = System.Text.Encoding.Default.GetString(data);

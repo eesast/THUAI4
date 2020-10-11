@@ -57,7 +57,7 @@ namespace Communication.CommServer
                 }                             
             }
         }
-        public bool Dequeue(out byte[] data)//就是套了个壳，呵呵哒
+        public bool TryTake(out byte[] data)//就是套了个壳
         {
             try
             {
@@ -65,9 +65,21 @@ namespace Communication.CommServer
             }
             catch(Exception e)
             {
-                Console.WriteLine("Exception occured when trying to take an item to the queue:" + e.Message);
+                Console.WriteLine("Exception occured when trying to take an item from the queue:" + e.Message);
                 data = null;
                 return false;
+            }
+        }
+        public byte[] Take()
+        {
+            try
+            {
+                return queue.Take();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Exception occured when taking an item from the queue:" + e.Message);
+                return null;
             }
         }
         public bool Stop()

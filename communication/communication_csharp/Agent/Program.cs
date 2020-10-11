@@ -57,8 +57,6 @@ namespace Communication.Agent
                     if (!server.Send(connId, bytes, bytes.Length))
                     {
                         Console.WriteLine($"向{connId}发送失败。");
-                        //如果有处理，就在这里加
-                        //Agent怎么处理这里呢……我不知道
                     }
                 }
                 return HandleResult.Ok;
