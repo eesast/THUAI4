@@ -19,19 +19,17 @@ namespace Communication.Agent
             var port = app.Option("-p|--port", "agent port, 7777 indefault", CommandOptionType.SingleValue);
             app.OnExecute(() =>
             {
-                string ep = server.Value();
-                if (string.IsNullOrEmpty(ep))
+                string endpoint = server.Value();
+                IPEndPoint serverend;
+                try
                 {
-                    Console.WriteLine("Fatal error: please input server endpoint.");
+                    serverend= IPEndPoint.Parse(endpoint);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Parsing server endpoint  went wrong:" + e.Message);
                     return 0;
                 }
-                string[] temp = ep.Split(":");
-                if (temp.Length != 2)
-                {
-                    Console.WriteLine("Wrong format of server endpoint. IP:port");
-                    return 0;
-                }
-                IPEndPoint serverend = new IPEndPoint(IPAddress.Parse(temp[0]), ushort.Parse(temp[1]));
                 string tt = port.Value();
                 ushort agentport;
                 agentport = string.IsNullOrEmpty(tt) ? (ushort)7777 : ushort.Parse(tt);
