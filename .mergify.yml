@@ -1,0 +1,6 @@
+pull_request_rules:
+  - name: Automatic close pr from master
+    conditions:
+      - "base=master"
+    actions:
+      close: {}
