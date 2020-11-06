@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CsharpClient\CsharpClient.csproj" />
+    <ProjectReference Include="..\CSharpClient\CSharpClient.csproj" />
   </ItemGroup>
 
 </Project>
