@@ -3,15 +3,15 @@ using System.Threading;
 using System.Collections.Generic;
 using HPSocket;
 using HPSocket.Tcp;
-namespace Communication.CsharpClient
+namespace Communication.CSharpClient
 {
     public delegate void OnReceiveCallback(byte[] bytes);
-    public class CsharpClient : IDisposable
+    public class CSharpClient : IDisposable
     {
         private TcpPackClient client;
         public event OnReceiveCallback OnReceive;
         private readonly int maxtimeout=30000;//ms，超时connect还没成功则认为连接失败
-        public CsharpClient()
+        public CSharpClient()
         {
             client = new TcpPackClient();
             client.OnReceive += delegate (IClient sender, byte[] bytes)

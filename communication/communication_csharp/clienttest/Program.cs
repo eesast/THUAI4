@@ -1,12 +1,12 @@
 ﻿using System;
-using Communication.CsharpClient;
+using Communication.CSharpClient;
 namespace clienttest
 {
    class Test
    {
        static void Main(string[] args)
        {
-           CsharpClient client = new CsharpClient();
+           CSharpClient client = new CSharpClient();
            client.OnReceive += delegate (byte[] bytes)
            {
                string temp = System.Text.Encoding.Default.GetString(bytes);

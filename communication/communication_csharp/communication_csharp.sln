@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "servertest", "servertest\se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clienttest", "clienttest\clienttest.csproj", "{AF20652D-A4AA-49DD-AE64-309975B0B151}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsharpClient", "CsharpClient\CsharpClient.csproj", "{16C730F3-9B01-4374-A9FE-D675EDB8BA8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpClient", "CSharpClient\CSharpClient.csproj", "{16C730F3-9B01-4374-A9FE-D675EDB8BA8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
