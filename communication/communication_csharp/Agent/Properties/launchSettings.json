@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Agent": {
+      "commandName": "Project",
+      "commandLineArgs": "-s 127.0.0.1:8888 -p 7777"
+    }
+  }
+}
