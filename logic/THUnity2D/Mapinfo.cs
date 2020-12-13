@@ -4,8 +4,13 @@ using System.Text;
 //这个类是个常量，不改
 namespace THUnity2D
 {
+    public enum MapInfoObjType : uint      //储存特定数字代表那种地图物件
+	{
+        Blank = 0,
+        Wall = 5
+	}
     public static class Mapinfo
-    {   
+    {
 
         //地图,50*50,中间全是空的
         //5为墙
@@ -63,9 +68,6 @@ namespace THUnity2D
             {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
          };
         //todo
-        //注意要时刻维护worldmap
-        private static Map worldmap;
-
 
     }
 }

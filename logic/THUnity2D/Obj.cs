@@ -7,49 +7,49 @@ using System.Text;
 //所有游戏人物，道具，子弹的基类
 namespace THUnity2D
 {
-    public enum ObjType {
-        //此枚举为调试代码，之后删除，应该用通信组的版本
-        wall = 1,
-        prop = 2,
-        bullet = 3
-    }
 
+	//参见protobuf
 
-    public enum PropType { 
-    //同上
-    empty,
-    p1,p2,p3,p4,p5,p6
-    }
+	public enum ObjType
+	{
+		empty = 0,
+		wall = 1,
+		prop = 2,
+		bullet = 3
+	}
 
+	public class Obj : GameObject	//道具，墙
+	{
+		public readonly ObjType objType;		//通信组实现
 
-    public class Obj: GameObject //道具，墙
-    {
-        public ObjType objType;//通信组实现
-      
-        public PropType _prop;//道具种类，或人物持有的道具类型
-        public PropType Prop {
-            set { _prop = value; }
-            get { return _prop; }
-        }
-        public BulletType _bullet;
-        public BulletType Bullet {
-            set { _bullet = value; }
-            get { return _bullet; }        
-        }
-
-        public Obj(double x_t, double y_t, ObjType objType) : base(new THUnity2D.XYPosition(x_t, y_t))//类型转换
+		private Character? _parent = null;		//道具的主人
+		public Character Parent
         {
-            this.objType = objType;
+			get { return _parent; }
+            set
+            {
+				Operations.Add
+					(
+						() =>
+						{
+							string debugStr = (value == null ? 
+							" has been throwed by " + (_parent == null ? "null." : _parent.ToString()) 
+							: "has been picked by " + (value == null ? "null." : value.ToString()));
+							_parent = value;
+							Debug(this, debugStr);
+						}
+					);
+            }
         }
 
+		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType) : base(initPos, radius, isRigid, moveSpeed)
+		{
+			this.objType = objType;
+		}
 
-
-
-        public override string ToString()
-        {
-            return objType + ":" + ID + ", " + Position.ToString() + " ";
-        }
-
-
-    }
+		public override string ToString()
+		{
+			return objType + ": " + ID + ", " + Position.ToString() + " ";
+		}
+	}
 }
