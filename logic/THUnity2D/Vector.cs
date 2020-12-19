@@ -8,9 +8,9 @@ namespace THUnity2D
 {
 	public struct Vector
 	{
-		public readonly double angle;
-		public readonly double length;
-		public Vector(double angle = 0.0, int length = 0)
+		public double angle;
+		public double length;
+		public Vector(double angle = 0.0, double length = 0.0)
 		{
 			if (length < 0)
 			{

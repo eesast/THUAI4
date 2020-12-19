@@ -137,6 +137,7 @@ namespace THUnity2D
 		}
 
 		private int score;						//当前分数
+		public int Score { get => score; }
 		public void AddScore(int add)
 		{
 			Operations.Add
@@ -163,6 +164,7 @@ namespace THUnity2D
 		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed)
 		{
 			score = 0;
+			this.jobType = jobType;
 
 			switch (jobType)
 			{

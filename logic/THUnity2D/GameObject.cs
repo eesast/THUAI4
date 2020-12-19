@@ -9,12 +9,15 @@ namespace THUnity2D
 {
 	public abstract class GameObject
 	{
-		public const int unitPerCell = 1024;			//一个大格含有的坐标个数
+		public const int unitPerCell = 1000;			//一个大格含有的坐标个数
 
 		public const int MinSpeed = 1;                  //最小速度
-		public const int MaxSpeed = (int)(unitPerCell * 0.414);	//最大速度
+		public const int MaxSpeed = (unitPerCell * 5);  //最大速度
 
-		private static long currentMaxID = 0;			//目前游戏对象的最大ID
+		public readonly object gameObjLock = new object();
+
+		private static long currentMaxID = 0;           //目前游戏对象的最大ID
+		public const long invalidID = long.MaxValue;			//无效的ID
 		public long ID { get; }							//ID
 		
 		protected readonly BlockingCollection<Action> Operations = new BlockingCollection<Action>();//事件队列
@@ -78,19 +81,20 @@ namespace THUnity2D
             }
 		}
 
-		//移动，改变坐标
-		public void Move(Vector displacement)
+		//移动，改变坐标，反馈实际走的长度的平方
+		public int Move(Vector displacement)
         {
+			var deltaPos = Vector.Vector2XY(displacement);
 			Operations.Add
 				(
 					() =>
                     {
-						var deltaPos = Vector.Vector2XY(displacement);
 						this._position.x += deltaPos.x;
 						this._position.y += deltaPos.y;
 						FacingDirection = displacement.angle;
                     }
 				);
+			return deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
         }
 
 		//物体半径
@@ -121,7 +125,7 @@ namespace THUnity2D
 			)
 			{ IsBackground = true }.Start();
 
-			Console.WriteLine("new gameobject constructed");//debug
+			Debug(this, " constructed!");
 		}
 
 		//用于Debug时从控制台观察到各个游戏对象的状况
