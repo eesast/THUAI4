@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CommServer\CommServer.csproj" />
+    <ProjectReference Include="..\THUnity2D\THUnity2D.csproj" />
   </ItemGroup>
 
 </Project>
