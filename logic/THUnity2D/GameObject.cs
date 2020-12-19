@@ -9,10 +9,8 @@ namespace THUnity2D
 {
 	public abstract class GameObject
 	{
-		public const int unitPerCell = 1000;			//一个大格含有的坐标个数
-
 		public const int MinSpeed = 1;                  //最小速度
-		public const int MaxSpeed = (unitPerCell * 5);  //最大速度
+		public const int MaxSpeed = int.MaxValue;  //最大速度
 
 		public readonly object gameObjLock = new object();
 
@@ -22,28 +20,26 @@ namespace THUnity2D
 		
 		protected readonly BlockingCollection<Action> Operations = new BlockingCollection<Action>();//事件队列
 
-		private XYPosition _position;		//位置
-		public XYPosition Position { get { return _position; } }
+		private XYPosition position;		//位置
+		public XYPosition Position { get { return position; } }
 
 		//Direction
-		private double _facingDirection = 0.0;		//面向的方向，去极角的弧度值
+		private double facingDirection = 0.0;		//面向的方向，去极角的弧度值
 		public double FacingDirection
         {
-			get => _facingDirection;
+			get => facingDirection;
 			private set
             {
 				Operations.Add
 					(
 						() =>
                         {
-							_facingDirection = value;
+							facingDirection = value;
                         }
 					);
             }
         }
 
-		private bool _canMove = false;				//当前是否能移动
-		
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
 
 		private int _moveSpeed;
@@ -65,43 +61,64 @@ namespace THUnity2D
         }
 
 		//当前是否能移动
+
+		private bool canMove = false;              //当前是否能移动
+
 		public bool CanMove
         {
-			get { return _canMove; }
+			get { return canMove; }
 			set
 			{
 				Operations.Add
 					(
 						() =>
 						{
-							_canMove = value;
-							Debug(this, _canMove ? "Enable move!" : "Disable move!");
+							canMove = value;
+							Debug(this, canMove ? "Enable move!" : "Disable move!");
 						}
 					);
             }
 		}
 
+		//当前是否正在移动
+		private bool isMoving = false;
+		public bool IsMoving
+		{
+			get => isMoving;
+			set
+			{
+				Operations.Add
+					(
+						() =>
+						{
+							isMoving = value;
+							Debug(this, isMoving ? " begin to move!" : " end moving!");
+						}
+					);
+			}
+		}
+
 		//移动，改变坐标，反馈实际走的长度的平方
-		public int Move(Vector displacement)
+		public long Move(Vector displacement)
         {
 			var deltaPos = Vector.Vector2XY(displacement);
 			Operations.Add
 				(
 					() =>
                     {
-						this._position.x += deltaPos.x;
-						this._position.y += deltaPos.y;
 						FacingDirection = displacement.angle;
-                    }
+						this.position.x += deltaPos.x;
+						this.position.y += deltaPos.y;
+					}
 				);
 			return deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
         }
 
 		//物体半径
-		private int _radius;
+		private int radius;
 		public int Radius
 		{
-			get => _radius;
+			get => radius;
 		}
 
 		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed)
@@ -109,8 +126,8 @@ namespace THUnity2D
 			ID = currentMaxID;
 			++currentMaxID;
 
-			this._position = initPos;
-			this._radius = radius;
+			this.position = initPos;
+			this.radius = radius;
 			this.IsRigid = isRigid;
 			this._moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
 
