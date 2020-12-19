@@ -49,7 +49,7 @@ namespace THUnity2D
 		{
 			get => cellColor.GetLength(1);
 		}
-		public const int numOfGridPerCell = GameObject.unitPerCell;   //每个的坐标单位数
+		public const int numOfGridPerCell = 1000;   //每个的坐标单位数
 		public const int numOfStepPerSecond = 50;		//每秒行走的步数
 
 		public int ObjRadius
@@ -87,6 +87,10 @@ namespace THUnity2D
 			isGaming = true;
 			Thread.Sleep(milliSeconds);
 			isGaming = false;
+			foreach (Character player in playerList)
+			{
+				player.CanMove = false;
+			}
 			return true;
 		}
 
@@ -131,6 +135,7 @@ namespace THUnity2D
 		//人物移动
 		public void MovePlayer(long playerID, int moveTime, double moveDirection)
 		{
+			if (!isGaming) return;
 			foreach (var iPlayer in playerList)
 			{
 				if (((Character)iPlayer).ID == playerID)
@@ -140,25 +145,33 @@ namespace THUnity2D
 							() =>
 							{
 								Character player = (Character)iPlayer;
+								if (!player.CanMove) return;
 								lock (player.gameObjLock)
 								{
-									if (!player.CanMove) return;
-									player.CanMove = false;
+									if (player.IsMoving) return;
+									player.IsMoving = true;		//开始移动
 								}
 								
 								GameObject.Debug(player, " begin to move at " + player.Position.ToString());
 								double deltaLen = 0.0;      //储存行走的误差
 								Vector moveVec = new Vector(moveDirection, 0.0);
+								//先转向
+								if (isGaming) player.Move(moveVec);		//先转向
 								while (isGaming && moveTime > 0)
 								{
-									var beginTime = System.Environment.TickCount;
+									var beginTime = Environment.TickCount;
 									moveVec.length = player.MoveSpeed / numOfStepPerSecond + deltaLen;
 									deltaLen = 0;
-									if (CheckCollision(player, moveVec) != null)
+									GameObject collisionObj = null;
+									if ((collisionObj = CheckCollision(player, moveVec)) != null)
 									{
+										OnCollision(player, collisionObj, moveVec);
 										moveVec.length = 0;
 									}
-									deltaLen += moveVec.length - Math.Sqrt(player.Move(moveVec));
+									else
+									{
+										deltaLen += moveVec.length - Math.Sqrt(player.Move(moveVec));
+									}
 									var endTime = System.Environment.TickCount;
 									moveTime -= 1000 / numOfStepPerSecond;
 									var deltaTime = endTime - beginTime;
@@ -172,11 +185,11 @@ namespace THUnity2D
 									}
 								}
 								moveVec.length = deltaLen;
-								if (CheckCollision(player, moveVec) != null)
+								if (CheckCollision(player, moveVec) == null)
 								{
 									player.Move(moveVec);
 								}
-								player.CanMove = true;
+								player.IsMoving = false;		//结束移动
 								GameObject.Debug(player, " end move at " + player.Position.ToString());
 							}
 						)
@@ -186,10 +199,86 @@ namespace THUnity2D
 			}
 		}
 
-		//碰撞检测，返回与之碰撞的物体
+		//碰撞检测，如果这样行走是否会与之碰撞，返回与之碰撞的物体
 		private GameObject? CheckCollision(GameObject obj, Vector moveVec)
 		{
-			return null;		//TODO: 暂不检测碰撞
+			XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
+			//在某列表中检查碰撞
+			Func<ArrayList, GameObject> CheckCollisionInList =
+				(ArrayList lst) =>
+				{
+					foreach(GameObject listObj in lst)
+					{
+						if (!listObj.IsRigid || listObj.ID == obj.ID) continue; //不检查自己和非刚体
+						int deltaX = nextPos.x - listObj.Position.x, deltaY = nextPos.y - listObj.Position.y;
+						if ((long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius))
+						{
+							return listObj;
+						}
+					}
+					return null;
+				};
+			GameObject collisionObj = null;
+			if ((collisionObj = CheckCollisionInList(playerList)) != null || (collisionObj = CheckCollisionInList(objList)) != null)
+			{
+				return collisionObj;
+			}
+			return null;
+		}
+		
+		//碰撞后处理
+		private void OnCollision(GameObject obj, GameObject collisionObj, Vector moveVec)
+		{
+			if (obj is Character)		//如果是人主动碰撞
+			{
+				uint maxLen = uint.MaxValue;      //移动的最大距离
+				uint tmpMax;
+				Vector2 objMoveUnitVector = new Vector2(1.0 * Math.Cos(obj.FacingDirection), 1.0 * Math.Sin(obj.FacingDirection));
+
+				XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
+				//在某列表中检查碰撞
+				Action<ArrayList> FindMax =
+					(ArrayList lst) =>
+					{
+						foreach (GameObject listObj in lst)
+						{
+							if (!listObj.IsRigid || listObj.ID == obj.ID) continue; //不检查自己和非刚体
+							int deltaX = nextPos.x - listObj.Position.x, deltaY = nextPos.y - listObj.Position.y;
+							if ((long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius))
+							{
+								int orgDeltaX = listObj.Position.x - obj.Position.x;
+								int orgDeltaY = listObj.Position.y - obj.Position.y;
+								double mod = Math.Sqrt((long)orgDeltaX * orgDeltaX + (long)orgDeltaY * orgDeltaY);
+								Vector2 relativePosUnitVector = new Vector2(orgDeltaX / mod, orgDeltaY / mod);
+								Vector2 moveUnitVector = new Vector2(Math.Cos(moveVec.angle), Math.Sin(moveVec.angle));
+								if (relativePosUnitVector * moveUnitVector <= 0) continue;
+								double tmp = mod - obj.Radius - listObj.Radius;
+								if (tmp <= 0)
+								{
+									tmpMax = 0;
+								}
+								else
+								{
+									tmp = tmp / Math.Cos(Math.Atan2(orgDeltaY, orgDeltaX) - moveVec.angle);
+									if (tmp < 0 || tmp > uint.MaxValue || tmp == double.NaN)
+									{
+										tmpMax = uint.MaxValue;
+									}
+									else tmpMax = (uint)tmp;
+								}
+
+								if (tmpMax < maxLen) maxLen = tmpMax;
+							}
+						}
+						//return null;
+					};
+
+				FindMax(playerList);
+				FindMax(objList);
+
+				maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / numOfStepPerSecond));
+				obj.Move(new Vector(moveVec.angle, maxLen));
+			}
 		}
 	}
 }
