@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clienttest", "clienttest\cl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpClient", "CSharpClient\CSharpClient.csproj", "{16C730F3-9B01-4374-A9FE-D675EDB8BA8B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communication.Proto", "Communication.Proto\Communication.Proto.csproj", "{FE41DB41-759C-45E3-BC89-C42C4B13F882}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{16C730F3-9B01-4374-A9FE-D675EDB8BA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16C730F3-9B01-4374-A9FE-D675EDB8BA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16C730F3-9B01-4374-A9FE-D675EDB8BA8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE41DB41-759C-45E3-BC89-C42C4B13F882}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE41DB41-759C-45E3-BC89-C42C4B13F882}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE41DB41-759C-45E3-BC89-C42C4B13F882}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE41DB41-759C-45E3-BC89-C42C4B13F882}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
