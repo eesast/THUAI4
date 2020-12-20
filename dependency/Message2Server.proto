@@ -1,12 +1,8 @@
 syntax = "proto3";
 package Protobuf;
+import "Message2Client.proto";
 option csharp_namespace = "Cummunication.Proto";
-enum JobType {
-    job1 = 1;
-    job2 = 2;
-    job3 = 3;
 
-}
 message Message2Server{
     double moveDuration = 1;
     double moveAngle = 2;//
@@ -15,7 +11,7 @@ message Message2Server{
     bool isPick = 5;
     bool isUse = 6;
     JobType jobType = 7;//只有第一条消息有效
-    int teamId = 8;
-    int playerId = 9;
+    int32 teamId = 8;
+    int32 playerId = 9;
     bool isThrow = 10;
 }
