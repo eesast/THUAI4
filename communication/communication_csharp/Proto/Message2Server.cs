@@ -32,7 +32,7 @@ namespace Communication.Proto {
             "ZWFtSWQYCCABKAUSEAoIcGxheWVySWQYCSABKAUSDwoHaXNUaHJvdxgKIAEo",
             "CEIWqgITQ29tbXVuaWNhdGlvbi5Qcm90b2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Cummunication.Proto.Message2ClientReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Communication.Proto.Message2ClientReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.Message2Server), global::Communication.Proto.Message2Server.Parser, new[]{ "MoveDuration", "MoveAngle", "AttackAngle", "IsAttack", "IsPick", "IsUse", "JobType", "TeamId", "PlayerId", "IsThrow" }, null, null, null)
           }));
@@ -154,12 +154,12 @@ namespace Communication.Proto {
 
     /// <summary>Field number for the "jobType" field.</summary>
     public const int JobTypeFieldNumber = 7;
-    private global::Cummunication.Proto.JobType jobType_ = 0;
+    private global::Communication.Proto.JobType jobType_ = 0;
     /// <summary>
     ///只有第一条消息有效
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Cummunication.Proto.JobType JobType {
+    public global::Communication.Proto.JobType JobType {
       get { return jobType_; }
       set {
         jobType_ = value;
@@ -406,7 +406,7 @@ namespace Communication.Proto {
             break;
           }
           case 56: {
-            JobType = (global::Cummunication.Proto.JobType) input.ReadEnum();
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
             break;
           }
           case 64: {

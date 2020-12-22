@@ -1,19 +1,23 @@
 ﻿using System;
 using Communication.CSharpClient;
+using Communication.Proto;
+using Google.Protobuf;
+
 namespace clienttest
 {
-   class Test
-   {
-       static void Main(string[] args)
-       {
-           CSharpClient client = new CSharpClient();
-           client.OnReceive += delegate (byte[] bytes)
-           {
-               string temp = System.Text.Encoding.Default.GetString(bytes);
-               Console.WriteLine("Receive from server:" + temp);
-           };
+    class Test
+    {
+        static void Main(string[] args)
+        {
+            CSharpClient client = new CSharpClient();
+            client.OnReceive += delegate (IMsg msg)
+            {
+                Message2Client mm = msg.Content as Message2Client;
+                Console.WriteLine($"Message type::{msg.MessageType}");
+                Console.WriteLine($"Info:{mm.MapColors}");
+            };
             Console.WriteLine("Connecting......");
-           if(client.Connect("127.0.0.1", 7777))
+            if (client.Connect("127.0.0.1", 7777))
             {
                 Console.WriteLine("成功连接Agent.");
             }
@@ -21,17 +25,18 @@ namespace clienttest
             {
                 Console.WriteLine("连接Agent失败.");
             }
-           string sendstr;
-           byte[] bytes;
-           while (true)
-           {
-               sendstr = Console.ReadLine();
-               if (string.IsNullOrEmpty(sendstr)) break;
-               bytes = System.Text.Encoding.Default.GetBytes(sendstr);
-               if(!client.Send(bytes)) Console.WriteLine("发送失败");
-           }
-           client.Stop();
-           client.Dispose();
-       }
-   }
+            string sendstr;
+            byte[] bytes;
+            while (true)
+            {
+                sendstr = Console.ReadLine();
+                if (string.IsNullOrEmpty(sendstr)) break;
+                Message2Server mm = new Message2Server();
+                mm.JobType = Communication.Proto.JobType.Job1;
+                client.SendMessage(mm, MessageType.Message2Server);
+            }
+            client.Stop();
+            client.Dispose();
+        }
+    }
 }
