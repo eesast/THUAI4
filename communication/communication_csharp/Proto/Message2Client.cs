@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Cummunication.Proto {
+namespace Communication.Proto {
 
   /// <summary>Holder for reflection information generated from Message2Client.proto</summary>
   public static partial class Message2ClientReflection {
@@ -48,10 +48,10 @@ namespace Cummunication.Proto {
             "QhaqAhNDdW1tdW5pY2F0aW9uLlByb3RvYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Cummunication.Proto.ObjType), typeof(global::Cummunication.Proto.PropType), typeof(global::Cummunication.Proto.BulletType), typeof(global::Cummunication.Proto.BuffType), typeof(global::Cummunication.Proto.JobType), }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Cummunication.Proto.GameObject), global::Cummunication.Proto.GameObject.Parser, new[]{ "X", "Y", "Hp", "MoveSpeed", "BulletNum", "ObjType", "PropType", "BulletType", "JobType", "TeamId", "PlayerId", "Damage", "FacingAngle", "Buffs" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Cummunication.Proto.MapColor), global::Cummunication.Proto.MapColor.Parser, new[]{ "X", "Y", "TeamId" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Cummunication.Proto.Message2Client), global::Cummunication.Proto.Message2Client.Parser, new[]{ "GameObjectList", "MapColors" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Communication.Proto.ObjType), typeof(global::Communication.Proto.PropType), typeof(global::Communication.Proto.BulletType), typeof(global::Communication.Proto.BuffType), typeof(global::Communication.Proto.JobType), }, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.GameObject), global::Communication.Proto.GameObject.Parser, new[]{ "X", "Y", "Hp", "MoveSpeed", "BulletNum", "ObjType", "PropType", "BulletType", "JobType", "TeamId", "PlayerId", "Damage", "FacingAngle", "Buffs" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MapColor), global::Communication.Proto.MapColor.Parser, new[]{ "X", "Y", "TeamId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.Message2Client), global::Communication.Proto.Message2Client.Parser, new[]{ "GameObjectList", "MapColors" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
           }));
     }
     #endregion
@@ -104,7 +104,7 @@ namespace Cummunication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Cummunication.Proto.Message2ClientReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Communication.Proto.Message2ClientReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -200,11 +200,11 @@ namespace Cummunication.Proto {
 
     /// <summary>Field number for the "ObjType" field.</summary>
     public const int ObjTypeFieldNumber = 6;
-    private global::Cummunication.Proto.ObjType objType_ = 0;
+    private global::Communication.Proto.ObjType objType_ = 0;
     /// <summary>
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Cummunication.Proto.ObjType ObjType {
+    public global::Communication.Proto.ObjType ObjType {
       get { return objType_; }
       set {
         objType_ = value;
@@ -213,11 +213,11 @@ namespace Cummunication.Proto {
 
     /// <summary>Field number for the "PropType" field.</summary>
     public const int PropTypeFieldNumber = 7;
-    private global::Cummunication.Proto.PropType propType_ = 0;
+    private global::Communication.Proto.PropType propType_ = 0;
     /// <summary>
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Cummunication.Proto.PropType PropType {
+    public global::Communication.Proto.PropType PropType {
       get { return propType_; }
       set {
         propType_ = value;
@@ -226,11 +226,11 @@ namespace Cummunication.Proto {
 
     /// <summary>Field number for the "BulletType" field.</summary>
     public const int BulletTypeFieldNumber = 8;
-    private global::Cummunication.Proto.BulletType bulletType_ = 0;
+    private global::Communication.Proto.BulletType bulletType_ = 0;
     /// <summary>
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Cummunication.Proto.BulletType BulletType {
+    public global::Communication.Proto.BulletType BulletType {
       get { return bulletType_; }
       set {
         bulletType_ = value;
@@ -239,9 +239,9 @@ namespace Cummunication.Proto {
 
     /// <summary>Field number for the "JobType" field.</summary>
     public const int JobTypeFieldNumber = 9;
-    private global::Cummunication.Proto.JobType jobType_ = 0;
+    private global::Communication.Proto.JobType jobType_ = 0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Cummunication.Proto.JobType JobType {
+    public global::Communication.Proto.JobType JobType {
       get { return jobType_; }
       set {
         jobType_ = value;
@@ -300,11 +300,11 @@ namespace Cummunication.Proto {
 
     /// <summary>Field number for the "buffs" field.</summary>
     public const int BuffsFieldNumber = 14;
-    private static readonly pb::FieldCodec<global::Cummunication.Proto.BuffType> _repeated_buffs_codec
-        = pb::FieldCodec.ForEnum(114, x => (int) x, x => (global::Cummunication.Proto.BuffType) x);
-    private readonly pbc::RepeatedField<global::Cummunication.Proto.BuffType> buffs_ = new pbc::RepeatedField<global::Cummunication.Proto.BuffType>();
+    private static readonly pb::FieldCodec<global::Communication.Proto.BuffType> _repeated_buffs_codec
+        = pb::FieldCodec.ForEnum(114, x => (int) x, x => (global::Communication.Proto.BuffType) x);
+    private readonly pbc::RepeatedField<global::Communication.Proto.BuffType> buffs_ = new pbc::RepeatedField<global::Communication.Proto.BuffType>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Cummunication.Proto.BuffType> Buffs {
+    public pbc::RepeatedField<global::Communication.Proto.BuffType> Buffs {
       get { return buffs_; }
     }
 
@@ -552,19 +552,19 @@ namespace Cummunication.Proto {
             break;
           }
           case 48: {
-            ObjType = (global::Cummunication.Proto.ObjType) input.ReadEnum();
+            ObjType = (global::Communication.Proto.ObjType) input.ReadEnum();
             break;
           }
           case 56: {
-            PropType = (global::Cummunication.Proto.PropType) input.ReadEnum();
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
             break;
           }
           case 64: {
-            BulletType = (global::Cummunication.Proto.BulletType) input.ReadEnum();
+            BulletType = (global::Communication.Proto.BulletType) input.ReadEnum();
             break;
           }
           case 72: {
-            JobType = (global::Cummunication.Proto.JobType) input.ReadEnum();
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
             break;
           }
           case 80: {
@@ -602,7 +602,7 @@ namespace Cummunication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Cummunication.Proto.Message2ClientReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Communication.Proto.Message2ClientReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -787,7 +787,7 @@ namespace Cummunication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Cummunication.Proto.Message2ClientReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Communication.Proto.Message2ClientReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -816,21 +816,21 @@ namespace Cummunication.Proto {
 
     /// <summary>Field number for the "gameObjectList" field.</summary>
     public const int GameObjectListFieldNumber = 1;
-    private static readonly pbc::MapField<long, global::Cummunication.Proto.GameObject>.Codec _map_gameObjectList_codec
-        = new pbc::MapField<long, global::Cummunication.Proto.GameObject>.Codec(pb::FieldCodec.ForInt64(8), pb::FieldCodec.ForMessage(18, global::Cummunication.Proto.GameObject.Parser), 10);
-    private readonly pbc::MapField<long, global::Cummunication.Proto.GameObject> gameObjectList_ = new pbc::MapField<long, global::Cummunication.Proto.GameObject>();
+    private static readonly pbc::MapField<long, global::Communication.Proto.GameObject>.Codec _map_gameObjectList_codec
+        = new pbc::MapField<long, global::Communication.Proto.GameObject>.Codec(pb::FieldCodec.ForInt64(8), pb::FieldCodec.ForMessage(18, global::Communication.Proto.GameObject.Parser), 10);
+    private readonly pbc::MapField<long, global::Communication.Proto.GameObject> gameObjectList_ = new pbc::MapField<long, global::Communication.Proto.GameObject>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<long, global::Cummunication.Proto.GameObject> GameObjectList {
+    public pbc::MapField<long, global::Communication.Proto.GameObject> GameObjectList {
       get { return gameObjectList_; }
     }
 
     /// <summary>Field number for the "MapColors" field.</summary>
     public const int MapColorsFieldNumber = 2;
-    private static readonly pb::FieldCodec<global::Cummunication.Proto.MapColor> _repeated_mapColors_codec
-        = pb::FieldCodec.ForMessage(18, global::Cummunication.Proto.MapColor.Parser);
-    private readonly pbc::RepeatedField<global::Cummunication.Proto.MapColor> mapColors_ = new pbc::RepeatedField<global::Cummunication.Proto.MapColor>();
+    private static readonly pb::FieldCodec<global::Communication.Proto.MapColor> _repeated_mapColors_codec
+        = pb::FieldCodec.ForMessage(18, global::Communication.Proto.MapColor.Parser);
+    private readonly pbc::RepeatedField<global::Communication.Proto.MapColor> mapColors_ = new pbc::RepeatedField<global::Communication.Proto.MapColor>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Cummunication.Proto.MapColor> MapColors {
+    public pbc::RepeatedField<global::Communication.Proto.MapColor> MapColors {
       get { return mapColors_; }
     }
 

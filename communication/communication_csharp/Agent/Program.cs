@@ -4,7 +4,6 @@ using System.Threading;
 using Microsoft.Extensions.CommandLineUtils;
 using HPSocket;
 using HPSocket.Tcp;
-using System.Collections.Generic;
 namespace Communication.Agent
 {
     class Program
@@ -23,9 +22,9 @@ namespace Communication.Agent
                 IPEndPoint serverend;
                 try
                 {
-                    serverend= IPEndPoint.Parse(endpoint);
+                    serverend = IPEndPoint.Parse(endpoint);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine("Parsing server endpoint  went wrong:" + e.Message);
                     return 0;
@@ -33,7 +32,7 @@ namespace Communication.Agent
                 string tt = port.Value();
                 ushort agentport;
                 agentport = string.IsNullOrEmpty(tt) ? (ushort)7777 : ushort.Parse(tt);
-                Console.WriteLine("Server endpoint:"+serverend.Address.ToString()+":"+serverend.Port.ToString());
+                Console.WriteLine("Server endpoint:" + serverend.Address.ToString() + ":" + serverend.Port.ToString());
                 Console.WriteLine($"Agent port:{agentport}");
                 return MainInternal(serverend, agentport);
             });
@@ -49,8 +48,7 @@ namespace Communication.Agent
             };
             client.OnReceive += delegate (IClient sender, byte[] bytes)
             {
-                List<IntPtr> temp = server.GetAllConnectionIds();
-                foreach (IntPtr connId in temp)
+                foreach (IntPtr connId in server.GetAllConnectionIds())
                 {
                     if (!server.Send(connId, bytes, bytes.Length))
                     {
@@ -60,15 +58,15 @@ namespace Communication.Agent
                 return HandleResult.Ok;
             };
             Console.WriteLine("Connecting......");
-            if(!client.Connect(serverend.Address.ToString(), (ushort)serverend.Port))
+            if (!client.Connect(serverend.Address.ToString(), (ushort)serverend.Port))
             {
                 Console.WriteLine("Failed to connect with the game server.");
-                
+
             }
             else
             {
                 int i;
-                for(i = 0; i < 300; i++)
+                for (i = 0; i < 300; i++)
                 {
                     if (client.IsConnected)
                     {
@@ -79,8 +77,8 @@ namespace Communication.Agent
                     {
                         Thread.Sleep(100);
                     }
-                } 
-                if(i==300) Console.WriteLine("Failed to connect with the game server.");
+                }
+                if (i == 300) Console.WriteLine("Failed to connect with the game server.");
             }
             server.Port = agentport;
             if (server.Start())

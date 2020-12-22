@@ -3,9 +3,12 @@ using System.Threading;
 using System.Collections.Generic;
 using HPSocket;
 using HPSocket.Tcp;
+using Communication.Proto;
+using Google.Protobuf;
+
 namespace Communication.CSharpClient
 {
-    public delegate void OnReceiveCallback(byte[] bytes);
+    public delegate void OnReceiveCallback(IMsg msg);
     public class CSharpClient : IDisposable
     {
         private TcpPackClient client;
@@ -16,7 +19,9 @@ namespace Communication.CSharpClient
             client = new TcpPackClient();
             client.OnReceive += delegate (IClient sender, byte[] bytes)
             {
-                OnReceive?.Invoke(bytes);
+                Message message = new Message();
+                message.MergeFrom(bytes);
+                OnReceive?.Invoke(message);
                 return HandleResult.Ok;
             };
         }
@@ -39,9 +44,21 @@ namespace Communication.CSharpClient
             }
             return false;
         }
-        public bool Send(byte[] bytes)
+        public void SendMessage(IMessage msg, MessageType messagetype)
         {
-            return client.Send(bytes, bytes.Length);
+            Message message = new Message();
+            message.Content = msg;
+            message.MessageType = messagetype;
+            byte[] bytes;
+            message.WriteTo(out bytes);
+            Send(bytes);
+        }
+        private void Send(byte[] bytes)
+        {
+            if(!client.Send(bytes, bytes.Length))
+            {
+                Console.WriteLine("发送失败。");
+            }
         }
         public bool Stop()
         {
