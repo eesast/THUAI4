@@ -11,6 +11,7 @@ namespace servertest
         {
             CommServer server = new CommServer();
             server.Listen(8888);
+            MapColor mapColor;
             server.OnConnect += delegate ()
             {
                 Console.WriteLine("An agent connects.");
@@ -34,9 +35,14 @@ namespace servertest
             };
             while (true)
             {
-                Message2Server mm = new Message2Server();
-                mm.JobType = Cummunication.Proto.JobType.Job2;
-                server.SendMessage(mm, MessageType.Message2Server);
+                Message2Client mm = new Message2Client();
+                mm.MapColors.Add(new Communication.Proto.MapColor
+                {X=100,
+                Y=200,
+                TeamId=123
+                }
+                    );
+                server.SendMessage(mm, MessageType.Message2Client);
             }
 
             Console.ReadLine();

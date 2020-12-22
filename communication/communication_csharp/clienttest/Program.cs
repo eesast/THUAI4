@@ -12,9 +12,9 @@ namespace clienttest
             CSharpClient client = new CSharpClient();
             client.OnReceive += delegate (IMsg msg)
             {
-                Message2Server mm = msg.Content as Message2Server;
+                Message2Client mm = msg.Content as Message2Client;
                 Console.WriteLine($"Message type::{msg.MessageType}");
-                Console.WriteLine($"Info:{mm.JobType}");
+                Console.WriteLine($"Info:{mm.MapColors}");
             };
             Console.WriteLine("Connecting......");
             if (client.Connect("127.0.0.1", 7777))
@@ -32,7 +32,7 @@ namespace clienttest
                 sendstr = Console.ReadLine();
                 if (string.IsNullOrEmpty(sendstr)) break;
                 Message2Server mm = new Message2Server();
-                mm.JobType = Cummunication.Proto.JobType.Job1;
+                mm.JobType = Communication.Proto.JobType.Job1;
                 client.SendMessage(mm, MessageType.Message2Server);
             }
             client.Stop();
