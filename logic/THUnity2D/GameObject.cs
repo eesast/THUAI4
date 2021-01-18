@@ -9,16 +9,25 @@ namespace THUnity2D
 {
 	public abstract class GameObject
 	{
+		public enum GameObjType
+		{
+			character = 0,
+			obj = 1
+		}
+		public abstract GameObjType GetGameObjType();	//给C++/CLI调试用的，因为我不知道C++/CLI怎么用is操作符（狗头保命）
+
 		public const int MinSpeed = 1;                  //最小速度
 		public const int MaxSpeed = int.MaxValue;  //最大速度
 
-		public readonly object gameObjLock = new object();
+		protected readonly object gameObjLock = new object();
+		public readonly object moveLock = new object();
 
 		private static long currentMaxID = 0;           //目前游戏对象的最大ID
-		public const long invalidID = long.MaxValue;			//无效的ID
+		public const long invalidID = long.MaxValue;            //无效的ID
+		public const long noneID = long.MinValue;				//不存在ID
 		public long ID { get; }							//ID
 		
-		protected readonly BlockingCollection<Action> Operations = new BlockingCollection<Action>();//事件队列
+		////protected readonly BlockingCollection<Action> Operations = new BlockingCollection<Action>();//事件队列
 
 		private XYPosition position;		//位置
 		public XYPosition Position { get { return position; } }
@@ -30,14 +39,12 @@ namespace THUnity2D
 			get => facingDirection;
 			private set
             {
-				Operations.Add
-					(
-						() =>
-                        {
-							facingDirection = value;
-                        }
-					);
-            }
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					facingDirection = value;
+				}
+			}
         }
 
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
@@ -48,17 +55,16 @@ namespace THUnity2D
 			get => _moveSpeed;
 			set
             {
-				Operations.Add
-					(
-						() =>
-                        {
-							//保证速度在MinSpeed与MaxSpeed之间
-							_moveSpeed = Math.Min(Math.Max(value, MinSpeed), MaxSpeed);
-							Debug(this, ", the speed of which has been set to " + _moveSpeed.ToString());
-						}
-					);
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					//保证速度在MinSpeed与MaxSpeed之间
+					_moveSpeed = Math.Min(Math.Max(value, MinSpeed), MaxSpeed);
+					Debug(this, ", the speed of which has been set to " + _moveSpeed.ToString());
+				}
+
 			}
-        }
+		}
 
 		//当前是否能移动
 
@@ -69,14 +75,12 @@ namespace THUnity2D
 			get { return canMove; }
 			set
 			{
-				Operations.Add
-					(
-						() =>
-						{
-							canMove = value;
-							Debug(this, canMove ? "Enable move!" : "Disable move!");
-						}
-					);
+				//Operations.Add
+				lock(gameObjLock)
+				{
+					canMove = value;
+					Debug(this, canMove ? "Enable move!" : "Disable move!");
+				}
             }
 		}
 
@@ -87,14 +91,12 @@ namespace THUnity2D
 			get => isMoving;
 			set
 			{
-				Operations.Add
-					(
-						() =>
-						{
-							isMoving = value;
-							Debug(this, isMoving ? " begin to move!" : " end moving!");
-						}
-					);
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					isMoving = value;
+					Debug(this, isMoving ? " begin to move!" : " end moving!");
+				}
 			}
 		}
 
@@ -102,15 +104,13 @@ namespace THUnity2D
 		public long Move(Vector displacement)
         {
 			var deltaPos = Vector.Vector2XY(displacement);
-			Operations.Add
-				(
-					() =>
-                    {
-						FacingDirection = displacement.angle;
-						this.position.x += deltaPos.x;
-						this.position.y += deltaPos.y;
-					}
-				);
+			//Operations.Add
+			lock (gameObjLock)
+            {
+				FacingDirection = displacement.angle;
+				this.position.x += deltaPos.x;
+				this.position.y += deltaPos.y;
+			}
 			return deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
         }
 
@@ -131,23 +131,28 @@ namespace THUnity2D
 			this.IsRigid = isRigid;
 			this._moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
 
-			new System.Threading.Thread(	//开辟一个线程，不断取出里面的待办事项进行办理
-				() =>
-				{
-					while (true)
-					{
-						Operations.Take()();
-					}
-				}
-			)
-			{ IsBackground = true }.Start();
+			//new System.Threading.Thread(	//开辟一个线程，不断取出里面的待办事项进行办理
+			//	() =>
+			//	{
+			//		while (true)
+			//		{
+			//			Operations.Take()();
+			//		}
+			//	}
+			//)
+			//{ IsBackground = true }.Start();
 
-			Debug(this, " constructed!");
+		}
+
+		public override string ToString()
+		{
+			return ID.ToString() + ": " + Position.ToString();
 		}
 
 		//用于Debug时从控制台观察到各个游戏对象的状况
 		public static void Debug(GameObject current, string str)
 		{
+			//Console.WriteLine(current.ToString());
 			Console.WriteLine(current.GetType() + " " + current.ToString() + str);
 		}
 

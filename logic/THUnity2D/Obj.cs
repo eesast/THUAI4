@@ -20,36 +20,40 @@ namespace THUnity2D
 
 	public class Obj : GameObject	//道具，墙
 	{
+		public override GameObjType GetGameObjType()
+		{
+			return GameObjType.obj;
+		}
 		public readonly ObjType objType;		//通信组实现
 
-		private Character? _parent = null;		//道具的主人
-		public Character Parent
+		private Character? parent = null;		//道具的主人
+		public Character? Parent
         {
-			get { return _parent; }
+			get => parent;
             set
             {
-				Operations.Add
-					(
-						() =>
-						{
-							string debugStr = (value == null ? 
-							" has been throwed by " + (_parent == null ? "null." : _parent.ToString()) 
-							: "has been picked by " + (value == null ? "null." : value.ToString()));
-							_parent = value;
-							Debug(this, debugStr);
-						}
-					);
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					string debugStr = (value == null ? 
+					" has been throwed by " + (parent == null ? "null." : parent.ToString()) 
+					: "has been picked by " + (value == null ? "null." : value.ToString()));
+					parent = value;
+					Debug(this, debugStr);
+				}
             }
         }
 
 		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType) : base(initPos, radius, isRigid, moveSpeed)
 		{
 			this.objType = objType;
+
+			Debug(this, " constructed!");
 		}
 
 		public override string ToString()
 		{
-			return objType + ": " + ID + ", " + Position.ToString() + " ";
+			return objType + "->" + ID + ": " + Position.ToString() + " ";
 		}
 	}
 }

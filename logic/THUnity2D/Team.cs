@@ -16,6 +16,8 @@ namespace THUnity2D
 		}
 		private readonly long teamID;
 		public long TeamID { get => teamID; }
+		public const long invalidTeamID = long.MaxValue;
+		public const long noneTeamID = long.MinValue;
 		private ArrayList playerList;
 		public int Score
 		{

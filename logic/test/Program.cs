@@ -131,6 +131,11 @@ namespace test
 				{
 					mp.MovePlayer((long)player2ID[0], time[key], direct[key]);
 				}
+
+				if (Win32Api.GetKeyState((Int32)ConsoleKey.J) < 0)
+				{
+					mp.Attack((long)player2ID[0], 10000000, Math.PI);
+				}
 			}
 		}
 	}

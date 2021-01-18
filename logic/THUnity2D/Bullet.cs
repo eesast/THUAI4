@@ -16,18 +16,20 @@ namespace THUnity2D
     public sealed class Bullet : Obj
     {
         //子弹的参数，尚未写完
-        Bullet(XYPosition initPos, int radius, int moveSpeed, BulletType bulletType) 
-            : base(initPos, radius, false, moveSpeed, ObjType.bullet)
+        public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType) 
+            : base(initPos, radius, false, basicMoveSpeed, ObjType.bullet)
         {
             switch (bulletType)
             {
                 case BulletType.empty: case BulletType.b1: 
                     IsRigid = false; 
+                
                     break;
                 default: 
                     IsRigid = true;
                     break;
             }
         }
+
     }
 }
