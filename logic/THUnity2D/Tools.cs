@@ -6,7 +6,7 @@
 
 namespace THUnity2D
 {
-    public class Tools
+    public static class Tools
     {
         public static double CorrectAngle(double angle)     //将幅角转化为主值0~2pi
         {

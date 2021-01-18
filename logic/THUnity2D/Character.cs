@@ -16,10 +16,29 @@ namespace THUnity2D
 	}
 	public sealed class Character : GameObject
 	{
-		private readonly int _orgMoveSpeed;         //人物固有移动速度
+		public override GameObjType GetGameObjType()
+		{
+			return GameObjType.character;
+		}
+		private readonly int orgMoveSpeed;         //人物固有移动速度
 		public void ResetMoveSpeed()                //重设人物速度为初始速度
 		{
-			MoveSpeed = _orgMoveSpeed;
+			MoveSpeed = orgMoveSpeed;
+		}
+
+		private long teamID = Team.invalidTeamID;
+		public long TeamID
+		{
+			get => teamID;
+			set
+			{
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					teamID = value;
+					Debug(this, " joins in the tream: " + value.ToString());
+				}
+			}
 		}
 
 		public readonly JobType jobType;
@@ -36,26 +55,22 @@ namespace THUnity2D
 		{
 			if (bulletNum > 0)
 			{
-				Operations.Add
-				(
-					() =>
-					{
-						if (bulletNum > 0) --bulletNum;
-					}
-				);
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					if (bulletNum > 0) --bulletNum;
+				}
 				return true;
 			}
 			else return false;
 		}
 		public void AddBulletNum()              //子弹数量加1
 		{
-			Operations.Add
-				(
-					() =>
-					{
-						if (bulletNum < maxBulletNum) ++bulletNum;
-					}
-				);
+			//Operations.Add
+			lock (gameObjLock)
+			{
+				if (bulletNum < maxBulletNum) ++bulletNum;
+			}
 		}
 
 		private readonly int maxHp;				//最大血量
@@ -65,25 +80,21 @@ namespace THUnity2D
 		public int HP { get => hp; }
 		public void AddHp(int add)				//加血
 		{
-			Operations.Add
-				(
-					() =>
-					{
-						hp = Math.Min(MaxHp, hp + add);
-						Debug(this, " hp has added to: " + hp.ToString());
-					}
-				);
+			//Operations.Add
+			lock (gameObjLock)
+			{
+				hp = Math.Min(MaxHp, hp + add);
+				Debug(this, " hp has added to: " + hp.ToString());
+			}
 		}
 		public void SubHp(int sub)				//扣血
 		{
-			Operations.Add
-				(
-					() =>
-					{
-						hp = Math.Max(0, hp - sub);
-						Debug(this, " hp has subed to: " + hp.ToString());
-					}
-				);
+			//Operations.Add
+			lock (gameObjLock)
+			{
+				hp = Math.Max(0, hp - sub);
+				Debug(this, " hp has subed to: " + hp.ToString());
+			}
 		}
 
 		public readonly int orgAp;      //固有攻击力
@@ -93,14 +104,12 @@ namespace THUnity2D
 			get => ap;
 			set
 			{
-				Operations.Add
-					(
-						() =>
-						{
-							ap = value;
-							Debug(this, "'s AP has been set to: " + value.ToString());
-						}
-					);
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					ap = value;
+					Debug(this, "'s AP has been set to: " + value.ToString());
+				}
 			}
 		}
 
@@ -110,14 +119,12 @@ namespace THUnity2D
 			get => holdProp;
 			set
 			{
-				Operations.Add
-					(
-						() =>
-						{
-							holdProp = value;
-							Debug(this, " picked the prop: " + holdProp.ToString());
-						}
-					);
+				//Operations.Add
+				lock (gameObjLock)
+				{
+					holdProp = value;
+					Debug(this, " picked the prop: " + holdProp.ToString());
+				}
 			}
 		}
 
@@ -140,25 +147,21 @@ namespace THUnity2D
 		public int Score { get => score; }
 		public void AddScore(int add)
 		{
-			Operations.Add
-				(
-					() =>
-					{
-						score += add;
-						Debug(this, " 's score has been added to: " + score.ToString());
-					}
-				);
+			//Operations.Add
+				lock (gameObjLock)
+				{
+					score += add;
+					Debug(this, " 's score has been added to: " + score.ToString());
+				}
 		}
 		public void SubScore(int sub)
 		{
-			Operations.Add
-				(
-					() =>
-					{
-						score -= sub;
-						Debug(this, " 's score has been subed to: " + score.ToString());
-					}
-				);
+			//Operations.Add
+			lock (gameObjLock)
+			{
+				score -= sub;
+				Debug(this, " 's score has been subed to: " + score.ToString());
+			}
 		}
 
 		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed)
@@ -169,9 +172,10 @@ namespace THUnity2D
 			switch (jobType)
 			{
 			case JobType.job0:
-				_orgMoveSpeed = basicMoveSpeed;
+			default:
+				orgMoveSpeed = basicMoveSpeed;
 				cd = 1500;
-				maxBulletNum = 10;
+				maxBulletNum = 100;
 				bulletNum = maxBulletNum;
 				maxHp = 5000;
 				hp = maxHp;
@@ -182,6 +186,8 @@ namespace THUnity2D
 
 				break;
 			}
+
+			Debug(this, " constructed!");
 		}
 
 	}
