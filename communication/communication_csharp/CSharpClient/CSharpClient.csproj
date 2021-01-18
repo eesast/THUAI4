@@ -9,5 +9,9 @@
     <PackageReference Include="HPSocket.Net" Version="5.7.2.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Proto\Proto.csproj" />
+  </ItemGroup>
+
  
 </Project>
