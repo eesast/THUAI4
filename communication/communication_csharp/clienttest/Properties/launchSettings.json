@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "clienttest": {
-      "commandName": "Project",
-      "commandLineArgs": "0 1 7777"
-    }
-  }
-}
