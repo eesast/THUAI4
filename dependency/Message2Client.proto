@@ -1,0 +1,61 @@
+syntax = "proto3";
+package Protobuf;
+option csharp_namespace = "Communication.Proto";
+
+enum ObjType{
+    player = 0;
+    wall = 1;
+    prop = 2;
+    bullet = 3;
+}
+enum PropType{
+    prop1 = 0;
+    prop2 = 1;
+    prop3 = 2;
+}
+enum BulletType{
+    bullet1 = 0;
+    bullet2 = 1;
+    bullet3 = 2;
+}
+enum BuffType{
+    haveShield = 0;
+    haveFuhuojia = 1;
+    speedUp = 2;
+    speedDown = 3;
+    damageUp = 4;
+    damageDown = 5;
+    isStunned = 6;
+}
+enum JobType {
+    job1 = 0;
+    job2 = 1;
+    job3 = 2;
+}
+message GameObject{
+    double x = 1;
+    double y = 2;
+    int32 hp = 3;
+    int32 moveSpeed = 4;
+    int32 bulletNum = 5;
+    ObjType ObjType = 6;//
+    PropType PropType = 7;//
+    BulletType BulletType = 8;//
+    JobType JobType = 9;
+    int32 teamId = 10;
+    int32 playerId = 11;//区分队内id
+    int32 damage = 12;
+    double facingAngle = 13; //面对的方向,rad
+    repeated BuffType buffs = 14;
+}
+
+message MapColor{
+    int32 x = 1;
+    int32 y = 2;
+    int32 teamId = 3;
+}
+
+message Message2Client{
+    map <int64, GameObject> gameObjectList = 1; 
+    repeated MapColor MapColors = 2;
+}

@@ -1,0 +1,1 @@
+@dotnet exec .\servertest\bin\Debug\netcoreapp3.1\servertest.dll
