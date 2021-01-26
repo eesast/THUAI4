@@ -33,7 +33,7 @@ bld/
 [Ll]ogs/
 
 # My private folder
-private/
+/private/
 /THUnity2D/deleted.cs
 
 # Visual Studio 2015/2017 cache/options directory
