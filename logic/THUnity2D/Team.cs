@@ -31,6 +31,32 @@ namespace THUnity2D
 				return score;
 			}
 		}
+		public bool GetPlayerScore(long playerID, out int score)
+		{
+			foreach (Character player in playerList)
+			{
+				if (player.ID == playerID)
+				{
+					score = player.Score;
+					return true;
+				}
+			}
+			score = 0;
+			return false;
+		}
+		public bool GetPlayerHP(long playerID, out int hp)
+		{
+			foreach (Character player in playerList)
+			{
+				if (player.ID == playerID)
+				{
+					hp = player.HP;
+					return true;
+				}
+			}
+			hp = 0;
+			return false;
+		}
 		public void AddPlayer(Character player)
 		{
 			playerList.Add(player);

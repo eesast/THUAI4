@@ -15,7 +15,8 @@ namespace THUnity2D
 		empty = 0,
 		wall = 1,
 		prop = 2,
-		bullet = 3
+		bullet = 3,
+		birthPoint = 4
 	}
 
 	public class Obj : GameObject	//道具，墙
