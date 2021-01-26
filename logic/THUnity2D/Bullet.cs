@@ -15,10 +15,13 @@ namespace THUnity2D
     }
     public sealed class Bullet : Obj
     {
+        private int ap;     //攻击力
+        public int AP { get => ap; }
         //子弹的参数，尚未写完
-        public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType) 
+        public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType, int ap) 
             : base(initPos, radius, false, basicMoveSpeed, ObjType.bullet)
         {
+            this.ap = ap;
             switch (bulletType)
             {
                 case BulletType.empty: case BulletType.b1: 
@@ -31,5 +34,18 @@ namespace THUnity2D
             }
         }
 
+        public XYPosition[] GetColorRange()
+		{
+            XYPosition[] range = new XYPosition[9];
+            for (int i = 0; i < 3; ++i)
+			{
+                for (int j = 0; j < 3; ++j)
+				{
+                    range[i * 3 + j].x = i - 1;
+                    range[i * 3 + j].y = j - 1;
+				}
+			}
+            return range;
+		}
     }
 }
