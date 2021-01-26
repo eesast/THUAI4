@@ -20,11 +20,6 @@ namespace THUnity2D
 		{
 			return GameObjType.character;
 		}
-		private readonly int orgMoveSpeed;         //人物固有移动速度
-		public void ResetMoveSpeed()                //重设人物速度为初始速度
-		{
-			MoveSpeed = orgMoveSpeed;
-		}
 
 		private long teamID = Team.invalidTeamID;
 		public long TeamID
@@ -87,7 +82,7 @@ namespace THUnity2D
 				Debug(this, " hp has added to: " + hp.ToString());
 			}
 		}
-		public void SubHp(int sub)				//扣血
+		private void SubHp(int sub)				//扣血
 		{
 			//Operations.Add
 			lock (gameObjLock)
@@ -95,6 +90,10 @@ namespace THUnity2D
 				hp = Math.Max(0, hp - sub);
 				Debug(this, " hp has subed to: " + hp.ToString());
 			}
+		}
+		public void BeAttack(int subHP)
+		{
+			SubHp(subHP);
 		}
 
 		public readonly int orgAp;      //固有攻击力
@@ -164,6 +163,15 @@ namespace THUnity2D
 			}
 		}
 
+		public override void Reset()
+		{
+			base.Reset();
+			hp = maxHp;
+			ap = orgAp;
+			holdProp = null;
+			bulletNum = maxBulletNum;
+		}
+
 		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed)
 		{
 			score = 0;
@@ -173,7 +181,6 @@ namespace THUnity2D
 			{
 			case JobType.job0:
 			default:
-				orgMoveSpeed = basicMoveSpeed;
 				cd = 1500;
 				maxBulletNum = 100;
 				bulletNum = maxBulletNum;

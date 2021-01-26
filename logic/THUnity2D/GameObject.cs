@@ -31,6 +31,7 @@ namespace THUnity2D
 
 		private XYPosition position;		//位置
 		public XYPosition Position { get { return position; } }
+		public readonly XYPosition orgPos;
 
 		//Direction
 		private double facingDirection = 0.0;		//面向的方向，去极角的弧度值
@@ -64,6 +65,11 @@ namespace THUnity2D
 				}
 
 			}
+		}
+		public readonly int orgMoveSpeed;
+		public void ResetMoveSpeed()
+		{
+			_moveSpeed = orgMoveSpeed;
 		}
 
 		//当前是否能移动
@@ -121,15 +127,29 @@ namespace THUnity2D
 			get => radius;
 		}
 
+		public virtual void Reset()
+		{
+			lock (moveLock)
+			{
+				this.position = orgPos;
+				_moveSpeed = orgMoveSpeed;
+				facingDirection = 0.0;
+				isMoving = false;
+				canMove = false;
+			}
+		}
+
 		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed)
 		{
 			ID = currentMaxID;
 			++currentMaxID;
 
 			this.position = initPos;
+			this.orgPos = initPos;
 			this.radius = radius;
 			this.IsRigid = isRigid;
 			this._moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
+			this.orgMoveSpeed = this._moveSpeed;
 
 			//new System.Threading.Thread(	//开辟一个线程，不断取出里面的待办事项进行办理
 			//	() =>

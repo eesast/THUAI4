@@ -1,6 +1,8 @@
 #include "UI.h"
 #include <thread>
 #include <atomic>
+#include <string>
+#include <sstream>
 
 namespace
 {
@@ -16,7 +18,7 @@ namespace
     void GetPMW()
     {
         MapWrapper mp;
-        mp.map = gcnew THUnity2D::Map(THUnity2D::Mapinfo::map, 1);
+        mp.map = gcnew THUnity2D::Map(THUnity2D::MapInfo::map, 2);
         pMW = &mp;
         finishGcNew = true;
         while (true) { std::this_thread::sleep_for(std::chrono::seconds(10)); }
@@ -79,12 +81,11 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int cols = pMW->map->Cols;
 
         width = (pixelPerCell.x = basicSize / cols) * cols;
+        width += appendCx = width / 2;
         height = (pixelPerCell.y = basicSize / rows) * rows + (appendCy = GetSystemMetrics(SM_CYMIN));
 
-        //Debug***********************
-        //System::Console::WriteLine("width: {0}; height: {1}", width, height);
-
-        playerID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(THUnity2D::XYPosition(2500, 2500), THUnity2D::JobType::job0, 0));
+        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType::job0, 0));
+        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType::job0, 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -98,61 +99,62 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         std::thread thrGame([]() {pMW->map->StartGame(1000 * 60 * 10); });
         thrGame.detach();
 
-		std::thread thrCheckKey
-		(
-			[this]()
-			{
+        auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk)
+        {
+            double direct[16] = { 0 };
+            int time[16] = { 0 };
 
-				double direct[16] = { 0 };
-				int time[16] = { 0 };
+            const int WKey = 0x1;
+            const int AKey = 0x2;
+            const int SKey = 0x4;
+            const int DKey = 0x8;
 
-				const int WKey = 0x1;
-				const int AKey = 0x2;
-				const int SKey = 0x4;
-				const int DKey = 0x8;
+            for (int i = 1; i < sizeof(time) / (sizeof(decltype(time[0]))); ++i)
+            {
+                time[i] = 1000;
+            }
 
-				for (int i = 1; i < sizeof(time) / (sizeof(decltype(time[0]))); ++i)
-				{
-					time[i] = 1000;
-				}
+            direct[WKey] = System::Math::PI;
+            direct[AKey] = -System::Math::PI * 0.5;
+            direct[SKey] = 0.0;
+            direct[DKey] = System::Math::PI * 0.5;
+            direct[WKey | AKey] = System::Math::PI * 0.25 * 5;
+            direct[WKey | DKey] = System::Math::PI * 0.25 * 3;
+            direct[SKey | AKey] = System::Math::PI * 0.25 * 7;
+            direct[SKey | DKey] = System::Math::PI * 0.25;
 
-				direct[WKey] = System::Math::PI;
-				direct[AKey] = -System::Math::PI * 0.5;
-				direct[SKey] = 0.0;
-				direct[DKey] = System::Math::PI * 0.5;
-				direct[WKey | AKey] = System::Math::PI * 0.25 * 5;
-				direct[WKey | DKey] = System::Math::PI * 0.25 * 3;
-				direct[SKey | AKey] = System::Math::PI * 0.25 * 7;
-				direct[SKey | DKey] = System::Math::PI * 0.25;
+            while (true)
+            {
 
-				while (true)
-				{
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                int key = 0;
+                bool WPress = GetKeyState(up) < 0,
+                    APress = GetKeyState(left) < 0,
+                    SPress = GetKeyState(down) < 0,
+                    DPress = GetKeyState(right) < 0;
+                if (WPress) key |= WKey;
+                if (APress) key |= AKey;
+                if (SPress) key |= SKey;
+                if (DPress) key |= DKey;
 
-					int key = 0;
-					bool WPress = GetKeyState('W') < 0,
-						APress = GetKeyState('A') < 0,
-						SPress = GetKeyState('S') < 0,
-						DPress = GetKeyState('D') < 0;
-					if (WPress) key |= WKey;
-					if (APress) key |= AKey;
-					if (SPress) key |= SKey;
-					if (DPress) key |= DKey;
+                bool JPress = GetKeyState(atk) < 0;
 
-					bool JPress = GetKeyState('J') < 0;
+                if (JPress)
+                {
+                    if (key) pMW->map->Attack(playerID, time[key] * 1000, direct[key]);
+                }
+                else if (key)
+                {
+                    pMW->map->MovePlayer(playerID, time[key], direct[key]);
+                }
+            }
+        };
 
-					if (JPress)
-					{
-						if (key) pMW->map->Attack(playerID, time[key] * 1000, direct[key]);
-					}
-					else if (key)
-					{
-						pMW->map->MovePlayer(playerID, time[key], direct[key]);
-					}
-				}
-			});
-        thrCheckKey.detach();
+        std::thread thrCheckKey1(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J');
+        std::thread thrCheckKey2(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0);
+        thrCheckKey1.detach();
+        thrCheckKey2.detach();
 
         break;
     }
@@ -167,7 +169,73 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SelectObject(hdcMem, hPen);
             HBRUSH hbrBkGnd = CreateSolidBrush(RGB(0, 0, 0));
             HBRUSH hbrOld = (HBRUSH)SelectObject(hdcMem, hbrBkGnd);
-            Rectangle(hdcMem, 0, 0, width, height);
+            Rectangle(hdcMem, 0, 0, width, height);     //绘制背景
+
+            //绘制地图颜色
+
+            HBRUSH hbrColor1 = CreateSolidBrush(RGB(100, 0, 0));
+            HBRUSH hbrColor2 = CreateSolidBrush(RGB(0, 100, 0));
+            HBRUSH hbrColor3 = CreateSolidBrush(RGB(0, 0, 100));
+            HBRUSH hbrColor4 = CreateSolidBrush(RGB(100, 100, 0));
+
+            auto cellColor = pMW->map->CellColor;
+            int rows = pMW->map->Rows, cols = pMW->map->Cols;
+            for (int i = 0, topPos = 0; i < rows; ++i, topPos += pixelPerCell.y)
+            {
+                for (int j = 0, leftPos = 0; j < cols; ++j, leftPos += pixelPerCell.x)
+                {
+                    switch (cellColor[i, j])
+                    {
+                    case THUnity2D::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
+                    case THUnity2D::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
+                    case THUnity2D::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
+                    case THUnity2D::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
+                    default: continue;
+                    }
+                    Rectangle(hdcMem, leftPos, topPos, leftPos + pixelPerCell.x, topPos + pixelPerCell.y);
+                }
+            }
+
+            DeleteObject(hbrColor1);
+            DeleteObject(hbrColor2);
+            DeleteObject(hbrColor3);
+            DeleteObject(hbrColor4);
+
+            //显示人物信息
+            
+            HFONT hfInfo = CreateFont
+            (
+                20,
+                0,
+                0,
+                0,
+                FW_NORMAL,
+                0,
+                0,
+                0,
+                GB2312_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                DEFAULT_QUALITY,
+                DEFAULT_PITCH,
+                TEXT("楷书")
+            );
+            HFONT hfOld = (HFONT)SelectObject(hdcMem, hfInfo);
+            SetBkColor(hdcMem, RGB(0, 0, 0));
+            SetTextColor(hdcMem, RGB(255, 255, 255));
+
+            std::wostringstream wsout;
+            wsout.imbue(std::locale("chs"));
+            wsout << L"队伍1：分数：" << pMW->map->GetTeamScore(0) << '\n';
+            wsout << L"玩家1：\n生命：" << pMW->map->GetPlayerHP(player1ID) << L"\n分数：" << pMW->map->GetPlayerScore(player1ID) << L"\n\n";
+            wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
+            wsout << L"玩家2：\n生命：" << pMW->map->GetPlayerHP(player2ID) << L"\n分数：" << pMW->map->GetPlayerScore(player2ID) << L"\n\n";
+            DrawTextW(hdcMem, wsout.str().c_str(), wsout.str().length(), &RECT({ width - appendCx + 20, 20, width, height }), 0);
+
+            SelectObject(hdcMem, hfOld);
+            DeleteObject(hfInfo);
+
+            //绘制游戏对象
 
             HBRUSH hbrPlayer = CreateSolidBrush(RGB(255, 0, 0));
             HBRUSH hbrWall = CreateSolidBrush(RGB(100, 100, 100));
@@ -183,13 +251,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     int rad = gameObj->Radius;
                     auto [x, y] = gameObj->Position;
                     SelectObject(hdcMem, hbrPlayer);
-                    Ellipse(hdcMem, (y - rad) * width / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * width / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
+                    Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
                 }
                 else
                 {
-                    int rad = gameObj->Radius;
-                    auto [x, y] = gameObj->Position;
-
                     THUnity2D::Obj^ obj = (THUnity2D::Obj^)gameObj;
                     switch (obj->objType)
                     {
@@ -199,9 +264,16 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     case THUnity2D::ObjType::wall:
                         SelectObject(hdcMem, hbrWall);
                         break;
+                    case THUnity2D::ObjType::birthPoint:
+                        goto notPaint;
+                        break;
                     }
-
-                    Ellipse(hdcMem, (y - rad) * width / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * width / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
+                    {
+                        int rad = gameObj->Radius;
+                        auto [x, y] = gameObj->Position;
+                        Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
+                    }
+                notPaint:;
                 }
             }
 
