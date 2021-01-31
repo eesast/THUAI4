@@ -25,15 +25,16 @@ namespace THUnity2D
             switch (bulletType)
             {
                 case BulletType.empty: case BulletType.b1: 
-                    IsRigid = false; 
+                    IsRigid = true; 
                 
                     break;
-                default: 
-                    IsRigid = true;
+                default:
+                IsRigid = false;
                     break;
             }
         }
 
+        //返回染色范围，相对自己的相对距离
         public XYPosition[] GetColorRange()
 		{
             XYPosition[] range = new XYPosition[9];
@@ -45,6 +46,22 @@ namespace THUnity2D
                     range[i * 3 + j].y = j - 1;
 				}
 			}
+            return range;
+		}
+
+        //返回爆炸范围，相对自己的相对距离
+        public XYPosition[] GetAttackRange()
+		{
+            XYPosition[] range = new XYPosition[9];
+            //range[0].x = range[0].y = 0;
+            for (int i = 0; i < 3; ++i)
+            {
+                for (int j = 0; j < 3; ++j)
+                {
+                    range[i * 3 + j].x = i - 1;
+                    range[i * 3 + j].y = j - 1;
+                }
+            }
             return range;
 		}
     }
