@@ -142,7 +142,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 if (JPress)
                 {
-                    if (key) pMW->map->Attack(playerID, time[key] * 1000, direct[key]);
+                    if (key && pMW->map->Attack(playerID, time[key], direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 }
                 else if (key)
                 {

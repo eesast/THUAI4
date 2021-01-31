@@ -284,10 +284,12 @@ namespace THUnity2D
 				{
 					BulletBomb((Bullet)obj, null); return true;
 				}
-				else if (obj.IsRigid || collisionObj is Character)	//如果碰撞对象可以被炸掉，爆炸；注意CheckCollision保证了这种情况下collisionObj不可能是BirthPoint
+
+				if (obj.IsRigid)		//CheckCollision保证了collisionObj不可能是BirthPoint
 				{
 					BulletBomb((Bullet)obj, collisionObj); return true;
 				}
+
 				return false;
 			}
 			return false;
@@ -312,14 +314,14 @@ namespace THUnity2D
 					}
 				}
 			}
-			
-			if (objBeingShot != null && objBeingShot is Character)	//如果击中了玩家
+
+			//攻击一个玩家函数
+			Action<Character> BombOnePlayer = (Character playerBeingShot) => 
 			{
-				var playerBeingShot = (Character)objBeingShot;
-				if (playerBeingShot.TeamID != bullet.Parent.TeamID)		//如果击中的不是队友
+				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
 				{
 					playerBeingShot.BeAttack(bullet.AP);
-					if (playerBeingShot.HP <= 0)				//如果打死了
+					if (playerBeingShot.HP <= 0)                //如果打死了
 					{
 						//人被打死时会停滞1秒钟
 						playerBeingShot.CanMove = false;
@@ -331,14 +333,34 @@ namespace THUnity2D
 
 						bullet.Parent.AddScore(addScoreWhenKillOnePlayer);  //给击杀者加分
 
-						Thread.Sleep(1000);
+						new Thread
+							(() =>
+							{
 
-						lock (playerListLock)
-						{
-							playerList.Add(playerBeingShot);
-						}
-						playerBeingShot.CanMove = true;
+								Thread.Sleep(1000);
+
+								lock (playerListLock)
+								{
+									playerList.Add(playerBeingShot);
+								}
+								playerBeingShot.CanMove = true;
+							}
+							)
+						{ IsBackground = true }.Start();
+
 					}
+				}
+			};
+			
+			if (objBeingShot != null)
+			{
+				if (objBeingShot is Character)  //如果击中了玩家
+				{
+					BombOnePlayer((Character)objBeingShot);
+				}
+				else if (objBeingShot is Bullet)		//如果被击中的是另一个子弹，把它爆掉
+				{
+					new Thread(() => { BulletBomb((Bullet)objBeingShot, null); }) { IsBackground = true }.Start();
 				}
 			}
 
@@ -369,6 +391,49 @@ namespace THUnity2D
 					cellColor[colorCellX, colorCellY] = TeamToColor(bullet.Parent.TeamID);
 				}
 			}
+
+			var attackRange = bullet.GetAttackRange();
+			for (int i = 0; i < attackRange.GetLength(0); ++i)	//化为实际格子坐标
+			{
+				attackRange[i].x += cellX;
+				attackRange[i].y += cellY;
+			}
+			ArrayList willBeAttacked = new ArrayList();
+			lock (playerListLock)
+			{
+				foreach (Character player in playerList)
+				{
+					int playerCellX = GridToCellX(player.Position), playerCellY = GridToCellY(player.Position);
+					foreach (var pos in attackRange)
+					{
+						if (pos.x == playerCellX && pos.y == playerCellY && !object.ReferenceEquals(player, objBeingShot)) { willBeAttacked.Add(player); }
+					}
+				}
+			}
+			foreach (Character player in willBeAttacked)
+			{
+				BombOnePlayer(player);
+			}
+			willBeAttacked.Clear();
+			lock (objListLock)
+			{
+				foreach (Obj obj in objList)
+				{
+					if (obj is Bullet)
+					{
+						int objCellX = GridToCellX(obj.Position), objCellY = GridToCellY(obj.Position);
+						foreach (var pos in attackRange)
+						{
+							if (pos.x == objCellX && pos.y == objCellY && !object.ReferenceEquals(obj, objBeingShot)) { willBeAttacked.Add(obj); }
+						}
+					}
+				}
+			}
+			foreach (Bullet beAttakedBullet in willBeAttacked)
+			{
+				new Thread(() => { BulletBomb(beAttakedBullet, null); }) { IsBackground = true }.Start();
+			}
+			willBeAttacked.Clear();
 		}
 
 		//物体移动
@@ -442,9 +507,9 @@ namespace THUnity2D
 		}
 
 		//攻击
-		public void Attack(long playerID, int time, double angle)
+		public bool Attack(long playerID, int time, double angle)
 		{
-			if (!isGaming) return;
+			if (!isGaming) return false;
 			lock (playerListLock)
 			{
 				foreach (Character player in playerList)
@@ -462,11 +527,13 @@ namespace THUnity2D
 
 							newBullet.CanMove = true;
 							MoveObj(newBullet, time, angle);
+							return true;
 						}
 						break;
 					}
 				}
 			}
+			return false;
 		}
 
 		public ArrayList GetGameObject()
