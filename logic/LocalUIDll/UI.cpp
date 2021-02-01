@@ -126,7 +126,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             while (true)
             {
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
                 int key = 0;
                 bool WPress = GetKeyState(up) < 0,
@@ -142,7 +142,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 if (JPress)
                 {
-                    if (key && pMW->map->Attack(playerID, time[key], direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                    if (key && pMW->map->Attack(playerID, time[key], direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(200));
                 }
                 else if (key)
                 {
