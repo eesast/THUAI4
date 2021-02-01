@@ -79,7 +79,15 @@ namespace THUnity2D
 		public const int numOfStepPerSecond = 50;       //每秒行走的步数
 		public const int addScoreWhenKillOnePlayer = 10;
 
-		public int ObjRadius { get => numOfGridPerCell / 2; }
+		private const int basicPlayerMoveSpeed = numOfGridPerCell * 2;
+		private const int basicBulletMoveSpeed = numOfGridPerCell * 5;
+
+
+		public int ObjMaxRadius { get => numOfGridPerCell / 2; }
+		public int PlayerRadius { get => ObjMaxRadius; }
+		public int WallRadius { get => ObjMaxRadius; }
+		public int BirthPointRadius { get => ObjMaxRadius; }
+		public int BulletRadius { get => ObjMaxRadius / 2; }
 
 		private ArrayList objList;              //游戏对象（除了玩家外）的列表
 		//private object objListLock = new object();
@@ -93,9 +101,6 @@ namespace THUnity2D
 
 		private readonly int numOfTeam;
 
-		private readonly int basicPlayerMoveSpeed;
-		private readonly int basicBulletMoveSpeed;
-
 		public long AddPlayer(PlayerInitInfo playerInitInfo)
 		{
 			if (!Team.teamExists(playerInitInfo.teamID) 
@@ -103,7 +108,7 @@ namespace THUnity2D
 				|| birthPointList[playerInitInfo.birthPointIdx].Parent != null) return GameObject.invalidID;
 
 			XYPosition pos = birthPointList[playerInitInfo.birthPointIdx].Position;
-			Character newPlayer = new Character(pos, ObjRadius, playerInitInfo.jobType, this.basicPlayerMoveSpeed);
+			Character newPlayer = new Character(pos, PlayerRadius, playerInitInfo.jobType, Map.basicPlayerMoveSpeed);
 			birthPointList[playerInitInfo.birthPointIdx].Parent = newPlayer;
 			playerListLock.EnterWriteLock(); playerList.Add(newPlayer); playerListLock.ExitWriteLock();
 			((Team)teamList[(int)playerInitInfo.teamID]).AddPlayer(newPlayer);
@@ -113,6 +118,35 @@ namespace THUnity2D
 
 			int cellX = GridToCellX(pos), cellY = GridToCellY(pos);
 			cellColor[cellX, cellY] = TeamToColor(playerInitInfo.teamID);
+
+			//开启装弹线程
+
+			new Thread
+				(
+					() =>
+					{
+						while (true)
+						{
+							var beginTime = Environment.TickCount;
+
+							var cellX = GridToCellX(newPlayer.Position);
+							var cellY = GridToCellY(newPlayer.Position);
+							if (cellColor[cellX, cellY] == TeamToColor(newPlayer.TeamID)) newPlayer.AddBulletNum();
+
+							var endTime = Environment.TickCount;
+							var deltaTime = endTime - beginTime;
+							if (deltaTime < newPlayer.CD)
+							{
+								Thread.Sleep(newPlayer.CD - deltaTime);
+							}
+							else
+							{
+								Console.WriteLine("The computer runs so slow that the player cannot finish adding bullet during this time!!!!!!");
+							}
+						}
+					}
+				)
+			{ IsBackground = true }.Start();
 			return newPlayer.ID;
 		}
 
@@ -164,6 +198,40 @@ namespace THUnity2D
 			if (playerToMove != null) MoveObj(playerToMove, moveTime, moveDirection);
 		}
 
+		//检查obj下一步位于nextPos时是否会与listObj碰撞
+		private bool WillCollide(GameObject obj, GameObject listObj, XYPosition nextPos)
+		{
+			if (!listObj.IsRigid || listObj.ID == obj.ID) return false; //不检查自己和非刚体
+
+			if (listObj is BirthPoint)          //如果是出生点，那么除了自己以外的其他玩家需要检查碰撞
+			{
+				//如果是角色并且出生点不是它的出生点，需要检查碰撞，否则不检查碰撞；
+				//下面的条件是obj is Character && !object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)求非得结果
+				if (!(obj is Character) || object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)) return false;
+			}
+
+
+			int deltaX = Math.Abs(nextPos.x - listObj.Position.x), deltaY = Math.Abs(nextPos.y - listObj.Position.y);
+
+			//默认obj是圆形的，因为能移动的物体目前只有圆形
+
+			switch (listObj.Shape)
+			{
+			case GameObject.ShapeType.Circle:       //圆与圆碰撞
+			{
+				return (long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius);
+			}
+			case GameObject.ShapeType.Sqare:        //圆与正方形碰撞
+			{
+				if (deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) return false;
+				if (deltaX < listObj.Radius || deltaY < listObj.Radius) return true;
+				return (long)(deltaX - listObj.Radius) * (long)(deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius;
+				////return !(deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) && ((deltaX < listObj.Radius || deltaY < listObj.Radius) || ((long)(deltaX - listObj.Radius) * (long)(deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius));
+			}
+			}
+			return false;
+		}
+
 		//碰撞检测，如果这样行走是否会与之碰撞，返回与之碰撞的物体
 		private GameObject? CheckCollision(GameObject obj, Vector moveVec)
 		{
@@ -178,17 +246,7 @@ namespace THUnity2D
 					{
 						foreach (GameObject listObj in lst)
 						{
-							if (!listObj.IsRigid || listObj.ID == obj.ID) continue; //不检查自己和非刚体
-
-							if (listObj is BirthPoint)			//如果是出生点，那么除了自己以外的其他玩家需要检查碰撞
-							{
-								//如果是角色并且出生点不是它的出生点，需要检查碰撞，否则不检查碰撞；
-								//下面的条件是obj is Character && !object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)求非得结果
-								if (!(obj is Character) || object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)) continue;
-							}
-
-							int deltaX = nextPos.x - listObj.Position.x, deltaY = nextPos.y - listObj.Position.y;
-							if ((long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius))
+							if (WillCollide(obj, listObj, nextPos))
 							{
 								collisionObj = listObj;
 								break;
@@ -206,7 +264,7 @@ namespace THUnity2D
 			}
 			return null;
 		}
-		
+
 		//碰撞后处理，返回是否已经销毁该对象
 		private bool OnCollision(GameObject obj, GameObject collisionObj, Vector moveVec)
 		{
@@ -226,52 +284,74 @@ namespace THUnity2D
 						{
 							foreach (GameObject listObj in lst)
 							{
-								if (!listObj.IsRigid || listObj.ID == obj.ID) continue; //不检查自己和非刚体
-
-								if (listObj is BirthPoint)          //如果是出生点，那么除了自己以外的其他玩家需要检查碰撞
-								{
-									//如果出生点是它的出生点，不需要检查碰撞
-									if (object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)) continue;
-								}
-
-								int deltaX = nextPos.x - listObj.Position.x, deltaY = nextPos.y - listObj.Position.y;
-
 								//如果再走一步发生碰撞
-								if ((long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius))
+								if (WillCollide(obj, listObj, nextPos))
 								{
-									//计算两者之间的距离
-									int orgDeltaX = listObj.Position.x - obj.Position.x;
-									int orgDeltaY = listObj.Position.y - obj.Position.y;
-									double mod = Math.Sqrt((long)orgDeltaX * orgDeltaX + (long)orgDeltaY * orgDeltaY);
-
-									if (mod == 0.0)     //如果两者重合
+									switch (listObj.Shape)	//默认obj为圆形
 									{
-										tmpMax = 0;
-									}
-									else
+									case GameObject.ShapeType.Circle:
 									{
+										//计算两者之间的距离
+										int orgDeltaX = listObj.Position.x - obj.Position.x;
+										int orgDeltaY = listObj.Position.y - obj.Position.y;
+										double mod = Math.Sqrt((long)orgDeltaX * orgDeltaX + (long)orgDeltaY * orgDeltaY);
 
-										Vector2 relativePosUnitVector = new Vector2(orgDeltaX / mod, orgDeltaY / mod);  //相对位置的单位向量
-										Vector2 moveUnitVector = new Vector2(Math.Cos(moveVec.angle), Math.Sin(moveVec.angle)); //运动方向的单位向量
-										if (relativePosUnitVector * moveUnitVector <= 0) continue;      //如果它们的内积小于零，即反向，那么不会发生碰撞
-
-									}
-
-									double tmp = mod - obj.Radius - listObj.Radius;
-									if (tmp <= 0)           //如果它们已经贴合了，那么不能再走了
-									{
-										tmpMax = 0;
-									}
-									else
-									{
-										//计算最多能走的距离
-										tmp = tmp / Math.Cos(Math.Atan2(orgDeltaY, orgDeltaX) - moveVec.angle);
-										if (tmp < 0 || tmp > uint.MaxValue || tmp == double.NaN)
+										if (mod == 0.0)     //如果两者重合
 										{
-											tmpMax = uint.MaxValue;
+											tmpMax = 0;
 										}
-										else tmpMax = (uint)tmp;
+										else
+										{
+
+											Vector2 relativePosUnitVector = new Vector2(orgDeltaX / mod, orgDeltaY / mod);  //相对位置的单位向量
+											Vector2 moveUnitVector = new Vector2(Math.Cos(moveVec.angle), Math.Sin(moveVec.angle)); //运动方向的单位向量
+											if (relativePosUnitVector * moveUnitVector <= 0) continue;      //如果它们的内积小于零，即反向，那么不会发生碰撞
+
+										}
+
+										double tmp = mod - obj.Radius - listObj.Radius;
+										if (tmp <= 0)           //如果它们已经贴合了，那么不能再走了
+										{
+											tmpMax = 0;
+										}
+										else
+										{
+											//计算最多能走的距离
+											tmp = tmp / Math.Cos(Math.Atan2(orgDeltaY, orgDeltaX) - moveVec.angle);
+											if (tmp < 0 || tmp > uint.MaxValue || tmp == double.NaN)
+											{
+												tmpMax = uint.MaxValue;
+											}
+											else tmpMax = (uint)tmp;
+										}
+										break;
 									}
+									case GameObject.ShapeType.Sqare:
+									{
+										//如果当前已经贴合，那么不能再行走了
+										if (WillCollide(obj, listObj, obj.Position)) tmpMax = 0;
+										else
+										{
+											//二分查找最大可能移动距离
+											int left = 0, right = (int)moveVec.length;
+											while (left < right - 1)
+											{
+												int mid = (right - left) / 2 + left;
+												if (WillCollide(obj, listObj, obj.Position + new XYPosition((int)(mid * Math.Cos(moveVec.angle)), (int)(mid * Math.Sin(moveVec.angle)))))
+												{
+													right = mid;
+												}
+												else left = mid;
+											}
+											tmpMax = (uint)left;
+										}
+										break;
+									}
+									default:
+										tmpMax = int.MaxValue;
+										break;
+									}
+									
 
 									if (tmpMax < maxLen) maxLen = tmpMax;
 								}
@@ -293,7 +373,8 @@ namespace THUnity2D
 				if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
 					|| obj.Position.x >= numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= numOfGridPerCell * Cols - obj.Radius)
 				{
-					BulletBomb((Bullet)obj, null); return true;
+					BulletBomb((Bullet)obj, null);
+					return true;
 				}
 
 				if (obj.IsRigid)		//CheckCollision保证了collisionObj不可能是BirthPoint
@@ -335,7 +416,7 @@ namespace THUnity2D
 					playerBeingShot.BeAttack(bullet.AP);
 					if (playerBeingShot.HP <= 0)                //如果打死了
 					{
-						//人被打死时会停滞1秒钟
+						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
 						playerBeingShot.CanMove = false;
 						playerListLock.EnterWriteLock();
 						{
@@ -480,6 +561,9 @@ namespace THUnity2D
 									moveVec.length = obj.MoveSpeed / numOfStepPerSecond + deltaLen;
 									deltaLen = 0;
 
+									//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
+									//缺陷：半径为0的物体检测不到越界
+									//未来改进方案：引入特殊的越界方块，如果越界视为与越界方块碰撞
 									if ((collisionObj = CheckCollision(obj, moveVec)) != null)
 									{
 										if (OnCollision(obj, collisionObj, moveVec))
@@ -549,7 +633,7 @@ namespace THUnity2D
 				{
 					Bullet newBullet = new Bullet(
 						playerWillAttack.Position + new XYPosition((int)(numOfGridPerCell * Math.Cos(angle)), (int)(numOfGridPerCell * Math.Sin(angle))),
-						ObjRadius, basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP);
+						BulletRadius, basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP);
 
 					newBullet.Parent = playerWillAttack;
 					objListLock.EnterWriteLock(); objList.Add(newBullet); objListLock.ExitWriteLock();
@@ -571,24 +655,16 @@ namespace THUnity2D
 			return gameObjList;
 		}
 
-		public int GetPlayerScore(long playerID)
+		public Character GetPlayerFromTeam(long playerID)
 		{
 			foreach (Team team in teamList)
 			{
-				int score;
-				if (team.GetPlayerScore(playerID, out score)) return score;
+				Character? player = team.GetPlayer(playerID);
+				if (player != null) return player;
 			}
-			throw new Exception("GetPlayerScore error: No this player!");
+			throw new Exception("GetPlayerFromTeam error: No this player!");
 		}
-		public int GetPlayerHP(long playerID)
-		{
-			foreach (Team team in teamList)
-			{
-				int hp;
-				if (team.GetPlayerHP(playerID, out hp)) return hp;
-			}
-			throw new Exception("GetPlayerHP error: No this player!");
-		}
+
 		public int GetTeamScore(long teamID)
 		{
 			if (!Team.teamExists(teamID)) throw new Exception("GetTeamScore error: No this team!");
@@ -621,9 +697,6 @@ namespace THUnity2D
 					cellColor[i, j] = ColorType.None;
 				}
 
-			this.basicPlayerMoveSpeed = numOfGridPerCell * 2;       //每秒钟人物行走的坐标数
-			this.basicBulletMoveSpeed = numOfGridPerCell * 5;       //每秒钟子弹行走的坐标数
-
 			//创建列表
 			objList = new ArrayList();
 			playerList = new ArrayList();
@@ -637,12 +710,12 @@ namespace THUnity2D
 					switch (mapResource[i, j])
 					{
 					case (uint)MapInfo.MapInfoObjType.Wall:
-						objListLock.EnterWriteLock(); objList.Add(new Wall(CellToGrid(i, j), ObjRadius)); objListLock.ExitWriteLock();
+						objListLock.EnterWriteLock(); objList.Add(new Wall(CellToGrid(i, j), WallRadius)); objListLock.ExitWriteLock();
 						break;
 					case (uint)MapInfo.MapInfoObjType.BirthPoint1: case (uint)MapInfo.MapInfoObjType.BirthPoint2: case (uint)MapInfo.MapInfoObjType.BirthPoint3: case (uint)MapInfo.MapInfoObjType.BirthPoint4:
 					case (uint)MapInfo.MapInfoObjType.BirthPoint5: case (uint)MapInfo.MapInfoObjType.BirthPoint6: case (uint)MapInfo.MapInfoObjType.BirthPoint7: case (uint)MapInfo.MapInfoObjType.BirthPoint8:
 					{
-						BirthPoint newBirthPoint = new BirthPoint(CellToGrid(i, j), ObjRadius);
+						BirthPoint newBirthPoint = new BirthPoint(CellToGrid(i, j), BirthPointRadius);
 						objListLock.EnterWriteLock(); objList.Add(newBirthPoint); objListLock.ExitWriteLock();
 						birthPointList.Add(MapInfo.BirthPointEnumToIdx((MapInfo.MapInfoObjType)mapResource[i, j]), newBirthPoint);
 						break;

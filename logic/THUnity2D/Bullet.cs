@@ -9,7 +9,7 @@ namespace THUnity2D
 {
     public enum BulletType
     {   //通信组实现，对应职业
-       empty = 0,
+       Empty = 0,
        b1 = 1,
        b2 = 2
     }
@@ -19,12 +19,12 @@ namespace THUnity2D
         public int AP { get => ap; }
         //子弹的参数，尚未写完
         public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType, int ap) 
-            : base(initPos, radius, false, basicMoveSpeed, ObjType.bullet)
+            : base(initPos, radius, false, basicMoveSpeed, ObjType.Bullet, ShapeType.Circle)
         {
             this.ap = ap;
             switch (bulletType)
             {
-                case BulletType.empty: case BulletType.b1: 
+                case BulletType.Empty: case BulletType.b1: 
                     IsRigid = true; 
                 
                     break;

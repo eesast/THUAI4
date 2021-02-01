@@ -11,8 +11,14 @@ namespace THUnity2D
 	{
 		public enum GameObjType
 		{
-			character = 0,
-			obj = 1
+			Character = 0,
+			Obj = 1
+		}
+		public enum ShapeType
+		{
+			Null = 0,
+			Circle = 1,
+			Sqare = 2
 		}
 		public abstract GameObjType GetGameObjType();	//给C++/CLI调试用的，因为我不知道C++/CLI怎么用is操作符（狗头保命）
 
@@ -27,8 +33,6 @@ namespace THUnity2D
 		public const long noneID = long.MinValue;				//不存在ID
 		public long ID { get; }							//ID
 		
-		////protected readonly BlockingCollection<Action> Operations = new BlockingCollection<Action>();//事件队列
-
 		private XYPosition position;		//位置
 		public XYPosition Position { get { return position; } }
 		public readonly XYPosition orgPos;
@@ -49,6 +53,9 @@ namespace THUnity2D
         }
 
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
+
+		private readonly ShapeType shape;
+		public ShapeType Shape { get => shape; }		//形状
 
 		private int _moveSpeed;
 		public int MoveSpeed
@@ -120,7 +127,7 @@ namespace THUnity2D
 			return deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
         }
 
-		//物体半径
+		//圆或内切圆半径
 		private int radius;
 		public int Radius
 		{
@@ -139,7 +146,7 @@ namespace THUnity2D
 			}
 		}
 
-		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed)
+		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ShapeType shape)
 		{
 			ID = currentMaxID;
 			++currentMaxID;
@@ -150,18 +157,7 @@ namespace THUnity2D
 			this.IsRigid = isRigid;
 			this._moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
 			this.orgMoveSpeed = this._moveSpeed;
-
-			//new System.Threading.Thread(	//开辟一个线程，不断取出里面的待办事项进行办理
-			//	() =>
-			//	{
-			//		while (true)
-			//		{
-			//			Operations.Take()();
-			//		}
-			//	}
-			//)
-			//{ IsBackground = true }.Start();
-
+			this.shape = shape;
 		}
 
 		public override string ToString()
@@ -172,8 +168,11 @@ namespace THUnity2D
 		//用于Debug时从控制台观察到各个游戏对象的状况
 		public static void Debug(GameObject current, string str)
 		{
-			//Console.WriteLine(current.ToString());
+
+#if DEBUG
 			Console.WriteLine(current.GetType() + " " + current.ToString() + str);
+#endif
+
 		}
 
 

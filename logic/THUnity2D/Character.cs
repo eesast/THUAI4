@@ -18,7 +18,7 @@ namespace THUnity2D
 	{
 		public override GameObjType GetGameObjType()
 		{
-			return GameObjType.character;
+			return GameObjType.Character;
 		}
 
 		private long teamID = Team.invalidTeamID;
@@ -172,7 +172,7 @@ namespace THUnity2D
 			bulletNum = maxBulletNum;
 		}
 
-		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed)
+		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed, ShapeType.Circle)
 		{
 			score = 0;
 			this.jobType = jobType;
@@ -181,7 +181,7 @@ namespace THUnity2D
 			{
 			case JobType.job0:
 			default:
-				cd = 1500;
+				cd = 2000;
 				maxBulletNum = 100;
 				bulletNum = maxBulletNum;
 				maxHp = 5000;
@@ -189,7 +189,7 @@ namespace THUnity2D
 				orgAp = 1000;
 				ap = orgAp;
 				holdProp = null;
-				bulletType = BulletType.empty;
+				bulletType = BulletType.Empty;
 
 				break;
 			}
