@@ -12,18 +12,18 @@ namespace THUnity2D
 
 	public enum ObjType
 	{
-		empty = 0,
-		wall = 1,
-		prop = 2,
-		bullet = 3,
-		birthPoint = 4
+		Empty = 0,
+		Wall = 1,
+		Prop = 2,
+		Bullet = 3,
+		BirthPoint = 4
 	}
 
-	public class Obj : GameObject	//道具，墙
+	public abstract class Obj : GameObject	//道具，墙
 	{
 		public override GameObjType GetGameObjType()
 		{
-			return GameObjType.obj;
+			return GameObjType.Obj;
 		}
 		public readonly ObjType objType;		//通信组实现
 
@@ -45,7 +45,7 @@ namespace THUnity2D
             }
         }
 
-		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType) : base(initPos, radius, isRigid, moveSpeed)
+		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType, ShapeType shape) : base(initPos, radius, isRigid, moveSpeed, shape)
 		{
 			this.objType = objType;
 

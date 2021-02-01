@@ -7,7 +7,7 @@ namespace THUnity2D
 {
 	public enum PropType
 	{
-		empty = 0,
+		Empty = 0,
 		p1 = 1,
 		p2 = 2
 	}
@@ -15,7 +15,7 @@ namespace THUnity2D
 	{
 		//道具类，未完成
 		public readonly PropType propType;
-		public Prop(XYPosition initPos, int radius, PropType propType) : base(initPos, radius, false, 0, ObjType.prop)
+		public Prop(XYPosition initPos, int radius, PropType propType) : base(initPos, radius, false, 0, ObjType.Prop, ShapeType.Circle)
         {
 			this.propType = propType;
         }

@@ -96,8 +96,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         SetTimer(hWnd, paintTimerID, 50, NULL);
 
-        std::thread thrGame([]() {pMW->map->StartGame(1000 * 60 * 10); });
-        thrGame.detach();
+        std::thread([]() {pMW->map->StartGame(1000 * 60 * 10); }).detach();
 
         auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk)
         {
@@ -111,7 +110,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             for (int i = 1; i < sizeof(time) / (sizeof(decltype(time[0]))); ++i)
             {
-                time[i] = 1000;
+                time[i] = 20;
             }
 
             direct[WKey] = System::Math::PI;
@@ -126,7 +125,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             while (true)
             {
 
-                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
                 int key = 0;
                 bool WPress = GetKeyState(up) < 0,
@@ -142,7 +141,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 if (JPress)
                 {
-                    if (key && pMW->map->Attack(playerID, time[key], direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                    if (key && 
+                        pMW->map->Attack(playerID, time[key] * 50, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 }
                 else if (key)
                 {
@@ -151,10 +151,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         };
 
-        std::thread thrCheckKey1(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J');
-        std::thread thrCheckKey2(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0);
-        thrCheckKey1.detach();
-        thrCheckKey2.detach();
+        std::thread(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J').detach();
+        std::thread(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0).detach();
 
         break;
     }
@@ -227,9 +225,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             std::wostringstream wsout;
             wsout.imbue(std::locale("chs"));
             wsout << L"队伍1：分数：" << pMW->map->GetTeamScore(0) << '\n';
-            wsout << L"玩家1：\n生命：" << pMW->map->GetPlayerHP(player1ID) << L"\n分数：" << pMW->map->GetPlayerScore(player1ID) << L"\n\n";
+            auto hPlayer1 = pMW->map->GetPlayerFromTeam(player1ID), hPlayer2 = pMW->map->GetPlayerFromTeam(player2ID);
+            wsout << L"玩家1：\n生命：" << hPlayer1->HP << L"\n剩余子弹数：" << hPlayer1->BulletNum << L"\n分数：" << hPlayer1->Score << L"\n\n";
             wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
-            wsout << L"玩家2：\n生命：" << pMW->map->GetPlayerHP(player2ID) << L"\n分数：" << pMW->map->GetPlayerScore(player2ID) << L"\n\n";
+            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->HP << L"\n\n";
             DrawTextW(hdcMem, wsout.str().c_str(), wsout.str().length(), &RECT({ width - appendCx + 20, 20, width, height }), 0);
 
             SelectObject(hdcMem, hfOld);
@@ -246,7 +245,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int colAllGrid = pMW->map->numOfGridPerCell * pMW->map->Cols;
             for each (THUnity2D::GameObject^ gameObj in gameObjList)
             {
-                if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::character)
+                if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::Character)
                 {
                     int rad = gameObj->Radius;
                     auto [x, y] = gameObj->Position;
@@ -258,20 +257,30 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     THUnity2D::Obj^ obj = (THUnity2D::Obj^)gameObj;
                     switch (obj->objType)
                     {
-                    case THUnity2D::ObjType::bullet:
+                    case THUnity2D::ObjType::Bullet:
                         SelectObject(hdcMem, hbrBullet);
                         break;
-                    case THUnity2D::ObjType::wall:
+                    case THUnity2D::ObjType::Wall:
                         SelectObject(hdcMem, hbrWall);
                         break;
-                    case THUnity2D::ObjType::birthPoint:
+                    case THUnity2D::ObjType::BirthPoint:
                         goto notPaint;
                         break;
                     }
                     {
                         int rad = gameObj->Radius;
                         auto [x, y] = gameObj->Position;
-                        Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
+
+                        static_assert(std::is_same_v<decltype(Ellipse), decltype(Rectangle)>, "The type of the paint functions are not the same!");
+
+                        decltype(Ellipse)* PaintFunc = nullptr;
+
+                        switch (obj->Shape)
+                        {
+                        case THUnity2D::GameObject::ShapeType::Circle: PaintFunc = &Ellipse; break;
+                        case THUnity2D::GameObject::ShapeType::Sqare: PaintFunc = &Rectangle; break;
+                        }
+                        PaintFunc(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
                     }
                 notPaint:;
                 }

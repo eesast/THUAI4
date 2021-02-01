@@ -15,6 +15,11 @@ namespace THUnity2D
 			this.y = y;
 		}
 
+		public int GetDim(int dim)
+		{
+			return dim == 0 ? x : y;
+		}
+
 		public override string ToString()
 		{
 			return "(" + x.ToString() + "," + y.ToString() + ")";
