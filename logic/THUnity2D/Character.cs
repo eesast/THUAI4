@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading;
 
 /// <summary>
 /// 人物类
@@ -16,6 +17,11 @@ namespace THUnity2D
 	}
 	public sealed class Character : GameObject
 	{
+		public const int basicAp = 1000;
+		public const int basicHp = 5000;
+		public const int basicCD = 2000;
+		public const int basicBulletNum = 15;
+
 		public override GameObjType GetGameObjType()
 		{
 			return GameObjType.Character;
@@ -38,6 +44,20 @@ namespace THUnity2D
 
 		public readonly JobType jobType;
 
+		public readonly object propLock = new object();
+		private bool isModifyingProp = false;
+		public bool IsModifyingProp
+		{
+			get => isModifyingProp;
+			set
+			{
+				lock (gameObjLock)
+				{
+					isModifyingProp = value;
+				}
+			}
+		}
+
 		private int cd;							//人物装弹固有CD
 		public int CD { get => cd; }
 
@@ -48,16 +68,16 @@ namespace THUnity2D
 		public int BulletNum { get => bulletNum; }
 		private bool TrySubBulletNum()              //尝试将子弹数量减1
 		{
-			if (bulletNum > 0)
+			//Operations.Add
+			lock (gameObjLock)
 			{
-				//Operations.Add
-				lock (gameObjLock)
+				if (bulletNum > 0)
 				{
-					if (bulletNum > 0) --bulletNum;
+					--bulletNum;
+					return true;
 				}
-				return true;
+				return false;
 			}
-			else return false;
 		}
 		public void AddBulletNum()              //子弹数量加1
 		{
@@ -91,6 +111,17 @@ namespace THUnity2D
 				Debug(this, " hp has subed to: " + hp.ToString());
 			}
 		}
+
+		private int lifeNum = 0;				//自己的第几条命，记录死亡次数
+		public int LifeNum { get => lifeNum; }
+		private void AddLifeNum()
+		{
+			lock (gameObjLock)
+			{
+				++lifeNum;
+			}
+		}
+
 		public void BeAttack(int subHP)
 		{
 			SubHp(subHP);
@@ -122,7 +153,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					holdProp = value;
-					Debug(this, " picked the prop: " + holdProp.ToString());
+					Debug(this, " picked the prop: " + (holdProp == null ? "null" : holdProp.ToString()));
 				}
 			}
 		}
@@ -137,9 +168,12 @@ namespace THUnity2D
 
 		public Prop? UseProp()					//使用手中道具，将道具返回给外部
 		{
-			var oldProp = HoldProp;
-			HoldProp = null;
-			return oldProp;
+			lock (gameObjLock)
+			{
+				var oldProp = holdProp;
+				holdProp = null;
+				return oldProp;
+			}
 		}
 
 		private int score;						//当前分数
@@ -165,6 +199,7 @@ namespace THUnity2D
 
 		public override void Reset()
 		{
+			++lifeNum;
 			base.Reset();
 			hp = maxHp;
 			ap = orgAp;
@@ -172,8 +207,87 @@ namespace THUnity2D
 			bulletNum = maxBulletNum;
 		}
 
+		//关于Buff的实现
+
+		private enum BuffType : uint		//有哪些加成
+		{
+			MoveSpeed = 0u,
+			AP = 1u,
+			CD = 2u
+		}
+		private const uint BuffTypeNum = 3u;		//加成的种类个数，即enum BuffType的成员个数
+		
+		[StructLayout(LayoutKind.Explicit, Size = 8)]
+		private struct BuffValue					//加成参数联合体类型，可能是int或double
+		{
+			[FieldOffset(0)]
+			public int iValue;
+			[FieldOffset(0)]
+			public double lfValue;
+			
+			public BuffValue(int intValue) { this.lfValue = 0.0; this.iValue = intValue; }
+			public BuffValue(double longFloatValue) { this.iValue = 0; this.lfValue = longFloatValue; }
+		}
+
+		private LinkedList<BuffValue>[] buffList;
+		private object[] buffListLock;
+
+		public void AddMoveSpeed(int add, int buffTime)
+		{
+			new Thread
+				(
+					() =>
+					{
+						BuffValue bf = new BuffValue(add);
+						LinkedListNode<BuffValue> buffNode;
+						lock (buffListLock[(uint)BuffType.MoveSpeed])
+						{
+							buffNode = buffList[(uint)BuffType.MoveSpeed].AddLast(bf);
+						}
+						ReCalculateMoveSpeed();
+						Thread.Sleep(buffTime);
+						try
+						{
+							lock (buffListLock[(uint)BuffType.MoveSpeed])
+							{
+								buffList[(uint)BuffType.MoveSpeed].Remove(buffNode);
+							}
+						}
+						catch { }
+						ReCalculateMoveSpeed();
+					}
+				)
+			{ IsBackground = true }.Start();
+		}
+
+		private void ReCalculateMoveSpeed()
+		{
+			int res = orgMoveSpeed;
+			lock (buffListLock[(uint)BuffType.MoveSpeed])
+			{
+				foreach (var add in buffList[(uint)BuffType.MoveSpeed])
+				{
+					res += add.iValue;
+				}
+			}
+			MoveSpeed = Math.Max(Math.Min(res, MaxSpeed), MinSpeed);
+		}
+
 		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed, ShapeType.Circle)
 		{
+
+			buffList = new LinkedList<BuffValue>[BuffTypeNum];
+			for (int i = 0; i < buffList.Length; ++i)
+			{
+				buffList[i] = new LinkedList<BuffValue>();
+			}
+
+			buffListLock = new object[5];
+			for (int i = 0; i < buffListLock.Length; ++i)
+			{
+				buffListLock[i] = new object();
+			}
+
 			score = 0;
 			this.jobType = jobType;
 
@@ -181,12 +295,12 @@ namespace THUnity2D
 			{
 			case JobType.job0:
 			default:
-				cd = 2000;
-				maxBulletNum = 100;
+				cd = basicCD;
+				maxBulletNum = basicBulletNum;
 				bulletNum = maxBulletNum;
-				maxHp = 5000;
+				maxHp = basicHp;
 				hp = maxHp;
-				orgAp = 1000;
+				orgAp = basicAp;
 				ap = orgAp;
 				holdProp = null;
 				bulletType = BulletType.Empty;
