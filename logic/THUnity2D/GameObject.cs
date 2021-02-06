@@ -34,7 +34,7 @@ namespace THUnity2D
 		public long ID { get; }							//ID
 		
 		private XYPosition position;		//位置
-		public XYPosition Position { get { return position; } }
+		public XYPosition Position { get => position; }
 		public readonly XYPosition orgPos;
 
 		//Direction
