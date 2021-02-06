@@ -23,7 +23,8 @@ namespace THUnity2D
 			public const int birthPointRadius = objMaxRadius;
 			public const int bulletRadius = objMaxRadius / 2;
 			public const int unpickedPropRadius = objMaxRadius;
-			public const int buffPropTime = 30 * 1000;		//buff道具持续时间（毫秒）
+			public const int buffPropTime = 30 * 1000;      //buff道具持续时间（毫秒）
+			public const int shieldTime = buffPropTime;
 
 			public const int bikeMoveSpeedBuff = numOfGridPerCell;
 			public const int amplifierAtkBuff = Character.basicAp * 2;
@@ -830,8 +831,19 @@ namespace THUnity2D
 				switch (prop.GetPropType())
 				{
 				case PropType.Bike:
-				default:
 					player.AddMoveSpeed(Constant.bikeMoveSpeedBuff, Constant.buffPropTime);
+					break;
+				case PropType.Amplifier:
+					player.AddAP(Constant.amplifierAtkBuff, Constant.buffPropTime);
+					break;
+				case PropType.JinKeLa:
+					player.ChangeCD(Constant.jinKeLaCdDiscount, Constant.buffPropTime);
+					break;
+				case PropType.Rice:
+					player.AddHp(Constant.riceHpAdd);
+					break;
+				case PropType.Shield:
+					player.AddShield(Constant.shieldTime);
 					break;
 				}
 			}

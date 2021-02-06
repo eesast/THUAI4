@@ -216,7 +216,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			
 			HFONT hfInfo = CreateFont
 			(
-				20,
+				15,
 				0,
 				0,
 				0,
@@ -242,11 +242,13 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			auto hPlayer1 = pMW->map->GetPlayerFromTeam(player1ID), hPlayer2 = pMW->map->GetPlayerFromTeam(player2ID);
 			wsout << L"玩家1：\n生命：" << hPlayer1->HP << L"\n剩余子弹数：" << hPlayer1->BulletNum << L"\n分数：" << hPlayer1->Score << L"\n";
 			wsout << L"移动速度：" << hPlayer1->MoveSpeed << "\n";
+			wsout << L"攻击力：" << hPlayer1->AP << "\n";
 			wsout << '\n';
 
 			wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
 			wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->HP << L"\n";
 			wsout << L"移动速度：" << hPlayer2->MoveSpeed << "\n";
+			wsout << L"攻击力：" << hPlayer2->AP << "\n";
 			wsout << '\n';
 
 			DrawTextW(hdcMem, wsout.str().c_str(), wsout.str().length(), &RECT({ width - appendCx + 20, 20, width, height }), 0);

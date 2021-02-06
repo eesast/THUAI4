@@ -59,7 +59,19 @@ namespace THUnity2D
 		}
 
 		private int cd;							//人物装弹固有CD
-		public int CD { get => cd; }
+		public int CD
+		{
+			get => cd;
+			private set
+			{
+				lock (gameObjLock)
+				{
+					cd = value;
+					Debug(this, string.Format("'s AP has been set to: {0}.", value));
+				}
+			}
+		}
+		public readonly int orgCD;
 
 		private int maxBulletNum;               //人物最大子弹数
 		public int MaxBulletNum { get => maxBulletNum; }
@@ -98,7 +110,7 @@ namespace THUnity2D
 			//Operations.Add
 			lock (gameObjLock)
 			{
-				hp = Math.Min(MaxHp, hp + add);
+				hp = Math.Max(Math.Min(MaxHp, hp + add), 0);
 				Debug(this, " hp has added to: " + hp.ToString());
 			}
 		}
@@ -107,7 +119,7 @@ namespace THUnity2D
 			//Operations.Add
 			lock (gameObjLock)
 			{
-				hp = Math.Max(0, hp - sub);
+				hp = Math.Min(Math.Max(0, hp - sub), MaxHp);
 				Debug(this, " hp has subed to: " + hp.ToString());
 			}
 		}
@@ -124,15 +136,17 @@ namespace THUnity2D
 
 		public void BeAttack(int subHP)
 		{
-			SubHp(subHP);
+			if (!HasShield()) SubHp(subHP);
 		}
 
+		public const int MinAP = 0;
+		public const int MaxAP = int.MaxValue;
 		public readonly int orgAp;      //固有攻击力
 		private int ap;                 //当前攻击力
 		public int AP
 		{
 			get => ap;
-			set
+			private set
 			{
 				//Operations.Add
 				lock (gameObjLock)
@@ -205,17 +219,25 @@ namespace THUnity2D
 			ap = orgAp;
 			holdProp = null;
 			bulletNum = maxBulletNum;
+			for (int i = 0; i < BuffTypeNum; ++i)
+			{
+				lock (buffListLock[i])
+				{
+					buffList[i].Clear();
+				}
+			}
 		}
 
-		//关于Buff的实现
+		#region 用于实现各种Buff道具的效果
 
 		private enum BuffType : uint		//有哪些加成
 		{
 			MoveSpeed = 0u,
 			AP = 1u,
-			CD = 2u
+			CD = 2u,
+			Shield = 3u
 		}
-		private const uint BuffTypeNum = 3u;		//加成的种类个数，即enum BuffType的成员个数
+		private const uint BuffTypeNum = 4u;		//加成的种类个数，即enum BuffType的成员个数
 		
 		[StructLayout(LayoutKind.Explicit, Size = 8)]
 		private struct BuffValue					//加成参数联合体类型，可能是int或double
@@ -232,34 +254,37 @@ namespace THUnity2D
 		private LinkedList<BuffValue>[] buffList;
 		private object[] buffListLock;
 
-		public void AddMoveSpeed(int add, int buffTime)
+		private void AddBuff(BuffValue bf, int buffTime, BuffType buffType, Action ReCalculateFunc)
 		{
 			new Thread
 				(
 					() =>
 					{
-						BuffValue bf = new BuffValue(add);
 						LinkedListNode<BuffValue> buffNode;
-						lock (buffListLock[(uint)BuffType.MoveSpeed])
+						lock (buffListLock[(uint)buffType])
 						{
-							buffNode = buffList[(uint)BuffType.MoveSpeed].AddLast(bf);
+							buffNode = buffList[(uint)buffType].AddLast(bf);
 						}
-						ReCalculateMoveSpeed();
+						ReCalculateFunc();
 						Thread.Sleep(buffTime);
 						try
 						{
-							lock (buffListLock[(uint)BuffType.MoveSpeed])
+							lock (buffListLock[(uint)buffType])
 							{
-								buffList[(uint)BuffType.MoveSpeed].Remove(buffNode);
+								buffList[(uint)buffType].Remove(buffNode);
 							}
 						}
 						catch { }
-						ReCalculateMoveSpeed();
+						ReCalculateFunc();
 					}
 				)
 			{ IsBackground = true }.Start();
 		}
 
+		public void AddMoveSpeed(int add, int buffTime)
+		{
+			AddBuff(new BuffValue(add), buffTime, BuffType.MoveSpeed, ReCalculateMoveSpeed);
+		}
 		private void ReCalculateMoveSpeed()
 		{
 			int res = orgMoveSpeed;
@@ -272,6 +297,54 @@ namespace THUnity2D
 			}
 			MoveSpeed = Math.Max(Math.Min(res, MaxSpeed), MinSpeed);
 		}
+
+		public void AddAP(int add, int buffTime)
+		{
+			AddBuff(new BuffValue(add), buffTime, BuffType.AP, ReCalculateAP);
+		}
+		private void ReCalculateAP()
+		{
+			int res = orgAp;
+			lock (buffListLock[(uint)BuffType.AP])
+			{
+				foreach (var bf in buffList[(uint)BuffType.AP])
+				{
+					res += bf.iValue;
+				}
+			}
+			AP = Math.Max(Math.Min(res, MaxAP), MinAP);
+		}
+
+		public void ChangeCD(double discount, int buffTime)
+		{
+			AddBuff(new BuffValue(discount), buffTime, BuffType.CD, ReCalculateCD);
+		}
+		private void ReCalculateCD()
+		{
+			double times = 1.0;
+			lock (buffListLock[(uint)BuffType.CD])
+			{
+				foreach (var bf in buffList[(uint)BuffType.CD])
+				{
+					times *= bf.lfValue;
+				}
+			}
+			CD = (int)(orgCD * times);
+		}
+
+		public void AddShield(int shieldTime)
+		{
+			AddBuff(new BuffValue(), shieldTime, BuffType.Shield, () => { });
+		}
+		public bool HasShield()
+		{
+			lock (buffListLock[(uint)BuffType.Shield])
+			{
+				return buffList[(uint)BuffType.Shield].Count != 0;
+			}
+		}
+
+		#endregion
 
 		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed, ShapeType.Circle)
 		{
@@ -295,7 +368,8 @@ namespace THUnity2D
 			{
 			case JobType.job0:
 			default:
-				cd = basicCD;
+				orgCD = basicCD;
+				cd = orgCD;
 				maxBulletNum = basicBulletNum;
 				bulletNum = maxBulletNum;
 				maxHp = basicHp;
