@@ -7,6 +7,30 @@ namespace THUnity2D
 {
 	public class Map
 	{
+		public static class Constant
+		{
+			public const int numOfGridPerCell = 1000;   //每个的坐标单位数
+			public const int numOfStepPerSecond = 50;       //每秒行走的步数
+			public const int addScoreWhenKillOnePlayer = 10;
+			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
+
+			public const int basicPlayerMoveSpeed = numOfGridPerCell * 2;
+			public const int basicBulletMoveSpeed = numOfGridPerCell * 5;
+
+			public const int objMaxRadius = numOfGridPerCell / 2;
+			public const int playerRadius = objMaxRadius;
+			public const int wallRadius = objMaxRadius;
+			public const int birthPointRadius = objMaxRadius;
+			public const int bulletRadius = objMaxRadius / 2;
+			public const int unpickedPropRadius = objMaxRadius;
+			public const int buffPropTime = 30 * 1000;		//buff道具持续时间（毫秒）
+
+			public const int bikeMoveSpeedBuff = numOfGridPerCell;
+			public const int amplifierAtkBuff = Character.basicAp * 2;
+			public const double jinKeLaCdDiscount = 0.25;
+			public const int riceHpAdd = Character.basicHp / 2;
+		}
+
 		public enum ColorType
 		{
 			None = 0,
@@ -38,17 +62,17 @@ namespace THUnity2D
 		}
 		public static XYPosition CellToGrid(int x, int y)	//求格子的中心坐标
 		{
-			XYPosition ret = new XYPosition(x * numOfGridPerCell + numOfGridPerCell / 2, 
-				y * numOfGridPerCell + numOfGridPerCell / 2);
+			XYPosition ret = new XYPosition(x * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2, 
+				y * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2);
 			return ret;
 		}
 		public static int GridToCellX(XYPosition pos)		//求坐标所在的格子的x坐标
 		{
-			return pos.x / numOfGridPerCell;
+			return pos.x / Constant.numOfGridPerCell;
 		}
 		public static int GridToCellY(XYPosition pos)      //求坐标所在的格子的y坐标
 		{
-			return pos.y / numOfGridPerCell;
+			return pos.y / Constant.numOfGridPerCell;
 		}
 		private ColorType[,] cellColor;			//储存每格的颜色
 		public ColorType[,] CellColor
@@ -75,26 +99,13 @@ namespace THUnity2D
 		{
 			get => cellColor.GetLength(1);
 		}
-		public const int numOfGridPerCell = 1000;   //每个的坐标单位数
-		public const int numOfStepPerSecond = 50;       //每秒行走的步数
-		public const int addScoreWhenKillOnePlayer = 10;
-
-		private const int basicPlayerMoveSpeed = numOfGridPerCell * 2;
-		private const int basicBulletMoveSpeed = numOfGridPerCell * 5;
-
-
-		public int ObjMaxRadius { get => numOfGridPerCell / 2; }
-		public int PlayerRadius { get => ObjMaxRadius; }
-		public int WallRadius { get => ObjMaxRadius; }
-		public int BirthPointRadius { get => ObjMaxRadius; }
-		public int BulletRadius { get => ObjMaxRadius / 2; }
 
 		private ArrayList objList;              //游戏对象（除了玩家外）的列表
-		//private object objListLock = new object();
-		private ReaderWriterLockSlim objListLock = new ReaderWriterLockSlim();
-		private ArrayList playerList;        //玩家列表
-											 //private object playerListLock = new object();
+		private ReaderWriterLockSlim objListLock = new ReaderWriterLockSlim();		//读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的ArrayList）
+		private ArrayList playerList;			//玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList）
 		private ReaderWriterLockSlim playerListLock = new ReaderWriterLockSlim();
+		private LinkedList<Prop> unpickedPropList;		//尚未捡起的道具列表
+		private ReaderWriterLockSlim unpickedPropListLock = new ReaderWriterLockSlim();
 		private ArrayList teamList;             //队伍列表
 		//private object teamListLock = new object();
 		private readonly Dictionary<uint, BirthPoint> birthPointList;	//出生点列表
@@ -108,7 +119,7 @@ namespace THUnity2D
 				|| birthPointList[playerInitInfo.birthPointIdx].Parent != null) return GameObject.invalidID;
 
 			XYPosition pos = birthPointList[playerInitInfo.birthPointIdx].Position;
-			Character newPlayer = new Character(pos, PlayerRadius, playerInitInfo.jobType, Map.basicPlayerMoveSpeed);
+			Character newPlayer = new Character(pos, Constant.playerRadius, playerInitInfo.jobType, Constant.basicPlayerMoveSpeed);
 			birthPointList[playerInitInfo.birthPointIdx].Parent = newPlayer;
 			playerListLock.EnterWriteLock(); playerList.Add(newPlayer); playerListLock.ExitWriteLock();
 			((Team)teamList[(int)playerInitInfo.teamID]).AddPlayer(newPlayer);
@@ -125,19 +136,20 @@ namespace THUnity2D
 				(
 					() =>
 					{
-						while (true)
+						while (!IsGaming) Thread.Sleep(newPlayer.CD);
+						while (IsGaming)
 						{
-							var beginTime = Environment.TickCount;
+							var beginTime = Environment.TickCount64;
 
 							var cellX = GridToCellX(newPlayer.Position);
 							var cellY = GridToCellY(newPlayer.Position);
 							if (cellColor[cellX, cellY] == TeamToColor(newPlayer.TeamID)) newPlayer.AddBulletNum();
 
-							var endTime = Environment.TickCount;
+							var endTime = Environment.TickCount64;
 							var deltaTime = endTime - beginTime;
 							if (deltaTime < newPlayer.CD)
 							{
-								Thread.Sleep(newPlayer.CD - deltaTime);
+								Thread.Sleep(newPlayer.CD - (int)deltaTime);
 							}
 							else
 							{
@@ -152,6 +164,7 @@ namespace THUnity2D
 
 		private bool isGaming = false;
 		public bool IsGaming { get => isGaming; }
+
 		public bool StartGame(int milliSeconds)
 		{
 			if (isGaming) return false;
@@ -163,6 +176,33 @@ namespace THUnity2D
 				}
 			}
 			playerListLock.ExitReadLock();
+
+			//开始产生道具
+
+			new Thread
+				(
+					() =>
+					{
+						while (!IsGaming) Thread.Sleep(1000);
+						while (IsGaming)
+						{
+							var beginTime = Environment.TickCount64;
+							ProduceOneProp();
+							var endTime = Environment.TickCount64;
+							var deltaTime = endTime - beginTime;
+							if (deltaTime <= Constant.producePropTimeInterval)
+							{
+								Thread.Sleep(Constant.producePropTimeInterval - (int)deltaTime);
+							}
+							else
+							{
+								Console.WriteLine("In Function StartGame: The computer runs too slow that it cannot produce one prop in the given time!");
+							}
+						}
+					}
+				)
+			{ IsBackground = true }.Start();
+
 			isGaming = true;
 			Thread.Sleep(milliSeconds);
 			isGaming = false;
@@ -175,6 +215,73 @@ namespace THUnity2D
 			}
 			playerListLock.ExitReadLock();
 			return true;
+		}
+
+		public void ProduceOneProp()
+		{
+			Random r = new Random((int)Environment.TickCount64);
+			XYPosition newPropPos = new XYPosition();
+			while (true)
+			{
+				newPropPos.x = r.Next(0, Rows * Constant.numOfGridPerCell);
+				newPropPos.y = r.Next(0, Cols * Constant.numOfGridPerCell);
+				int cellX = GridToCellX(newPropPos), cellY = GridToCellY(newPropPos);
+				bool canLayProp = true;
+				objListLock.EnterReadLock();
+				foreach (GameObject obj in objList)
+				{
+					if (cellX == GridToCellX(obj.Position) && cellY == GridToCellY(obj.Position) && (obj is Wall || obj is BirthPoint))
+					{
+						canLayProp = false;
+						break;
+					}
+				}
+				objListLock.ExitReadLock();
+				if (canLayProp) break;
+			}
+
+			PropType propType = (PropType)r.Next(Prop.MinPropTypeNum, Prop.MaxPropTypeNum + 1);
+
+			Prop? newProp = null;
+			switch (propType)
+			{
+			case PropType.Bike:
+			{
+				newProp = new Bike(newPropPos, Constant.unpickedPropRadius, Constant.bikeMoveSpeedBuff);
+				break;
+			}
+			case PropType.Amplifier:
+			{
+				newProp = new Amplifier(newPropPos, Constant.unpickedPropRadius, Constant.amplifierAtkBuff);
+				break;
+			}
+			case PropType.JinKeLa:
+			{
+				newProp = new JinKeLa(newPropPos, Constant.unpickedPropRadius, Constant.jinKeLaCdDiscount);
+				break;
+			}
+			case PropType.Rice:
+			{
+				newProp = new Rice(newPropPos, Constant.unpickedPropRadius, Constant.riceHpAdd);
+				break;
+			}
+			case PropType.Shield:
+			{
+				newProp = new Shield(newPropPos, Constant.unpickedPropRadius);
+				break;
+			}
+			case PropType.Totem:
+			{
+				newProp = new Totem(newPropPos, Constant.unpickedPropRadius);
+				break;
+			}
+			}
+			if (newProp != null)
+			{
+				unpickedPropListLock.EnterWriteLock();
+				unpickedPropList.AddLast(newProp);
+				unpickedPropListLock.ExitWriteLock();
+			}
 		}
 
 		//人物移动
@@ -363,7 +470,7 @@ namespace THUnity2D
 				FindMax(playerList, playerListLock);
 				FindMax(objList, objListLock);
 
-				maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / numOfStepPerSecond));
+				maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Constant.numOfStepPerSecond));
 				obj.Move(new Vector(moveVec.angle, maxLen));
 				return false;
 			}
@@ -371,7 +478,7 @@ namespace THUnity2D
 			{
 				//如果越界，爆炸
 				if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
-					|| obj.Position.x >= numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= numOfGridPerCell * Cols - obj.Radius)
+					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius)
 				{
 					BulletBomb((Bullet)obj, null);
 					return true;
@@ -418,6 +525,7 @@ namespace THUnity2D
 					{
 						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
 						playerBeingShot.CanMove = false;
+						playerBeingShot.IsResetting = true;
 						playerListLock.EnterWriteLock();
 						{
 							playerList.Remove(playerBeingShot);
@@ -425,7 +533,7 @@ namespace THUnity2D
 						playerListLock.ExitWriteLock();
 						playerBeingShot.Reset();
 
-						bullet.Parent.AddScore(addScoreWhenKillOnePlayer);  //给击杀者加分
+						bullet.Parent.AddScore(Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
 
 						new Thread
 							(() =>
@@ -438,7 +546,12 @@ namespace THUnity2D
 									playerList.Add(playerBeingShot);
 								}
 								playerListLock.ExitWriteLock();
-								playerBeingShot.CanMove = true;
+
+								if (IsGaming)
+								{
+									playerBeingShot.CanMove = true;
+								}
+								playerBeingShot.IsResetting = false;
 							}
 							)
 						{ IsBackground = true }.Start();
@@ -518,7 +631,7 @@ namespace THUnity2D
 			{
 				foreach (Obj obj in objList)
 				{
-					if (obj is Bullet)
+					if (obj.IsRigid && obj is Bullet)
 					{
 						int objCellX = GridToCellX(obj.Position), objCellY = GridToCellY(obj.Position);
 						foreach (var pos in attackRange)
@@ -545,7 +658,7 @@ namespace THUnity2D
 							{
 								lock (obj.moveLock)
 								{
-									if (obj.IsMoving || !obj.CanMove) return;
+									if (!obj.IsAvailable) return;
 									obj.IsMoving = true;     //开始移动
 								}
 
@@ -555,10 +668,10 @@ namespace THUnity2D
 								//先转向
 								if (isGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
 								GameObject? collisionObj = null;
-								while (isGaming && moveTime > 0 && obj.CanMove)
+								while (isGaming && moveTime > 0 && obj.CanMove && !obj.IsResetting)
 								{
-									var beginTime = Environment.TickCount;
-									moveVec.length = obj.MoveSpeed / numOfStepPerSecond + deltaLen;
+									var beginTime = Environment.TickCount64;
+									moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
 									deltaLen = 0;
 
 									//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
@@ -580,12 +693,12 @@ namespace THUnity2D
 									{
 										deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
 									}
-									var endTime = System.Environment.TickCount;
-									moveTime -= 1000 / numOfStepPerSecond;
+									var endTime = System.Environment.TickCount64;
+									moveTime -= 1000 / Constant.numOfStepPerSecond;
 									var deltaTime = endTime - beginTime;
-									if (deltaTime <= 1000 / numOfStepPerSecond)
+									if (deltaTime <= 1000 / Constant.numOfStepPerSecond)
 									{
-										Thread.Sleep(1000 / numOfStepPerSecond - deltaTime);
+										Thread.Sleep(1000 / Constant.numOfStepPerSecond - (int)deltaTime);
 									}
 									else
 									{
@@ -609,31 +722,38 @@ namespace THUnity2D
 			{ IsBackground = true }.Start();
 		}
 
-		//攻击
-		public bool Attack(long playerID, int time, double angle)
+		private Character? FindPlayerFromPlayerList(long playerID)
 		{
-			if (!isGaming) return false;
-			Character? playerWillAttack = null;
+			Character? player = null;
 			playerListLock.EnterReadLock();
 			{
-				foreach (Character player in playerList)
+				foreach (Character iplayer in playerList)
 				{
-					if (player.ID == playerID)
+					if (iplayer.ID == playerID)
 					{
-						playerWillAttack = player;
+						player = iplayer;
 						break;
 					}
 				}
 			}
 			playerListLock.ExitReadLock();
+			return player;
+		}
+
+		//攻击
+		public bool Attack(long playerID, int time, double angle)
+		{
+			if (!isGaming) return false;
+			Character? playerWillAttack = FindPlayerFromPlayerList(playerID);
 
 			if (playerWillAttack != null)
 			{
+				if (!playerWillAttack.IsAvailable) return false;
 				if (playerWillAttack.Attack())
 				{
 					Bullet newBullet = new Bullet(
-						playerWillAttack.Position + new XYPosition((int)(numOfGridPerCell * Math.Cos(angle)), (int)(numOfGridPerCell * Math.Sin(angle))),
-						BulletRadius, basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP);
+						playerWillAttack.Position + new XYPosition((int)(Constant.numOfGridPerCell * Math.Cos(angle)), (int)(Constant.numOfGridPerCell * Math.Sin(angle))),
+						Constant.bulletRadius, Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP);
 
 					newBullet.Parent = playerWillAttack;
 					objListLock.EnterWriteLock(); objList.Add(newBullet); objListLock.ExitWriteLock();
@@ -647,11 +767,82 @@ namespace THUnity2D
 			return false;
 		}
 
+		//捡道具，是否是前面的那一格（true则是面向的那一格；false则是所在的那一格），以及要捡的道具类型
+		public void Pick(long playerID, PropType propType, bool isFrontCell)
+		{
+			if (!IsGaming) return;
+			Character? player = FindPlayerFromPlayerList(playerID);
+			if (player == null) return;
+			if (!player.IsAvailable) return;
+
+			lock (player.propLock)
+			{
+				while (player.IsModifyingProp) Thread.Sleep(1);
+				player.IsModifyingProp = true;
+			}
+
+			int cellX = GridToCellX(player.Position), cellY = GridToCellY(player.Position);
+			/*判断面对方向，未完成*/
+			Prop? prop = null;
+			unpickedPropListLock.EnterWriteLock();
+			for (var propNode = unpickedPropList.First; !ReferenceEquals(propNode, unpickedPropList.Last); propNode = propNode.Next)
+			{
+				if (propNode.Value.GetPropType() != propType) continue;
+				int cellXTmp = GridToCellX(propNode.Value.Position), cellYTmp = GridToCellY(propNode.Value.Position);
+				if (cellXTmp == cellX && cellYTmp == cellY)
+				{
+					prop = propNode.Value;
+					unpickedPropList.Remove(propNode);
+					break;
+				}
+			}
+			unpickedPropListLock.ExitWriteLock();
+
+			if (prop != null)
+			{
+				player.HoldProp = prop;
+			}
+
+			player.IsModifyingProp = false;
+		}
+
+		public void Use(long playerID)
+		{
+			if (!isGaming) return;
+			Character? player = FindPlayerFromPlayerList(playerID);
+			if (player == null) return;
+
+			if (!player.IsAvailable) return;
+
+			lock (player.propLock)
+			{
+				while (player.IsModifyingProp) Thread.Sleep(1);
+				player.IsModifyingProp = true;
+			}
+
+			Prop? prop = player.HoldProp;
+			player.HoldProp = null;
+
+			player.IsModifyingProp = false;
+
+			if (prop != null)
+			{
+				switch (prop.GetPropType())
+				{
+				case PropType.Bike:
+				default:
+					player.AddMoveSpeed(Constant.bikeMoveSpeedBuff, Constant.buffPropTime);
+					break;
+				}
+			}
+		}
+
 		public ArrayList GetGameObject()
 		{
 			ArrayList gameObjList = new ArrayList();
 			playerListLock.EnterWriteLock(); gameObjList.AddRange(playerList); playerListLock.ExitWriteLock();
 			objListLock.EnterWriteLock(); gameObjList.AddRange(objList); objListLock.ExitWriteLock();
+			unpickedPropListLock.EnterReadLock(); gameObjList.AddRange(unpickedPropList); unpickedPropListLock.ExitReadLock();
 			return gameObjList;
 		}
 
@@ -700,6 +891,7 @@ namespace THUnity2D
 			//创建列表
 			objList = new ArrayList();
 			playerList = new ArrayList();
+			unpickedPropList = new LinkedList<Prop>();
 			birthPointList = new Dictionary<uint, BirthPoint>(MapInfo.numOfBirthPoint);
 
 			//将墙等游戏对象插入到游戏中
@@ -710,12 +902,12 @@ namespace THUnity2D
 					switch (mapResource[i, j])
 					{
 					case (uint)MapInfo.MapInfoObjType.Wall:
-						objListLock.EnterWriteLock(); objList.Add(new Wall(CellToGrid(i, j), WallRadius)); objListLock.ExitWriteLock();
+						objListLock.EnterWriteLock(); objList.Add(new Wall(CellToGrid(i, j), Constant.wallRadius)); objListLock.ExitWriteLock();
 						break;
 					case (uint)MapInfo.MapInfoObjType.BirthPoint1: case (uint)MapInfo.MapInfoObjType.BirthPoint2: case (uint)MapInfo.MapInfoObjType.BirthPoint3: case (uint)MapInfo.MapInfoObjType.BirthPoint4:
 					case (uint)MapInfo.MapInfoObjType.BirthPoint5: case (uint)MapInfo.MapInfoObjType.BirthPoint6: case (uint)MapInfo.MapInfoObjType.BirthPoint7: case (uint)MapInfo.MapInfoObjType.BirthPoint8:
 					{
-						BirthPoint newBirthPoint = new BirthPoint(CellToGrid(i, j), BirthPointRadius);
+						BirthPoint newBirthPoint = new BirthPoint(CellToGrid(i, j), Constant.birthPointRadius);
 						objListLock.EnterWriteLock(); objList.Add(newBirthPoint); objListLock.ExitWriteLock();
 						birthPointList.Add(MapInfo.BirthPointEnumToIdx((MapInfo.MapInfoObjType)mapResource[i, j]), newBirthPoint);
 						break;

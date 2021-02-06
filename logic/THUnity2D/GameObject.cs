@@ -61,23 +61,15 @@ namespace THUnity2D
 		public int MoveSpeed
         {
 			get => _moveSpeed;
-			set
-            {
-				//Operations.Add
+			protected set
+			{
 				lock (gameObjLock)
 				{
-					//保证速度在MinSpeed与MaxSpeed之间
-					_moveSpeed = Math.Min(Math.Max(value, MinSpeed), MaxSpeed);
-					Debug(this, ", the speed of which has been set to " + _moveSpeed.ToString());
+					_moveSpeed = value;
 				}
-
 			}
 		}
 		public readonly int orgMoveSpeed;
-		public void ResetMoveSpeed()
-		{
-			_moveSpeed = orgMoveSpeed;
-		}
 
 		//当前是否能移动
 
@@ -112,6 +104,22 @@ namespace THUnity2D
 				}
 			}
 		}
+
+		private bool isResetting = false;
+		public bool IsResetting
+		{
+			get => isResetting;
+			set
+			{
+				lock (gameObjLock)
+				{
+					isResetting = value;
+				}
+			}
+		}
+
+		public bool IsAvailable { get => !IsMoving && CanMove && !IsResetting; }    //是否能接收指令
+
 
 		//移动，改变坐标，反馈实际走的长度的平方
 		public long Move(Vector displacement)
