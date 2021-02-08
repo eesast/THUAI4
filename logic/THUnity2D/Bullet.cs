@@ -17,11 +17,15 @@ namespace THUnity2D
     {
         private int ap;     //攻击力
         public int AP { get => ap; }
+
+        private readonly bool hasSpear;
+        public bool HasSpear { get => hasSpear; }
         //子弹的参数，尚未写完
-        public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType, int ap) 
+        public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType, int ap, bool hasSpear) 
             : base(initPos, radius, false, basicMoveSpeed, ObjType.Bullet, ShapeType.Circle)
         {
             this.ap = ap;
+            this.hasSpear = hasSpear;
             switch (bulletType)
             {
                 case BulletType.Empty: case BulletType.b1: 
@@ -29,7 +33,7 @@ namespace THUnity2D
                 
                     break;
                 default:
-                IsRigid = false;
+                    IsRigid = false;
                     break;
             }
         }

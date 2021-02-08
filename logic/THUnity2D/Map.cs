@@ -14,8 +14,8 @@ namespace THUnity2D
 			public const int addScoreWhenKillOnePlayer = 10;
 			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
 
-			public const int basicPlayerMoveSpeed = numOfGridPerCell * 2;
-			public const int basicBulletMoveSpeed = numOfGridPerCell * 5;
+			public const int basicPlayerMoveSpeed = numOfGridPerCell * 4;
+			public const int basicBulletMoveSpeed = numOfGridPerCell * 6;
 
 			public const int objMaxRadius = numOfGridPerCell / 2;
 			public const int playerRadius = objMaxRadius;
@@ -23,13 +23,21 @@ namespace THUnity2D
 			public const int birthPointRadius = objMaxRadius;
 			public const int bulletRadius = objMaxRadius / 2;
 			public const int unpickedPropRadius = objMaxRadius;
+
 			public const int buffPropTime = 30 * 1000;      //buff道具持续时间（毫秒）
 			public const int shieldTime = buffPropTime;
+			public const int totemTime = buffPropTime;
+			public const int spearTime = buffPropTime;
 
 			public const int bikeMoveSpeedBuff = numOfGridPerCell;
 			public const int amplifierAtkBuff = Character.basicAp * 2;
 			public const double jinKeLaCdDiscount = 0.25;
 			public const int riceHpAdd = Character.basicHp / 2;
+
+			public const int mineTime = 60 * 1000;      //地雷埋藏的持续时间
+			public const int dirtMoveSpeedDebuff = numOfGridPerCell;
+			public const int attenuatorAtkDebuff = amplifierAtkBuff;
+			public const double dividerCdDiscount = 4.0;
 		}
 
 		public enum ColorType
@@ -238,7 +246,11 @@ namespace THUnity2D
 					}
 				}
 				objListLock.ExitReadLock();
-				if (canLayProp) break;
+				if (canLayProp)
+				{
+					newPropPos = CellToGrid(cellX, cellY);
+					break;
+				}
 			}
 
 			PropType propType = (PropType)r.Next(Prop.MinPropTypeNum, Prop.MaxPropTypeNum + 1);
@@ -246,36 +258,16 @@ namespace THUnity2D
 			Prop? newProp = null;
 			switch (propType)
 			{
-			case PropType.Bike:
-			{
-				newProp = new Bike(newPropPos, Constant.unpickedPropRadius, Constant.bikeMoveSpeedBuff);
-				break;
-			}
-			case PropType.Amplifier:
-			{
-				newProp = new Amplifier(newPropPos, Constant.unpickedPropRadius, Constant.amplifierAtkBuff);
-				break;
-			}
-			case PropType.JinKeLa:
-			{
-				newProp = new JinKeLa(newPropPos, Constant.unpickedPropRadius, Constant.jinKeLaCdDiscount);
-				break;
-			}
-			case PropType.Rice:
-			{
-				newProp = new Rice(newPropPos, Constant.unpickedPropRadius, Constant.riceHpAdd);
-				break;
-			}
-			case PropType.Shield:
-			{
-				newProp = new Shield(newPropPos, Constant.unpickedPropRadius);
-				break;
-			}
-			case PropType.Totem:
-			{
-				newProp = new Totem(newPropPos, Constant.unpickedPropRadius);
-				break;
-			}
+			case PropType.Bike: newProp = new Bike(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Amplifier: newProp = new Amplifier(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.JinKeLa: newProp = new JinKeLa(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Rice: newProp = new Rice(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Shield: newProp = new Shield(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Totem: newProp = new Totem(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Spear: newProp = new Spear(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Dirt: newProp = new Dirt(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Attenuator: newProp = new Attenuator(newPropPos, Constant.unpickedPropRadius); break;
+			case PropType.Divider: newProp = new Divider(newPropPos, Constant.unpickedPropRadius); break;
 			}
 			if (newProp != null)
 			{
@@ -318,6 +310,11 @@ namespace THUnity2D
 				if (!(obj is Character) || object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)) return false;
 			}
 
+			if (listObj is Mine)
+			{
+				if (!(obj is Character)) return false;  //非人物不需要检查碰撞
+				if (((Mine)listObj).Parent.TeamID == ((Character)obj).TeamID) return false;		//同组的人不会触发地雷
+			}
 
 			int deltaX = Math.Abs(nextPos.x - listObj.Position.x), deltaY = Math.Abs(nextPos.y - listObj.Position.y);
 
@@ -521,7 +518,7 @@ namespace THUnity2D
 			{
 				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
 				{
-					playerBeingShot.BeAttack(bullet.AP);
+					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear);
 					if (playerBeingShot.HP <= 0)                //如果打死了
 					{
 						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
@@ -678,18 +675,30 @@ namespace THUnity2D
 									//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
 									//缺陷：半径为0的物体检测不到越界
 									//未来改进方案：引入特殊的越界方块，如果越界视为与越界方块碰撞
-									if ((collisionObj = CheckCollision(obj, moveVec)) != null)
+									
+									while (true)
 									{
-										if (OnCollision(obj, collisionObj, moveVec))
+										collisionObj = CheckCollision(obj, moveVec);
+										if (collisionObj == null) break;
+										if (collisionObj is Mine)
 										{
-											//已经被销毁
-
-											GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
-
-											return;
+											ActivateMine((Character)obj, (Mine)collisionObj);
 										}
-										if (obj.IsRigid && obj is Character) moveVec.length = 0;
+										else
+										{
+											if (OnCollision(obj, collisionObj, moveVec))
+											{
+												//已经被销毁
+
+												GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+
+												return;
+											}
+											if (obj.IsRigid && obj is Character) moveVec.length = 0;
+											break;
+										}
 									}
+
 									////else
 									{
 										deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
@@ -754,7 +763,7 @@ namespace THUnity2D
 				{
 					Bullet newBullet = new Bullet(
 						playerWillAttack.Position + new XYPosition((int)(Constant.numOfGridPerCell * Math.Cos(angle)), (int)(Constant.numOfGridPerCell * Math.Sin(angle))),
-						Constant.bulletRadius, Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP);
+						Constant.bulletRadius, Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP, playerWillAttack.HasSpear);
 
 					newBullet.Parent = playerWillAttack;
 					objListLock.EnterWriteLock(); objList.Add(newBullet); objListLock.ExitWriteLock();
@@ -769,12 +778,12 @@ namespace THUnity2D
 		}
 
 		//捡道具，是否是前面的那一格（true则是面向的那一格；false则是所在的那一格），以及要捡的道具类型
-		public void Pick(long playerID, PropType propType, bool isFrontCell)
+		public bool Pick(long playerID, PropType propType, bool isFrontCell)
 		{
-			if (!IsGaming) return;
+			if (!IsGaming) return false;
 			Character? player = FindPlayerFromPlayerList(playerID);
-			if (player == null) return;
-			if (!player.IsAvailable) return;
+			if (player == null) return false;
+			if (!player.IsAvailable) return false;
 
 			lock (player.propLock)
 			{
@@ -802,9 +811,11 @@ namespace THUnity2D
 			if (prop != null)
 			{
 				player.HoldProp = prop;
+				prop.Parent = player;
 			}
 
 			player.IsModifyingProp = false;
+			return prop != null;
 		}
 
 		public void Use(long playerID)
@@ -828,25 +839,91 @@ namespace THUnity2D
 
 			if (prop != null)
 			{
-				switch (prop.GetPropType())
+				if (prop is Buff)
 				{
-				case PropType.Bike:
-					player.AddMoveSpeed(Constant.bikeMoveSpeedBuff, Constant.buffPropTime);
-					break;
-				case PropType.Amplifier:
-					player.AddAP(Constant.amplifierAtkBuff, Constant.buffPropTime);
-					break;
-				case PropType.JinKeLa:
-					player.ChangeCD(Constant.jinKeLaCdDiscount, Constant.buffPropTime);
-					break;
-				case PropType.Rice:
-					player.AddHp(Constant.riceHpAdd);
-					break;
-				case PropType.Shield:
-					player.AddShield(Constant.shieldTime);
-					break;
+					switch (prop.GetPropType())
+					{
+					case PropType.Bike:
+						player.AddMoveSpeed(Constant.bikeMoveSpeedBuff, Constant.buffPropTime);
+						break;
+					case PropType.Amplifier:
+						player.AddAP(Constant.amplifierAtkBuff, Constant.buffPropTime);
+						break;
+					case PropType.JinKeLa:
+						player.ChangeCD(Constant.jinKeLaCdDiscount, Constant.buffPropTime);
+						break;
+					case PropType.Rice:
+						player.AddHp(Constant.riceHpAdd);
+						break;
+					case PropType.Shield:
+						player.AddShield(Constant.shieldTime);
+						break;
+					case PropType.Totem:
+						player.AddTotem(Constant.totemTime);
+						break;
+					case PropType.Spear:
+						player.AddSpear(Constant.spearTime);
+						break;
+					}
+				}
+				else if (prop is Mine)
+				{
+					Mine mine = (Mine)prop;
+					mine.SetLaid(player.Position);
+					new Thread
+						(
+							() =>
+							{
+								objListLock.EnterWriteLock();
+								objList.Add(mine);
+								objListLock.ExitWriteLock();
+
+								Thread.Sleep(Constant.mineTime);
+
+								objListLock.EnterWriteLock();
+								try { objList.Remove(mine); } catch { }
+								objListLock.ExitWriteLock();
+							}
+						)
+					{ IsBackground = true }.Start();
 				}
 			}
+		}
+
+		private void ActivateMine(Character player, Mine mine)
+		{
+			objListLock.EnterWriteLock();
+			try { objList.Remove(mine); } catch { }
+			objListLock.ExitWriteLock();
+
+			switch (mine.GetPropType())
+			{
+			case PropType.Dirt:
+				player.AddMoveSpeed(-Constant.dirtMoveSpeedDebuff, Constant.buffPropTime);
+				break;
+			case PropType.Attenuator:
+				player.AddAP(-Constant.attenuatorAtkDebuff, Constant.buffPropTime);
+				break;
+			case PropType.Divider:
+				player.ChangeCD(Constant.dividerCdDiscount, Constant.buffPropTime);
+				break;
+			}
+		}
+
+		public void SendMessage(long fromID, long toID, string message)
+		{
+			if (message.Length > 64) return;
+			Character from, to;
+			try
+			{
+				from = GetPlayerFromTeam(fromID);
+				to = GetPlayerFromTeam(toID);
+			}
+			catch { return; }
+
+			if (from.TeamID != to.TeamID) return;
+
+			to.Message = message;
 		}
 
 		public ArrayList GetGameObject()
@@ -858,7 +935,7 @@ namespace THUnity2D
 			return gameObjList;
 		}
 
-		public Character GetPlayerFromTeam(long playerID)
+		public Character GetPlayerFromTeam(long playerID)	//从队伍中寻找玩家，要求一定要找到
 		{
 			foreach (Team team in teamList)
 			{

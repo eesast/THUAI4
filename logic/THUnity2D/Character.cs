@@ -134,9 +134,10 @@ namespace THUnity2D
 			}
 		}
 
-		public void BeAttack(int subHP)
+		public void BeAttack(int subHP, bool hasSpear)
 		{
-			if (!HasShield()) SubHp(subHP);
+			if (hasSpear || !HasShield) SubHp(subHP);
+			if (hp <= 0) TryActivatingTotem();
 		}
 
 		public const int MinAP = 0;
@@ -228,6 +229,19 @@ namespace THUnity2D
 			}
 		}
 
+		private string message = "THUAI4";
+		public string Message
+		{
+			get => message;
+			set
+			{
+				lock (gameObjLock)
+				{
+					message = value;
+				}
+			}
+		}
+
 		#region 用于实现各种Buff道具的效果
 
 		private enum BuffType : uint		//有哪些加成
@@ -235,9 +249,11 @@ namespace THUnity2D
 			MoveSpeed = 0u,
 			AP = 1u,
 			CD = 2u,
-			Shield = 3u
+			Shield = 3u,
+			Totem = 4u,
+			Spear = 5u
 		}
-		private const uint BuffTypeNum = 4u;		//加成的种类个数，即enum BuffType的成员个数
+		private const uint BuffTypeNum = 6u;		//加成的种类个数，即enum BuffType的成员个数
 		
 		[StructLayout(LayoutKind.Explicit, Size = 8)]
 		private struct BuffValue					//加成参数联合体类型，可能是int或double
@@ -329,18 +345,62 @@ namespace THUnity2D
 					times *= bf.lfValue;
 				}
 			}
-			CD = (int)(orgCD * times);
+			CD = Math.Max((int)(orgCD * times), 1);
 		}
 
 		public void AddShield(int shieldTime)
 		{
 			AddBuff(new BuffValue(), shieldTime, BuffType.Shield, () => { });
 		}
-		public bool HasShield()
+		public bool HasShield
 		{
-			lock (buffListLock[(uint)BuffType.Shield])
+			get
 			{
-				return buffList[(uint)BuffType.Shield].Count != 0;
+				lock (buffListLock[(uint)BuffType.Shield])
+				{
+					return buffList[(uint)BuffType.Shield].Count != 0;
+				}
+			}
+		}
+
+		public void AddTotem(int totemTime)
+		{
+			AddBuff(new BuffValue(), totemTime, BuffType.Totem, () => { });
+		}
+		public bool HasTotem
+		{
+			get
+			{
+				lock (buffListLock[(uint)BuffType.Totem])
+				{
+					return buffList[(uint)BuffType.Totem].Count != 0;
+				}
+			}
+		}
+		private void TryActivatingTotem()
+		{
+			if (HasTotem)
+			{
+				hp = maxHp;
+				lock (buffListLock[(uint)BuffType.Totem])
+				{
+					buffList[(uint)BuffType.Totem].Clear();
+				}
+			}
+		}
+
+		public void AddSpear(int spearTime)
+		{
+			AddBuff(new BuffValue(), spearTime, BuffType.Spear, () => { });
+		}
+		public bool HasSpear
+		{
+			get
+			{
+				lock (buffListLock[(uint)BuffType.Spear])
+				{
+					return buffList[(uint)BuffType.Spear].Count != 0;
+				}
 			}
 		}
 
@@ -355,7 +415,7 @@ namespace THUnity2D
 				buffList[i] = new LinkedList<BuffValue>();
 			}
 
-			buffListLock = new object[5];
+			buffListLock = new object[buffList.Length];
 			for (int i = 0; i < buffListLock.Length; ++i)
 			{
 				buffListLock[i] = new object();

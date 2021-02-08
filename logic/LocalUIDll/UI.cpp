@@ -146,7 +146,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				if (PPress)
 				{
-					pMW->map->Pick(playerID, THUnity2D::PropType::Bike, false);
+					for (int i = THUnity2D::Prop::MinPropTypeNum; i <= THUnity2D::Prop::MaxPropTypeNum; ++i)
+					{
+						if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i), false)) break;
+					}
 				}
 				else if (UPress)
 				{
@@ -251,7 +254,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			wsout << L"¹¥»÷Á¦£º" << hPlayer2->AP << "\n";
 			wsout << '\n';
 
-			DrawTextW(hdcMem, wsout.str().c_str(), wsout.str().length(), &RECT({ width - appendCx + 20, 20, width, height }), 0);
+			DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &RECT({ width - appendCx + 20, 20, width, height }), 0);
 
 			SelectObject(hdcMem, hfOld);
 			DeleteObject(hfInfo);
@@ -265,8 +268,12 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				std::pair<int, TCHAR>((int)THUnity2D::PropType::Amplifier, TEXT('A')),
 				std::pair<int, TCHAR>((int)THUnity2D::PropType::JinKeLa, TEXT('J')),
 				std::pair<int, TCHAR>((int)THUnity2D::PropType::Rice, TEXT('R')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Shield, TEXT('S')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Totem, TEXT('T'))
+				std::pair<int, TCHAR>((int)THUnity2D::PropType::Shield, TEXT('N')),
+				std::pair<int, TCHAR>((int)THUnity2D::PropType::Totem, TEXT('T')),
+				std::pair<int, TCHAR>((int)THUnity2D::PropType::Phaser, TEXT('P')),
+				std::pair<int, TCHAR>((int)THUnity2D::PropType::Dirt, TEXT('D')),
+				std::pair<int, TCHAR>((int)THUnity2D::PropType::Attenuator, TEXT('S')),
+				std::pair<int, TCHAR>((int)THUnity2D::PropType::Divider, TEXT('F'))
 			};
 
 			HFONT hfUnpickedProp = CreateFont
