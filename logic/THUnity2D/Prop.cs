@@ -14,17 +14,22 @@ namespace THUnity2D
 		JinKeLa = 3,
 		Rice = 4,
 		Shield = 5,
-		Totem = 6
+		NegativeFeedback = Shield,
+		Totem = 6,
+		Spear = 7,
+		Phaser = Spear,
+		Dirt = 8,
+		Attenuator = 9,
+		Divider = 10
 	}
 
 	public abstract class Prop : Obj
 	{
 		public const int MinPropTypeNum = 1;
-		public const int MaxPropTypeNum = 6;
+		public const int MaxPropTypeNum = 10;
 
-		private bool laid = false;		//道具是否已放置
+		protected bool laid = false;		//道具是否已放置
 		public bool Laid { get => laid; }
-		public void SetLaid() { laid = true; }
 
 		public abstract PropType GetPropType();
 		//道具类
@@ -36,15 +41,23 @@ namespace THUnity2D
 		public Buff(XYPosition initPos, int radius) : base(initPos, radius) { }
 	}
 
-	public class Bike : Buff
+	public abstract class Mine : Prop
 	{
-		private readonly int moveSpeedBuff;
-		public int MoveSpeedBuff { get => moveSpeedBuff; }
+		public Mine(XYPosition initPos, int radius) : base(initPos, radius) { }
 
-		public Bike(XYPosition initPos, int radius, int moveSpeedBuff) : base(initPos, radius)
+		public void SetLaid(XYPosition pos)
 		{
-			this.moveSpeedBuff = moveSpeedBuff;
+			if (laid) return;
+			laid = true;
+			position = pos;
+			shape = ShapeType.Circle;
 		}
+	}
+
+	public sealed class Bike : Buff
+	{
+
+		public Bike(XYPosition initPos, int radius) : base(initPos, radius) { }
 		
 		public override PropType GetPropType()
 		{
@@ -52,14 +65,10 @@ namespace THUnity2D
 		}
 	}
 	
-	public class Amplifier : Buff
+	public sealed class Amplifier : Buff
 	{
-		private readonly int atkBuff;
-		public int AtkBuff { get => atkBuff; }
-		public Amplifier(XYPosition initPos, int radius, int atkBuff) : base(initPos, radius)
-		{
-			this.atkBuff = atkBuff;
-		}
+
+		public Amplifier(XYPosition initPos, int radius) : base(initPos, radius) { }
 
 		public override PropType GetPropType()
 		{
@@ -67,15 +76,10 @@ namespace THUnity2D
 		}
 	}
 
-	public class JinKeLa : Buff
+	public sealed class JinKeLa : Buff
 	{
-		private readonly double cdDiscount;
-		public double CdDiscoount { get => cdDiscount; }
 
-		public JinKeLa(XYPosition initPos, int radius, double cdDiscount) : base(initPos, radius)
-		{
-			this.cdDiscount = cdDiscount;
-		}
+		public JinKeLa(XYPosition initPos, int radius) : base(initPos, radius) { }
 
 		public override PropType GetPropType()
 		{
@@ -83,15 +87,10 @@ namespace THUnity2D
 		}
 	}
 
-	public class Rice : Buff
+	public sealed class Rice : Buff
 	{
-		private readonly int hpAdd;
-		public int HPAdd { get => hpAdd; }
 
-		public Rice(XYPosition initPos, int radius, int hpAdd) : base(initPos, radius)
-		{
-			this.hpAdd = hpAdd;
-		}
+		public Rice(XYPosition initPos, int radius) : base(initPos, radius) { }
 
 		public override PropType GetPropType()
 		{
@@ -99,7 +98,7 @@ namespace THUnity2D
 		}
 	}
 
-	public class Shield : Buff
+	public sealed class Shield : Buff
 	{
 		public Shield(XYPosition initPos, int radius) : base(initPos, radius) { }
 
@@ -109,13 +108,53 @@ namespace THUnity2D
 		}
 	}
 
-	public class Totem : Buff
+	public sealed class Totem : Buff
 	{
 		public Totem(XYPosition initPos, int radius) : base(initPos, radius) { }
 
 		public override PropType GetPropType()
 		{
 			return PropType.Totem;
+		}
+	}
+
+	public sealed class Spear : Buff
+	{
+		public Spear(XYPosition initPos, int radius) : base(initPos, radius) { }
+
+		public override PropType GetPropType()
+		{
+			return PropType.Spear;
+		}
+	}
+
+	public sealed class Dirt : Mine
+	{
+		public Dirt(XYPosition initPos, int radius) : base(initPos, radius) { }
+
+		public override PropType GetPropType()
+		{
+			return PropType.Dirt;
+		}
+	}
+
+	public sealed class Attenuator : Mine
+	{
+		public Attenuator(XYPosition initPos, int radius) : base(initPos, radius) { }
+
+		public override PropType GetPropType()
+		{
+			return PropType.Attenuator;
+		}
+	}
+
+	public sealed class Divider : Mine
+	{
+		public Divider(XYPosition initPos, int radius) : base(initPos, radius) { }
+
+		public override PropType GetPropType()
+		{
+			return PropType.Divider;
 		}
 	}
 }

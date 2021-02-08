@@ -33,7 +33,7 @@ namespace THUnity2D
 		public const long noneID = long.MinValue;				//不存在ID
 		public long ID { get; }							//ID
 		
-		private XYPosition position;		//位置
+		protected XYPosition position;		//位置
 		public XYPosition Position { get => position; }
 		public readonly XYPosition orgPos;
 
@@ -54,7 +54,7 @@ namespace THUnity2D
 
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
 
-		private readonly ShapeType shape;
+		protected ShapeType shape;
 		public ShapeType Shape { get => shape; }		//形状
 
 		private int _moveSpeed;
