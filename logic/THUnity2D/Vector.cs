@@ -24,6 +24,10 @@ namespace THUnity2D
         {
 			return new XYPosition((int)(v.length * Math.Cos(v.angle)), (int)(v.length * Math.Sin(v.angle)));
         }
+		public static Vector XY2Vector(double x, double y)
+		{
+			return new Vector(Math.Atan2(y, x), Math.Sqrt(x * x + y * y));
+		}
 	}
 
 	public struct Vector2
@@ -39,6 +43,10 @@ namespace THUnity2D
 		public static double operator* (Vector2 v1, Vector2 v2)
 		{
 			return v1.x * v2.x + v1.y * v2.y;
+		}
+		public static Vector2 operator+ (Vector2 v1, Vector2 v2)
+		{
+			return new Vector2(v1.x + v2.x, v1.y + v2.y);
 		}
 	}
 }
