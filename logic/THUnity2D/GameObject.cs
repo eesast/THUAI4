@@ -11,8 +11,14 @@ namespace THUnity2D
 	{
 		public enum GameObjType
 		{
-			character = 0,
-			obj = 1
+			Character = 0,
+			Obj = 1
+		}
+		public enum ShapeType
+		{
+			Null = 0,
+			Circle = 1,
+			Sqare = 2
 		}
 		public abstract GameObjType GetGameObjType();	//给C++/CLI调试用的，因为我不知道C++/CLI怎么用is操作符（狗头保命）
 
@@ -27,10 +33,8 @@ namespace THUnity2D
 		public const long noneID = long.MinValue;				//不存在ID
 		public long ID { get; }							//ID
 		
-		////protected readonly BlockingCollection<Action> Operations = new BlockingCollection<Action>();//事件队列
-
-		private XYPosition position;		//位置
-		public XYPosition Position { get { return position; } }
+		protected XYPosition position;		//位置
+		public XYPosition Position { get => position; }
 		public readonly XYPosition orgPos;
 
 		//Direction
@@ -50,27 +54,22 @@ namespace THUnity2D
 
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
 
+		protected ShapeType shape;
+		public ShapeType Shape { get => shape; }		//形状
+
 		private int _moveSpeed;
 		public int MoveSpeed
         {
 			get => _moveSpeed;
-			set
-            {
-				//Operations.Add
+			protected set
+			{
 				lock (gameObjLock)
 				{
-					//保证速度在MinSpeed与MaxSpeed之间
-					_moveSpeed = Math.Min(Math.Max(value, MinSpeed), MaxSpeed);
-					Debug(this, ", the speed of which has been set to " + _moveSpeed.ToString());
+					_moveSpeed = value;
 				}
-
 			}
 		}
 		public readonly int orgMoveSpeed;
-		public void ResetMoveSpeed()
-		{
-			_moveSpeed = orgMoveSpeed;
-		}
 
 		//当前是否能移动
 
@@ -106,6 +105,22 @@ namespace THUnity2D
 			}
 		}
 
+		private bool isResetting = false;
+		public bool IsResetting
+		{
+			get => isResetting;
+			set
+			{
+				lock (gameObjLock)
+				{
+					isResetting = value;
+				}
+			}
+		}
+
+		public bool IsAvailable { get => !IsMoving && CanMove && !IsResetting; }    //是否能接收指令
+
+
 		//移动，改变坐标，反馈实际走的长度的平方
 		public long Move(Vector displacement)
         {
@@ -120,7 +135,7 @@ namespace THUnity2D
 			return deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
         }
 
-		//物体半径
+		//圆或内切圆半径
 		private int radius;
 		public int Radius
 		{
@@ -139,7 +154,7 @@ namespace THUnity2D
 			}
 		}
 
-		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed)
+		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ShapeType shape)
 		{
 			ID = currentMaxID;
 			++currentMaxID;
@@ -150,18 +165,7 @@ namespace THUnity2D
 			this.IsRigid = isRigid;
 			this._moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
 			this.orgMoveSpeed = this._moveSpeed;
-
-			//new System.Threading.Thread(	//开辟一个线程，不断取出里面的待办事项进行办理
-			//	() =>
-			//	{
-			//		while (true)
-			//		{
-			//			Operations.Take()();
-			//		}
-			//	}
-			//)
-			//{ IsBackground = true }.Start();
-
+			this.shape = shape;
 		}
 
 		public override string ToString()
@@ -172,8 +176,11 @@ namespace THUnity2D
 		//用于Debug时从控制台观察到各个游戏对象的状况
 		public static void Debug(GameObject current, string str)
 		{
-			//Console.WriteLine(current.ToString());
+
+#if DEBUG
 			Console.WriteLine(current.GetType() + " " + current.ToString() + str);
+#endif
+
 		}
 
 
