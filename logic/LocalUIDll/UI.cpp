@@ -100,7 +100,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         std::thread([]() {pMW->map->StartGame(1000 * 60 * 10); }).detach();
 
-        auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk, int pick, int use)
+        auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk, int pick, int use, int throwprop)
         {
             double direct[16] = { 0 };
             int time[16] = { 0 };
@@ -143,12 +143,13 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 bool JPress = GetKeyState(atk) < 0;
                 bool PPress = GetKeyState(pick) < 0;
                 bool UPress = GetKeyState(use) < 0;
+                bool TPress = GetKeyState(throwprop) < 0;
 
                 if (PPress)
                 {
                     for (int i = THUnity2D::Prop::MinPropTypeNum; i <= THUnity2D::Prop::MaxPropTypeNum; ++i)
                     {
-                        if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i), false)) break;
+                        if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
                     }
                 }
                 else if (UPress)
@@ -160,6 +161,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     if (key && 
                         pMW->map->Attack(playerID, time[key] * 50, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 }
+                else if (TPress)
+                {
+                    if (key) pMW->map->Throw(playerID, time[key] * 50, direct[key]);
+                }
                 else if (key)
                 {
                     pMW->map->MovePlayer(playerID, time[key], direct[key]);
@@ -167,8 +172,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         };
 
-        std::thread(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J', 'P', 'U').detach();
-        std::thread(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2).detach();
+        std::thread(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J', 'P', 'U', 'T').detach();
+        std::thread(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3).detach();
 
         break;
     }
@@ -306,7 +311,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             HPEN hPenPlayerDirect = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 
-            auto gameObjList = pMW->map->GetGameObject();
+            auto gameObjList = pMW->map->GetGameObjectForDebug();
             int rowAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Rows;
             int colAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Cols;
             for each (THUnity2D::GameObject^ gameObj in gameObjList)
