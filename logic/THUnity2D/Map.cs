@@ -522,7 +522,7 @@ namespace THUnity2D
 			{
 				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
 				{
-					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear);
+					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, bullet.Parent);
 					if (playerBeingShot.HP <= 0)                //如果打死了
 					{
 						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
@@ -769,6 +769,19 @@ namespace THUnity2D
 						playerWillAttack.Position + new XYPosition((int)(Constant.numOfGridPerCell * Math.Cos(angle)), (int)(Constant.numOfGridPerCell * Math.Sin(angle))),
 						Constant.bulletRadius, Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP, playerWillAttack.HasSpear);
 
+					switch (playerWillAttack.bulletType)
+					{
+					case BulletType.Bullet0:
+					case BulletType.Bullet3:
+					case BulletType.Bullet6:
+						timeInMilliseconds = int.MaxValue;
+						break;
+					case BulletType.Bullet5:
+						timeInMilliseconds = 0;
+						angle = playerWillAttack.FacingDirection;
+						break;
+					}
+
 					newBullet.Parent = playerWillAttack;
 					objListLock.EnterWriteLock(); objList.Add(newBullet); objListLock.ExitWriteLock();
 
@@ -930,7 +943,7 @@ namespace THUnity2D
 			to.Message = message;
 		}
 
-		public ArrayList GetGameObjectForDebug()
+		public ArrayList GetGameObject()
 		{
 			ArrayList gameObjList = new ArrayList();
 			playerListLock.EnterWriteLock(); gameObjList.AddRange(playerList); playerListLock.ExitWriteLock();
@@ -947,6 +960,11 @@ namespace THUnity2D
 				if (player != null) return player;
 			}
 			throw new Exception("GetPlayerFromTeam error: No this player!");
+		}
+		
+		public long[] GetPlayerIDsOfTheTeam(long teamID)
+		{
+			return ((Team)teamList[(int)teamID]).GetPlayerIDs();
 		}
 
 		public void Throw(long playerID, int moveTimeInMilliseconds, double angle)

@@ -86,8 +86,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         width += appendCx = width / 2;
         height = (pixelPerCell.y = basicSize / rows) * rows + (appendCy = GetSystemMetrics(SM_CYMIN));
 
-        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType::job0, 0));
-        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType::job0, 1));
+        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType::Job6, 0));
+        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType::Job5, 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -311,7 +311,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             HPEN hPenPlayerDirect = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 
-            auto gameObjList = pMW->map->GetGameObjectForDebug();
+            auto gameObjList = pMW->map->GetGameObject();
             int rowAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Rows;
             int colAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Cols;
             for each (THUnity2D::GameObject^ gameObj in gameObjList)

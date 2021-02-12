@@ -57,19 +57,20 @@ namespace THUnity2D
 		protected ShapeType shape;
 		public ShapeType Shape { get => shape; }		//形状
 
-		private int _moveSpeed;
+		private int moveSpeed;
 		public int MoveSpeed
         {
-			get => _moveSpeed;
+			get => moveSpeed;
 			protected set
 			{
 				lock (gameObjLock)
 				{
-					_moveSpeed = value;
+					moveSpeed = value;
 				}
 			}
 		}
-		public readonly int orgMoveSpeed;
+		private int orgMoveSpeed;
+		public int OrgMoveSpeed { get => orgMoveSpeed; protected set { orgMoveSpeed = value; } }
 
 		//当前是否能移动
 
@@ -77,11 +78,11 @@ namespace THUnity2D
 
 		public bool CanMove
         {
-			get { return canMove; }
+			get => canMove;
 			set
 			{
 				//Operations.Add
-				lock(gameObjLock)
+				lock (gameObjLock)
 				{
 					canMove = value;
 					Debug(this, canMove ? "Enable move!" : "Disable move!");
@@ -147,7 +148,7 @@ namespace THUnity2D
 			lock (moveLock)
 			{
 				this.position = orgPos;
-				_moveSpeed = orgMoveSpeed;
+				this.moveSpeed = orgMoveSpeed;
 				facingDirection = 0.0;
 				isMoving = false;
 				canMove = false;
@@ -163,8 +164,8 @@ namespace THUnity2D
 			this.orgPos = initPos;
 			this.radius = radius;
 			this.IsRigid = isRigid;
-			this._moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
-			this.orgMoveSpeed = this._moveSpeed;
+			this.moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
+			this.orgMoveSpeed = this.moveSpeed;
 			this.shape = shape;
 		}
 

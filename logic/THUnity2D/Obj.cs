@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-//using Commmunication.proto;//通信组定义结构体
+
 //所有游戏人物，道具，子弹的基类
 namespace THUnity2D
 {
-
-	//参见protobuf
 
 	public enum ObjType
 	{
@@ -25,7 +23,7 @@ namespace THUnity2D
 		{
 			return GameObjType.Obj;
 		}
-		public readonly ObjType objType;		//通信组实现
+		public readonly ObjType objType;
 
 		private Character? parent = null;		//道具的主人
 		public Character? Parent
