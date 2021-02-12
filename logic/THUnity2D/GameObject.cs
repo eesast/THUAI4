@@ -33,8 +33,8 @@ namespace THUnity2D
 		public const long noneID = long.MinValue;				//不存在ID
 		public long ID { get; }							//ID
 		
-		protected XYPosition position;		//位置
-		public XYPosition Position { get => position; }
+		private XYPosition position;		//位置
+		public XYPosition Position { get => position; protected set { lock (gameObjLock) { position = value; } } }
 		public readonly XYPosition orgPos;
 
 		//Direction

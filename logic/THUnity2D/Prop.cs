@@ -34,6 +34,14 @@ namespace THUnity2D
 		public abstract PropType GetPropType();
 		//道具类
 		public Prop(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Prop, ShapeType.Sqare) { }
+		public void ResetPosition(XYPosition pos)
+		{
+			Position = pos;
+		}
+		public void ResetMoveSpeed(int newMoveSpeed)
+		{
+			MoveSpeed = newMoveSpeed;
+		}
 	}
 
 	public abstract class Buff : Prop
@@ -49,7 +57,7 @@ namespace THUnity2D
 		{
 			if (laid) return;
 			laid = true;
-			position = pos;
+			Position = pos;
 			shape = ShapeType.Circle;
 		}
 	}
