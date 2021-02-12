@@ -10,6 +10,15 @@ namespace THUnity2D
 	{
 		public double angle;
 		public double length;
+		
+		public static XYPosition Vector2XY(Vector v)
+        {
+			return new XYPosition((int)(v.length * Math.Cos(v.angle)), (int)(v.length * Math.Sin(v.angle)));
+        }
+		public static Vector XY2Vector(double x, double y)
+		{
+			return new Vector(Math.Atan2(y, x), Math.Sqrt(x * x + y * y));
+		}
 		public Vector(double angle, double length)
 		{
 			if (length < 0)
@@ -19,14 +28,6 @@ namespace THUnity2D
 			}
 			this.angle = Tools.CorrectAngle(angle);
 			this.length = length;
-		}
-		public static XYPosition Vector2XY(Vector v)
-        {
-			return new XYPosition((int)(v.length * Math.Cos(v.angle)), (int)(v.length * Math.Sin(v.angle)));
-        }
-		public static Vector XY2Vector(double x, double y)
-		{
-			return new Vector(Math.Atan2(y, x), Math.Sqrt(x * x + y * y));
 		}
 	}
 
