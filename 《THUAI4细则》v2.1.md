@@ -1,4 +1,4 @@
-# 《THUAI4》细则 v2.0
+# 《THUAI4》细则 v2.01
 
 ## 一、通信接口建议
 
@@ -6,7 +6,7 @@
 
 设想通信过程：  
 
-由 Server 设置队伍数量 `teamCount` 和每队人数 `playerCount`，以及游戏持续时间 `time`，这样可以只用一个 Agent 来专门收发消息。Agent 负责把每一个连接到 Agent 的  Client 赋予一个专门的 `CommunicationID` 来标识不同的 Client。游戏开始前，每个 Client 询问玩家要加入的队伍（用一个整数 `teamID` 表示，其中 `0 <= teamID < teamCount`），以及玩家所选的职业（也用整数表示，详情参见下面的说明），玩家选择完毕后，向 `Server` 发送 `AddPlayer` 消息，然后进入等待，如果队伍和职业无效，将会接收到 Server 发来的 `InvalidPlayer` 消息，这时 `Client` 可以重新询问玩家，或者抛异常结束，等等；如果有效，Client 将会接收到 Server 发来的 `ValidPlayer` 消息，然后等待 `Server` 发来开始游戏 `StartGame` 的消息后就开始游戏。  
+由 Server 设置队伍数量 `teamCount` 和每队人数 `playerCount`，以及游戏持续时间 `time`，这样可以只用一个 Agent 来专门收发消息。游戏开始前，每个 Client 询问玩家要加入的队伍（用一个整数 `teamID` 表示，其中 `0 <= teamID < teamCount`），以及队伍的玩家号 `playerID`，其中 `0 <= playerID < playerCount`，以及玩家所选的职业（也用整数表示，详情参见下面的说明），玩家选择完毕后，向 `Server` 发送 `AddPlayer` 消息，然后进入等待。如果队伍、职业或玩家号无效（即玩家已存在或指定的 ID 超出范围），将会接收到 Server 发来的 `InvalidPlayer` 消息，这时 `Client` 可以重新询问玩家，或者抛异常结束，等等；如果有效，Client 将会接收到 Server 发来的 `ValidPlayer` 消息，然后等待 `Server` 发来开始游戏 `StartGame` 的消息后就开始游戏。  
 
 当 `Server` 处组满队之后，就向所有的 `Client` 发送 `StartGame` 消息，`Client`端即可开始执行选手代码或，者开始玩家的鼠标键盘操作进行游戏。  
 
@@ -19,18 +19,19 @@
 ```c++
 enum class GameObjType
 {
-	Character = 0,
-	Wall = 1,
-	Prop = 2,
-	Bullet = 3,
-	BirthPoint = 4
+    Character = 0,
+    Wall = 1,
+    Prop = 2,
+    Bullet = 3,
+    BirthPoint = 4,
+    OutOfBoundBlock = 5
 }
 
 //道具类型，此为编写时的临时名称，具体道具名称可以待主题确定后更改
 enum class PropType
 {
-	Null = 0,
-	Bike = 1,
+    Null = 0,
+    Bike = 1,
     Amplifier = 2,
     JinKeLa = 3,
     Rice = 4,
@@ -99,7 +100,7 @@ struct GameObjInfo
     GameObjType gameObjType;
     
     //以下当gameObjType为任意值时均时有效
-    int64 id;
+    int64 guid;			//每个游戏对象有一个全局ID，即guid
     int32 x;
     int32 y;
     double facingDirection;
@@ -133,12 +134,14 @@ struct GameObjInfo
 
 struct MessageToClient
 {
-    int64 CommunicationID;	//给Agent看，发送给谁
+    int64 playerID;			//指明发送给谁
+    int64 teamID;			//指明发送给谁
+    
     MessageType messageType;
     GameObjInfo selfInfo;	//自己的个人信息
-    int64[] teammateIDs;	//所有队友的ID
+    int64[] teammateGUIDs;	//所有队友的GUID，其0、1、2、3元素分别为playerID为0、1、2、3的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
     ColorType selfTeamColor;	//自己队伍的所属颜色
-    GameObjInfo[] gameObjs;	//当前地图上的所有对象
+    GameObjInfo[] gameObjs;		//当前地图上的所有对象
     ColorType[][] cellColors;	//每个 cell 的颜色
 }
 
@@ -173,6 +176,7 @@ struct MessageToServer
    
    #include <cstdint>
    #include <utility>
+   #include <limits>
    
    #define M_SCI static constexpr inline
    #define MF_SI static inline
@@ -181,8 +185,9 @@ struct MessageToServer
    {
        using XYPosition = ::std::pair<int, int>;
    
-       class Constant
+       struct Constant
        {
+           M_SCI int64_t invalidGUID = std::numeric_limits<int64_t>::max();
            M_SCI int32_t numOfGridPerCell = 1000;
            M_SCI int32_t buffPropTime = 30 * 1000;
            M_SCI int32_t shieldTime = 30 * 1000;
@@ -192,20 +197,21 @@ struct MessageToServer
            
            /*除此以外，还需实现的常量有amplifierAtkBuff、jinKeLaCdDiscount、riceHpAdd、mineTime、dirtMoveSpeedDebuff、attenuatorAtkDebuff、dividerCdDiscount，和上面的一样，具体数值参见 Logic 中 Map.cs 中的 THUnity2D.Map.Constant 类*/
    
-           MF_SI auto CellToGrid(int x, int y) { return std::make_pair<int, int>(x * numOfGridPerCell + numOfGridPerCell / 2, y * numOfGridPerCell + numOfGridPerCell / 2) }
+           MF_SI auto CellToGrid(int x, int y) { return std::make_pair<int, int>(x * numOfGridPerCell + numOfGridPerCell / 2, y * numOfGridPerCell + numOfGridPerCell / 2); }
            MF_SI int32_t GridToCellX(XYPosition pos)
            {
-               return pos.x / numOfGridPerCell;
+               return pos.first / numOfGridPerCell;
            }
-           MF_SI int32_t GridToCellX(XYPosition pos)
+           MF_SI int32_t GridToCellY(XYPosition pos)
            {
-               return pos.y / numOfGridPerCell;
+               return pos.second / numOfGridPerCell;
            }
-       }
+       };
    }
    
    #undef MF_SI
    #undef M_SCI
+   
    ```
 
    
@@ -277,7 +283,7 @@ struct MessageToServer
 
 + **形状**：每个人物是一个圆
 
-+ **子弹**：当子弹爆炸时，会将周围一定范围内的颜色染成自己队伍所属的颜色。染色以 cell 为基本单位，即每个 cell 内颜色是相同的。此外，子弹爆炸还会导致一定范围内的玩家受到伤害，并可能会引起周围子弹的爆炸。每个人物的子弹数量是有限的。当人物所踩的 cell 的颜色是自己队伍的颜色时，会缓慢回复子弹数量。
++ **子弹**：当子弹爆炸时，会将周围一定范围内的颜色染成自己队伍所属的颜色。染色以 cell 为基本单位，即每个 cell 内颜色是相同的。此外，子弹爆炸还会导致一定范围内的玩家受到伤害，并可能会引起周围子弹的爆炸。每个人物的子弹数量是有限的。当人物所踩的 cell 的颜色是自己队伍的颜色时，会缓慢回复子弹数量。子弹是圆形物体，比人物稍小。
 
 + **属性**：ID、中心的坐标、面对方向、移动速度、碰撞半径、所属队伍ID、职业、回复子弹CD、
 
@@ -310,6 +316,12 @@ struct MessageToServer
 
 ---
 
+### 墙体
+
+墙是一个正方形，可以起道阻碍作用。
+
+---
+
  ### 道具
 
 + **简介**：道具会在地图的任意一个没有碰撞障碍、没有出生点的 cell 中随机生成   
@@ -329,7 +341,7 @@ struct MessageToServer
     
   + 地雷类道具
   
-    + 地雷类道具综述：使用时会在自己脚下埋藏一颗地雷，该地雷在一定时间内存在。若在该段时间内有人踩在上面，则地雷对该角色起作用并消失；若无，则时间到后地雷自动消失
+    + 地雷类道具综述：使用时会在自己脚下埋藏一颗地雷，该地雷在一定时间内存在。若在该段时间内有人踩在上面，则地雷对该角色起作用并消失；若无，则时间到后地雷自动消失。地雷被放置后是圆形物体
   
     1. 泥沼（Dirt）：效果与Bike相反
     2. 衰减器（Stagnancy/Attenuator）：与Amplifier相反

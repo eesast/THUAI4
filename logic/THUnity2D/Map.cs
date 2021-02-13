@@ -350,6 +350,13 @@ namespace THUnity2D
 						}
 					}
 					listLock.ExitReadLock();
+
+					//如果越界，则与越界方块碰撞
+					if (collisionObj == null && (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
+					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius))
+					{
+						collisionObj = new OutOfBoundBlock(nextPos);
+					}
 					return collisionObj;
 				};
 
@@ -366,6 +373,9 @@ namespace THUnity2D
 		{
 			if (obj is Character)		//如果是人主动碰撞
 			{
+
+				/*由于四周是墙，所以人物永远不可能与越界方块碰撞*/
+
 				uint maxLen = uint.MaxValue;      //移动的最大距离
 				uint tmpMax;
 				Vector2 objMoveUnitVector = new Vector2(1.0 * Math.Cos(obj.FacingDirection), 1.0 * Math.Sin(obj.FacingDirection));
@@ -466,8 +476,7 @@ namespace THUnity2D
 			else if (obj is Bullet)
 			{
 				//如果越界，爆炸
-				if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
-					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius)
+				if (collisionObj is OutOfBoundBlock)
 				{
 					BulletBomb((Bullet)obj, null);
 					return true;
@@ -678,7 +687,7 @@ namespace THUnity2D
 
 									//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
 									//缺陷：半径为0的物体检测不到越界
-									//未来改进方案：引入特殊的越界方块，如果越界视为与越界方块碰撞
+									//改进：如果越界，则与越界方块碰撞
 									
 									while (true)
 									{
@@ -809,13 +818,26 @@ namespace THUnity2D
 			}
 
 			int cellX = Constant.GridToCellX(player.Position), cellY = Constant.GridToCellY(player.Position);
-			
+
+#if DEBUG
+			Console.WriteLine("Try picking: {0} {1} Type: {2}", cellX, cellY, (int)propType);
+#endif
+
 			Prop? prop = null;
 			unpickedPropListLock.EnterWriteLock();
-			for (var propNode = unpickedPropList.First; !ReferenceEquals(propNode, unpickedPropList.Last); propNode = propNode.Next)
+			for (LinkedListNode<Prop>? propNode = unpickedPropList.First; propNode != null; propNode = propNode.Next)
 			{
+#if DEBUG
+				Console.WriteLine("Picking: Now check type: {0}", (int)propNode.Value.GetPropType());
+#endif
+
 				if (propNode.Value.GetPropType() != propType || propNode.Value.IsMoving) continue;
 				int cellXTmp = Constant.GridToCellX(propNode.Value.Position), cellYTmp = Constant.GridToCellY(propNode.Value.Position);
+
+#if DEBUG
+				Console.WriteLine("Ready to pick: {0} {1}, {2} {3}", cellX, cellY, cellXTmp, cellYTmp);
+#endif
+
 				if (cellXTmp == cellX && cellYTmp == cellY)
 				{
 					prop = propNode.Value;
