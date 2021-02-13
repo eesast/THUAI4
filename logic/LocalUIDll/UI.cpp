@@ -124,7 +124,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             for (int i = 1; i < sizeof(time) / (sizeof(decltype(time[0]))); ++i)
             {
-                time[i] = 20;
+                time[i] = 50;
             }
 
             direct[WKey] = System::Math::PI;
@@ -266,7 +266,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wsout << '\n';
 
             wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
-            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->HP << L"\n";
+            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->Score << L"\n";
             wsout << L"移动速度：" << hPlayer2->MoveSpeed << "\n";
             wsout << L"攻击力：" << hPlayer2->AP << "\n";
             wsout << '\n';

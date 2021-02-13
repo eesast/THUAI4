@@ -10,7 +10,7 @@ namespace THUnity2D
 		public static class Constant
 		{
 			public const int numOfGridPerCell = 1000;   //每个的坐标单位数
-			public const int numOfStepPerSecond = 50;       //每秒行走的步数
+			public const int numOfStepPerSecond = 20;       //每秒行走的步数
 			public const int addScoreWhenKillOnePlayer = 10;
 			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
 
@@ -673,15 +673,19 @@ namespace THUnity2D
 									obj.IsMoving = true;     //开始移动
 								}
 
-								GameObject.Debug(obj, " begin to move at " + obj.Position.ToString());
+								var moveBeginTime = Environment.TickCount64;
+								var moveEndTime = moveBeginTime + moveTime;
+								var timeShouldBe = moveBeginTime;
+
+								GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
 								double deltaLen = 0.0;      //储存行走的误差
 								Vector moveVec = new Vector(moveDirection, 0.0);
 								//先转向
 								if (isGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
 								GameObject? collisionObj = null;
-								while (isGaming && moveTime > 0 && obj.CanMove && !obj.IsResetting)
+								while (isGaming && timeShouldBe < moveEndTime && obj.CanMove && !obj.IsResetting)
 								{
-									var beginTime = Environment.TickCount64;
+									
 									moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
 									deltaLen = 0;
 
@@ -716,16 +720,17 @@ namespace THUnity2D
 									{
 										deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
 									}
-									var endTime = System.Environment.TickCount64;
-									moveTime -= 1000 / Constant.numOfStepPerSecond;
-									var deltaTime = endTime - beginTime;
-									if (deltaTime <= 1000 / Constant.numOfStepPerSecond)
+
+									timeShouldBe += 1000 / Constant.numOfStepPerSecond;
+									var nowTime = Environment.TickCount64;
+									
+									if (timeShouldBe >= nowTime)
 									{
-										Thread.Sleep(1000 / Constant.numOfStepPerSecond - (int)deltaTime);
+										Thread.Sleep((int)(timeShouldBe - nowTime));
 									}
 									else
 									{
-										Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!!");
+										Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!! Time should be: {0} but nowTime is {1}!", timeShouldBe, nowTime);
 									}
 								}
 								moveVec.length = deltaLen;
@@ -738,7 +743,7 @@ namespace THUnity2D
 									OnCollision(obj, collisionObj, moveVec);
 								}
 								obj.IsMoving = false;        //结束移动
-								GameObject.Debug(obj, " end move at " + obj.Position.ToString());
+								GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 								if (obj is Bullet) BulletBomb((Bullet)obj, null);
 							}
 						)
