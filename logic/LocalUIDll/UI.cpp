@@ -3,6 +3,7 @@
 #include <atomic>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <unordered_map>
 #include <utility>
 
@@ -86,8 +87,19 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         width += appendCx = width / 2;
         height = (pixelPerCell.y = basicSize / rows) * rows + (appendCy = GetSystemMetrics(SM_CYMIN));
 
-        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType::Job6, 0));
-        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType::Job5, 1));
+        int job1 = 0, job2 = 1;
+        std::ifstream fin("job.txt");
+        if (fin)
+        {
+            fin >> job1 >> job2;
+            fin.close();
+
+            if (job1 < 0 || job1 >= 7) job1 = 0;
+            if (job2 < 0 || job2 >= 7) job2 = 0;
+        }
+
+        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
+        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
