@@ -21,9 +21,9 @@ namespace servertest
                 byte[] data;
                 IMsg msg;
                 if (server.TryTake(out msg))
-                {
-                    Console.WriteLine($"Receive a message");
+                {   
                     Message2Server mm = msg.Content as Message2Server;
+                    Console.WriteLine($"Receive a message from {mm.PlayerId}");
                     Console.WriteLine($"Message type::{msg.MessageType}");
                     Console.WriteLine($"Info:{mm.JobType}");
 
@@ -33,17 +33,13 @@ namespace servertest
                     Console.WriteLine("fail to dequeue");
                 }
             };
-            while (true)
-            {
-                Message2Client mm = new Message2Client();
-                mm.MapColors.Add(new Communication.Proto.MapColor
-                {X=100,
-                Y=200,
-                TeamId=123
-                }
-                    );
-                server.SendMessage(mm, MessageType.Message2Client);
-            }
+            Console.ReadLine();
+
+            Message2One m = new Message2One();
+            m.PlayerId = 1;
+            m.Message = "hello world!";
+            server.SendMessage(m, MessageType.Message2One);
+
 
             Console.ReadLine();
             server.Dispose();
