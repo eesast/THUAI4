@@ -783,10 +783,11 @@ namespace THUnity2D
 						playerWillAttack.Position + new XYPosition((int)(Constant.numOfGridPerCell * Math.Cos(angle)), (int)(Constant.numOfGridPerCell * Math.Sin(angle))),
 						Constant.bulletRadius, Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP, playerWillAttack.HasSpear);
 
+					newBullet.Parent = playerWillAttack;
+
 					switch (playerWillAttack.bulletType)
 					{
 					case BulletType.Bullet0:
-					case BulletType.Bullet3:
 					case BulletType.Bullet6:
 						timeInMilliseconds = int.MaxValue;
 						break;
@@ -794,9 +795,55 @@ namespace THUnity2D
 						timeInMilliseconds = 0;
 						angle = playerWillAttack.FacingDirection;
 						break;
+					case BulletType.Bullet3:		//不断检测它所位于的格子，并将其染色
+						timeInMilliseconds = int.MaxValue;
+						new Thread
+							(
+								() =>
+								{
+									for (int i = 0; i < 50 && !newBullet.CanMove; ++i)		//等待子弹开始移动，最多等待50次
+									{
+										Thread.Sleep(1000 / Constant.numOfStepPerSecond);
+									}
+
+									while (newBullet.CanMove)
+									{
+										int cellX = Constant.GridToCellX(newBullet.Position), cellY = Constant.GridToCellY(newBullet.Position);
+										
+										if (cellX >= 0 && cellX < Rows && cellY >= 0 && cellY < Cols)
+										{
+											bool canColor = true;
+											objListLock.EnterReadLock();
+											{
+												foreach (GameObject obj in objList)
+												{
+													if (obj.IsRigid
+													&& Constant.GridToCellX(obj.Position) == cellX
+													&& Constant.GridToCellY(obj.Position) == cellY
+													&& (obj is Wall || obj is BirthPoint))
+													{
+														canColor = false;
+														break;
+													}
+												}
+											}
+											objListLock.ExitReadLock();
+
+											if (canColor)
+											{
+												cellColor[cellX, cellY] = TeamToColor(newBullet.Parent.TeamID);
+											}
+										}
+
+										Thread.Sleep(1000 / Constant.numOfStepPerSecond);
+									}
+								}
+							)
+						{ IsBackground = true }.Start();
+						
+						break;
 					}
 
-					newBullet.Parent = playerWillAttack;
 					objListLock.EnterWriteLock(); objList.Add(newBullet); objListLock.ExitWriteLock();
 
 					newBullet.CanMove = true;

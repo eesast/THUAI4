@@ -8,7 +8,7 @@ namespace Logic.Server
         static int Main(string[] args)
         {
             ArgumentOptions? options = null;
-            Parser.Default.ParseArguments<ArgumentOptions>(args).WithParsed(o => options = o);
+            Parser.Default.ParseArguments<ArgumentOptions>(args).WithParsed(o => { options = o; });
             if (options == null)
 			{
                 Console.WriteLine("Parse failed!");

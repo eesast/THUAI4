@@ -92,7 +92,8 @@ enum class MessageType
     InvalidPlayer = 6,
     ValidPlayer = 7,
     StartGame = 8,
-    EndGame = 9,
+    Gaming = 9,
+    EndGame = 10
 }
 
 struct GameObjInfo
