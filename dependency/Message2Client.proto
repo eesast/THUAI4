@@ -59,3 +59,8 @@ message Message2Client{
     map <int64, GameObject> gameObjectList = 1; 
     repeated MapColor MapColors = 2;
 }
+
+message Message2One{
+    int32 playerId=1;//要发给谁
+    string message=2;
+}
