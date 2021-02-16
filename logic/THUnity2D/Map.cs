@@ -10,12 +10,13 @@ namespace THUnity2D
 		public static class Constant
 		{
 			public const int numOfGridPerCell = 1000;   //每个的坐标单位数
-			public const int numOfStepPerSecond = 50;       //每秒行走的步数
+			public const int numOfStepPerSecond = 20;       //每秒行走的步数
 			public const int addScoreWhenKillOnePlayer = 10;
 			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
 
 			public const int basicPlayerMoveSpeed = numOfGridPerCell * 4;
 			public const int basicBulletMoveSpeed = numOfGridPerCell * 6;
+			public const int thrownPropMoveSpeed = numOfGridPerCell * 8;
 
 			public const int objMaxRadius = numOfGridPerCell / 2;
 			public const int playerRadius = objMaxRadius;
@@ -38,6 +39,21 @@ namespace THUnity2D
 			public const int dirtMoveSpeedDebuff = numOfGridPerCell;
 			public const int attenuatorAtkDebuff = amplifierAtkBuff;
 			public const double dividerCdDiscount = 4.0;
+
+			public static XYPosition CellToGrid(int x, int y)   //求格子的中心坐标
+			{
+				XYPosition ret = new XYPosition(x * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2,
+					y * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2);
+				return ret;
+			}
+			public static int GridToCellX(XYPosition pos)       //求坐标所在的格子的x坐标
+			{
+				return pos.x / Constant.numOfGridPerCell;
+			}
+			public static int GridToCellY(XYPosition pos)      //求坐标所在的格子的y坐标
+			{
+				return pos.y / Constant.numOfGridPerCell;
+			}
 		}
 
 		public enum ColorType
@@ -69,20 +85,7 @@ namespace THUnity2D
 				this.teamID = teamID;
 			}
 		}
-		public static XYPosition CellToGrid(int x, int y)	//求格子的中心坐标
-		{
-			XYPosition ret = new XYPosition(x * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2, 
-				y * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2);
-			return ret;
-		}
-		public static int GridToCellX(XYPosition pos)		//求坐标所在的格子的x坐标
-		{
-			return pos.x / Constant.numOfGridPerCell;
-		}
-		public static int GridToCellY(XYPosition pos)      //求坐标所在的格子的y坐标
-		{
-			return pos.y / Constant.numOfGridPerCell;
-		}
+
 		private ColorType[,] cellColor;			//储存每格的颜色
 		public ColorType[,] CellColor
 		{
@@ -136,7 +139,7 @@ namespace THUnity2D
 
 			//设置出生点的颜色
 
-			int cellX = GridToCellX(pos), cellY = GridToCellY(pos);
+			int cellX = Constant.GridToCellX(pos), cellY = Constant.GridToCellY(pos);
 			cellColor[cellX, cellY] = TeamToColor(playerInitInfo.teamID);
 
 			//开启装弹线程
@@ -150,8 +153,8 @@ namespace THUnity2D
 						{
 							var beginTime = Environment.TickCount64;
 
-							var cellX = GridToCellX(newPlayer.Position);
-							var cellY = GridToCellY(newPlayer.Position);
+							var cellX = Constant.GridToCellX(newPlayer.Position);
+							var cellY = Constant.GridToCellY(newPlayer.Position);
 							if (cellColor[cellX, cellY] == TeamToColor(newPlayer.TeamID)) newPlayer.AddBulletNum();
 
 							var endTime = Environment.TickCount64;
@@ -226,7 +229,7 @@ namespace THUnity2D
 			return true;
 		}
 
-		public void ProduceOneProp()
+		private void ProduceOneProp()
 		{
 			Random r = new Random((int)Environment.TickCount64);
 			XYPosition newPropPos = new XYPosition();
@@ -234,12 +237,12 @@ namespace THUnity2D
 			{
 				newPropPos.x = r.Next(0, Rows * Constant.numOfGridPerCell);
 				newPropPos.y = r.Next(0, Cols * Constant.numOfGridPerCell);
-				int cellX = GridToCellX(newPropPos), cellY = GridToCellY(newPropPos);
+				int cellX = Constant.GridToCellX(newPropPos), cellY = Constant.GridToCellY(newPropPos);
 				bool canLayProp = true;
 				objListLock.EnterReadLock();
 				foreach (GameObject obj in objList)
 				{
-					if (cellX == GridToCellX(obj.Position) && cellY == GridToCellY(obj.Position) && (obj is Wall || obj is BirthPoint))
+					if (cellX == Constant.GridToCellX(obj.Position) && cellY == Constant.GridToCellY(obj.Position) && (obj is Wall || obj is BirthPoint))
 					{
 						canLayProp = false;
 						break;
@@ -248,7 +251,7 @@ namespace THUnity2D
 				objListLock.ExitReadLock();
 				if (canLayProp)
 				{
-					newPropPos = CellToGrid(cellX, cellY);
+					newPropPos = Constant.CellToGrid(cellX, cellY);
 					break;
 				}
 			}
@@ -274,28 +277,16 @@ namespace THUnity2D
 				unpickedPropListLock.EnterWriteLock();
 				unpickedPropList.AddLast(newProp);
 				unpickedPropListLock.ExitWriteLock();
+				newProp.CanMove = true;
 			}
 		}
 
 		//人物移动
-		public void MovePlayer(long playerID, int moveTime, double moveDirection)
+		public void MovePlayer(long playerID, int moveTimeInMilliseconds, double moveDirection)
 		{
 			if (!isGaming) return;
-			Character? playerToMove = null;
-			playerListLock.EnterReadLock();
-			{
-				foreach (var iPlayer in playerList)
-				{
-					if (((Character)iPlayer).ID == playerID)
-					{
-						playerToMove = (Character)iPlayer;
-						break;
-					}
-				}
-			}
-			playerListLock.ExitReadLock();
-
-			if (playerToMove != null) MoveObj(playerToMove, moveTime, moveDirection);
+			Character? playerToMove = FindPlayerFromPlayerList(playerID);
+			if (playerToMove != null) MoveObj(playerToMove, moveTimeInMilliseconds, moveDirection);
 		}
 
 		//检查obj下一步位于nextPos时是否会与listObj碰撞
@@ -318,7 +309,7 @@ namespace THUnity2D
 
 			int deltaX = Math.Abs(nextPos.x - listObj.Position.x), deltaY = Math.Abs(nextPos.y - listObj.Position.y);
 
-			//默认obj是圆形的，因为能移动的物体目前只有圆形
+			//默认obj是圆形的，因为能移动的物体目前只有圆形；且会移动的道具尚未被捡起，其形状没有意义，可默认为圆形
 
 			switch (listObj.Shape)
 			{
@@ -359,6 +350,13 @@ namespace THUnity2D
 						}
 					}
 					listLock.ExitReadLock();
+
+					//如果越界，则与越界方块碰撞
+					if (collisionObj == null && (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
+					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius))
+					{
+						collisionObj = new OutOfBoundBlock(nextPos);
+					}
 					return collisionObj;
 				};
 
@@ -375,6 +373,9 @@ namespace THUnity2D
 		{
 			if (obj is Character)		//如果是人主动碰撞
 			{
+
+				/*由于四周是墙，所以人物永远不可能与越界方块碰撞*/
+
 				uint maxLen = uint.MaxValue;      //移动的最大距离
 				uint tmpMax;
 				Vector2 objMoveUnitVector = new Vector2(1.0 * Math.Cos(obj.FacingDirection), 1.0 * Math.Sin(obj.FacingDirection));
@@ -475,8 +476,7 @@ namespace THUnity2D
 			else if (obj is Bullet)
 			{
 				//如果越界，爆炸
-				if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
-					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius)
+				if (collisionObj is OutOfBoundBlock)
 				{
 					BulletBomb((Bullet)obj, null);
 					return true;
@@ -487,6 +487,19 @@ namespace THUnity2D
 					BulletBomb((Bullet)obj, collisionObj); return true;
 				}
 
+				return false;
+			}
+			else if (obj is Prop)
+			{
+				//如果越界，清除出游戏
+				if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
+					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius)
+				{
+					unpickedPropListLock.EnterWriteLock();
+					unpickedPropList.Remove((Prop)obj);
+					unpickedPropListLock.ExitWriteLock();
+					return true;
+				}
 				return false;
 			}
 			return false;
@@ -518,7 +531,7 @@ namespace THUnity2D
 			{
 				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
 				{
-					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear);
+					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, bullet.Parent);
 					if (playerBeingShot.HP <= 0)                //如果打死了
 					{
 						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
@@ -572,7 +585,7 @@ namespace THUnity2D
 
 			/*改变地图颜色*/
 
-			int cellX = GridToCellX(bullet.Position), cellY = GridToCellY(bullet.Position);
+			int cellX = Constant.GridToCellX(bullet.Position), cellY = Constant.GridToCellY(bullet.Position);
 			var colorRange = bullet.GetColorRange();
 			
 			/*哪些颜色不能够被改变*/
@@ -584,7 +597,7 @@ namespace THUnity2D
 				{
 					if (obj.IsRigid && (obj is Wall || obj is BirthPoint))
 					{
-						cannotColor[GridToCellX(obj.Position), GridToCellY(obj.Position)] = true;
+						cannotColor[Constant.GridToCellX(obj.Position), Constant.GridToCellY(obj.Position)] = true;
 					}
 				}
 			}
@@ -611,7 +624,7 @@ namespace THUnity2D
 			{
 				foreach (Character player in playerList)
 				{
-					int playerCellX = GridToCellX(player.Position), playerCellY = GridToCellY(player.Position);
+					int playerCellX = Constant.GridToCellX(player.Position), playerCellY = Constant.GridToCellY(player.Position);
 					foreach (var pos in attackRange)
 					{
 						if (pos.x == playerCellX && pos.y == playerCellY && !object.ReferenceEquals(player, objBeingShot)) { willBeAttacked.Add(player); }
@@ -631,7 +644,7 @@ namespace THUnity2D
 				{
 					if (obj.IsRigid && obj is Bullet)
 					{
-						int objCellX = GridToCellX(obj.Position), objCellY = GridToCellY(obj.Position);
+						int objCellX = Constant.GridToCellX(obj.Position), objCellY = Constant.GridToCellY(obj.Position);
 						foreach (var pos in attackRange)
 						{
 							if (pos.x == objCellX && pos.y == objCellY && !object.ReferenceEquals(obj, objBeingShot)) { willBeAttacked.Add(obj); }
@@ -660,27 +673,31 @@ namespace THUnity2D
 									obj.IsMoving = true;     //开始移动
 								}
 
-								GameObject.Debug(obj, " begin to move at " + obj.Position.ToString());
+								var moveBeginTime = Environment.TickCount64;
+								var moveEndTime = moveBeginTime + moveTime;
+								var timeShouldBe = moveBeginTime;
+
+								GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
 								double deltaLen = 0.0;      //储存行走的误差
 								Vector moveVec = new Vector(moveDirection, 0.0);
 								//先转向
 								if (isGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
 								GameObject? collisionObj = null;
-								while (isGaming && moveTime > 0 && obj.CanMove && !obj.IsResetting)
+								while (isGaming && timeShouldBe < moveEndTime && obj.CanMove && !obj.IsResetting)
 								{
-									var beginTime = Environment.TickCount64;
+									
 									moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
 									deltaLen = 0;
 
 									//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
 									//缺陷：半径为0的物体检测不到越界
-									//未来改进方案：引入特殊的越界方块，如果越界视为与越界方块碰撞
+									//改进：如果越界，则与越界方块碰撞
 									
 									while (true)
 									{
 										collisionObj = CheckCollision(obj, moveVec);
 										if (collisionObj == null) break;
-										if (collisionObj is Mine)
+										if (collisionObj is Mine)		//CheckCollision保证只有不同组的人物会和地雷碰撞
 										{
 											ActivateMine((Character)obj, (Mine)collisionObj);
 										}
@@ -703,16 +720,17 @@ namespace THUnity2D
 									{
 										deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
 									}
-									var endTime = System.Environment.TickCount64;
-									moveTime -= 1000 / Constant.numOfStepPerSecond;
-									var deltaTime = endTime - beginTime;
-									if (deltaTime <= 1000 / Constant.numOfStepPerSecond)
+
+									timeShouldBe += 1000 / Constant.numOfStepPerSecond;
+									var nowTime = Environment.TickCount64;
+									
+									if (timeShouldBe >= nowTime)
 									{
-										Thread.Sleep(1000 / Constant.numOfStepPerSecond - (int)deltaTime);
+										Thread.Sleep((int)(timeShouldBe - nowTime));
 									}
 									else
 									{
-										Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!!");
+										Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!! Time should be: {0} but nowTime is {1}!", timeShouldBe, nowTime);
 									}
 								}
 								moveVec.length = deltaLen;
@@ -725,7 +743,7 @@ namespace THUnity2D
 									OnCollision(obj, collisionObj, moveVec);
 								}
 								obj.IsMoving = false;        //结束移动
-								GameObject.Debug(obj, " end move at " + obj.Position.ToString());
+								GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 								if (obj is Bullet) BulletBomb((Bullet)obj, null);
 							}
 						)
@@ -751,7 +769,7 @@ namespace THUnity2D
 		}
 
 		//攻击
-		public bool Attack(long playerID, int time, double angle)
+		public bool Attack(long playerID, int timeInMilliseconds, double angle)
 		{
 			if (!isGaming) return false;
 			Character? playerWillAttack = FindPlayerFromPlayerList(playerID);
@@ -766,10 +784,70 @@ namespace THUnity2D
 						Constant.bulletRadius, Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP, playerWillAttack.HasSpear);
 
 					newBullet.Parent = playerWillAttack;
+
+					switch (playerWillAttack.bulletType)
+					{
+					case BulletType.Bullet0:
+					case BulletType.Bullet6:
+						timeInMilliseconds = int.MaxValue;
+						break;
+					case BulletType.Bullet5:
+						timeInMilliseconds = 0;
+						angle = playerWillAttack.FacingDirection;
+						break;
+					case BulletType.Bullet3:		//不断检测它所位于的格子，并将其染色
+						timeInMilliseconds = int.MaxValue;
+						new Thread
+							(
+								() =>
+								{
+									for (int i = 0; i < 50 && !newBullet.CanMove; ++i)		//等待子弹开始移动，最多等待50次
+									{
+										Thread.Sleep(1000 / Constant.numOfStepPerSecond);
+									}
+
+									while (newBullet.CanMove)
+									{
+										int cellX = Constant.GridToCellX(newBullet.Position), cellY = Constant.GridToCellY(newBullet.Position);
+										
+										if (cellX >= 0 && cellX < Rows && cellY >= 0 && cellY < Cols)
+										{
+											bool canColor = true;
+											objListLock.EnterReadLock();
+											{
+												foreach (GameObject obj in objList)
+												{
+													if (obj.IsRigid
+													&& Constant.GridToCellX(obj.Position) == cellX
+													&& Constant.GridToCellY(obj.Position) == cellY
+													&& (obj is Wall || obj is BirthPoint))
+													{
+														canColor = false;
+														break;
+													}
+												}
+											}
+											objListLock.ExitReadLock();
+
+											if (canColor)
+											{
+												cellColor[cellX, cellY] = TeamToColor(newBullet.Parent.TeamID);
+											}
+										}
+
+										Thread.Sleep(1000 / Constant.numOfStepPerSecond);
+									}
+								}
+							)
+						{ IsBackground = true }.Start();
+						
+						break;
+					}
+
 					objListLock.EnterWriteLock(); objList.Add(newBullet); objListLock.ExitWriteLock();
 
 					newBullet.CanMove = true;
-					MoveObj(newBullet, time, angle);
+					MoveObj(newBullet, timeInMilliseconds, angle);
 					return true;
 				}
 			}
@@ -778,7 +856,7 @@ namespace THUnity2D
 		}
 
 		//捡道具，是否是前面的那一格（true则是面向的那一格；false则是所在的那一格），以及要捡的道具类型
-		public bool Pick(long playerID, PropType propType, bool isFrontCell)
+		public bool Pick(long playerID, PropType propType)
 		{
 			if (!IsGaming) return false;
 			Character? player = FindPlayerFromPlayerList(playerID);
@@ -791,14 +869,27 @@ namespace THUnity2D
 				player.IsModifyingProp = true;
 			}
 
-			int cellX = GridToCellX(player.Position), cellY = GridToCellY(player.Position);
-			/*判断面对方向，未完成*/
+			int cellX = Constant.GridToCellX(player.Position), cellY = Constant.GridToCellY(player.Position);
+
+#if DEBUG
+			Console.WriteLine("Try picking: {0} {1} Type: {2}", cellX, cellY, (int)propType);
+#endif
+
 			Prop? prop = null;
 			unpickedPropListLock.EnterWriteLock();
-			for (var propNode = unpickedPropList.First; !ReferenceEquals(propNode, unpickedPropList.Last); propNode = propNode.Next)
+			for (LinkedListNode<Prop>? propNode = unpickedPropList.First; propNode != null; propNode = propNode.Next)
 			{
-				if (propNode.Value.GetPropType() != propType) continue;
-				int cellXTmp = GridToCellX(propNode.Value.Position), cellYTmp = GridToCellY(propNode.Value.Position);
+#if DEBUG
+				Console.WriteLine("Picking: Now check type: {0}", (int)propNode.Value.GetPropType());
+#endif
+
+				if (propNode.Value.GetPropType() != propType || propNode.Value.IsMoving) continue;
+				int cellXTmp = Constant.GridToCellX(propNode.Value.Position), cellYTmp = Constant.GridToCellY(propNode.Value.Position);
+
+#if DEBUG
+				Console.WriteLine("Ready to pick: {0} {1}, {2} {3}", cellX, cellY, cellXTmp, cellYTmp);
+#endif
+
 				if (cellXTmp == cellX && cellYTmp == cellY)
 				{
 					prop = propNode.Value;
@@ -944,6 +1035,26 @@ namespace THUnity2D
 			}
 			throw new Exception("GetPlayerFromTeam error: No this player!");
 		}
+		
+		public long[] GetPlayerIDsOfTheTeam(long teamID)
+		{
+			return ((Team)teamList[(int)teamID]).GetPlayerIDs();
+		}
+
+		public void Throw(long playerID, int moveTimeInMilliseconds, double angle)
+		{
+			Character? player = FindPlayerFromPlayerList(playerID);
+			if (player == null) return;
+			if (!player.IsAvailable) return;
+			Prop? oldProp = player.UseProp();
+			if (oldProp == null) return;
+			oldProp.ResetPosition(player.Position);
+			oldProp.ResetMoveSpeed(Constant.thrownPropMoveSpeed);
+			MoveObj(oldProp, moveTimeInMilliseconds, angle);
+			unpickedPropListLock.EnterWriteLock();
+			unpickedPropList.AddLast(oldProp);
+			unpickedPropListLock.ExitWriteLock();
+		}
 
 		public int GetTeamScore(long teamID)
 		{
@@ -991,12 +1102,12 @@ namespace THUnity2D
 					switch (mapResource[i, j])
 					{
 					case (uint)MapInfo.MapInfoObjType.Wall:
-						objListLock.EnterWriteLock(); objList.Add(new Wall(CellToGrid(i, j), Constant.wallRadius)); objListLock.ExitWriteLock();
+						objListLock.EnterWriteLock(); objList.Add(new Wall(Constant.CellToGrid(i, j), Constant.wallRadius)); objListLock.ExitWriteLock();
 						break;
 					case (uint)MapInfo.MapInfoObjType.BirthPoint1: case (uint)MapInfo.MapInfoObjType.BirthPoint2: case (uint)MapInfo.MapInfoObjType.BirthPoint3: case (uint)MapInfo.MapInfoObjType.BirthPoint4:
 					case (uint)MapInfo.MapInfoObjType.BirthPoint5: case (uint)MapInfo.MapInfoObjType.BirthPoint6: case (uint)MapInfo.MapInfoObjType.BirthPoint7: case (uint)MapInfo.MapInfoObjType.BirthPoint8:
 					{
-						BirthPoint newBirthPoint = new BirthPoint(CellToGrid(i, j), Constant.birthPointRadius);
+						BirthPoint newBirthPoint = new BirthPoint(Constant.CellToGrid(i, j), Constant.birthPointRadius);
 						objListLock.EnterWriteLock(); objList.Add(newBirthPoint); objListLock.ExitWriteLock();
 						birthPointList.Add(MapInfo.BirthPointEnumToIdx((MapInfo.MapInfoObjType)mapResource[i, j]), newBirthPoint);
 						break;

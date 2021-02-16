@@ -32,7 +32,17 @@ namespace THUnity2D
 		public bool Laid { get => laid; }
 
 		public abstract PropType GetPropType();
-		//道具类
+
+		
+		public void ResetPosition(XYPosition pos)
+		{
+			Position = pos;
+		}
+		public void ResetMoveSpeed(int newMoveSpeed)
+		{
+			MoveSpeed = newMoveSpeed;
+		}
+
 		public Prop(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Prop, ShapeType.Sqare) { }
 	}
 
@@ -43,15 +53,15 @@ namespace THUnity2D
 
 	public abstract class Mine : Prop
 	{
-		public Mine(XYPosition initPos, int radius) : base(initPos, radius) { }
-
 		public void SetLaid(XYPosition pos)
 		{
 			if (laid) return;
 			laid = true;
-			position = pos;
+			Position = pos;
 			shape = ShapeType.Circle;
 		}
+		public Mine(XYPosition initPos, int radius) : base(initPos, radius) { }
+
 	}
 
 	public sealed class Bike : Buff
