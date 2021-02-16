@@ -9,4 +9,9 @@
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\communication\communication_csharp\CommServer\CommServer.csproj" />
+    <ProjectReference Include="..\THUnity2D\THUnity2D.csproj" />
+  </ItemGroup>
+
 </Project>

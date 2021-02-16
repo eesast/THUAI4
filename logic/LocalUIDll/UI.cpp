@@ -171,7 +171,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 else if (JPress)
                 {
                     if (key && 
-                        pMW->map->Attack(playerID, time[key] * 50, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                        pMW->map->Attack(playerID, time[key] * 20, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 }
                 else if (TPress)
                 {

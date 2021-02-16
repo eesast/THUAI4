@@ -1,0 +1,18 @@
+syntax = "proto3";
+package Protobuf;
+option csharp_namespace = "Communication.Proto";
+
+enum MessageType
+{
+    AddPlayer = 0;
+    Move = 1;
+    Attack = 2;
+    Pick = 3;
+    Use = 4;
+    Throw = 5;
+    InvalidPlayer = 6;
+    ValidPlayer = 7;
+    StartGame = 8;
+    Gaming = 9;
+    EndGame = 10;
+}
