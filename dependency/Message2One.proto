@@ -1,9 +1,0 @@
-syntax = "proto3";
-package Protobuf;
-option csharp_namespace = "Communication.Proto";
-
-//这个是通信组写的，无实际意义 但希望Server单独发给某个Client的Message作为不同的类
-message Message2One {
-    int32 playerId = 1;
-    string message = 2;
-}

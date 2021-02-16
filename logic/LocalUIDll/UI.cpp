@@ -3,6 +3,7 @@
 #include <atomic>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <unordered_map>
 #include <utility>
 
@@ -86,8 +87,19 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         width += appendCx = width / 2;
         height = (pixelPerCell.y = basicSize / rows) * rows + (appendCy = GetSystemMetrics(SM_CYMIN));
 
-        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType::job0, 0));
-        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType::job0, 1));
+        int job1 = 0, job2 = 1;
+        std::ifstream fin("job.txt");
+        if (fin)
+        {
+            fin >> job1 >> job2;
+            fin.close();
+
+            if (job1 < 0 || job1 >= 7) job1 = 0;
+            if (job2 < 0 || job2 >= 7) job2 = 0;
+        }
+
+        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
+        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -100,7 +112,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         std::thread([]() {pMW->map->StartGame(1000 * 60 * 10); }).detach();
 
-        auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk, int pick, int use)
+        auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk, int pick, int use, int throwprop)
         {
             double direct[16] = { 0 };
             int time[16] = { 0 };
@@ -112,7 +124,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             for (int i = 1; i < sizeof(time) / (sizeof(decltype(time[0]))); ++i)
             {
-                time[i] = 20;
+                time[i] = 50;
             }
 
             direct[WKey] = System::Math::PI;
@@ -143,12 +155,13 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 bool JPress = GetKeyState(atk) < 0;
                 bool PPress = GetKeyState(pick) < 0;
                 bool UPress = GetKeyState(use) < 0;
+                bool TPress = GetKeyState(throwprop) < 0;
 
                 if (PPress)
                 {
                     for (int i = THUnity2D::Prop::MinPropTypeNum; i <= THUnity2D::Prop::MaxPropTypeNum; ++i)
                     {
-                        if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i), false)) break;
+                        if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
                     }
                 }
                 else if (UPress)
@@ -158,7 +171,11 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 else if (JPress)
                 {
                     if (key && 
-                        pMW->map->Attack(playerID, time[key] * 50, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                        pMW->map->Attack(playerID, time[key] * 20, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                }
+                else if (TPress)
+                {
+                    if (key) pMW->map->Throw(playerID, time[key] * 50, direct[key]);
                 }
                 else if (key)
                 {
@@ -167,8 +184,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         };
 
-        std::thread(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J', 'P', 'U').detach();
-        std::thread(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2).detach();
+        std::thread(UsrControl, player1ID, 'W', 'A', 'S', 'D', 'J', 'P', 'U', 'T').detach();
+        std::thread(UsrControl, player2ID, VK_UP, VK_LEFT, VK_DOWN, VK_RIGHT, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2, VK_NUMPAD3).detach();
 
         break;
     }
@@ -249,7 +266,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wsout << '\n';
 
             wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
-            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->HP << L"\n";
+            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->Score << L"\n";
             wsout << L"移动速度：" << hPlayer2->MoveSpeed << "\n";
             wsout << L"攻击力：" << hPlayer2->AP << "\n";
             wsout << '\n';
