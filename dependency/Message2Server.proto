@@ -13,4 +13,5 @@ message MessageToServer
     PropType propType = 4;	//messageType为Pick时要捡起的道具类型
     int32 timeInMilliseconds = 5;	//时间参数
     double angle = 6;		//角度参数
+    int64 playerID = 7;     //发送的玩家ID
 }

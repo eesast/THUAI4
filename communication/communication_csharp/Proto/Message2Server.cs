@@ -25,16 +25,17 @@ namespace Communication.Proto {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChRNZXNzYWdlMlNlcnZlci5wcm90bxIIUHJvdG9idWYaEU1lc3NhZ2VUeXBl",
-            "LnByb3RvGhRNZXNzYWdlMkNsaWVudC5wcm90byLCAQoPTWVzc2FnZVRvU2Vy",
+            "LnByb3RvGhRNZXNzYWdlMkNsaWVudC5wcm90byLUAQoPTWVzc2FnZVRvU2Vy",
             "dmVyEioKC21lc3NhZ2VUeXBlGAEgASgOMhUuUHJvdG9idWYuTWVzc2FnZVR5",
             "cGUSIgoHam9iVHlwZRgCIAEoDjIRLlByb3RvYnVmLkpvYlR5cGUSDgoGdGVh",
             "bUlEGAMgASgDEiQKCHByb3BUeXBlGAQgASgOMhIuUHJvdG9idWYuUHJvcFR5",
             "cGUSGgoSdGltZUluTWlsbGlzZWNvbmRzGAUgASgFEg0KBWFuZ2xlGAYgASgB",
-            "QhaqAhNDb21tdW5pY2F0aW9uLlByb3RvYgZwcm90bzM="));
+            "EhAKCHBsYXllcklEGAcgASgDQhaqAhNDb21tdW5pY2F0aW9uLlByb3RvYgZw",
+            "cm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Communication.Proto.MessageTypeReflection.Descriptor, global::Communication.Proto.Message2ClientReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToServer), global::Communication.Proto.MessageToServer.Parser, new[]{ "MessageType", "JobType", "TeamID", "PropType", "TimeInMilliseconds", "Angle" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToServer), global::Communication.Proto.MessageToServer.Parser, new[]{ "MessageType", "JobType", "TeamID", "PropType", "TimeInMilliseconds", "Angle", "PlayerID" }, null, null, null, null)
           }));
     }
     #endregion
@@ -76,6 +77,7 @@ namespace Communication.Proto {
       propType_ = other.propType_;
       timeInMilliseconds_ = other.timeInMilliseconds_;
       angle_ = other.angle_;
+      playerID_ = other.playerID_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -165,6 +167,20 @@ namespace Communication.Proto {
       }
     }
 
+    /// <summary>Field number for the "playerID" field.</summary>
+    public const int PlayerIDFieldNumber = 7;
+    private long playerID_;
+    /// <summary>
+    ///发送的玩家ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long PlayerID {
+      get { return playerID_; }
+      set {
+        playerID_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as MessageToServer);
@@ -184,6 +200,7 @@ namespace Communication.Proto {
       if (PropType != other.PropType) return false;
       if (TimeInMilliseconds != other.TimeInMilliseconds) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Angle, other.Angle)) return false;
+      if (PlayerID != other.PlayerID) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -196,6 +213,7 @@ namespace Communication.Proto {
       if (PropType != global::Communication.Proto.PropType.Null) hash ^= PropType.GetHashCode();
       if (TimeInMilliseconds != 0) hash ^= TimeInMilliseconds.GetHashCode();
       if (Angle != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Angle);
+      if (PlayerID != 0L) hash ^= PlayerID.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -236,6 +254,10 @@ namespace Communication.Proto {
         output.WriteRawTag(49);
         output.WriteDouble(Angle);
       }
+      if (PlayerID != 0L) {
+        output.WriteRawTag(56);
+        output.WriteInt64(PlayerID);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -269,6 +291,10 @@ namespace Communication.Proto {
         output.WriteRawTag(49);
         output.WriteDouble(Angle);
       }
+      if (PlayerID != 0L) {
+        output.WriteRawTag(56);
+        output.WriteInt64(PlayerID);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -295,6 +321,9 @@ namespace Communication.Proto {
       }
       if (Angle != 0D) {
         size += 1 + 8;
+      }
+      if (PlayerID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(PlayerID);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -324,6 +353,9 @@ namespace Communication.Proto {
       }
       if (other.Angle != 0D) {
         Angle = other.Angle;
+      }
+      if (other.PlayerID != 0L) {
+        PlayerID = other.PlayerID;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -363,6 +395,10 @@ namespace Communication.Proto {
             Angle = input.ReadDouble();
             break;
           }
+          case 56: {
+            PlayerID = input.ReadInt64();
+            break;
+          }
         }
       }
     #endif
@@ -399,6 +435,10 @@ namespace Communication.Proto {
           }
           case 49: {
             Angle = input.ReadDouble();
+            break;
+          }
+          case 56: {
+            PlayerID = input.ReadInt64();
             break;
           }
         }
