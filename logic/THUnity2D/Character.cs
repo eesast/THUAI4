@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace THUnity2D
 {
-	public enum JobType
+	public enum JobType : int
 	{
 		Job0 = 0,
 		Job1 = 1,
@@ -17,7 +17,8 @@ namespace THUnity2D
 		Job3 = 3,
 		Job4 = 4,
 		Job5 = 5,
-		Job6 = 6
+		Job6 = 6,
+		InvalidJobType = int.MaxValue
 	}
 	public sealed class Character : GameObject
 	{
