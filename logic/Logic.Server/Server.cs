@@ -26,6 +26,8 @@ namespace Logic.Server
 			return teamID >= 0 && teamID < options.TeamCount && playerID >= 0 && playerID < options.PlayerCountPerTeam;
 		}
 
+		private Communication.CommServer.CommServer serverCommunicator;
+
 		public Server(ArgumentOptions options)
 		{
 			//队伍数量在 1~4 之间，总人数不超过 8
@@ -46,7 +48,28 @@ namespace Logic.Server
 			}
 
 			/*TODO: 绑定OnReceive、开始监听，未完成*/
+			serverCommunicator = new Communication.CommServer.CommServer();
 
+			while (!serverCommunicator.Listen(options.ServerPort))
+			{
+				Console.WriteLine("Server listen failed!");
+				Thread.Sleep(1000);
+			}
+
+			Console.WriteLine("Server begins to listen!");
+
+			serverCommunicator.OnConnect += delegate ()
+			{
+				Console.WriteLine("Successfully connected!");
+			};
+
+			serverCommunicator.OnReceive += delegate ()
+			{
+				/*TODO: 绑定OnReceive未完成*/
+
+				//IMsg msg;
+				//if (serverCommunicator.TryTake(out IMsg msg))
+			};
 		}
 
 		private void OnReceive(MessageToServer msg)
@@ -120,7 +143,18 @@ namespace Logic.Server
 				}
 
 				Map.PlayerInitInfo playerInitInfo = new Map.PlayerInitInfo(GetBirthPointIdx(msg.TeamID, msg.PlayerID), ConvertTool.ToGameJobType(msg.JobType), msg.TeamID);
-				if (playerInitInfo.jobType == THUnity2D.JobType.InvalidJobType) return false;		//非法职业
+				if (playerInitInfo.jobType == THUnity2D.JobType.InvalidJobType) return false;       //非法职业
+
+				bool legalJob = false;
+				foreach (var enumMem in typeof(THUnity2D.JobType).GetFields())
+				{
+					if (playerInitInfo.jobType.ToString() == enumMem.Name)
+					{
+						legalJob = true;
+						break;
+					}
+				}
+				if (!legalJob) return false;		//非法职业，职业数值超出枚举范围
 
 				long newPlayerID = game.AddPlayer(playerInitInfo);
 				if (newPlayerID == GameObject.invalidID) return false;
