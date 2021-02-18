@@ -1,4 +1,4 @@
-# 《THUAI4》细则 v2.01
+# 《THUAI4》细则 v2.2
 
 ## 一、通信接口建议
 
@@ -88,12 +88,13 @@ enum class MessageType
     Pick = 3,
     Use = 4,
     Throw = 5,
+    Send = 6
     
-    InvalidPlayer = 6,
-    ValidPlayer = 7,
-    StartGame = 8,
-    Gaming = 9,
-    EndGame = 10
+    InvalidPlayer = 7,
+    ValidPlayer = 8,
+    StartGame = 9,
+    Gaming = 10,
+    EndGame = 11
 }
 
 struct GameObjInfo
@@ -131,6 +132,16 @@ struct GameObjInfo
     int32 maxHp;
     int32 hp;
     int32 lifeNum;		//第几次复活
+    string message;
+}
+
+struct MessageToOneClient
+{
+    int64 playerID;			//指明发送给谁
+    int64 teamID;			//指明发送给谁
+    
+    MessageType messageType;	//消息类型，可能是 InvalidPlayer、ValidPlayer
+    int64 guid;				//自己的guid
 }
 
 struct MessageToClient
@@ -138,7 +149,7 @@ struct MessageToClient
     int64 playerID;			//指明发送给谁
     int64 teamID;			//指明发送给谁
     
-    MessageType messageType;
+    MessageType messageType;	//消息类型，可能是除 InvalidPlayer、ValidPlayer 之外的任何消息
     GameObjInfo selfInfo;	//自己的个人信息
     int64[] teammateGUIDs;	//所有队友的GUID，其0、1、2、3元素分别为playerID为0、1、2、3的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
     ColorType selfTeamColor;	//自己队伍的所属颜色
@@ -149,11 +160,14 @@ struct MessageToClient
 struct MessageToServer
 {
     MessageType messageType;
+    int64 playerID;		//消息发送者的playerID
+    int64 teamID;		//消息发送者所在队伍的ID
     JobType jobType;	//messageType为AddPlayer时选择的职业
-    int64 teamID;		//messageType为AddPlayer时选择的队伍
     PropType propType;	//messageType为Pick时要捡起的道具类型
     int timeInMilliseconds;	//时间参数
     double angle;		//角度参数
+    int64 ToPlayerID;	//当messageType为Send时有效，为发送对象的ID
+    string message;		//当messageType为Send时有效，为发送的消息
 }
 
 ```
@@ -237,7 +251,9 @@ struct MessageToServer
 
    `void Throw(int timeInMilliseconds, double angle)`、
 
-   `void Attack(int timeInMilliseconds, double angle)`
+   `void Attack(int timeInMilliseconds, double angle)`、
+   
+   `void Send(int playerID, std::string message)`
 
 ---
 
