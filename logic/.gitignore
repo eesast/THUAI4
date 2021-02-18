@@ -35,6 +35,7 @@ bld/
 # My private folder
 /private/
 /THUnity2D/deleted.cs
+/Logic.Server/deleted.cs
 /ImageMaker/
 
 # Visual Studio 2015/2017 cache/options directory

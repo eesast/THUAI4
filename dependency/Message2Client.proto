@@ -132,4 +132,5 @@ message MessageToClient
     }
 
     repeated OneDimVec cellColors = 8;	//每个 cell 的颜色
+    int32 teamScore = 9;                //本队伍的分数
 }
