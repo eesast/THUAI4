@@ -9,12 +9,13 @@ namespace clienttest
     {
         static void Main(string[] args)
         {
+            Console.WriteLine($"My id is {int.Parse(args[1])}");
             CSharpClient client = new CSharpClient();
             client.OnReceive += delegate (IMsg msg)
             {
-                Message2Client mm = msg.Content as Message2Client;
+                Message2One mm = msg.Content as Message2One;
                 Console.WriteLine($"Message type::{msg.MessageType}");
-                Console.WriteLine($"Info:{mm.MapColors}");
+                Console.WriteLine("Message:" + mm.Message);
             };
             Console.WriteLine("Connecting......");
             if (client.Connect("127.0.0.1", 7777))
@@ -25,16 +26,14 @@ namespace clienttest
             {
                 Console.WriteLine("连接Agent失败.");
             }
-            string sendstr;
-            byte[] bytes;
-            while (true)
-            {
-                sendstr = Console.ReadLine();
-                if (string.IsNullOrEmpty(sendstr)) break;
-                Message2Server mm = new Message2Server();
-                mm.JobType = Communication.Proto.JobType.Job1;
-                client.SendMessage(mm, MessageType.Message2Server);
-            }
+            
+
+            Message2Server mm = new Message2Server();
+            mm.PlayerId = int.Parse(args[1]);
+            mm.JobType = Communication.Proto.JobType.Job1;
+            client.SendMessage(mm, MessageType.Message2Server);
+
+            Console.ReadLine();
             client.Stop();
             client.Dispose();
         }
