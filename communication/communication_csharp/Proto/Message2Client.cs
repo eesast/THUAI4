@@ -24,83 +24,126 @@ namespace Communication.Proto {
     static Message2ClientReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChRNZXNzYWdlMkNsaWVudC5wcm90bxIIUHJvdG9idWYi1gIKCkdhbWVPYmpl",
-            "Y3QSCQoBeBgBIAEoARIJCgF5GAIgASgBEgoKAmhwGAMgASgFEhEKCW1vdmVT",
-            "cGVlZBgEIAEoBRIRCglidWxsZXROdW0YBSABKAUSIgoHT2JqVHlwZRgGIAEo",
-            "DjIRLlByb3RvYnVmLk9ialR5cGUSJAoIUHJvcFR5cGUYByABKA4yEi5Qcm90",
-            "b2J1Zi5Qcm9wVHlwZRIoCgpCdWxsZXRUeXBlGAggASgOMhQuUHJvdG9idWYu",
-            "QnVsbGV0VHlwZRIiCgdKb2JUeXBlGAkgASgOMhEuUHJvdG9idWYuSm9iVHlw",
-            "ZRIOCgZ0ZWFtSWQYCiABKAUSEAoIcGxheWVySWQYCyABKAUSDgoGZGFtYWdl",
-            "GAwgASgFEhMKC2ZhY2luZ0FuZ2xlGA0gASgBEiEKBWJ1ZmZzGA4gAygOMhIu",
-            "UHJvdG9idWYuQnVmZlR5cGUiMAoITWFwQ29sb3ISCQoBeBgBIAEoBRIJCgF5",
-            "GAIgASgFEg4KBnRlYW1JZBgDIAEoBSLKAQoOTWVzc2FnZTJDbGllbnQSRAoO",
-            "Z2FtZU9iamVjdExpc3QYASADKAsyLC5Qcm90b2J1Zi5NZXNzYWdlMkNsaWVu",
-            "dC5HYW1lT2JqZWN0TGlzdEVudHJ5EiUKCU1hcENvbG9ycxgCIAMoCzISLlBy",
-            "b3RvYnVmLk1hcENvbG9yGksKE0dhbWVPYmplY3RMaXN0RW50cnkSCwoDa2V5",
-            "GAEgASgDEiMKBXZhbHVlGAIgASgLMhQuUHJvdG9idWYuR2FtZU9iamVjdDoC",
-            "OAEqNQoHT2JqVHlwZRIKCgZwbGF5ZXIQABIICgR3YWxsEAESCAoEcHJvcBAC",
-            "EgoKBmJ1bGxldBADKisKCFByb3BUeXBlEgkKBXByb3AxEAASCQoFcHJvcDIQ",
-            "ARIJCgVwcm9wMxACKjMKCkJ1bGxldFR5cGUSCwoHYnVsbGV0MRAAEgsKB2J1",
-            "bGxldDIQARILCgdidWxsZXQzEAIqdQoIQnVmZlR5cGUSDgoKaGF2ZVNoaWVs",
-            "ZBAAEhAKDGhhdmVGdWh1b2ppYRABEgsKB3NwZWVkVXAQAhINCglzcGVlZERv",
-            "d24QAxIMCghkYW1hZ2VVcBAEEg4KCmRhbWFnZURvd24QBRINCglpc1N0dW5u",
-            "ZWQQBionCgdKb2JUeXBlEggKBGpvYjEQABIICgRqb2IyEAESCAoEam9iMxAC",
-            "QhaqAhNDdW1tdW5pY2F0aW9uLlByb3RvYgZwcm90bzM="));
+            "ChRNZXNzYWdlMkNsaWVudC5wcm90bxIIUHJvdG9idWYaEU1lc3NhZ2VUeXBl",
+            "LnByb3RvIvYDCgtHYW1lT2JqSW5mbxIqCgtnYW1lT2JqVHlwZRgBIAEoDjIV",
+            "LlByb3RvYnVmLkdhbWVPYmpUeXBlEgwKBGd1aWQYAiABKAMSCQoBeBgDIAEo",
+            "BRIJCgF5GAQgASgFEhcKD2ZhY2luZ0RpcmVjdGlvbhgFIAEoARIRCgltb3Zl",
+            "U3BlZWQYBiABKAUSDwoHY2FuTW92ZRgHIAEoCBIQCghpc01vdmluZxgIIAEo",
+            "CBImCglzaGFwZVR5cGUYCSABKA4yEy5Qcm90b2J1Zi5TaGFwZVR5cGUSDgoG",
+            "cmFkaXVzGAogASgFEg4KBnRlYW1JRBgLIAEoAxIKCgJhcBgMIAEoBRIoCgpi",
+            "dWxsZXRUeXBlGA0gASgOMhQuUHJvdG9idWYuQnVsbGV0VHlwZRIkCghwcm9w",
+            "VHlwZRgOIAEoDjISLlByb3RvYnVmLlByb3BUeXBlEg4KBmlzTGFpZBgPIAEo",
+            "CBIPCgdpc0R5aW5nGBAgASgIEiIKB2pvYlR5cGUYESABKA4yES5Qcm90b2J1",
+            "Zi5Kb2JUeXBlEgoKAkNEGBIgASgFEhQKDG1heEJ1bGxldE51bRgTIAEoBRIR",
+            "CglidWxsZXROdW0YFCABKAUSDQoFbWF4SHAYFSABKAUSCgoCaHAYFiABKAUS",
+            "DwoHbGlmZU51bRgXIAEoBSJwChJNZXNzYWdlVG9PbmVDbGllbnQSEAoIcGxh",
+            "eWVySUQYASABKAMSDgoGdGVhbUlEGAIgASgDEioKC21lc3NhZ2VUeXBlGAMg",
+            "ASgOMhUuUHJvdG9idWYuTWVzc2FnZVR5cGUSDAoEZ3VpZBgEIAEoAyL1AgoP",
+            "TWVzc2FnZVRvQ2xpZW50EhAKCHBsYXllcklEGAEgASgDEg4KBnRlYW1JRBgC",
+            "IAEoAxIqCgttZXNzYWdlVHlwZRgDIAEoDjIVLlByb3RvYnVmLk1lc3NhZ2VU",
+            "eXBlEicKCHNlbGZJbmZvGAQgASgLMhUuUHJvdG9idWYuR2FtZU9iakluZm8S",
+            "FQoNdGVhbW1hdGVHVUlEcxgFIAMoAxIqCg1zZWxmVGVhbUNvbG9yGAYgASgO",
+            "MhMuUHJvdG9idWYuQ29sb3JUeXBlEicKCGdhbWVPYmpzGAcgAygLMhUuUHJv",
+            "dG9idWYuR2FtZU9iakluZm8SNwoKY2VsbENvbG9ycxgIIAMoCzIjLlByb3Rv",
+            "YnVmLk1lc3NhZ2VUb0NsaWVudC5PbmVEaW1WZWMSEQoJdGVhbVNjb3JlGAkg",
+            "ASgFGjMKCU9uZURpbVZlYxImCglyb3dDb2xvcnMYASADKA4yEy5Qcm90b2J1",
+            "Zi5Db2xvclR5cGUqYQoLR2FtZU9ialR5cGUSDQoJQ2hhcmFjdGVyEAASCAoE",
+            "V2FsbBABEggKBFByb3AQAhIKCgZCdWxsZXQQAxIOCgpCaXJ0aFBvaW50EAQS",
+            "EwoPT3V0T2ZCb3VuZEJsb2NrEAUqmAEKCFByb3BUeXBlEggKBE51bGwQABII",
+            "CgRCaWtlEAESDQoJQW1wbGlmaWVyEAISCwoHSmluS2VMYRADEggKBFJpY2UQ",
+            "BBIUChBOZWdhdGl2ZUZlZWRiYWNrEAUSCQoFVG90ZW0QBhIKCgZQaGFzZXIQ",
+            "BxIICgREaXJ0EAgSDgoKQXR0ZW51YXRvchAJEgsKB0RpdmlkZXIQCiojCglT",
+            "aGFwZVR5cGUSCgoGQ2lyY2xlEAASCgoGU3F1YXJlEAEqTwoHSm9iVHlwZRII",
+            "CgRKb2IwEAASCAoESm9iMRABEggKBEpvYjIQAhIICgRKb2IzEAMSCAoESm9i",
+            "NBAEEggKBEpvYjUQBRIICgRKb2I2EAYqZwoKQnVsbGV0VHlwZRILCgdCdWxs",
+            "ZXQwEAASCwoHQnVsbGV0MRABEgsKB0J1bGxldDIQAhILCgdCdWxsZXQzEAMS",
+            "CwoHQnVsbGV0NBAEEgsKB0J1bGxldDUQBRILCgdCdWxsZXQ2EAYqRQoJQ29s",
+            "b3JUeXBlEggKBE5vbmUQABIKCgZDb2xvcjEQARIKCgZDb2xvcjIQAhIKCgZD",
+            "b2xvcjMQAxIKCgZDb2xvcjQQBEIWqgITQ29tbXVuaWNhdGlvbi5Qcm90b2IG",
+            "cHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Communication.Proto.ObjType), typeof(global::Communication.Proto.PropType), typeof(global::Communication.Proto.BulletType), typeof(global::Communication.Proto.BuffType), typeof(global::Communication.Proto.JobType), }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.GameObject), global::Communication.Proto.GameObject.Parser, new[]{ "X", "Y", "Hp", "MoveSpeed", "BulletNum", "ObjType", "PropType", "BulletType", "JobType", "TeamId", "PlayerId", "Damage", "FacingAngle", "Buffs" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MapColor), global::Communication.Proto.MapColor.Parser, new[]{ "X", "Y", "TeamId" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.Message2Client), global::Communication.Proto.Message2Client.Parser, new[]{ "GameObjectList", "MapColors" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+          new pbr::FileDescriptor[] { global::Communication.Proto.MessageTypeReflection.Descriptor, },
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Communication.Proto.GameObjType), typeof(global::Communication.Proto.PropType), typeof(global::Communication.Proto.ShapeType), typeof(global::Communication.Proto.JobType), typeof(global::Communication.Proto.BulletType), typeof(global::Communication.Proto.ColorType), }, null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.GameObjInfo), global::Communication.Proto.GameObjInfo.Parser, new[]{ "GameObjType", "Guid", "X", "Y", "FacingDirection", "MoveSpeed", "CanMove", "IsMoving", "ShapeType", "Radius", "TeamID", "Ap", "BulletType", "PropType", "IsLaid", "IsDying", "JobType", "CD", "MaxBulletNum", "BulletNum", "MaxHp", "Hp", "LifeNum" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToOneClient), global::Communication.Proto.MessageToOneClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "Guid" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient), global::Communication.Proto.MessageToClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "SelfInfo", "TeammateGUIDs", "SelfTeamColor", "GameObjs", "CellColors", "TeamScore" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient.Types.OneDimVec), global::Communication.Proto.MessageToClient.Types.OneDimVec.Parser, new[]{ "RowColors" }, null, null, null, null)})
           }));
     }
     #endregion
 
   }
   #region Enums
-  public enum ObjType {
-    [pbr::OriginalName("player")] Player = 0,
-    [pbr::OriginalName("wall")] Wall = 1,
-    [pbr::OriginalName("prop")] Prop = 2,
-    [pbr::OriginalName("bullet")] Bullet = 3,
+  public enum GameObjType {
+    [pbr::OriginalName("Character")] Character = 0,
+    [pbr::OriginalName("Wall")] Wall = 1,
+    [pbr::OriginalName("Prop")] Prop = 2,
+    [pbr::OriginalName("Bullet")] Bullet = 3,
+    [pbr::OriginalName("BirthPoint")] BirthPoint = 4,
+    [pbr::OriginalName("OutOfBoundBlock")] OutOfBoundBlock = 5,
   }
 
+  /// <summary>
+  ///道具类型，此为编写时的临时名称，具体道具名称可以待主题确定后更改
+  /// </summary>
   public enum PropType {
-    [pbr::OriginalName("prop1")] Prop1 = 0,
-    [pbr::OriginalName("prop2")] Prop2 = 1,
-    [pbr::OriginalName("prop3")] Prop3 = 2,
+    [pbr::OriginalName("Null")] Null = 0,
+    [pbr::OriginalName("Bike")] Bike = 1,
+    [pbr::OriginalName("Amplifier")] Amplifier = 2,
+    [pbr::OriginalName("JinKeLa")] JinKeLa = 3,
+    [pbr::OriginalName("Rice")] Rice = 4,
+    [pbr::OriginalName("NegativeFeedback")] NegativeFeedback = 5,
+    [pbr::OriginalName("Totem")] Totem = 6,
+    [pbr::OriginalName("Phaser")] Phaser = 7,
+    [pbr::OriginalName("Dirt")] Dirt = 8,
+    [pbr::OriginalName("Attenuator")] Attenuator = 9,
+    [pbr::OriginalName("Divider")] Divider = 10,
   }
 
-  public enum BulletType {
-    [pbr::OriginalName("bullet1")] Bullet1 = 0,
-    [pbr::OriginalName("bullet2")] Bullet2 = 1,
-    [pbr::OriginalName("bullet3")] Bullet3 = 2,
-  }
-
-  public enum BuffType {
-    [pbr::OriginalName("haveShield")] HaveShield = 0,
-    [pbr::OriginalName("haveFuhuojia")] HaveFuhuojia = 1,
-    [pbr::OriginalName("speedUp")] SpeedUp = 2,
-    [pbr::OriginalName("speedDown")] SpeedDown = 3,
-    [pbr::OriginalName("damageUp")] DamageUp = 4,
-    [pbr::OriginalName("damageDown")] DamageDown = 5,
-    [pbr::OriginalName("isStunned")] IsStunned = 6,
+  public enum ShapeType {
+    [pbr::OriginalName("Circle")] Circle = 0,
+    [pbr::OriginalName("Square")] Square = 1,
   }
 
   public enum JobType {
-    [pbr::OriginalName("job1")] Job1 = 0,
-    [pbr::OriginalName("job2")] Job2 = 1,
-    [pbr::OriginalName("job3")] Job3 = 2,
+    [pbr::OriginalName("Job0")] Job0 = 0,
+    [pbr::OriginalName("Job1")] Job1 = 1,
+    [pbr::OriginalName("Job2")] Job2 = 2,
+    [pbr::OriginalName("Job3")] Job3 = 3,
+    [pbr::OriginalName("Job4")] Job4 = 4,
+    [pbr::OriginalName("Job5")] Job5 = 5,
+    [pbr::OriginalName("Job6")] Job6 = 6,
+  }
+
+  public enum BulletType {
+    [pbr::OriginalName("Bullet0")] Bullet0 = 0,
+    [pbr::OriginalName("Bullet1")] Bullet1 = 1,
+    [pbr::OriginalName("Bullet2")] Bullet2 = 2,
+    [pbr::OriginalName("Bullet3")] Bullet3 = 3,
+    [pbr::OriginalName("Bullet4")] Bullet4 = 4,
+    [pbr::OriginalName("Bullet5")] Bullet5 = 5,
+    [pbr::OriginalName("Bullet6")] Bullet6 = 6,
+  }
+
+  public enum ColorType {
+    [pbr::OriginalName("None")] None = 0,
+    [pbr::OriginalName("Color1")] Color1 = 1,
+    [pbr::OriginalName("Color2")] Color2 = 2,
+    [pbr::OriginalName("Color3")] Color3 = 3,
+    [pbr::OriginalName("Color4")] Color4 = 4,
   }
 
   #endregion
 
   #region Messages
-  public sealed partial class GameObject : pb::IMessage<GameObject> {
-    private static readonly pb::MessageParser<GameObject> _parser = new pb::MessageParser<GameObject>(() => new GameObject());
+  public sealed partial class GameObjInfo : pb::IMessage<GameObjInfo>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<GameObjInfo> _parser = new pb::MessageParser<GameObjInfo>(() => new GameObjInfo());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<GameObject> Parser { get { return _parser; } }
+    public static pb::MessageParser<GameObjInfo> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -113,41 +156,75 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GameObject() {
+    public GameObjInfo() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GameObject(GameObject other) : this() {
+    public GameObjInfo(GameObjInfo other) : this() {
+      gameObjType_ = other.gameObjType_;
+      guid_ = other.guid_;
       x_ = other.x_;
       y_ = other.y_;
-      hp_ = other.hp_;
+      facingDirection_ = other.facingDirection_;
       moveSpeed_ = other.moveSpeed_;
-      bulletNum_ = other.bulletNum_;
-      objType_ = other.objType_;
-      propType_ = other.propType_;
+      canMove_ = other.canMove_;
+      isMoving_ = other.isMoving_;
+      shapeType_ = other.shapeType_;
+      radius_ = other.radius_;
+      teamID_ = other.teamID_;
+      ap_ = other.ap_;
       bulletType_ = other.bulletType_;
+      propType_ = other.propType_;
+      isLaid_ = other.isLaid_;
+      isDying_ = other.isDying_;
       jobType_ = other.jobType_;
-      teamId_ = other.teamId_;
-      playerId_ = other.playerId_;
-      damage_ = other.damage_;
-      facingAngle_ = other.facingAngle_;
-      buffs_ = other.buffs_.Clone();
+      cD_ = other.cD_;
+      maxBulletNum_ = other.maxBulletNum_;
+      bulletNum_ = other.bulletNum_;
+      maxHp_ = other.maxHp_;
+      hp_ = other.hp_;
+      lifeNum_ = other.lifeNum_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GameObject Clone() {
-      return new GameObject(this);
+    public GameObjInfo Clone() {
+      return new GameObjInfo(this);
+    }
+
+    /// <summary>Field number for the "gameObjType" field.</summary>
+    public const int GameObjTypeFieldNumber = 1;
+    private global::Communication.Proto.GameObjType gameObjType_ = global::Communication.Proto.GameObjType.Character;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Communication.Proto.GameObjType GameObjType {
+      get { return gameObjType_; }
+      set {
+        gameObjType_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "guid" field.</summary>
+    public const int GuidFieldNumber = 2;
+    private long guid_;
+    /// <summary>
+    ///以下当gameObjType为任意值时均时有效
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long Guid {
+      get { return guid_; }
+      set {
+        guid_ = value;
+      }
     }
 
     /// <summary>Field number for the "x" field.</summary>
-    public const int XFieldNumber = 1;
-    private double x_;
+    public const int XFieldNumber = 3;
+    private int x_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double X {
+    public int X {
       get { return x_; }
       set {
         x_ = value;
@@ -155,29 +232,29 @@ namespace Communication.Proto {
     }
 
     /// <summary>Field number for the "y" field.</summary>
-    public const int YFieldNumber = 2;
-    private double y_;
+    public const int YFieldNumber = 4;
+    private int y_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double Y {
+    public int Y {
       get { return y_; }
       set {
         y_ = value;
       }
     }
 
-    /// <summary>Field number for the "hp" field.</summary>
-    public const int HpFieldNumber = 3;
-    private int hp_;
+    /// <summary>Field number for the "facingDirection" field.</summary>
+    public const int FacingDirectionFieldNumber = 5;
+    private double facingDirection_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Hp {
-      get { return hp_; }
+    public double FacingDirection {
+      get { return facingDirection_; }
       set {
-        hp_ = value;
+        facingDirection_ = value;
       }
     }
 
     /// <summary>Field number for the "moveSpeed" field.</summary>
-    public const int MoveSpeedFieldNumber = 4;
+    public const int MoveSpeedFieldNumber = 6;
     private int moveSpeed_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int MoveSpeed {
@@ -187,47 +264,89 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "bulletNum" field.</summary>
-    public const int BulletNumFieldNumber = 5;
-    private int bulletNum_;
+    /// <summary>Field number for the "canMove" field.</summary>
+    public const int CanMoveFieldNumber = 7;
+    private bool canMove_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int BulletNum {
-      get { return bulletNum_; }
+    public bool CanMove {
+      get { return canMove_; }
       set {
-        bulletNum_ = value;
+        canMove_ = value;
       }
     }
 
-    /// <summary>Field number for the "ObjType" field.</summary>
-    public const int ObjTypeFieldNumber = 6;
-    private global::Communication.Proto.ObjType objType_ = 0;
+    /// <summary>Field number for the "isMoving" field.</summary>
+    public const int IsMovingFieldNumber = 8;
+    private bool isMoving_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IsMoving {
+      get { return isMoving_; }
+      set {
+        isMoving_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "shapeType" field.</summary>
+    public const int ShapeTypeFieldNumber = 9;
+    private global::Communication.Proto.ShapeType shapeType_ = global::Communication.Proto.ShapeType.Circle;
     /// <summary>
+    ///形状
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Communication.Proto.ObjType ObjType {
-      get { return objType_; }
+    public global::Communication.Proto.ShapeType ShapeType {
+      get { return shapeType_; }
       set {
-        objType_ = value;
+        shapeType_ = value;
       }
     }
 
-    /// <summary>Field number for the "PropType" field.</summary>
-    public const int PropTypeFieldNumber = 7;
-    private global::Communication.Proto.PropType propType_ = 0;
+    /// <summary>Field number for the "radius" field.</summary>
+    public const int RadiusFieldNumber = 10;
+    private int radius_;
     /// <summary>
+    ///圆形物体的半径或正方形内切圆半径
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Communication.Proto.PropType PropType {
-      get { return propType_; }
+    public int Radius {
+      get { return radius_; }
       set {
-        propType_ = value;
+        radius_ = value;
       }
     }
 
-    /// <summary>Field number for the "BulletType" field.</summary>
-    public const int BulletTypeFieldNumber = 8;
-    private global::Communication.Proto.BulletType bulletType_ = 0;
+    /// <summary>Field number for the "teamID" field.</summary>
+    public const int TeamIDFieldNumber = 11;
+    private long teamID_;
     /// <summary>
+    ///以下当gameObjType为Character和Bullet时才有效
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long TeamID {
+      get { return teamID_; }
+      set {
+        teamID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "ap" field.</summary>
+    public const int ApFieldNumber = 12;
+    private int ap_;
+    /// <summary>
+    ///攻击力
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Ap {
+      get { return ap_; }
+      set {
+        ap_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "bulletType" field.</summary>
+    public const int BulletTypeFieldNumber = 13;
+    private global::Communication.Proto.BulletType bulletType_ = global::Communication.Proto.BulletType.Bullet0;
+    /// <summary>
+    ///子弹类型
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Communication.Proto.BulletType BulletType {
@@ -237,9 +356,51 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "JobType" field.</summary>
-    public const int JobTypeFieldNumber = 9;
-    private global::Communication.Proto.JobType jobType_ = 0;
+    /// <summary>Field number for the "propType" field.</summary>
+    public const int PropTypeFieldNumber = 14;
+    private global::Communication.Proto.PropType propType_ = global::Communication.Proto.PropType.Null;
+    /// <summary>
+    ///以下当gameObjType为Character和Prop时有效
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Communication.Proto.PropType PropType {
+      get { return propType_; }
+      set {
+        propType_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "isLaid" field.</summary>
+    public const int IsLaidFieldNumber = 15;
+    private bool isLaid_;
+    /// <summary>
+    ///以下仅当gameObjType为Prop时有效
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IsLaid {
+      get { return isLaid_; }
+      set {
+        isLaid_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "isDying" field.</summary>
+    public const int IsDyingFieldNumber = 16;
+    private bool isDying_;
+    /// <summary>
+    ///以下仅当gameObjType为Character时有效
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool IsDying {
+      get { return isDying_; }
+      set {
+        isDying_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "jobType" field.</summary>
+    public const int JobTypeFieldNumber = 17;
+    private global::Communication.Proto.JobType jobType_ = global::Communication.Proto.JobType.Job0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Communication.Proto.JobType JobType {
       get { return jobType_; }
@@ -248,113 +409,140 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "teamId" field.</summary>
-    public const int TeamIdFieldNumber = 10;
-    private int teamId_;
+    /// <summary>Field number for the "CD" field.</summary>
+    public const int CDFieldNumber = 18;
+    private int cD_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TeamId {
-      get { return teamId_; }
+    public int CD {
+      get { return cD_; }
       set {
-        teamId_ = value;
+        cD_ = value;
       }
     }
 
-    /// <summary>Field number for the "playerId" field.</summary>
-    public const int PlayerIdFieldNumber = 11;
-    private int playerId_;
+    /// <summary>Field number for the "maxBulletNum" field.</summary>
+    public const int MaxBulletNumFieldNumber = 19;
+    private int maxBulletNum_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int MaxBulletNum {
+      get { return maxBulletNum_; }
+      set {
+        maxBulletNum_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "bulletNum" field.</summary>
+    public const int BulletNumFieldNumber = 20;
+    private int bulletNum_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int BulletNum {
+      get { return bulletNum_; }
+      set {
+        bulletNum_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "maxHp" field.</summary>
+    public const int MaxHpFieldNumber = 21;
+    private int maxHp_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int MaxHp {
+      get { return maxHp_; }
+      set {
+        maxHp_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "hp" field.</summary>
+    public const int HpFieldNumber = 22;
+    private int hp_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Hp {
+      get { return hp_; }
+      set {
+        hp_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "lifeNum" field.</summary>
+    public const int LifeNumFieldNumber = 23;
+    private int lifeNum_;
     /// <summary>
-    ///区分队内id
+    ///第几次复活
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int PlayerId {
-      get { return playerId_; }
+    public int LifeNum {
+      get { return lifeNum_; }
       set {
-        playerId_ = value;
+        lifeNum_ = value;
       }
-    }
-
-    /// <summary>Field number for the "damage" field.</summary>
-    public const int DamageFieldNumber = 12;
-    private int damage_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Damage {
-      get { return damage_; }
-      set {
-        damage_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "facingAngle" field.</summary>
-    public const int FacingAngleFieldNumber = 13;
-    private double facingAngle_;
-    /// <summary>
-    ///面对的方向,rad
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double FacingAngle {
-      get { return facingAngle_; }
-      set {
-        facingAngle_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "buffs" field.</summary>
-    public const int BuffsFieldNumber = 14;
-    private static readonly pb::FieldCodec<global::Communication.Proto.BuffType> _repeated_buffs_codec
-        = pb::FieldCodec.ForEnum(114, x => (int) x, x => (global::Communication.Proto.BuffType) x);
-    private readonly pbc::RepeatedField<global::Communication.Proto.BuffType> buffs_ = new pbc::RepeatedField<global::Communication.Proto.BuffType>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Communication.Proto.BuffType> Buffs {
-      get { return buffs_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as GameObject);
+      return Equals(other as GameObjInfo);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(GameObject other) {
+    public bool Equals(GameObjInfo other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(X, other.X)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Y, other.Y)) return false;
-      if (Hp != other.Hp) return false;
+      if (GameObjType != other.GameObjType) return false;
+      if (Guid != other.Guid) return false;
+      if (X != other.X) return false;
+      if (Y != other.Y) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(FacingDirection, other.FacingDirection)) return false;
       if (MoveSpeed != other.MoveSpeed) return false;
-      if (BulletNum != other.BulletNum) return false;
-      if (ObjType != other.ObjType) return false;
-      if (PropType != other.PropType) return false;
+      if (CanMove != other.CanMove) return false;
+      if (IsMoving != other.IsMoving) return false;
+      if (ShapeType != other.ShapeType) return false;
+      if (Radius != other.Radius) return false;
+      if (TeamID != other.TeamID) return false;
+      if (Ap != other.Ap) return false;
       if (BulletType != other.BulletType) return false;
+      if (PropType != other.PropType) return false;
+      if (IsLaid != other.IsLaid) return false;
+      if (IsDying != other.IsDying) return false;
       if (JobType != other.JobType) return false;
-      if (TeamId != other.TeamId) return false;
-      if (PlayerId != other.PlayerId) return false;
-      if (Damage != other.Damage) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(FacingAngle, other.FacingAngle)) return false;
-      if(!buffs_.Equals(other.buffs_)) return false;
+      if (CD != other.CD) return false;
+      if (MaxBulletNum != other.MaxBulletNum) return false;
+      if (BulletNum != other.BulletNum) return false;
+      if (MaxHp != other.MaxHp) return false;
+      if (Hp != other.Hp) return false;
+      if (LifeNum != other.LifeNum) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (X != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(X);
-      if (Y != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Y);
-      if (Hp != 0) hash ^= Hp.GetHashCode();
+      if (GameObjType != global::Communication.Proto.GameObjType.Character) hash ^= GameObjType.GetHashCode();
+      if (Guid != 0L) hash ^= Guid.GetHashCode();
+      if (X != 0) hash ^= X.GetHashCode();
+      if (Y != 0) hash ^= Y.GetHashCode();
+      if (FacingDirection != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(FacingDirection);
       if (MoveSpeed != 0) hash ^= MoveSpeed.GetHashCode();
+      if (CanMove != false) hash ^= CanMove.GetHashCode();
+      if (IsMoving != false) hash ^= IsMoving.GetHashCode();
+      if (ShapeType != global::Communication.Proto.ShapeType.Circle) hash ^= ShapeType.GetHashCode();
+      if (Radius != 0) hash ^= Radius.GetHashCode();
+      if (TeamID != 0L) hash ^= TeamID.GetHashCode();
+      if (Ap != 0) hash ^= Ap.GetHashCode();
+      if (BulletType != global::Communication.Proto.BulletType.Bullet0) hash ^= BulletType.GetHashCode();
+      if (PropType != global::Communication.Proto.PropType.Null) hash ^= PropType.GetHashCode();
+      if (IsLaid != false) hash ^= IsLaid.GetHashCode();
+      if (IsDying != false) hash ^= IsDying.GetHashCode();
+      if (JobType != global::Communication.Proto.JobType.Job0) hash ^= JobType.GetHashCode();
+      if (CD != 0) hash ^= CD.GetHashCode();
+      if (MaxBulletNum != 0) hash ^= MaxBulletNum.GetHashCode();
       if (BulletNum != 0) hash ^= BulletNum.GetHashCode();
-      if (ObjType != 0) hash ^= ObjType.GetHashCode();
-      if (PropType != 0) hash ^= PropType.GetHashCode();
-      if (BulletType != 0) hash ^= BulletType.GetHashCode();
-      if (JobType != 0) hash ^= JobType.GetHashCode();
-      if (TeamId != 0) hash ^= TeamId.GetHashCode();
-      if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
-      if (Damage != 0) hash ^= Damage.GetHashCode();
-      if (FacingAngle != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(FacingAngle);
-      hash ^= buffs_.GetHashCode();
+      if (MaxHp != 0) hash ^= MaxHp.GetHashCode();
+      if (Hp != 0) hash ^= Hp.GetHashCode();
+      if (LifeNum != 0) hash ^= LifeNum.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -368,107 +556,280 @@ namespace Communication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (X != 0D) {
-        output.WriteRawTag(9);
-        output.WriteDouble(X);
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (GameObjType != global::Communication.Proto.GameObjType.Character) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) GameObjType);
       }
-      if (Y != 0D) {
-        output.WriteRawTag(17);
-        output.WriteDouble(Y);
+      if (Guid != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(Guid);
       }
-      if (Hp != 0) {
+      if (X != 0) {
         output.WriteRawTag(24);
-        output.WriteInt32(Hp);
+        output.WriteInt32(X);
+      }
+      if (Y != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Y);
+      }
+      if (FacingDirection != 0D) {
+        output.WriteRawTag(41);
+        output.WriteDouble(FacingDirection);
       }
       if (MoveSpeed != 0) {
-        output.WriteRawTag(32);
+        output.WriteRawTag(48);
         output.WriteInt32(MoveSpeed);
       }
-      if (BulletNum != 0) {
-        output.WriteRawTag(40);
-        output.WriteInt32(BulletNum);
-      }
-      if (ObjType != 0) {
-        output.WriteRawTag(48);
-        output.WriteEnum((int) ObjType);
-      }
-      if (PropType != 0) {
+      if (CanMove != false) {
         output.WriteRawTag(56);
-        output.WriteEnum((int) PropType);
+        output.WriteBool(CanMove);
       }
-      if (BulletType != 0) {
+      if (IsMoving != false) {
         output.WriteRawTag(64);
+        output.WriteBool(IsMoving);
+      }
+      if (ShapeType != global::Communication.Proto.ShapeType.Circle) {
+        output.WriteRawTag(72);
+        output.WriteEnum((int) ShapeType);
+      }
+      if (Radius != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(Radius);
+      }
+      if (TeamID != 0L) {
+        output.WriteRawTag(88);
+        output.WriteInt64(TeamID);
+      }
+      if (Ap != 0) {
+        output.WriteRawTag(96);
+        output.WriteInt32(Ap);
+      }
+      if (BulletType != global::Communication.Proto.BulletType.Bullet0) {
+        output.WriteRawTag(104);
         output.WriteEnum((int) BulletType);
       }
-      if (JobType != 0) {
-        output.WriteRawTag(72);
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        output.WriteRawTag(112);
+        output.WriteEnum((int) PropType);
+      }
+      if (IsLaid != false) {
+        output.WriteRawTag(120);
+        output.WriteBool(IsLaid);
+      }
+      if (IsDying != false) {
+        output.WriteRawTag(128, 1);
+        output.WriteBool(IsDying);
+      }
+      if (JobType != global::Communication.Proto.JobType.Job0) {
+        output.WriteRawTag(136, 1);
         output.WriteEnum((int) JobType);
       }
-      if (TeamId != 0) {
-        output.WriteRawTag(80);
-        output.WriteInt32(TeamId);
+      if (CD != 0) {
+        output.WriteRawTag(144, 1);
+        output.WriteInt32(CD);
       }
-      if (PlayerId != 0) {
-        output.WriteRawTag(88);
-        output.WriteInt32(PlayerId);
+      if (MaxBulletNum != 0) {
+        output.WriteRawTag(152, 1);
+        output.WriteInt32(MaxBulletNum);
       }
-      if (Damage != 0) {
-        output.WriteRawTag(96);
-        output.WriteInt32(Damage);
+      if (BulletNum != 0) {
+        output.WriteRawTag(160, 1);
+        output.WriteInt32(BulletNum);
       }
-      if (FacingAngle != 0D) {
-        output.WriteRawTag(105);
-        output.WriteDouble(FacingAngle);
+      if (MaxHp != 0) {
+        output.WriteRawTag(168, 1);
+        output.WriteInt32(MaxHp);
       }
-      buffs_.WriteTo(output, _repeated_buffs_codec);
+      if (Hp != 0) {
+        output.WriteRawTag(176, 1);
+        output.WriteInt32(Hp);
+      }
+      if (LifeNum != 0) {
+        output.WriteRawTag(184, 1);
+        output.WriteInt32(LifeNum);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
+    #endif
     }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (GameObjType != global::Communication.Proto.GameObjType.Character) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) GameObjType);
+      }
+      if (Guid != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(Guid);
+      }
+      if (X != 0) {
+        output.WriteRawTag(24);
+        output.WriteInt32(X);
+      }
+      if (Y != 0) {
+        output.WriteRawTag(32);
+        output.WriteInt32(Y);
+      }
+      if (FacingDirection != 0D) {
+        output.WriteRawTag(41);
+        output.WriteDouble(FacingDirection);
+      }
+      if (MoveSpeed != 0) {
+        output.WriteRawTag(48);
+        output.WriteInt32(MoveSpeed);
+      }
+      if (CanMove != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(CanMove);
+      }
+      if (IsMoving != false) {
+        output.WriteRawTag(64);
+        output.WriteBool(IsMoving);
+      }
+      if (ShapeType != global::Communication.Proto.ShapeType.Circle) {
+        output.WriteRawTag(72);
+        output.WriteEnum((int) ShapeType);
+      }
+      if (Radius != 0) {
+        output.WriteRawTag(80);
+        output.WriteInt32(Radius);
+      }
+      if (TeamID != 0L) {
+        output.WriteRawTag(88);
+        output.WriteInt64(TeamID);
+      }
+      if (Ap != 0) {
+        output.WriteRawTag(96);
+        output.WriteInt32(Ap);
+      }
+      if (BulletType != global::Communication.Proto.BulletType.Bullet0) {
+        output.WriteRawTag(104);
+        output.WriteEnum((int) BulletType);
+      }
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        output.WriteRawTag(112);
+        output.WriteEnum((int) PropType);
+      }
+      if (IsLaid != false) {
+        output.WriteRawTag(120);
+        output.WriteBool(IsLaid);
+      }
+      if (IsDying != false) {
+        output.WriteRawTag(128, 1);
+        output.WriteBool(IsDying);
+      }
+      if (JobType != global::Communication.Proto.JobType.Job0) {
+        output.WriteRawTag(136, 1);
+        output.WriteEnum((int) JobType);
+      }
+      if (CD != 0) {
+        output.WriteRawTag(144, 1);
+        output.WriteInt32(CD);
+      }
+      if (MaxBulletNum != 0) {
+        output.WriteRawTag(152, 1);
+        output.WriteInt32(MaxBulletNum);
+      }
+      if (BulletNum != 0) {
+        output.WriteRawTag(160, 1);
+        output.WriteInt32(BulletNum);
+      }
+      if (MaxHp != 0) {
+        output.WriteRawTag(168, 1);
+        output.WriteInt32(MaxHp);
+      }
+      if (Hp != 0) {
+        output.WriteRawTag(176, 1);
+        output.WriteInt32(Hp);
+      }
+      if (LifeNum != 0) {
+        output.WriteRawTag(184, 1);
+        output.WriteInt32(LifeNum);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (X != 0D) {
-        size += 1 + 8;
+      if (GameObjType != global::Communication.Proto.GameObjType.Character) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) GameObjType);
       }
-      if (Y != 0D) {
-        size += 1 + 8;
+      if (Guid != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Guid);
       }
-      if (Hp != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Hp);
+      if (X != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(X);
+      }
+      if (Y != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Y);
+      }
+      if (FacingDirection != 0D) {
+        size += 1 + 8;
       }
       if (MoveSpeed != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(MoveSpeed);
       }
-      if (BulletNum != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(BulletNum);
+      if (CanMove != false) {
+        size += 1 + 1;
       }
-      if (ObjType != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ObjType);
+      if (IsMoving != false) {
+        size += 1 + 1;
       }
-      if (PropType != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) PropType);
+      if (ShapeType != global::Communication.Proto.ShapeType.Circle) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ShapeType);
       }
-      if (BulletType != 0) {
+      if (Radius != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Radius);
+      }
+      if (TeamID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(TeamID);
+      }
+      if (Ap != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Ap);
+      }
+      if (BulletType != global::Communication.Proto.BulletType.Bullet0) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) BulletType);
       }
-      if (JobType != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) JobType);
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) PropType);
       }
-      if (TeamId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TeamId);
+      if (IsLaid != false) {
+        size += 1 + 1;
       }
-      if (PlayerId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerId);
+      if (IsDying != false) {
+        size += 2 + 1;
       }
-      if (Damage != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Damage);
+      if (JobType != global::Communication.Proto.JobType.Job0) {
+        size += 2 + pb::CodedOutputStream.ComputeEnumSize((int) JobType);
       }
-      if (FacingAngle != 0D) {
-        size += 1 + 8;
+      if (CD != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(CD);
       }
-      size += buffs_.CalculateSize(_repeated_buffs_codec);
+      if (MaxBulletNum != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(MaxBulletNum);
+      }
+      if (BulletNum != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(BulletNum);
+      }
+      if (MaxHp != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(MaxHp);
+      }
+      if (Hp != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(Hp);
+      }
+      if (LifeNum != 0) {
+        size += 2 + pb::CodedOutputStream.ComputeInt32Size(LifeNum);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -476,129 +837,310 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(GameObject other) {
+    public void MergeFrom(GameObjInfo other) {
       if (other == null) {
         return;
       }
-      if (other.X != 0D) {
+      if (other.GameObjType != global::Communication.Proto.GameObjType.Character) {
+        GameObjType = other.GameObjType;
+      }
+      if (other.Guid != 0L) {
+        Guid = other.Guid;
+      }
+      if (other.X != 0) {
         X = other.X;
       }
-      if (other.Y != 0D) {
+      if (other.Y != 0) {
         Y = other.Y;
       }
-      if (other.Hp != 0) {
-        Hp = other.Hp;
+      if (other.FacingDirection != 0D) {
+        FacingDirection = other.FacingDirection;
       }
       if (other.MoveSpeed != 0) {
         MoveSpeed = other.MoveSpeed;
       }
+      if (other.CanMove != false) {
+        CanMove = other.CanMove;
+      }
+      if (other.IsMoving != false) {
+        IsMoving = other.IsMoving;
+      }
+      if (other.ShapeType != global::Communication.Proto.ShapeType.Circle) {
+        ShapeType = other.ShapeType;
+      }
+      if (other.Radius != 0) {
+        Radius = other.Radius;
+      }
+      if (other.TeamID != 0L) {
+        TeamID = other.TeamID;
+      }
+      if (other.Ap != 0) {
+        Ap = other.Ap;
+      }
+      if (other.BulletType != global::Communication.Proto.BulletType.Bullet0) {
+        BulletType = other.BulletType;
+      }
+      if (other.PropType != global::Communication.Proto.PropType.Null) {
+        PropType = other.PropType;
+      }
+      if (other.IsLaid != false) {
+        IsLaid = other.IsLaid;
+      }
+      if (other.IsDying != false) {
+        IsDying = other.IsDying;
+      }
+      if (other.JobType != global::Communication.Proto.JobType.Job0) {
+        JobType = other.JobType;
+      }
+      if (other.CD != 0) {
+        CD = other.CD;
+      }
+      if (other.MaxBulletNum != 0) {
+        MaxBulletNum = other.MaxBulletNum;
+      }
       if (other.BulletNum != 0) {
         BulletNum = other.BulletNum;
       }
-      if (other.ObjType != 0) {
-        ObjType = other.ObjType;
+      if (other.MaxHp != 0) {
+        MaxHp = other.MaxHp;
       }
-      if (other.PropType != 0) {
-        PropType = other.PropType;
+      if (other.Hp != 0) {
+        Hp = other.Hp;
       }
-      if (other.BulletType != 0) {
-        BulletType = other.BulletType;
+      if (other.LifeNum != 0) {
+        LifeNum = other.LifeNum;
       }
-      if (other.JobType != 0) {
-        JobType = other.JobType;
-      }
-      if (other.TeamId != 0) {
-        TeamId = other.TeamId;
-      }
-      if (other.PlayerId != 0) {
-        PlayerId = other.PlayerId;
-      }
-      if (other.Damage != 0) {
-        Damage = other.Damage;
-      }
-      if (other.FacingAngle != 0D) {
-        FacingAngle = other.FacingAngle;
-      }
-      buffs_.Add(other.buffs_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
         switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 9: {
-            X = input.ReadDouble();
+          case 8: {
+            GameObjType = (global::Communication.Proto.GameObjType) input.ReadEnum();
             break;
           }
-          case 17: {
-            Y = input.ReadDouble();
+          case 16: {
+            Guid = input.ReadInt64();
             break;
           }
           case 24: {
-            Hp = input.ReadInt32();
+            X = input.ReadInt32();
             break;
           }
           case 32: {
-            MoveSpeed = input.ReadInt32();
+            Y = input.ReadInt32();
             break;
           }
-          case 40: {
-            BulletNum = input.ReadInt32();
+          case 41: {
+            FacingDirection = input.ReadDouble();
             break;
           }
           case 48: {
-            ObjType = (global::Communication.Proto.ObjType) input.ReadEnum();
+            MoveSpeed = input.ReadInt32();
             break;
           }
           case 56: {
-            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            CanMove = input.ReadBool();
             break;
           }
           case 64: {
-            BulletType = (global::Communication.Proto.BulletType) input.ReadEnum();
+            IsMoving = input.ReadBool();
             break;
           }
           case 72: {
-            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
+            ShapeType = (global::Communication.Proto.ShapeType) input.ReadEnum();
             break;
           }
           case 80: {
-            TeamId = input.ReadInt32();
+            Radius = input.ReadInt32();
             break;
           }
           case 88: {
-            PlayerId = input.ReadInt32();
+            TeamID = input.ReadInt64();
             break;
           }
           case 96: {
-            Damage = input.ReadInt32();
+            Ap = input.ReadInt32();
             break;
           }
-          case 105: {
-            FacingAngle = input.ReadDouble();
+          case 104: {
+            BulletType = (global::Communication.Proto.BulletType) input.ReadEnum();
             break;
           }
-          case 114:
           case 112: {
-            buffs_.AddEntriesFrom(input, _repeated_buffs_codec);
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            break;
+          }
+          case 120: {
+            IsLaid = input.ReadBool();
+            break;
+          }
+          case 128: {
+            IsDying = input.ReadBool();
+            break;
+          }
+          case 136: {
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
+            break;
+          }
+          case 144: {
+            CD = input.ReadInt32();
+            break;
+          }
+          case 152: {
+            MaxBulletNum = input.ReadInt32();
+            break;
+          }
+          case 160: {
+            BulletNum = input.ReadInt32();
+            break;
+          }
+          case 168: {
+            MaxHp = input.ReadInt32();
+            break;
+          }
+          case 176: {
+            Hp = input.ReadInt32();
+            break;
+          }
+          case 184: {
+            LifeNum = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            GameObjType = (global::Communication.Proto.GameObjType) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            Guid = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            X = input.ReadInt32();
+            break;
+          }
+          case 32: {
+            Y = input.ReadInt32();
+            break;
+          }
+          case 41: {
+            FacingDirection = input.ReadDouble();
+            break;
+          }
+          case 48: {
+            MoveSpeed = input.ReadInt32();
+            break;
+          }
+          case 56: {
+            CanMove = input.ReadBool();
+            break;
+          }
+          case 64: {
+            IsMoving = input.ReadBool();
+            break;
+          }
+          case 72: {
+            ShapeType = (global::Communication.Proto.ShapeType) input.ReadEnum();
+            break;
+          }
+          case 80: {
+            Radius = input.ReadInt32();
+            break;
+          }
+          case 88: {
+            TeamID = input.ReadInt64();
+            break;
+          }
+          case 96: {
+            Ap = input.ReadInt32();
+            break;
+          }
+          case 104: {
+            BulletType = (global::Communication.Proto.BulletType) input.ReadEnum();
+            break;
+          }
+          case 112: {
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            break;
+          }
+          case 120: {
+            IsLaid = input.ReadBool();
+            break;
+          }
+          case 128: {
+            IsDying = input.ReadBool();
+            break;
+          }
+          case 136: {
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
+            break;
+          }
+          case 144: {
+            CD = input.ReadInt32();
+            break;
+          }
+          case 152: {
+            MaxBulletNum = input.ReadInt32();
+            break;
+          }
+          case 160: {
+            BulletNum = input.ReadInt32();
+            break;
+          }
+          case 168: {
+            MaxHp = input.ReadInt32();
+            break;
+          }
+          case 176: {
+            Hp = input.ReadInt32();
+            break;
+          }
+          case 184: {
+            LifeNum = input.ReadInt32();
             break;
           }
         }
       }
     }
+    #endif
 
   }
 
-  public sealed partial class MapColor : pb::IMessage<MapColor> {
-    private static readonly pb::MessageParser<MapColor> _parser = new pb::MessageParser<MapColor>(() => new MapColor());
+  /// <summary>
+  ///发送单个信息时
+  /// </summary>
+  public sealed partial class MessageToOneClient : pb::IMessage<MessageToOneClient>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessageToOneClient> _parser = new pb::MessageParser<MessageToOneClient>(() => new MessageToOneClient());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<MapColor> Parser { get { return _parser; } }
+    public static pb::MessageParser<MessageToOneClient> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -611,83 +1153,106 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public MapColor() {
+    public MessageToOneClient() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public MapColor(MapColor other) : this() {
-      x_ = other.x_;
-      y_ = other.y_;
-      teamId_ = other.teamId_;
+    public MessageToOneClient(MessageToOneClient other) : this() {
+      playerID_ = other.playerID_;
+      teamID_ = other.teamID_;
+      messageType_ = other.messageType_;
+      guid_ = other.guid_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public MapColor Clone() {
-      return new MapColor(this);
+    public MessageToOneClient Clone() {
+      return new MessageToOneClient(this);
     }
 
-    /// <summary>Field number for the "x" field.</summary>
-    public const int XFieldNumber = 1;
-    private int x_;
+    /// <summary>Field number for the "playerID" field.</summary>
+    public const int PlayerIDFieldNumber = 1;
+    private long playerID_;
+    /// <summary>
+    ///指明发送给谁
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int X {
-      get { return x_; }
+    public long PlayerID {
+      get { return playerID_; }
       set {
-        x_ = value;
+        playerID_ = value;
       }
     }
 
-    /// <summary>Field number for the "y" field.</summary>
-    public const int YFieldNumber = 2;
-    private int y_;
+    /// <summary>Field number for the "teamID" field.</summary>
+    public const int TeamIDFieldNumber = 2;
+    private long teamID_;
+    /// <summary>
+    ///指明发送给谁
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Y {
-      get { return y_; }
+    public long TeamID {
+      get { return teamID_; }
       set {
-        y_ = value;
+        teamID_ = value;
       }
     }
 
-    /// <summary>Field number for the "teamId" field.</summary>
-    public const int TeamIdFieldNumber = 3;
-    private int teamId_;
+    /// <summary>Field number for the "messageType" field.</summary>
+    public const int MessageTypeFieldNumber = 3;
+    private global::Communication.Proto.MessageType messageType_ = global::Communication.Proto.MessageType.AddPlayer;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TeamId {
-      get { return teamId_; }
+    public global::Communication.Proto.MessageType MessageType {
+      get { return messageType_; }
       set {
-        teamId_ = value;
+        messageType_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "guid" field.</summary>
+    public const int GuidFieldNumber = 4;
+    private long guid_;
+    /// <summary>
+    ///自己的guid
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long Guid {
+      get { return guid_; }
+      set {
+        guid_ = value;
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as MapColor);
+      return Equals(other as MessageToOneClient);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(MapColor other) {
+    public bool Equals(MessageToOneClient other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (X != other.X) return false;
-      if (Y != other.Y) return false;
-      if (TeamId != other.TeamId) return false;
+      if (PlayerID != other.PlayerID) return false;
+      if (TeamID != other.TeamID) return false;
+      if (MessageType != other.MessageType) return false;
+      if (Guid != other.Guid) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (X != 0) hash ^= X.GetHashCode();
-      if (Y != 0) hash ^= Y.GetHashCode();
-      if (TeamId != 0) hash ^= TeamId.GetHashCode();
+      if (PlayerID != 0L) hash ^= PlayerID.GetHashCode();
+      if (TeamID != 0L) hash ^= TeamID.GetHashCode();
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) hash ^= MessageType.GetHashCode();
+      if (Guid != 0L) hash ^= Guid.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -701,34 +1266,70 @@ namespace Communication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (X != 0) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (PlayerID != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(X);
+        output.WriteInt64(PlayerID);
       }
-      if (Y != 0) {
+      if (TeamID != 0L) {
         output.WriteRawTag(16);
-        output.WriteInt32(Y);
+        output.WriteInt64(TeamID);
       }
-      if (TeamId != 0) {
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
         output.WriteRawTag(24);
-        output.WriteInt32(TeamId);
+        output.WriteEnum((int) MessageType);
+      }
+      if (Guid != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(Guid);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
+    #endif
     }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (PlayerID != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(PlayerID);
+      }
+      if (TeamID != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(TeamID);
+      }
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) MessageType);
+      }
+      if (Guid != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(Guid);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (X != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(X);
+      if (PlayerID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(PlayerID);
       }
-      if (Y != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Y);
+      if (TeamID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(TeamID);
       }
-      if (TeamId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TeamId);
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MessageType);
+      }
+      if (Guid != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Guid);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -737,24 +1338,30 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(MapColor other) {
+    public void MergeFrom(MessageToOneClient other) {
       if (other == null) {
         return;
       }
-      if (other.X != 0) {
-        X = other.X;
+      if (other.PlayerID != 0L) {
+        PlayerID = other.PlayerID;
       }
-      if (other.Y != 0) {
-        Y = other.Y;
+      if (other.TeamID != 0L) {
+        TeamID = other.TeamID;
       }
-      if (other.TeamId != 0) {
-        TeamId = other.TeamId;
+      if (other.MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        MessageType = other.MessageType;
+      }
+      if (other.Guid != 0L) {
+        Guid = other.Guid;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
         switch(tag) {
@@ -762,28 +1369,70 @@ namespace Communication.Proto {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            X = input.ReadInt32();
+            PlayerID = input.ReadInt64();
             break;
           }
           case 16: {
-            Y = input.ReadInt32();
+            TeamID = input.ReadInt64();
             break;
           }
           case 24: {
-            TeamId = input.ReadInt32();
+            MessageType = (global::Communication.Proto.MessageType) input.ReadEnum();
+            break;
+          }
+          case 32: {
+            Guid = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            PlayerID = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            TeamID = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            MessageType = (global::Communication.Proto.MessageType) input.ReadEnum();
+            break;
+          }
+          case 32: {
+            Guid = input.ReadInt64();
             break;
           }
         }
       }
     }
+    #endif
 
   }
 
-  public sealed partial class Message2Client : pb::IMessage<Message2Client> {
-    private static readonly pb::MessageParser<Message2Client> _parser = new pb::MessageParser<Message2Client>(() => new Message2Client());
+  /// <summary>
+  ///发送全局信息时
+  /// </summary>
+  public sealed partial class MessageToClient : pb::IMessage<MessageToClient>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessageToClient> _parser = new pb::MessageParser<MessageToClient>(() => new MessageToClient());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<Message2Client> Parser { get { return _parser; } }
+    public static pb::MessageParser<MessageToClient> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -796,67 +1445,188 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Message2Client() {
+    public MessageToClient() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Message2Client(Message2Client other) : this() {
-      gameObjectList_ = other.gameObjectList_.Clone();
-      mapColors_ = other.mapColors_.Clone();
+    public MessageToClient(MessageToClient other) : this() {
+      playerID_ = other.playerID_;
+      teamID_ = other.teamID_;
+      messageType_ = other.messageType_;
+      selfInfo_ = other.selfInfo_ != null ? other.selfInfo_.Clone() : null;
+      teammateGUIDs_ = other.teammateGUIDs_.Clone();
+      selfTeamColor_ = other.selfTeamColor_;
+      gameObjs_ = other.gameObjs_.Clone();
+      cellColors_ = other.cellColors_.Clone();
+      teamScore_ = other.teamScore_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Message2Client Clone() {
-      return new Message2Client(this);
+    public MessageToClient Clone() {
+      return new MessageToClient(this);
     }
 
-    /// <summary>Field number for the "gameObjectList" field.</summary>
-    public const int GameObjectListFieldNumber = 1;
-    private static readonly pbc::MapField<long, global::Communication.Proto.GameObject>.Codec _map_gameObjectList_codec
-        = new pbc::MapField<long, global::Communication.Proto.GameObject>.Codec(pb::FieldCodec.ForInt64(8), pb::FieldCodec.ForMessage(18, global::Communication.Proto.GameObject.Parser), 10);
-    private readonly pbc::MapField<long, global::Communication.Proto.GameObject> gameObjectList_ = new pbc::MapField<long, global::Communication.Proto.GameObject>();
+    /// <summary>Field number for the "playerID" field.</summary>
+    public const int PlayerIDFieldNumber = 1;
+    private long playerID_;
+    /// <summary>
+    ///指明发送给谁
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<long, global::Communication.Proto.GameObject> GameObjectList {
-      get { return gameObjectList_; }
+    public long PlayerID {
+      get { return playerID_; }
+      set {
+        playerID_ = value;
+      }
     }
 
-    /// <summary>Field number for the "MapColors" field.</summary>
-    public const int MapColorsFieldNumber = 2;
-    private static readonly pb::FieldCodec<global::Communication.Proto.MapColor> _repeated_mapColors_codec
-        = pb::FieldCodec.ForMessage(18, global::Communication.Proto.MapColor.Parser);
-    private readonly pbc::RepeatedField<global::Communication.Proto.MapColor> mapColors_ = new pbc::RepeatedField<global::Communication.Proto.MapColor>();
+    /// <summary>Field number for the "teamID" field.</summary>
+    public const int TeamIDFieldNumber = 2;
+    private long teamID_;
+    /// <summary>
+    ///指明发送给谁
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Communication.Proto.MapColor> MapColors {
-      get { return mapColors_; }
+    public long TeamID {
+      get { return teamID_; }
+      set {
+        teamID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "messageType" field.</summary>
+    public const int MessageTypeFieldNumber = 3;
+    private global::Communication.Proto.MessageType messageType_ = global::Communication.Proto.MessageType.AddPlayer;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Communication.Proto.MessageType MessageType {
+      get { return messageType_; }
+      set {
+        messageType_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "selfInfo" field.</summary>
+    public const int SelfInfoFieldNumber = 4;
+    private global::Communication.Proto.GameObjInfo selfInfo_;
+    /// <summary>
+    ///自己的个人信息
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Communication.Proto.GameObjInfo SelfInfo {
+      get { return selfInfo_; }
+      set {
+        selfInfo_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "teammateGUIDs" field.</summary>
+    public const int TeammateGUIDsFieldNumber = 5;
+    private static readonly pb::FieldCodec<long> _repeated_teammateGUIDs_codec
+        = pb::FieldCodec.ForInt64(42);
+    private readonly pbc::RepeatedField<long> teammateGUIDs_ = new pbc::RepeatedField<long>();
+    /// <summary>
+    ///所有队友的GUID，其0、1、2、3元素分别为playerID为0、1、2、3的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<long> TeammateGUIDs {
+      get { return teammateGUIDs_; }
+    }
+
+    /// <summary>Field number for the "selfTeamColor" field.</summary>
+    public const int SelfTeamColorFieldNumber = 6;
+    private global::Communication.Proto.ColorType selfTeamColor_ = global::Communication.Proto.ColorType.None;
+    /// <summary>
+    ///自己队伍的所属颜色
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Communication.Proto.ColorType SelfTeamColor {
+      get { return selfTeamColor_; }
+      set {
+        selfTeamColor_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "gameObjs" field.</summary>
+    public const int GameObjsFieldNumber = 7;
+    private static readonly pb::FieldCodec<global::Communication.Proto.GameObjInfo> _repeated_gameObjs_codec
+        = pb::FieldCodec.ForMessage(58, global::Communication.Proto.GameObjInfo.Parser);
+    private readonly pbc::RepeatedField<global::Communication.Proto.GameObjInfo> gameObjs_ = new pbc::RepeatedField<global::Communication.Proto.GameObjInfo>();
+    /// <summary>
+    ///当前地图上的所有对象
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Communication.Proto.GameObjInfo> GameObjs {
+      get { return gameObjs_; }
+    }
+
+    /// <summary>Field number for the "cellColors" field.</summary>
+    public const int CellColorsFieldNumber = 8;
+    private static readonly pb::FieldCodec<global::Communication.Proto.MessageToClient.Types.OneDimVec> _repeated_cellColors_codec
+        = pb::FieldCodec.ForMessage(66, global::Communication.Proto.MessageToClient.Types.OneDimVec.Parser);
+    private readonly pbc::RepeatedField<global::Communication.Proto.MessageToClient.Types.OneDimVec> cellColors_ = new pbc::RepeatedField<global::Communication.Proto.MessageToClient.Types.OneDimVec>();
+    /// <summary>
+    ///每个 cell 的颜色
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Communication.Proto.MessageToClient.Types.OneDimVec> CellColors {
+      get { return cellColors_; }
+    }
+
+    /// <summary>Field number for the "teamScore" field.</summary>
+    public const int TeamScoreFieldNumber = 9;
+    private int teamScore_;
+    /// <summary>
+    ///本队伍的分数
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int TeamScore {
+      get { return teamScore_; }
+      set {
+        teamScore_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as Message2Client);
+      return Equals(other as MessageToClient);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(Message2Client other) {
+    public bool Equals(MessageToClient other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!GameObjectList.Equals(other.GameObjectList)) return false;
-      if(!mapColors_.Equals(other.mapColors_)) return false;
+      if (PlayerID != other.PlayerID) return false;
+      if (TeamID != other.TeamID) return false;
+      if (MessageType != other.MessageType) return false;
+      if (!object.Equals(SelfInfo, other.SelfInfo)) return false;
+      if(!teammateGUIDs_.Equals(other.teammateGUIDs_)) return false;
+      if (SelfTeamColor != other.SelfTeamColor) return false;
+      if(!gameObjs_.Equals(other.gameObjs_)) return false;
+      if(!cellColors_.Equals(other.cellColors_)) return false;
+      if (TeamScore != other.TeamScore) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      hash ^= GameObjectList.GetHashCode();
-      hash ^= mapColors_.GetHashCode();
+      if (PlayerID != 0L) hash ^= PlayerID.GetHashCode();
+      if (TeamID != 0L) hash ^= TeamID.GetHashCode();
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) hash ^= MessageType.GetHashCode();
+      if (selfInfo_ != null) hash ^= SelfInfo.GetHashCode();
+      hash ^= teammateGUIDs_.GetHashCode();
+      if (SelfTeamColor != global::Communication.Proto.ColorType.None) hash ^= SelfTeamColor.GetHashCode();
+      hash ^= gameObjs_.GetHashCode();
+      hash ^= cellColors_.GetHashCode();
+      if (TeamScore != 0) hash ^= TeamScore.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -870,18 +1640,102 @@ namespace Communication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      gameObjectList_.WriteTo(output, _map_gameObjectList_codec);
-      mapColors_.WriteTo(output, _repeated_mapColors_codec);
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (PlayerID != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(PlayerID);
+      }
+      if (TeamID != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(TeamID);
+      }
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) MessageType);
+      }
+      if (selfInfo_ != null) {
+        output.WriteRawTag(34);
+        output.WriteMessage(SelfInfo);
+      }
+      teammateGUIDs_.WriteTo(output, _repeated_teammateGUIDs_codec);
+      if (SelfTeamColor != global::Communication.Proto.ColorType.None) {
+        output.WriteRawTag(48);
+        output.WriteEnum((int) SelfTeamColor);
+      }
+      gameObjs_.WriteTo(output, _repeated_gameObjs_codec);
+      cellColors_.WriteTo(output, _repeated_cellColors_codec);
+      if (TeamScore != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(TeamScore);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
+    #endif
     }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (PlayerID != 0L) {
+        output.WriteRawTag(8);
+        output.WriteInt64(PlayerID);
+      }
+      if (TeamID != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(TeamID);
+      }
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        output.WriteRawTag(24);
+        output.WriteEnum((int) MessageType);
+      }
+      if (selfInfo_ != null) {
+        output.WriteRawTag(34);
+        output.WriteMessage(SelfInfo);
+      }
+      teammateGUIDs_.WriteTo(ref output, _repeated_teammateGUIDs_codec);
+      if (SelfTeamColor != global::Communication.Proto.ColorType.None) {
+        output.WriteRawTag(48);
+        output.WriteEnum((int) SelfTeamColor);
+      }
+      gameObjs_.WriteTo(ref output, _repeated_gameObjs_codec);
+      cellColors_.WriteTo(ref output, _repeated_cellColors_codec);
+      if (TeamScore != 0) {
+        output.WriteRawTag(72);
+        output.WriteInt32(TeamScore);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      size += gameObjectList_.CalculateSize(_map_gameObjectList_codec);
-      size += mapColors_.CalculateSize(_repeated_mapColors_codec);
+      if (PlayerID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(PlayerID);
+      }
+      if (TeamID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(TeamID);
+      }
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MessageType);
+      }
+      if (selfInfo_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(SelfInfo);
+      }
+      size += teammateGUIDs_.CalculateSize(_repeated_teammateGUIDs_codec);
+      if (SelfTeamColor != global::Communication.Proto.ColorType.None) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) SelfTeamColor);
+      }
+      size += gameObjs_.CalculateSize(_repeated_gameObjs_codec);
+      size += cellColors_.CalculateSize(_repeated_cellColors_codec);
+      if (TeamScore != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TeamScore);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -889,34 +1743,316 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(Message2Client other) {
+    public void MergeFrom(MessageToClient other) {
       if (other == null) {
         return;
       }
-      gameObjectList_.Add(other.gameObjectList_);
-      mapColors_.Add(other.mapColors_);
+      if (other.PlayerID != 0L) {
+        PlayerID = other.PlayerID;
+      }
+      if (other.TeamID != 0L) {
+        TeamID = other.TeamID;
+      }
+      if (other.MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        MessageType = other.MessageType;
+      }
+      if (other.selfInfo_ != null) {
+        if (selfInfo_ == null) {
+          SelfInfo = new global::Communication.Proto.GameObjInfo();
+        }
+        SelfInfo.MergeFrom(other.SelfInfo);
+      }
+      teammateGUIDs_.Add(other.teammateGUIDs_);
+      if (other.SelfTeamColor != global::Communication.Proto.ColorType.None) {
+        SelfTeamColor = other.SelfTeamColor;
+      }
+      gameObjs_.Add(other.gameObjs_);
+      cellColors_.Add(other.cellColors_);
+      if (other.TeamScore != 0) {
+        TeamScore = other.TeamScore;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
         switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 10: {
-            gameObjectList_.AddEntriesFrom(input, _map_gameObjectList_codec);
+          case 8: {
+            PlayerID = input.ReadInt64();
             break;
           }
-          case 18: {
-            mapColors_.AddEntriesFrom(input, _repeated_mapColors_codec);
+          case 16: {
+            TeamID = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            MessageType = (global::Communication.Proto.MessageType) input.ReadEnum();
+            break;
+          }
+          case 34: {
+            if (selfInfo_ == null) {
+              SelfInfo = new global::Communication.Proto.GameObjInfo();
+            }
+            input.ReadMessage(SelfInfo);
+            break;
+          }
+          case 42:
+          case 40: {
+            teammateGUIDs_.AddEntriesFrom(input, _repeated_teammateGUIDs_codec);
+            break;
+          }
+          case 48: {
+            SelfTeamColor = (global::Communication.Proto.ColorType) input.ReadEnum();
+            break;
+          }
+          case 58: {
+            gameObjs_.AddEntriesFrom(input, _repeated_gameObjs_codec);
+            break;
+          }
+          case 66: {
+            cellColors_.AddEntriesFrom(input, _repeated_cellColors_codec);
+            break;
+          }
+          case 72: {
+            TeamScore = input.ReadInt32();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            PlayerID = input.ReadInt64();
+            break;
+          }
+          case 16: {
+            TeamID = input.ReadInt64();
+            break;
+          }
+          case 24: {
+            MessageType = (global::Communication.Proto.MessageType) input.ReadEnum();
+            break;
+          }
+          case 34: {
+            if (selfInfo_ == null) {
+              SelfInfo = new global::Communication.Proto.GameObjInfo();
+            }
+            input.ReadMessage(SelfInfo);
+            break;
+          }
+          case 42:
+          case 40: {
+            teammateGUIDs_.AddEntriesFrom(ref input, _repeated_teammateGUIDs_codec);
+            break;
+          }
+          case 48: {
+            SelfTeamColor = (global::Communication.Proto.ColorType) input.ReadEnum();
+            break;
+          }
+          case 58: {
+            gameObjs_.AddEntriesFrom(ref input, _repeated_gameObjs_codec);
+            break;
+          }
+          case 66: {
+            cellColors_.AddEntriesFrom(ref input, _repeated_cellColors_codec);
+            break;
+          }
+          case 72: {
+            TeamScore = input.ReadInt32();
             break;
           }
         }
       }
     }
+    #endif
+
+    #region Nested types
+    /// <summary>Container for nested types declared in the MessageToClient message type.</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static partial class Types {
+      public sealed partial class OneDimVec : pb::IMessage<OneDimVec>
+      #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+          , pb::IBufferMessage
+      #endif
+      {
+        private static readonly pb::MessageParser<OneDimVec> _parser = new pb::MessageParser<OneDimVec>(() => new OneDimVec());
+        private pb::UnknownFieldSet _unknownFields;
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public static pb::MessageParser<OneDimVec> Parser { get { return _parser; } }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public static pbr::MessageDescriptor Descriptor {
+          get { return global::Communication.Proto.MessageToClient.Descriptor.NestedTypes[0]; }
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        pbr::MessageDescriptor pb::IMessage.Descriptor {
+          get { return Descriptor; }
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public OneDimVec() {
+          OnConstruction();
+        }
+
+        partial void OnConstruction();
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public OneDimVec(OneDimVec other) : this() {
+          rowColors_ = other.rowColors_.Clone();
+          _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public OneDimVec Clone() {
+          return new OneDimVec(this);
+        }
+
+        /// <summary>Field number for the "rowColors" field.</summary>
+        public const int RowColorsFieldNumber = 1;
+        private static readonly pb::FieldCodec<global::Communication.Proto.ColorType> _repeated_rowColors_codec
+            = pb::FieldCodec.ForEnum(10, x => (int) x, x => (global::Communication.Proto.ColorType) x);
+        private readonly pbc::RepeatedField<global::Communication.Proto.ColorType> rowColors_ = new pbc::RepeatedField<global::Communication.Proto.ColorType>();
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public pbc::RepeatedField<global::Communication.Proto.ColorType> RowColors {
+          get { return rowColors_; }
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public override bool Equals(object other) {
+          return Equals(other as OneDimVec);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public bool Equals(OneDimVec other) {
+          if (ReferenceEquals(other, null)) {
+            return false;
+          }
+          if (ReferenceEquals(other, this)) {
+            return true;
+          }
+          if(!rowColors_.Equals(other.rowColors_)) return false;
+          return Equals(_unknownFields, other._unknownFields);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public override int GetHashCode() {
+          int hash = 1;
+          hash ^= rowColors_.GetHashCode();
+          if (_unknownFields != null) {
+            hash ^= _unknownFields.GetHashCode();
+          }
+          return hash;
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public override string ToString() {
+          return pb::JsonFormatter.ToDiagnosticString(this);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public void WriteTo(pb::CodedOutputStream output) {
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+          output.WriteRawMessage(this);
+        #else
+          rowColors_.WriteTo(output, _repeated_rowColors_codec);
+          if (_unknownFields != null) {
+            _unknownFields.WriteTo(output);
+          }
+        #endif
+        }
+
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+          rowColors_.WriteTo(ref output, _repeated_rowColors_codec);
+          if (_unknownFields != null) {
+            _unknownFields.WriteTo(ref output);
+          }
+        }
+        #endif
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public int CalculateSize() {
+          int size = 0;
+          size += rowColors_.CalculateSize(_repeated_rowColors_codec);
+          if (_unknownFields != null) {
+            size += _unknownFields.CalculateSize();
+          }
+          return size;
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public void MergeFrom(OneDimVec other) {
+          if (other == null) {
+            return;
+          }
+          rowColors_.Add(other.rowColors_);
+          _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public void MergeFrom(pb::CodedInputStream input) {
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+          input.ReadRawMessage(this);
+        #else
+          uint tag;
+          while ((tag = input.ReadTag()) != 0) {
+            switch(tag) {
+              default:
+                _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+                break;
+              case 10:
+              case 8: {
+                rowColors_.AddEntriesFrom(input, _repeated_rowColors_codec);
+                break;
+              }
+            }
+          }
+        #endif
+        }
+
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+          uint tag;
+          while ((tag = input.ReadTag()) != 0) {
+            switch(tag) {
+              default:
+                _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+                break;
+              case 10:
+              case 8: {
+                rowColors_.AddEntriesFrom(ref input, _repeated_rowColors_codec);
+                break;
+              }
+            }
+          }
+        }
+        #endif
+
+      }
+
+    }
+    #endregion
 
   }
 

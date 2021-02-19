@@ -24,28 +24,33 @@ namespace Communication.Proto {
     static Message2ServerReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChRNZXNzYWdlMlNlcnZlci5wcm90bxIIUHJvdG9idWYaFE1lc3NhZ2UyQ2xp",
-            "ZW50LnByb3RvItYBCg5NZXNzYWdlMlNlcnZlchIUCgxtb3ZlRHVyYXRpb24Y",
-            "ASABKAESEQoJbW92ZUFuZ2xlGAIgASgBEhMKC2F0dGFja0FuZ2xlGAMgASgB",
-            "EhAKCGlzQXR0YWNrGAQgASgIEg4KBmlzUGljaxgFIAEoCBINCgVpc1VzZRgG",
-            "IAEoCBIiCgdqb2JUeXBlGAcgASgOMhEuUHJvdG9idWYuSm9iVHlwZRIOCgZ0",
-            "ZWFtSWQYCCABKAUSEAoIcGxheWVySWQYCSABKAUSDwoHaXNUaHJvdxgKIAEo",
-            "CEIWqgITQ29tbXVuaWNhdGlvbi5Qcm90b2IGcHJvdG8z"));
+            "ChRNZXNzYWdlMlNlcnZlci5wcm90bxIIUHJvdG9idWYaEU1lc3NhZ2VUeXBl",
+            "LnByb3RvGhRNZXNzYWdlMkNsaWVudC5wcm90byLUAQoPTWVzc2FnZVRvU2Vy",
+            "dmVyEioKC21lc3NhZ2VUeXBlGAEgASgOMhUuUHJvdG9idWYuTWVzc2FnZVR5",
+            "cGUSIgoHam9iVHlwZRgCIAEoDjIRLlByb3RvYnVmLkpvYlR5cGUSDgoGdGVh",
+            "bUlEGAMgASgDEiQKCHByb3BUeXBlGAQgASgOMhIuUHJvdG9idWYuUHJvcFR5",
+            "cGUSGgoSdGltZUluTWlsbGlzZWNvbmRzGAUgASgFEg0KBWFuZ2xlGAYgASgB",
+            "EhAKCHBsYXllcklEGAcgASgDQhaqAhNDb21tdW5pY2F0aW9uLlByb3RvYgZw",
+            "cm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Communication.Proto.Message2ClientReflection.Descriptor, },
-          new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.Message2Server), global::Communication.Proto.Message2Server.Parser, new[]{ "MoveDuration", "MoveAngle", "AttackAngle", "IsAttack", "IsPick", "IsUse", "JobType", "TeamId", "PlayerId", "IsThrow" }, null, null, null)
+          new pbr::FileDescriptor[] { global::Communication.Proto.MessageTypeReflection.Descriptor, global::Communication.Proto.Message2ClientReflection.Descriptor, },
+          new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToServer), global::Communication.Proto.MessageToServer.Parser, new[]{ "MessageType", "JobType", "TeamID", "PropType", "TimeInMilliseconds", "Angle", "PlayerID" }, null, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Messages
-  public sealed partial class Message2Server : pb::IMessage<Message2Server> {
-    private static readonly pb::MessageParser<Message2Server> _parser = new pb::MessageParser<Message2Server>(() => new Message2Server());
+  public sealed partial class MessageToServer : pb::IMessage<MessageToServer>
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      , pb::IBufferMessage
+  #endif
+  {
+    private static readonly pb::MessageParser<MessageToServer> _parser = new pb::MessageParser<MessageToServer>(() => new MessageToServer());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<Message2Server> Parser { get { return _parser; } }
+    public static pb::MessageParser<MessageToServer> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -58,105 +63,45 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Message2Server() {
+    public MessageToServer() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Message2Server(Message2Server other) : this() {
-      moveDuration_ = other.moveDuration_;
-      moveAngle_ = other.moveAngle_;
-      attackAngle_ = other.attackAngle_;
-      isAttack_ = other.isAttack_;
-      isPick_ = other.isPick_;
-      isUse_ = other.isUse_;
+    public MessageToServer(MessageToServer other) : this() {
+      messageType_ = other.messageType_;
       jobType_ = other.jobType_;
-      teamId_ = other.teamId_;
-      playerId_ = other.playerId_;
-      isThrow_ = other.isThrow_;
+      teamID_ = other.teamID_;
+      propType_ = other.propType_;
+      timeInMilliseconds_ = other.timeInMilliseconds_;
+      angle_ = other.angle_;
+      playerID_ = other.playerID_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Message2Server Clone() {
-      return new Message2Server(this);
+    public MessageToServer Clone() {
+      return new MessageToServer(this);
     }
 
-    /// <summary>Field number for the "moveDuration" field.</summary>
-    public const int MoveDurationFieldNumber = 1;
-    private double moveDuration_;
+    /// <summary>Field number for the "messageType" field.</summary>
+    public const int MessageTypeFieldNumber = 1;
+    private global::Communication.Proto.MessageType messageType_ = global::Communication.Proto.MessageType.AddPlayer;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double MoveDuration {
-      get { return moveDuration_; }
+    public global::Communication.Proto.MessageType MessageType {
+      get { return messageType_; }
       set {
-        moveDuration_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "moveAngle" field.</summary>
-    public const int MoveAngleFieldNumber = 2;
-    private double moveAngle_;
-    /// <summary>
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double MoveAngle {
-      get { return moveAngle_; }
-      set {
-        moveAngle_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "attackAngle" field.</summary>
-    public const int AttackAngleFieldNumber = 3;
-    private double attackAngle_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public double AttackAngle {
-      get { return attackAngle_; }
-      set {
-        attackAngle_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "isAttack" field.</summary>
-    public const int IsAttackFieldNumber = 4;
-    private bool isAttack_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool IsAttack {
-      get { return isAttack_; }
-      set {
-        isAttack_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "isPick" field.</summary>
-    public const int IsPickFieldNumber = 5;
-    private bool isPick_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool IsPick {
-      get { return isPick_; }
-      set {
-        isPick_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "isUse" field.</summary>
-    public const int IsUseFieldNumber = 6;
-    private bool isUse_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool IsUse {
-      get { return isUse_; }
-      set {
-        isUse_ = value;
+        messageType_ = value;
       }
     }
 
     /// <summary>Field number for the "jobType" field.</summary>
-    public const int JobTypeFieldNumber = 7;
-    private global::Communication.Proto.JobType jobType_ = 0;
+    public const int JobTypeFieldNumber = 2;
+    private global::Communication.Proto.JobType jobType_ = global::Communication.Proto.JobType.Job0;
     /// <summary>
-    ///只有第一条消息有效
+    ///messageType为AddPlayer时选择的职业
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Communication.Proto.JobType JobType {
@@ -166,78 +111,109 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "teamId" field.</summary>
-    public const int TeamIdFieldNumber = 8;
-    private int teamId_;
+    /// <summary>Field number for the "teamID" field.</summary>
+    public const int TeamIDFieldNumber = 3;
+    private long teamID_;
+    /// <summary>
+    ///messageType为AddPlayer时选择的队伍
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TeamId {
-      get { return teamId_; }
+    public long TeamID {
+      get { return teamID_; }
       set {
-        teamId_ = value;
+        teamID_ = value;
       }
     }
 
-    /// <summary>Field number for the "playerId" field.</summary>
-    public const int PlayerIdFieldNumber = 9;
-    private int playerId_;
+    /// <summary>Field number for the "propType" field.</summary>
+    public const int PropTypeFieldNumber = 4;
+    private global::Communication.Proto.PropType propType_ = global::Communication.Proto.PropType.Null;
+    /// <summary>
+    ///messageType为Pick时要捡起的道具类型
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int PlayerId {
-      get { return playerId_; }
+    public global::Communication.Proto.PropType PropType {
+      get { return propType_; }
       set {
-        playerId_ = value;
+        propType_ = value;
       }
     }
 
-    /// <summary>Field number for the "isThrow" field.</summary>
-    public const int IsThrowFieldNumber = 10;
-    private bool isThrow_;
+    /// <summary>Field number for the "timeInMilliseconds" field.</summary>
+    public const int TimeInMillisecondsFieldNumber = 5;
+    private int timeInMilliseconds_;
+    /// <summary>
+    ///时间参数
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool IsThrow {
-      get { return isThrow_; }
+    public int TimeInMilliseconds {
+      get { return timeInMilliseconds_; }
       set {
-        isThrow_ = value;
+        timeInMilliseconds_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "angle" field.</summary>
+    public const int AngleFieldNumber = 6;
+    private double angle_;
+    /// <summary>
+    ///角度参数
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public double Angle {
+      get { return angle_; }
+      set {
+        angle_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "playerID" field.</summary>
+    public const int PlayerIDFieldNumber = 7;
+    private long playerID_;
+    /// <summary>
+    ///发送的玩家ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long PlayerID {
+      get { return playerID_; }
+      set {
+        playerID_ = value;
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as Message2Server);
+      return Equals(other as MessageToServer);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(Message2Server other) {
+    public bool Equals(MessageToServer other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(MoveDuration, other.MoveDuration)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(MoveAngle, other.MoveAngle)) return false;
-      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(AttackAngle, other.AttackAngle)) return false;
-      if (IsAttack != other.IsAttack) return false;
-      if (IsPick != other.IsPick) return false;
-      if (IsUse != other.IsUse) return false;
+      if (MessageType != other.MessageType) return false;
       if (JobType != other.JobType) return false;
-      if (TeamId != other.TeamId) return false;
-      if (PlayerId != other.PlayerId) return false;
-      if (IsThrow != other.IsThrow) return false;
+      if (TeamID != other.TeamID) return false;
+      if (PropType != other.PropType) return false;
+      if (TimeInMilliseconds != other.TimeInMilliseconds) return false;
+      if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Angle, other.Angle)) return false;
+      if (PlayerID != other.PlayerID) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (MoveDuration != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(MoveDuration);
-      if (MoveAngle != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(MoveAngle);
-      if (AttackAngle != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(AttackAngle);
-      if (IsAttack != false) hash ^= IsAttack.GetHashCode();
-      if (IsPick != false) hash ^= IsPick.GetHashCode();
-      if (IsUse != false) hash ^= IsUse.GetHashCode();
-      if (JobType != 0) hash ^= JobType.GetHashCode();
-      if (TeamId != 0) hash ^= TeamId.GetHashCode();
-      if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
-      if (IsThrow != false) hash ^= IsThrow.GetHashCode();
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) hash ^= MessageType.GetHashCode();
+      if (JobType != global::Communication.Proto.JobType.Job0) hash ^= JobType.GetHashCode();
+      if (TeamID != 0L) hash ^= TeamID.GetHashCode();
+      if (PropType != global::Communication.Proto.PropType.Null) hash ^= PropType.GetHashCode();
+      if (TimeInMilliseconds != 0) hash ^= TimeInMilliseconds.GetHashCode();
+      if (Angle != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Angle);
+      if (PlayerID != 0L) hash ^= PlayerID.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -251,83 +227,103 @@ namespace Communication.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (MoveDuration != 0D) {
-        output.WriteRawTag(9);
-        output.WriteDouble(MoveDuration);
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      output.WriteRawMessage(this);
+    #else
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) MessageType);
       }
-      if (MoveAngle != 0D) {
-        output.WriteRawTag(17);
-        output.WriteDouble(MoveAngle);
-      }
-      if (AttackAngle != 0D) {
-        output.WriteRawTag(25);
-        output.WriteDouble(AttackAngle);
-      }
-      if (IsAttack != false) {
-        output.WriteRawTag(32);
-        output.WriteBool(IsAttack);
-      }
-      if (IsPick != false) {
-        output.WriteRawTag(40);
-        output.WriteBool(IsPick);
-      }
-      if (IsUse != false) {
-        output.WriteRawTag(48);
-        output.WriteBool(IsUse);
-      }
-      if (JobType != 0) {
-        output.WriteRawTag(56);
+      if (JobType != global::Communication.Proto.JobType.Job0) {
+        output.WriteRawTag(16);
         output.WriteEnum((int) JobType);
       }
-      if (TeamId != 0) {
-        output.WriteRawTag(64);
-        output.WriteInt32(TeamId);
+      if (TeamID != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(TeamID);
       }
-      if (PlayerId != 0) {
-        output.WriteRawTag(72);
-        output.WriteInt32(PlayerId);
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        output.WriteRawTag(32);
+        output.WriteEnum((int) PropType);
       }
-      if (IsThrow != false) {
-        output.WriteRawTag(80);
-        output.WriteBool(IsThrow);
+      if (TimeInMilliseconds != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(TimeInMilliseconds);
+      }
+      if (Angle != 0D) {
+        output.WriteRawTag(49);
+        output.WriteDouble(Angle);
+      }
+      if (PlayerID != 0L) {
+        output.WriteRawTag(56);
+        output.WriteInt64(PlayerID);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
+    #endif
     }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) MessageType);
+      }
+      if (JobType != global::Communication.Proto.JobType.Job0) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) JobType);
+      }
+      if (TeamID != 0L) {
+        output.WriteRawTag(24);
+        output.WriteInt64(TeamID);
+      }
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        output.WriteRawTag(32);
+        output.WriteEnum((int) PropType);
+      }
+      if (TimeInMilliseconds != 0) {
+        output.WriteRawTag(40);
+        output.WriteInt32(TimeInMilliseconds);
+      }
+      if (Angle != 0D) {
+        output.WriteRawTag(49);
+        output.WriteDouble(Angle);
+      }
+      if (PlayerID != 0L) {
+        output.WriteRawTag(56);
+        output.WriteInt64(PlayerID);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(ref output);
+      }
+    }
+    #endif
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (MoveDuration != 0D) {
-        size += 1 + 8;
+      if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MessageType);
       }
-      if (MoveAngle != 0D) {
-        size += 1 + 8;
-      }
-      if (AttackAngle != 0D) {
-        size += 1 + 8;
-      }
-      if (IsAttack != false) {
-        size += 1 + 1;
-      }
-      if (IsPick != false) {
-        size += 1 + 1;
-      }
-      if (IsUse != false) {
-        size += 1 + 1;
-      }
-      if (JobType != 0) {
+      if (JobType != global::Communication.Proto.JobType.Job0) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) JobType);
       }
-      if (TeamId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TeamId);
+      if (TeamID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(TeamID);
       }
-      if (PlayerId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerId);
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) PropType);
       }
-      if (IsThrow != false) {
-        size += 1 + 1;
+      if (TimeInMilliseconds != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TimeInMilliseconds);
+      }
+      if (Angle != 0D) {
+        size += 1 + 8;
+      }
+      if (PlayerID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(PlayerID);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -336,94 +332,119 @@ namespace Communication.Proto {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(Message2Server other) {
+    public void MergeFrom(MessageToServer other) {
       if (other == null) {
         return;
       }
-      if (other.MoveDuration != 0D) {
-        MoveDuration = other.MoveDuration;
+      if (other.MessageType != global::Communication.Proto.MessageType.AddPlayer) {
+        MessageType = other.MessageType;
       }
-      if (other.MoveAngle != 0D) {
-        MoveAngle = other.MoveAngle;
-      }
-      if (other.AttackAngle != 0D) {
-        AttackAngle = other.AttackAngle;
-      }
-      if (other.IsAttack != false) {
-        IsAttack = other.IsAttack;
-      }
-      if (other.IsPick != false) {
-        IsPick = other.IsPick;
-      }
-      if (other.IsUse != false) {
-        IsUse = other.IsUse;
-      }
-      if (other.JobType != 0) {
+      if (other.JobType != global::Communication.Proto.JobType.Job0) {
         JobType = other.JobType;
       }
-      if (other.TeamId != 0) {
-        TeamId = other.TeamId;
+      if (other.TeamID != 0L) {
+        TeamID = other.TeamID;
       }
-      if (other.PlayerId != 0) {
-        PlayerId = other.PlayerId;
+      if (other.PropType != global::Communication.Proto.PropType.Null) {
+        PropType = other.PropType;
       }
-      if (other.IsThrow != false) {
-        IsThrow = other.IsThrow;
+      if (other.TimeInMilliseconds != 0) {
+        TimeInMilliseconds = other.TimeInMilliseconds;
+      }
+      if (other.Angle != 0D) {
+        Angle = other.Angle;
+      }
+      if (other.PlayerID != 0L) {
+        PlayerID = other.PlayerID;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void MergeFrom(pb::CodedInputStream input) {
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+      input.ReadRawMessage(this);
+    #else
       uint tag;
       while ((tag = input.ReadTag()) != 0) {
         switch(tag) {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 9: {
-            MoveDuration = input.ReadDouble();
+          case 8: {
+            MessageType = (global::Communication.Proto.MessageType) input.ReadEnum();
             break;
           }
-          case 17: {
-            MoveAngle = input.ReadDouble();
-            break;
-          }
-          case 25: {
-            AttackAngle = input.ReadDouble();
-            break;
-          }
-          case 32: {
-            IsAttack = input.ReadBool();
-            break;
-          }
-          case 40: {
-            IsPick = input.ReadBool();
-            break;
-          }
-          case 48: {
-            IsUse = input.ReadBool();
-            break;
-          }
-          case 56: {
+          case 16: {
             JobType = (global::Communication.Proto.JobType) input.ReadEnum();
             break;
           }
-          case 64: {
-            TeamId = input.ReadInt32();
+          case 24: {
+            TeamID = input.ReadInt64();
             break;
           }
-          case 72: {
-            PlayerId = input.ReadInt32();
+          case 32: {
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
             break;
           }
-          case 80: {
-            IsThrow = input.ReadBool();
+          case 40: {
+            TimeInMilliseconds = input.ReadInt32();
+            break;
+          }
+          case 49: {
+            Angle = input.ReadDouble();
+            break;
+          }
+          case 56: {
+            PlayerID = input.ReadInt64();
+            break;
+          }
+        }
+      }
+    #endif
+    }
+
+    #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+            break;
+          case 8: {
+            MessageType = (global::Communication.Proto.MessageType) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
+            break;
+          }
+          case 24: {
+            TeamID = input.ReadInt64();
+            break;
+          }
+          case 32: {
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            break;
+          }
+          case 40: {
+            TimeInMilliseconds = input.ReadInt32();
+            break;
+          }
+          case 49: {
+            Angle = input.ReadDouble();
+            break;
+          }
+          case 56: {
+            PlayerID = input.ReadInt64();
             break;
           }
         }
       }
     }
+    #endif
 
   }
 

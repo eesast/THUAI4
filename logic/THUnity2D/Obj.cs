@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-//using Commmunication.proto;//通信组定义结构体
+
 //所有游戏人物，道具，子弹的基类
 namespace THUnity2D
 {
 
-	//参见protobuf
-
 	public enum ObjType
 	{
-		empty = 0,
-		wall = 1,
-		prop = 2,
-		bullet = 3
+		Empty = 0,
+		Wall = 1,
+		Prop = 2,
+		Bullet = 3,
+		BirthPoint = 4,
+		OutOfBoundBlock = 5
 	}
 
-	public class Obj : GameObject	//道具，墙
+	public abstract class Obj : GameObject	//道具，墙
 	{
 		public override GameObjType GetGameObjType()
 		{
-			return GameObjType.obj;
+			return GameObjType.Obj;
 		}
-		public readonly ObjType objType;		//通信组实现
+		public readonly ObjType objType;
 
 		private Character? parent = null;		//道具的主人
 		public Character? Parent
@@ -44,7 +44,7 @@ namespace THUnity2D
             }
         }
 
-		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType) : base(initPos, radius, isRigid, moveSpeed)
+		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType, ShapeType shape) : base(initPos, radius, isRigid, moveSpeed, shape)
 		{
 			this.objType = objType;
 

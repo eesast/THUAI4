@@ -18,7 +18,6 @@ namespace THUnity2D
 		public long TeamID { get => teamID; }
 		public const long invalidTeamID = long.MaxValue;
 		public const long noneTeamID = long.MinValue;
-		private ArrayList playerList;
 		public int Score
 		{
 			get
@@ -31,6 +30,21 @@ namespace THUnity2D
 				return score;
 			}
 		}
+
+		private ArrayList playerList;
+
+		public Character? GetPlayer(long playerID)
+		{
+			foreach (Character player in playerList)
+			{
+				if (player.ID == playerID)
+				{
+					return player;
+				}
+			}
+			return null;
+		}
+
 		public void AddPlayer(Character player)
 		{
 			playerList.Add(player);
@@ -47,6 +61,16 @@ namespace THUnity2D
 		public void ClearPlayer()
 		{
 			playerList = ArrayList.Synchronized(new ArrayList());
+		}
+		public long[] GetPlayerIDs()
+		{
+			long[] playerIDs = new long[playerList.Count];
+			int num = 0;
+			foreach (Character player in playerList)
+			{
+				playerIDs[num++] = player.ID;
+			}
+			return playerIDs;
 		}
 		public static bool teamExists(long findTeamID)
 		{
