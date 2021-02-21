@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 /// 出生点类
 /// </summary>
 
