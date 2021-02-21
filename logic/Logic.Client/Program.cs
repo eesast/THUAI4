@@ -84,6 +84,7 @@ namespace Logic.Client
                     gameform.Close();
                     Application.Exit();
                     break;
+                default:break;
             }
         }
         private static void Refresh(MessageToClient msg)
