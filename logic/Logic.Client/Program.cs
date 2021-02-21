@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using CommandLine;
+using Communication.Proto;
 
 namespace Logic.Client
 {
@@ -9,53 +12,135 @@ namespace Logic.Client
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            for (int i = 0; i < 50; i++)
+            //取得开始命令
+            AOption? options = null;
+            Parser.Default.ParseArguments<AOption>(args).WithParsed(o => { options = o; });
+            if (options == null)
+            {
+                Application.Run(new Starting());
+            }
+            else
+            {
+                teamID = options.teamID;
+                playerID = options.playerID;
+                jobType = (JobType)options.job;
+            }
+            //向server发消息
+            MessageToServer msg01 = new MessageToServer();
+            msg01.MessageType = MessageType.AddPlayer;
+            msg01.TeamID = teamID-1;
+            msg01.PlayerID = playerID-1;
+            msg01.JobType = jobType;
+            //TO DO:发出消息
+
+            //判断是否成功：假设收到消息在msg02中
+            MessageToOneClient msg02 = new MessageToOneClient();
+            if (!OnReciveShort(msg02)) Application.Exit();//若失败则结束进程
+            else MessageBox.Show("Loading");//等待游戏开始
+
+            //TO DO:一收到消息就用OnreciveNormal处理
+
+        }
+        public static int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
+        public static Int64 teamID;
+        public static Int64 playerID;
+        public static JobType jobType;
+        public static int x; //精细坐标
+        public static int y; //精细坐标
+        public static int movespeed;
+        private static Dictionary<Int64, Tuple<int, int>> Hashable;
+        private static Form1 gameform; //游戏窗体
+        private static bool OnReciveShort(MessageToOneClient msg)  //连接是否成功
+        {
+            if (msg.MessageType == MessageType.ValidPlayer) return true;
+            else return false;
+        }
+        private static void OnReciveNormal(MessageToClient msg) //处理游戏消息
+        {
+            switch (msg.MessageType)
+            {
+                case MessageType.StartGame:
+                    Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                    for(int i = 0; i < 4; i++)
+                    {
+                        for(int j = 0; j < 4; j++)
+                        {
+                            Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                        }
+                    }
+                    movespeed = msg.SelfInfo.MoveSpeed;
+                    gameform = new Form1();
+                    Application.Run(gameform);
+                    break;
+                case MessageType.Gaming:
+                    Refresh(msg);
+                    break;
+                case MessageType.EndGame:
+                    gameform.Close();
+                    Application.Exit();
+                    break;
+            }
+        }
+        private static void Refresh(MessageToClient msg)
+        {
+            x = msg.SelfInfo.X;
+            y = msg.SelfInfo.Y;
+            movespeed = msg.SelfInfo.MoveSpeed;
+            for (int i = 0; i < 50; i++) //读取颜色
             {
                 for (int j = 0; j < 50; j++)
                 {
-                    System.Random random = new System.Random();
-                    ColorState[i, j] = random.Next(-2, 5);
+                    ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
                 }
             }
-            Application.Run(new Form1());
+            foreach(var objinfo in msg.GameObjs)
+            {
+                Objdeal(objinfo);
+            }
+            gameform.Rebuild();
         }
-        static int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
-        public static int GetColorState(int x, int y)  //类外取颜色信息
+        private static void Objdeal(GameObjInfo obj)
         {
-            return ColorState[x, y];
+            switch (obj.GameObjType)
+            {
+                case GameObjType.BirthPoint:
+                    ColorState[obj.Y / 1024, obj.X / 1024] = -2;
+                    break;
+                case GameObjType.Wall:
+                    ColorState[obj.Y / 1024, obj.X / 1024] = -1;
+                    break;
+                case GameObjType.Character:
+                    if (obj.IsDying) break;
+                    Player player = new Player(obj.Y, obj.X, (byte)(obj.TeamID+1), (byte)(Hashable[obj.Guid].Item2+1), obj.JobType, (short)obj.Hp);
+                    gameform.DrawPlayer(player);
+                    break;
+                case GameObjType.Bullet:
+                    Bullet bullet = new Bullet(obj.Y, obj.X, (int)obj.TeamID+1, obj.BulletType, obj.Guid);
+                    gameform.DrawBullet(bullet);
+                    break;
+                case GameObjType.Prop:
+                    Item item = new Item(obj.Y / 1024, obj.X / 1024, obj.PropType);
+                    gameform.DrawItem(item);
+                    break;
+            }
         }
-
     }
-    class Player  //玩家显示类
+    public class Player  //玩家显示类
     {
         public int x; //精细坐标
         public int y; //精细坐标
         public byte teamnum;
         public byte playernum;
-        public enum Job //职业
-        { Profession0 = 0, Profession1 = 1, Profession2 = 2, Profession3 = 3, Profession4 = 4, Profession5 = 5, Profession6 = 6 }
-        public enum Possession //持有的道具种类
-        {
-            None = 0,
-            SpeedUp = 1,
-            DamageUp = 2,
-            Shorter_Reload_CD = 3,
-
-        };
-        public Job job;
-        public Possession possession = 0;
+        public JobType job;
+        public PropType possession = 0;
         public short health = 0;
-        public byte shield = 0;  //0无状态 1有盾 2有复活甲(revive)
-        public byte speed = 0;  //0无状态 1增益 2负面效果
-        public byte damage = 0;  //0无状态 1增益 2负面效果
-        public byte stunned = 0;  //0无状态 1被眩晕
         public bool existed = false;
-        public Player(int x, int y, byte teamnum, byte playernum, Job job, short health)
+        public Player(int x, int y, byte teamnum, byte playernum, JobType job, short health)
         {
             this.x = x;
             this.y = y;
@@ -65,54 +150,48 @@ namespace Logic.Client
             this.job = job;
         }
     }
-    class Bullet  //子弹类
+    public class Bullet  //子弹类
     {
         public int x; //横坐标(精细)
         public int y; //纵坐标(精细)
-        public int teamnum;
-        public bool towards;//0:横向  1:纵向
+        public Int64 teamnum;
+        public BulletType bulletType;
         public bool existed = false;
-        public long id = 0;
-        public static long ID = 0;
-        public Bullet(int x, int y, int teamnum, bool towards)
+        public Int64 id = 0;
+        public Bullet(int x, int y, int teamnum, BulletType bulletType,Int64 guid)
         {
             this.x = x;
             this.y = y;
             this.teamnum = teamnum;
-            this.towards = towards;
-            this.id = ID;
-            ID++;
+            this.bulletType = bulletType;
+            this.id = guid;
         }
     }
-    class Item  //道具类
+    public class Item  //道具类
     {
         public int xnum; //横坐标大格
         public int ynum; //纵坐标大格
         public byte type = 0;
         /*
-         * 0:加速
-         * 1:增伤
-         * 2:减CD
-         * 3:回血
-         * 4:盾
-         * 5:复活甲
-         * 6:减速地雷
-         * 7:减伤地雷
-         * 8:加CD地雷
-         * 9:扣血地雷
-         * 10:眩晕地雷
-         * 11:破盾
+         * 0:NULL
+         * 1:加速
+         * 2:加伤
+         * 4:回血
+         * 5:盾
+         * 6:复活甲
+         * 7:破盾
+         * 8:减速地雷
+         * 9:减伤地雷
+         * 10:加CD地雷
          */
         public bool existed = false;
         public long id = 0;
-        public static long ID = 0;
-        public Item(int xnum, int ynum, byte type)
+        public Item(int xnum, int ynum, PropType type)
         {
             this.xnum = xnum;
             this.ynum = ynum;
-            this.type = type;
-            this.id = ID;
-            ID++;
+            this.type = (byte)type;
+            this.id = xnum*50+ynum;
         }
     }
 
