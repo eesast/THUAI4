@@ -15,7 +15,7 @@ namespace Communication.Agent
     {
         private static readonly TcpPackServer server = new TcpPackServer();
         private static readonly TcpPackClient client = new TcpPackClient();
-        private static readonly ConcurrentDictionary<int, IntPtr> dict = new ConcurrentDictionary<int, IntPtr>();
+        private static readonly ConcurrentDictionary<long, IntPtr> dict = new ConcurrentDictionary<long, IntPtr>();
 
         static int Main(string[] args)
         {
@@ -55,15 +55,15 @@ namespace Communication.Agent
                 {
                     Message message = new Message();
                     message.MergeFrom(bytes);//这里需不需要拷贝？
-                    if (message.MessageType == MessageType.Message2Server)//是否有其他可能？如何处理？
+                    if (message.PacketType == PacketType.MessageToServer)//是否有其他可能？如何处理？
                     {
-                        Message2Server msg = message.Content as Message2Server;
-                        if (dict.ContainsKey(msg.PlayerId))
+                        MessageToServer msg = message.Content as MessageToServer;
+                        if (dict.ContainsKey(msg.PlayerID))
                         {
-                            Console.WriteLine($"More than one client claims to have the same ID {msg.PlayerId}.");
+                            Console.WriteLine($"More than one client claims to have the same ID {msg.PlayerID}.");
                             return HandleResult.Error;
                         }
-                        dict.TryAdd(msg.PlayerId, connId);//不可能false
+                        dict.TryAdd(msg.PlayerID, connId);//不可能false
                     }
                 }
                 client.Send(bytes, bytes.Length);
@@ -87,22 +87,22 @@ namespace Communication.Agent
             {
                 MemoryStream istream = new MemoryStream(bytes);
                 BinaryReader br = new BinaryReader(istream);
-                MessageType type = (MessageType)br.PeekChar();
+                PacketType type = (PacketType)br.PeekChar();
                 br.Close();//debug期间加的，也许有用也许没用
                 istream.Dispose();
-                if (type == MessageType.Message2One)
+                if (type == PacketType.MessageToOneClient)
                 {
                     Message m = new Message();
                     m.MergeFrom(bytes);
-                    Message2One message = m.Content as Message2One;
-                    if (!dict.ContainsKey(message.PlayerId))
+                    MessageToOneClient message = m.Content as MessageToOneClient;
+                    if (!dict.ContainsKey(message.PlayerID))
                     {
-                        Console.WriteLine($"Error: No such player corresponding to ID {message.PlayerId}");
+                        Console.WriteLine($"Error: No such player corresponding to ID {message.PlayerID}");
                         return HandleResult.Error;
                     }
-                    if (!server.Send(dict[message.PlayerId], bytes, bytes.Length))
+                    if (!server.Send(dict[message.PlayerID], bytes, bytes.Length))
                     {
-                        Console.WriteLine($"向{dict[message.PlayerId]}发送失败。");
+                        Console.WriteLine($"向{dict[message.PlayerID]}发送失败。");
                     }
                     return HandleResult.Ok;
                 }

@@ -11,11 +11,12 @@ namespace clienttest
         {
             Console.WriteLine($"My id is {int.Parse(args[1])}");
             CSharpClient client = new CSharpClient();
-            client.OnReceive += delegate (IMsg msg)
+            client.OnReceive += delegate ()
             {
-                Message2One mm = msg.Content as Message2One;
-                Console.WriteLine($"Message type::{msg.MessageType}");
-                Console.WriteLine("Message:" + mm.Message);
+                IMsg msg = client.Take();
+                MessageToOneClient mm = msg.Content as MessageToOneClient;
+                Console.WriteLine($"Message type::{msg.PacketType}");
+                Console.WriteLine(mm);
             };
             Console.WriteLine("Connecting......");
             if (client.Connect("127.0.0.1", 7777))
@@ -28,10 +29,10 @@ namespace clienttest
             }
             
 
-            Message2Server mm = new Message2Server();
-            mm.PlayerId = int.Parse(args[1]);
+            MessageToServer mm = new MessageToServer();
+            mm.PlayerID = int.Parse(args[1]);
             mm.JobType = Communication.Proto.JobType.Job1;
-            client.SendMessage(mm, MessageType.Message2Server);
+            client.SendMessage(mm);
 
             Console.ReadLine();
             client.Stop();
