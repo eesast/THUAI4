@@ -17,7 +17,7 @@ namespace Logic.Client
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //È¡µÃ¿ªÊ¼ÃüÁî
+            //È¡ï¿½Ã¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
             AOption? options = null;
             Parser.Default.ParseArguments<AOption>(args).WithParsed(o => { options = o; });
             if (options == null)
@@ -30,37 +30,37 @@ namespace Logic.Client
                 playerID = options.playerID;
                 jobType = (JobType)options.job;
             }
-            //Ïòserver·¢ÏûÏ¢
+            //ï¿½ï¿½serverï¿½ï¿½ï¿½ï¿½Ï¢
             MessageToServer msg01 = new MessageToServer();
             msg01.MessageType = MessageType.AddPlayer;
             msg01.TeamID = teamID-1;
             msg01.PlayerID = playerID-1;
             msg01.JobType = jobType;
-            //TO DO:·¢³öÏûÏ¢
+            //TO DO:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 
-            //ÅÐ¶ÏÊÇ·ñ³É¹¦£º¼ÙÉèÊÕµ½ÏûÏ¢ÔÚmsg02ÖÐ
+            //ï¿½Ð¶ï¿½ï¿½Ç·ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½msg02ï¿½ï¿½
             MessageToOneClient msg02 = new MessageToOneClient();
-            if (!OnReciveShort(msg02)) Application.Exit();//ÈôÊ§°ÜÔò½áÊø½ø³Ì
-            else MessageBox.Show("Loading");//µÈ´ýÓÎÏ·¿ªÊ¼
+            if (!OnReciveShort(msg02)) Application.Exit();//ï¿½ï¿½Ê§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            else MessageBox.Show("Loading");//ï¿½È´ï¿½ï¿½ï¿½Ï·ï¿½ï¿½Ê¼
 
-            //TO DO:Ò»ÊÕµ½ÏûÏ¢¾ÍÓÃOnreciveNormal´¦Àí
+            //TO DO:Ò»ï¿½Õµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½OnreciveNormalï¿½ï¿½ï¿½ï¿½
 
         }
-        public static int[,] ColorState = new int[50, 50];  //´¢´æÃ¿¸öµØÍ¼¸ñµÄÈ¾É«×´Ì¬ 0:Î´±»È¾É« i:µÚi¶ÓÈ¾É« -1:Ç½Ìå -2:³öÉúµã
+        public static int[,] ColorState = new int[50, 50];  //ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½È¾É«×´Ì¬ 0:Î´ï¿½ï¿½È¾É« i:ï¿½ï¿½iï¿½ï¿½È¾É« -1:Ç½ï¿½ï¿½ -2:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         public static Int64 teamID;
         public static Int64 playerID;
         public static JobType jobType;
-        public static int x; //¾«Ï¸×ø±ê
-        public static int y; //¾«Ï¸×ø±ê
+        public static int x; //ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½
+        public static int y; //ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½
         public static int movespeed;
         private static Dictionary<Int64, Tuple<int, int>> Hashable;
-        private static Form1 gameform; //ÓÎÏ·´°Ìå
-        private static bool OnReciveShort(MessageToOneClient msg)  //Á¬½ÓÊÇ·ñ³É¹¦
+        private static Form1 gameform; //ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½
+        private static bool OnReciveShort(MessageToOneClient msg)  //ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½É¹ï¿½
         {
             if (msg.MessageType == MessageType.ValidPlayer) return true;
             else return false;
         }
-        private static void OnReciveNormal(MessageToClient msg) //´¦ÀíÓÎÏ·ÏûÏ¢
+        private static void OnReciveNormal(MessageToClient msg) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½Ï¢
         {
             switch (msg.MessageType)
             {
@@ -92,7 +92,7 @@ namespace Logic.Client
             x = msg.SelfInfo.X;
             y = msg.SelfInfo.Y;
             movespeed = msg.SelfInfo.MoveSpeed;
-            for (int i = 0; i < 50; i++) //¶ÁÈ¡ÑÕÉ«
+            for (int i = 0; i < 50; i++) //ï¿½ï¿½È¡ï¿½ï¿½É«
             {
                 for (int j = 0; j < 50; j++)
                 {
@@ -131,10 +131,10 @@ namespace Logic.Client
             }
         }
     }
-    public class Player  //Íæ¼ÒÏÔÊ¾Àà
+    public class Player  //ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½
     {
-        public int x; //¾«Ï¸×ø±ê
-        public int y; //¾«Ï¸×ø±ê
+        public int x; //ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½
+        public int y; //ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½
         public byte teamnum;
         public byte playernum;
         public JobType job;
@@ -151,10 +151,10 @@ namespace Logic.Client
             this.job = job;
         }
     }
-    public class Bullet  //×Óµ¯Àà
+    public class Bullet  //ï¿½Óµï¿½ï¿½ï¿½
     {
-        public int x; //ºá×ø±ê(¾«Ï¸)
-        public int y; //×Ý×ø±ê(¾«Ï¸)
+        public int x; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Ï¸)
+        public int y; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Ï¸)
         public Int64 teamnum;
         public BulletType bulletType;
         public bool existed = false;
@@ -168,22 +168,22 @@ namespace Logic.Client
             this.id = guid;
         }
     }
-    public class Item  //µÀ¾ßÀà
+    public class Item  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
-        public int xnum; //ºá×ø±ê´ó¸ñ
-        public int ynum; //×Ý×ø±ê´ó¸ñ
+        public int xnum; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        public int ynum; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         public byte type = 0;
         /*
          * 0:NULL
-         * 1:¼ÓËÙ
-         * 2:¼ÓÉË
-         * 4:»ØÑª
-         * 5:¶Ü
-         * 6:¸´»î¼×
-         * 7:ÆÆ¶Ü
-         * 8:¼õËÙµØÀ×
-         * 9:¼õÉËµØÀ×
-         * 10:¼ÓCDµØÀ×
+         * 1:ï¿½ï¿½ï¿½ï¿½
+         * 2:ï¿½ï¿½ï¿½ï¿½
+         * 4:ï¿½ï¿½Ñª
+         * 5:ï¿½ï¿½
+         * 6:ï¿½ï¿½ï¿½ï¿½ï¿½
+         * 7:ï¿½Æ¶ï¿½
+         * 8:ï¿½ï¿½ï¿½Ùµï¿½ï¿½ï¿½
+         * 9:ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½
+         * 10:ï¿½ï¿½CDï¿½ï¿½ï¿½ï¿½
          */
         public bool existed = false;
         public long id = 0;
