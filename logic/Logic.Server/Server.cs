@@ -235,6 +235,17 @@ namespace Logic.Server
 				msgGameObjs.Add(CopyInfo.Auto((GameObject)gameObj));
 			}
 
+			//记录所有GUID信息
+			Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs> playerGUIDs = new Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs>();
+			for (int x = 0; x < options.TeamCount; ++x)
+			{
+				playerGUIDs.Add(new MessageToClient.Types.OneTeamGUIDs());
+				for (int y = 0; y < options.PlayerCountPerTeam; ++y)
+				{
+					playerGUIDs[x].TeammateGUIDs.Add(communicationToGameID[x, y]);
+				}
+			}
+				
 
 			for (int i = 0; i < options.TeamCount; ++i)
 			{
@@ -247,9 +258,9 @@ namespace Logic.Server
 					msg.MessageType = msgType;
 					msg.SelfInfo = CopyInfo.Player(game.GetPlayerFromTeam(communicationToGameID[i, j]));
 
-					for (int k = 0; k < options.PlayerCountPerTeam; ++k)
+					for (int k = 0; k < options.TeamCount; ++k)
 					{
-						msg.TeammateGUIDs.Add(communicationToGameID[i, k]);
+						msg.PlayerGUIDs.Add(playerGUIDs[k]);
 					}
 
 					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(game.TeamToColor(i));
