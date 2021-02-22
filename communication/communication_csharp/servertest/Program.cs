@@ -11,7 +11,6 @@ namespace servertest
         {
             CommServer server = new CommServer();
             server.Listen(8888);
-            MapColor mapColor;
             server.OnConnect += delegate ()
             {
                 Console.WriteLine("An agent connects.");
@@ -22,9 +21,9 @@ namespace servertest
                 IMsg msg;
                 if (server.TryTake(out msg))
                 {   
-                    Message2Server mm = msg.Content as Message2Server;
-                    Console.WriteLine($"Receive a message from {mm.PlayerId}");
-                    Console.WriteLine($"Message type::{msg.MessageType}");
+                    MessageToServer mm = msg.Content as MessageToServer;
+                    Console.WriteLine($"Receive a message from {mm.PlayerID}");
+                    Console.WriteLine($"Message type::{msg.PacketType}");
                     Console.WriteLine($"Info:{mm.JobType}");
 
                 }
@@ -35,10 +34,12 @@ namespace servertest
             };
             Console.ReadLine();
 
-            Message2One m = new Message2One();
-            m.PlayerId = 1;
-            m.Message = "hello world!";
-            server.SendMessage(m, MessageType.Message2One);
+            MessageToOneClient m = new MessageToOneClient();
+            m.PlayerID = 1;
+            m.TeamID = 123;
+            m.MessageType = MessageType.AddPlayer;
+            m.Guid = 888;
+            server.SendMessage(m);
 
 
             Console.ReadLine();
