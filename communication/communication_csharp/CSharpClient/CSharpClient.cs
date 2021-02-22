@@ -4,24 +4,35 @@ using System.Collections.Generic;
 using HPSocket;
 using HPSocket.Tcp;
 using Communication.Proto;
+using System.Collections.Concurrent;
 using Google.Protobuf;
 
 namespace Communication.CSharpClient
 {
-    public delegate void OnReceiveCallback(IMsg msg);
+    public delegate void OnReceiveCallback();
     public class CSharpClient : IDisposable
     {
         private TcpPackClient client;
+        private BlockingCollection<IMsg> queue;
         public event OnReceiveCallback OnReceive;
         private readonly int maxtimeout=30000;//ms，超时connect还没成功则认为连接失败
         public CSharpClient()
         {
             client = new TcpPackClient();
+            queue = new BlockingCollection<IMsg>();
             client.OnReceive += delegate (IClient sender, byte[] bytes)
             {
                 Message message = new Message();
                 message.MergeFrom(bytes);
-                OnReceive?.Invoke(message);
+                try
+                {
+                    queue.Add(message);//理论上这里可能抛出异常ObjectDisposedException或InvalidOperationException
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception occured when adding an item to the queue:" + e.Message);
+                }
+                OnReceive?.Invoke();
                 return HandleResult.Ok;
             };
         }
@@ -44,11 +55,11 @@ namespace Communication.CSharpClient
             }
             return false;
         }
-        public void SendMessage(IMessage msg, MessageType messagetype)
+        public void SendMessage(MessageToServer msg)
         {
             Message message = new Message();
             message.Content = msg;
-            message.MessageType = messagetype;
+            message.PacketType = PacketType.MessageToServer;
             byte[] bytes;
             message.WriteTo(out bytes);
             Send(bytes);
@@ -58,6 +69,31 @@ namespace Communication.CSharpClient
             if(!client.Send(bytes, bytes.Length))
             {
                 Console.WriteLine("发送失败。");
+            }
+        }
+        public bool TryTake(out IMsg msg)
+        {
+            try
+            {
+                return queue.TryTake(out msg);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception occured when trying to take an item from the queue:" + e.Message);
+                msg = null;
+                return false;
+            }
+        }
+        public IMsg Take()
+        {
+            try
+            {
+                return queue.Take();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception occured when taking an item from the queue:" + e.Message);
+                return null;
             }
         }
         public bool Stop()
