@@ -65,11 +65,13 @@ namespace Logic.Server
 
 			serverCommunicator.OnReceive += delegate ()
 			{
-				/*TODO: 绑定OnReceive未完成*/
-
-				//IMsg msg;
-				//if (serverCommunicator.TryTake(out IMsg msg))
+				if (serverCommunicator.TryTake(out IMsg msg) && msg.PacketType == PacketType.MessageToServer)
+				{
+					this.OnReceive((MessageToServer)msg.Content);
+				}
 			};
+
+			Thread.Sleep(int.MaxValue);
 		}
 
 		private void OnReceive(MessageToServer msg)
@@ -119,7 +121,7 @@ namespace Logic.Server
 			msg2Send.TeamID = msgRecv.TeamID;
 			msg2Send.MessageType = isValid ? MessageType.ValidPlayer : MessageType.InvalidPlayer;
 
-			/*TODO: 发送消息，未完成*/
+			serverCommunicator.SendMessage(msg2Send);
 		}
 
 		private bool AddPlayer(MessageToServer msg)
@@ -207,6 +209,13 @@ namespace Logic.Server
 		{
 			//向所有玩家发送结束游戏消息
 			SendMessageToAllClients(MessageType.EndGame);
+
+			//打印各个队伍的分数
+			Console.WriteLine("Final score: ");
+			for (ushort i = 0; i < options.TeamCount; ++i)
+			{
+				Console.WriteLine("Team {0}: {1}", i, game.GetTeamScore(i));
+			}
 		}
 		
 		private void SendMessageToAllClients(MessageType msgType)		//向所有的客户端发送消息
@@ -235,6 +244,17 @@ namespace Logic.Server
 				msgGameObjs.Add(CopyInfo.Auto((GameObject)gameObj));
 			}
 
+			//记录所有GUID信息
+			Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs> playerGUIDs = new Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs>();
+			for (int x = 0; x < options.TeamCount; ++x)
+			{
+				playerGUIDs.Add(new MessageToClient.Types.OneTeamGUIDs());
+				for (int y = 0; y < options.PlayerCountPerTeam; ++y)
+				{
+					playerGUIDs[x].TeammateGUIDs.Add(communicationToGameID[x, y]);
+				}
+			}
+				
 
 			for (int i = 0; i < options.TeamCount; ++i)
 			{
@@ -247,9 +267,9 @@ namespace Logic.Server
 					msg.MessageType = msgType;
 					msg.SelfInfo = CopyInfo.Player(game.GetPlayerFromTeam(communicationToGameID[i, j]));
 
-					for (int k = 0; k < options.PlayerCountPerTeam; ++k)
+					for (int k = 0; k < options.TeamCount; ++k)
 					{
-						msg.TeammateGUIDs.Add(communicationToGameID[i, k]);
+						msg.PlayerGUIDs.Add(playerGUIDs[k]);
 					}
 
 					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(game.TeamToColor(i));
@@ -266,7 +286,7 @@ namespace Logic.Server
 
 					msg.TeamScore = teamScore;
 
-					/*TODO: 向该玩家发送消息，未完成*/
+					serverCommunicator.SendMessage(msg);
 				}
 			}
 		}
