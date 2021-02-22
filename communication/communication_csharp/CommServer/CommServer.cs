@@ -50,11 +50,20 @@ namespace Communication.CommServer
             return temp;
 
         }
-        public void SendMessage(IMessage msg,MessageType messagetype)
+        public void SendMessage(MessageToClient msg)
         {
             Message message = new Message();
             message.Content = msg;
-            message.MessageType = messagetype;
+            message.PacketType = PacketType.MessageToClient;
+            byte[] bytes;
+            message.WriteTo(out bytes);
+            Send(bytes);
+        }
+        public void SendMessage(MessageToOneClient msg)
+        {
+            Message message = new Message();
+            message.Content = msg;
+            message.PacketType = PacketType.MessageToOneClient;
             byte[] bytes;
             message.WriteTo(out bytes);
             Send(bytes);
