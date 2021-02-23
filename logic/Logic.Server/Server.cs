@@ -47,7 +47,6 @@ namespace Logic.Server
 				}
 			}
 
-			/*TODO: 绑定OnReceive、开始监听，未完成*/
 			serverCommunicator = new Communication.CommServer.CommServer();
 
 			while (!serverCommunicator.Listen(options.ServerPort))
