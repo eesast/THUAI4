@@ -11,11 +11,14 @@ namespace Logic.Server
             Parser.Default.ParseArguments<ArgumentOptions>(args).WithParsed(o => { options = o; });
             if (options == null)
 			{
-                Console.WriteLine("Parse failed!");
+                Console.WriteLine("Argument parsing failed!");
                 return 1;
 			}
 
-            Console.WriteLine(options.ServerPort);
+            Console.WriteLine("Server begin to run: " + options.ServerPort.ToString());
+
+            Server server = new Server(options);
+            
             return 0;
         }
     }
