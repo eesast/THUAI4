@@ -453,7 +453,7 @@ namespace Logic.Client
                 if (y < Interval || y > Interval + 50 * MapcellHeight) return;
                 int xnum = (x - Interval) / MapcellWidth;
                 int ynum = (y - Interval) / MapcellHeight;
-                int colorstate = Program.GetColorState(xnum, ynum);
+                int colorstate = Program.ColorState[xnum, ynum];
                 switch (colorstate)
                 {
                     case -2:  //出生点:深灰色+边框
@@ -502,6 +502,7 @@ namespace Logic.Client
                 msg.Angle = Math.Atan2(y - Program.y, x - Program.x);//目前为弧度
                 msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - Program.y), 2)+Math.Pow((double)(x - Program.x), 2))*1024/MapcellHeight/Program.movespeed+0.5);
                 //TO DO:向server发移动指令消息
+                Program.clientCommunicator.SendMessage(msg);
             }
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
@@ -615,25 +616,28 @@ namespace Logic.Client
                     MessageToServer msg1 = new MessageToServer();
                     msg1.MessageType = MessageType.Attack;
                     msg1.Angle = Math.Atan2(y - Program.y, x - Program.x);//目前为弧度
-                    //TO DO:发消息
+                    Program.clientCommunicator.SendMessage(msg1);
                     break;
                 case 'w':
                 case 'W':
                     MessageToServer msg2 = new MessageToServer();
                     msg2.MessageType = MessageType.Use;
                     //TO DO:发消息
+                    Program.clientCommunicator.SendMessage(msg2);
                     break;
                 case 'e':
                 case 'E':
                     MessageToServer msg3 = new MessageToServer();
                     msg3.MessageType = MessageType.Pick;
                     //TO DO:发消息
+                    Program.clientCommunicator.SendMessage(msg3);
                     break;
                 case 'r':
                 case 'R':
                     MessageToServer msg4 = new MessageToServer();
                     msg4.MessageType = MessageType.Throw;
                     //TO DO:发消息
+                    Program.clientCommunicator.SendMessage(msg4);
                     break;
                 default: break;
             }
