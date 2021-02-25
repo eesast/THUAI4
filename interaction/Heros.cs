@@ -18,7 +18,7 @@ public class Heros : MonoBehaviour
     }
 
     public void Coloring(int xPos, int yPos){
-        FloorManager.SetColor(xPos, yPos, color);
+        
     }
 
     
