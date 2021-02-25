@@ -47,7 +47,6 @@ namespace Logic.Server
 				}
 			}
 
-			/*TODO: 绑定OnReceive、开始监听，未完成*/
 			serverCommunicator = new Communication.CommServer.CommServer();
 
 			while (!serverCommunicator.Listen(options.ServerPort))
@@ -122,6 +121,11 @@ namespace Logic.Server
 			msg2Send.MessageType = isValid ? MessageType.ValidPlayer : MessageType.InvalidPlayer;
 
 			serverCommunicator.SendMessage(msg2Send);
+
+			lock (addPlayerLock)
+			{
+				CheckStart();       //检查是否该开始游戏了
+			}
 		}
 
 		private bool AddPlayer(MessageToServer msg)
@@ -162,7 +166,6 @@ namespace Logic.Server
 				if (newPlayerID == GameObject.invalidID) return false;
 				communicationToGameID[msg.TeamID, msg.PlayerID] = newPlayerID;
 
-				CheckStart();		//检查是否该开始游戏了
 				return true;
 			}
 		}
