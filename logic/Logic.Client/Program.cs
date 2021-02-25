@@ -4,6 +4,8 @@ using System.Windows.Forms;
 using CommandLine;
 using Communication.Proto;
 using Communication.CSharpClient;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Logic.Client
 {
@@ -33,7 +35,7 @@ namespace Logic.Client
                 port = options.ServerPort;
             }
             clientCommunicator = new Communication.CSharpClient.CSharpClient();
-            if (clientCommunicator.Connect("127.0.0.1", (ushort)port))
+            if (clientCommunicator.Connect("127.0.0.1", port))
             {
                 MessageBox.Show("成功连接Agent");
             }
@@ -52,42 +54,69 @@ namespace Logic.Client
             clientCommunicator.OnReceive += delegate ()
             {
                 if (clientCommunicator.TryTake(out IMsg msg))
+                    messageline.Add(msg);
+            };
+            messageline = new BlockingCollection<IMsg>(100);
+            gameform = new Form1();
+            new Thread(() =>
+            {
+                while (!messageline.IsCompleted)
                 {
-                    if (msg.PacketType == PacketType.MessageToOneClient)
+                    if (messageline.TryTake(out IMsg msg))
                     {
-                        MessageToOneClient mm = msg.Content as MessageToOneClient;
-                        OnReciveShort(mm);
-                    }
-                    else if (msg.PacketType == PacketType.MessageToClient)
-                    {
-                        MessageToClient mm = msg.Content as MessageToClient;
-                        OnReciveNormal(mm);
+                        if (msg.PacketType == PacketType.MessageToOneClient)
+                        {
+                            MessageToOneClient mm = msg.Content as MessageToOneClient;
+                            OnReciveShort(mm);
+                        }
+                        else if (msg.PacketType == PacketType.MessageToClient)
+                        {
+                            MessageToClient mm = msg.Content as MessageToClient;
+                            OnReciveNormal(mm);
+                        }
                     }
                 }
-            };
+            }
+                ).Start();
             clientCommunicator.SendMessage(msg01);
+            Application.Run(gameform);
         }
         public static int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
         public static Int64 teamID;
         public static Int64 playerID;
         public static JobType jobType;
-        public static int port;
+        public static ushort port;
         public static int x; //精细坐标
         public static int y; //精细坐标
         public static int movespeed;
         private static Dictionary<Int64, Tuple<int, int>> Hashable;
         private static Form1 gameform; //游戏窗体
         public static CSharpClient clientCommunicator;
+        private static BlockingCollection<IMsg> messageline;
+        private static bool gaming;
         private static void OnReciveShort(MessageToOneClient msg)  //连接是否成功
         {
-            if (msg.MessageType == MessageType.ValidPlayer) { MessageBox.Show("Loading");gameform = new Form1();Application.Run(gameform); }
-            else Application.Exit();
+            if (msg.MessageType == MessageType.ValidPlayer)
+            {
+                MessageBox.Show("Loading");
+            }
+            else
+            {
+                Application.Run(new Starting());
+                MessageToServer msg1 = new MessageToServer();
+                msg1.MessageType = MessageType.AddPlayer;
+                msg1.TeamID = teamID - 1;
+                msg1.PlayerID = playerID - 1;
+                msg1.JobType = jobType;
+                clientCommunicator.SendMessage(msg1);
+            }
         }
         private static void OnReciveNormal(MessageToClient msg) //处理游戏消息
         {
             switch (msg.MessageType)
             {
                 case MessageType.StartGame:
+                    MessageBox.Show("game start");
                     Hashable = new Dictionary<Int64, Tuple<int, int>>();
                     for (int i = 0; i < 4; i++)
                     {
@@ -97,8 +126,7 @@ namespace Logic.Client
                         }
                     }
                     movespeed = msg.SelfInfo.MoveSpeed;
-                    gameform = new Form1();
-                    Application.Run(gameform);
+                    MessageBox.Show("start over");
                     break;
                 case MessageType.Gaming:
                     Refresh(msg);
@@ -110,8 +138,9 @@ namespace Logic.Client
                 default: break;
             }
         }
-        private static void Refresh(MessageToClient msg)
+        private static void Refresh(MessageToClient msg)  //刷新界面
         {
+            MessageBox.Show("refresh");
             x = msg.SelfInfo.X;
             y = msg.SelfInfo.Y;
             movespeed = msg.SelfInfo.MoveSpeed;
@@ -122,13 +151,13 @@ namespace Logic.Client
                     ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
                 }
             }
-            foreach (var objinfo in msg.GameObjs)
-            {
-                Objdeal(objinfo);
-            }
             gameform.Rebuild();
+            //foreach (var objinfo in msg.GameObjs)
+            //{
+            //    Objdeal(objinfo);
+            //}
         }
-        private static void Objdeal(GameObjInfo obj)
+        private static void Objdeal(GameObjInfo obj)  //处理物体
         {
             switch (obj.GameObjType)
             {

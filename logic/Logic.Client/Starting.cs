@@ -5,7 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using Communication;
+using Communication.Proto;
 
 namespace Logic.Client
 {
@@ -25,7 +25,7 @@ namespace Logic.Client
             Program.teamID = comboBox1.SelectedIndex+1;
             Program.jobType = (Communication.Proto.JobType)comboBox2.SelectedIndex;
             Program.playerID = comboBox3.SelectedIndex+1;
-            Program.port = (int)numericUpDown1.Value;
+            Program.port = (ushort)numericUpDown1.Value;
             this.Close();
         }
     }
