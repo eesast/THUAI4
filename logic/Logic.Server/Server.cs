@@ -121,6 +121,11 @@ namespace Logic.Server
 			msg2Send.MessageType = isValid ? MessageType.ValidPlayer : MessageType.InvalidPlayer;
 
 			serverCommunicator.SendMessage(msg2Send);
+
+			lock (addPlayerLock)
+			{
+				CheckStart();       //检查是否该开始游戏了
+			}
 		}
 
 		private bool AddPlayer(MessageToServer msg)
@@ -161,7 +166,6 @@ namespace Logic.Server
 				if (newPlayerID == GameObject.invalidID) return false;
 				communicationToGameID[msg.TeamID, msg.PlayerID] = newPlayerID;
 
-				CheckStart();		//检查是否该开始游戏了
 				return true;
 			}
 		}
