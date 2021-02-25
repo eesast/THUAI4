@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using CommandLine;
 using Communication.Proto;
+using Communication.CSharpClient;
 
 namespace Logic.Client
 {
@@ -29,6 +30,17 @@ namespace Logic.Client
                 teamID = options.teamID;
                 playerID = options.playerID;
                 jobType = (JobType)options.job;
+                port = options.ServerPort;
+            }
+            clientCommunicator = new Communication.CSharpClient.CSharpClient();
+            if (clientCommunicator.Connect("127.0.0.1", (ushort)port))
+            {
+                MessageBox.Show("成功连接Agent");
+            }
+            else
+            {
+                MessageBox.Show("连接Agent失败");
+                return;
             }
             //向server发消息
             MessageToServer msg01 = new MessageToServer();
@@ -37,28 +49,39 @@ namespace Logic.Client
             msg01.PlayerID = playerID - 1;
             msg01.JobType = jobType;
             //TO DO:发出消息
-
-            //判断是否成功：假设收到消息在msg02中
-            MessageToOneClient msg02 = new MessageToOneClient();
-            if (!OnReciveShort(msg02)) Application.Exit();//若失败则结束进程
-            else MessageBox.Show("Loading");//等待游戏开始
-
-            //TO DO:一收到消息就用OnreciveNormal处理
-
+            clientCommunicator.OnReceive += delegate ()
+            {
+                if (clientCommunicator.TryTake(out IMsg msg))
+                {
+                    if (msg.PacketType == PacketType.MessageToOneClient)
+                    {
+                        MessageToOneClient mm = msg.Content as MessageToOneClient;
+                        OnReciveShort(mm);
+                    }
+                    else if (msg.PacketType == PacketType.MessageToClient)
+                    {
+                        MessageToClient mm = msg.Content as MessageToClient;
+                        OnReciveNormal(mm);
+                    }
+                }
+            };
+            clientCommunicator.SendMessage(msg01);
         }
         public static int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
         public static Int64 teamID;
         public static Int64 playerID;
         public static JobType jobType;
+        public static int port;
         public static int x; //精细坐标
         public static int y; //精细坐标
         public static int movespeed;
         private static Dictionary<Int64, Tuple<int, int>> Hashable;
         private static Form1 gameform; //游戏窗体
-        private static bool OnReciveShort(MessageToOneClient msg)  //连接是否成功
+        public static CSharpClient clientCommunicator;
+        private static void OnReciveShort(MessageToOneClient msg)  //连接是否成功
         {
-            if (msg.MessageType == MessageType.ValidPlayer) return true;
-            else return false;
+            if (msg.MessageType == MessageType.ValidPlayer) { MessageBox.Show("Loading");gameform = new Form1();Application.Run(gameform); }
+            else Application.Exit();
         }
         private static void OnReciveNormal(MessageToClient msg) //处理游戏消息
         {

@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\communication\communication_csharp\CSharpClient\CSharpClient.csproj" />
     <ProjectReference Include="..\..\communication\communication_csharp\Proto\Proto.csproj" />
     <ProjectReference Include="..\THUnity2D\THUnity2D.csproj" />
   </ItemGroup>
