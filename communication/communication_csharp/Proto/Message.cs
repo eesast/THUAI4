@@ -25,16 +25,28 @@ namespace Communication.Proto
         private IMessage content;
         public IMessage Content { get => content; set => content = value; }
 
-        //这两个方法也是效法前人 传递类名字符串用来创建（似乎比较低效？但写起来简单hhh）
         public void MergeFrom(byte[] bytes)
         {
             MemoryStream istream = new MemoryStream(bytes);
             BinaryReader br = new BinaryReader(istream);
             type = (PacketType)br.ReadInt32();
+            string typename = null;
+            switch (type)
+            {
+                case PacketType.MessageToClient:
+                    typename = "Communication.Proto.MessageToClient";
+                    break;
+                case PacketType.MessageToOneClient:
+                    typename = "Communication.Proto.MessageToOneClient";
+                    break;
+                case PacketType.MessageToServer:
+                    typename = "Communication.Proto.MessageToServer";
+                    break;
+            }
             try
             {
                 CodedInputStream input = new CodedInputStream(istream);
-                string typename = input.ReadString();
+                
                 content = Activator.CreateInstance(Type.GetType(typename)) as IMessage;
                 content.MergeFrom(input);
             }
@@ -55,7 +67,7 @@ namespace Communication.Proto
             //If true, output is left open when the returned CodedOutputStream is disposed; if false, the provided stream is disposed as well.
             using (CodedOutputStream output = new CodedOutputStream(ostream, true))
             {
-                output.WriteString(Content.GetType().FullName);
+                Console.WriteLine(Content.GetType().FullName);
                 Content.WriteTo(output);
                 output.Flush();
             }
