@@ -110,7 +110,22 @@ namespace Logic.Server
 					game.Throw(communicationToGameID[msg.TeamID, msg.PlayerID], msg.TimeInMilliseconds, msg.Angle);
 				}
 				break;
+			case MessageType.Send:
+				SendMessageToTeammate(msg);
+				break;
 			}
+		}
+
+		private void SendMessageToTeammate(MessageToServer msgRecv)
+		{
+			if (!ValidTeamIDAndPlayerID(msgRecv.TeamID, msgRecv.PlayerID)) return;
+			if (msgRecv.Message.Length > 64) return;
+			MessageToOneClient msg = new MessageToOneClient();
+			msg.PlayerID = msgRecv.SendToPlayerID;
+			msg.TeamID = msgRecv.TeamID;
+			msg.Message = msgRecv.Message;
+			serverCommunicator.SendMessage(msg);
+			game.SendMessage(communicationToGameID[msgRecv.TeamID, msgRecv.PlayerID], communicationToGameID[msg.TeamID, msg.PlayerID], msgRecv.Message);
 		}
 
 		private void SendAddPlayerResponse(MessageToServer msgRecv, bool isValid)	//作为对 AddPlayer 消息的响应，给客户端发送信息
