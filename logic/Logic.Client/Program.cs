@@ -135,6 +135,7 @@ namespace Logic.Client
                     Refresh(msg);
                     break;
                 case MessageType.EndGame:
+                    Application.Exit();
                     break;
                 default: break;
             }
