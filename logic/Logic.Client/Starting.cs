@@ -17,7 +17,7 @@ namespace Logic.Client
             comboBox1.SelectedIndex = 0;
             comboBox2.SelectedIndex = 0;
             comboBox3.SelectedIndex = 0;
-            numericUpDown1.Value = 0;
+            numericUpDown1.Value = 7777;
         }
 
         private void button1_Click(object sender, EventArgs e)
