@@ -53,26 +53,27 @@ namespace Logic.Client
             //TO DO:发出消息
             clientCommunicator.OnReceive += delegate ()
             {
+                if (gaming) return;
                 if (clientCommunicator.TryTake(out IMsg msg))
-                    messageline.Add(msg);
+                    messageline.Add(new Tuple<IMsg, long>(msg,System.Environment.TickCount64));
             };
-            messageline = new BlockingCollection<IMsg>(100);
+            messageline = new BlockingCollection<Tuple<IMsg, long>>();
             gameform = new Form1();
             new Thread(() =>
             {
-                while (!messageline.IsCompleted)
+                while (true)
                 {
-                    if (messageline.TryTake(out IMsg msg))
+                    if (messageline.TryTake(out Tuple<IMsg, long> msg))
                     {
-                        if (msg.PacketType == PacketType.MessageToOneClient)
+                        if (msg.Item1.PacketType == PacketType.MessageToOneClient)
                         {
-                            MessageToOneClient mm = msg.Content as MessageToOneClient;
+                            MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
                             OnReciveShort(mm);
                         }
-                        else if (msg.PacketType == PacketType.MessageToClient)
+                        else if (msg.Item1.PacketType == PacketType.MessageToClient)
                         {
-                            MessageToClient mm = msg.Content as MessageToClient;
-                            OnReciveNormal(mm);
+                            MessageToClient mm = msg.Item1.Content as MessageToClient;
+                            OnReciveNormal(mm,msg.Item2);
                         }
                     }
                 }
@@ -82,18 +83,19 @@ namespace Logic.Client
             Application.Run(gameform);
         }
         public static int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
+        public static bool[,] ColorChange = new bool[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
         public static Int64 teamID;
         public static Int64 playerID;
         public static JobType jobType;
         public static ushort port;
-        public static int x; //精细坐标
-        public static int y; //精细坐标
+        public static Int64 selfguid;
         public static int movespeed;
         private static Dictionary<Int64, Tuple<int, int>> Hashable;
         private static Form1 gameform; //游戏窗体
         public static CSharpClient clientCommunicator;
-        private static BlockingCollection<IMsg> messageline;
-        private static bool gaming;
+        private static BlockingCollection<Tuple<IMsg,long>> messageline;
+        private static bool gaming = false;
+        public const int cell = 1000;
         private static void OnReciveShort(MessageToOneClient msg)  //连接是否成功
         {
             if (msg.MessageType == MessageType.ValidPlayer)
@@ -102,6 +104,7 @@ namespace Logic.Client
             }
             else
             {
+                MessageBox.Show("Invalid Player");
                 Application.Run(new Starting());
                 MessageToServer msg1 = new MessageToServer();
                 msg1.MessageType = MessageType.AddPlayer;
@@ -111,65 +114,79 @@ namespace Logic.Client
                 clientCommunicator.SendMessage(msg1);
             }
         }
-        private static void OnReciveNormal(MessageToClient msg) //处理游戏消息
+        private static void OnReciveNormal(MessageToClient msg,long clock) //处理游戏消息
         {
             switch (msg.MessageType)
             {
                 case MessageType.StartGame:
                     MessageBox.Show("game start");
                     Hashable = new Dictionary<Int64, Tuple<int, int>>();
-                    for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < 1; i++)
                     {
-                        for (int j = 0; j < 4; j++)
+                        for (int j = 0; j < 1; j++)
                         {
                             Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
                         }
                     }
                     movespeed = msg.SelfInfo.MoveSpeed;
-                    MessageBox.Show("start over");
                     break;
                 case MessageType.Gaming:
+                    if (System.Environment.TickCount64 - clock > 50) break;
                     Refresh(msg);
                     break;
                 case MessageType.EndGame:
-                    gameform.Close();
-                    Application.Exit();
                     break;
                 default: break;
             }
         }
         private static void Refresh(MessageToClient msg)  //刷新界面
         {
-            MessageBox.Show("refresh");
-            x = msg.SelfInfo.X;
-            y = msg.SelfInfo.Y;
+            selfguid = msg.SelfInfo.Guid;
             movespeed = msg.SelfInfo.MoveSpeed;
             for (int i = 0; i < 50; i++) //读取颜色
             {
                 for (int j = 0; j < 50; j++)
                 {
-                    ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
+                    if (ColorState[i, j] == (int)msg.CellColors[j].RowColors[i])
+                        ColorChange[i, j] = false;
+                    else
+                    {
+                        ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
+                        ColorChange[i, j] = true;
+                    }
                 }
             }
+            foreach (var objinfo in msg.GameObjs)
+            {
+                Objdeal(objinfo);
+            }
             gameform.Rebuild();
-            //foreach (var objinfo in msg.GameObjs)
-            //{
-            //    Objdeal(objinfo);
-            //}
         }
         private static void Objdeal(GameObjInfo obj)  //处理物体
         {
             switch (obj.GameObjType)
             {
                 case GameObjType.BirthPoint:
-                    ColorState[obj.Y / 1024, obj.X / 1024] = -2;
+                    if (ColorState[obj.Y / cell, obj.X / cell] == -2)
+                        ColorChange[obj.Y / cell, obj.X / cell] = false;
+                    else
+                    {
+                        ColorState[obj.Y / cell, obj.X / cell] = -2;
+                        ColorChange[obj.Y / cell, obj.X / cell] = true;
+                    }
                     break;
                 case GameObjType.Wall:
-                    ColorState[obj.Y / 1024, obj.X / 1024] = -1;
+                    if (ColorState[obj.Y / cell, obj.X / cell] == -1)
+                        ColorChange[obj.Y / cell, obj.X / cell] = false;
+                    else
+                    {
+                        ColorState[obj.Y / cell, obj.X / cell] = -1;
+                        ColorChange[obj.Y / cell, obj.X / cell] = true;
+                    }
                     break;
                 case GameObjType.Character:
                     if (obj.IsDying) break;
-                    Player player = new Player(obj.Y, obj.X, (byte)(obj.TeamID + 1), (byte)(Hashable[obj.Guid].Item2 + 1), obj.JobType, (short)obj.Hp);
+                    Player player = new Player(obj.Y, obj.X, (byte)(obj.TeamID + 1), (byte)(Hashable[obj.Guid].Item2 + 1), obj.JobType, (short)obj.Hp,obj.Guid,obj.PropType);
                     gameform.DrawPlayer(player);
                     break;
                 case GameObjType.Bullet:
@@ -177,9 +194,11 @@ namespace Logic.Client
                     gameform.DrawBullet(bullet);
                     break;
                 case GameObjType.Prop:
-                    Item item = new Item(obj.Y / 1024, obj.X / 1024, obj.PropType);
+                    if (obj.IsLaid) break;
+                    Item item = new Item(obj.Y / cell, obj.X / cell, obj.PropType,obj.Guid);
                     gameform.DrawItem(item);
                     break;
+                default: break;
             }
         }
     }
@@ -189,11 +208,11 @@ namespace Logic.Client
         public int y; //精细坐标
         public byte teamnum;
         public byte playernum;
+        public Int64 id;
         public JobType job;
         public PropType possession = 0;
         public short health = 0;
-        public bool existed = false;
-        public Player(int x, int y, byte teamnum, byte playernum, JobType job, short health)
+        public Player(int x, int y, byte teamnum, byte playernum, JobType job, short health,Int64 guid,PropType possession)
         {
             this.x = x;
             this.y = y;
@@ -201,6 +220,8 @@ namespace Logic.Client
             this.playernum = playernum;
             this.health = health;
             this.job = job;
+            this.id = guid;
+            this.possession = possession;
         }
     }
     public class Bullet  //子弹类
@@ -209,7 +230,6 @@ namespace Logic.Client
         public int y; //纵坐标(精细)
         public Int64 teamnum;
         public BulletType bulletType;
-        public bool existed = false;
         public Int64 id = 0;
         public Bullet(int x, int y, int teamnum, BulletType bulletType, Int64 guid)
         {
@@ -237,14 +257,23 @@ namespace Logic.Client
          * 9:减伤地雷
          * 10:加CD地雷
          */
-        public bool existed = false;
-        public long id = 0;
-        public Item(int xnum, int ynum, PropType type)
+        public Int64 id;
+        public Item(int xnum, int ynum, PropType type,Int64 guid)
         {
             this.xnum = xnum;
             this.ynum = ynum;
             this.type = (byte)type;
-            this.id = xnum * 50 + ynum;
+            this.id = guid;
+        }
+    }
+    public class BoolLabel
+    {
+        public bool used;
+        public Label label;
+        public BoolLabel()
+        {
+            label = new Label();
+            used = true;
         }
     }
 }
