@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 using Communication.Proto; 
 
@@ -18,6 +19,8 @@ namespace Logic.Client
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.Text = "Client---简易调试界面";
+            //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            //this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             //绘制地图
             for (int i = 0; i < 50; i++)
             {
@@ -268,6 +271,15 @@ namespace Logic.Client
             //玩家示例代码
             //子弹示例代码
             //道具示例代码
+            //new Thread(() =>
+            //{
+            //    while (true)
+            //    {
+            //        this.Refresh();
+            //        Thread.Sleep(2000);
+            //    }
+            //}
+            //    ).Start();            
         }
         protected readonly int MapcellWidth = 13;  //单元格长度
         protected readonly int MapcellHeight = 13;  //单元格高度
@@ -311,135 +323,143 @@ namespace Logic.Client
             Magicpen.Dispose();
         }
         //动态标签集合
-        Dictionary<long, Label> PlayerLabelSet = new Dictionary<long, Label>();
-        Dictionary<long, Label> BulletLabelSet = new Dictionary<long, Label>();
-        Dictionary<long, Label> ItemLabelSet = new Dictionary<long, Label>();
+        Dictionary<long, BoolLabel> PlayerLabelSet = new Dictionary<long, BoolLabel>();
+        Dictionary<long, BoolLabel> BulletLabelSet = new Dictionary<long, BoolLabel>();
+        Dictionary<long, BoolLabel> ItemLabelSet = new Dictionary<long, BoolLabel>();
         public void DrawPlayer(Player player)  //绘制玩家
         {
-            if (player.existed)
+            this.Invoke(new Action(() =>
             {
-                PlayerLabelSet[player.teamnum * 10 + player.playernum].Location = new Point(player.x, player.y);
-                PlayerLabelSet[player.teamnum * 10 + player.playernum].BringToFront();
-            }
-            else
-            {
-                Label label = new Label();
-                label.Size = new Size(MapcellWidth + 1, MapcellHeight + 1);
-                label.Location = new Point((player.x * MapcellWidth + 512) / 1024 - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + 512) / 1024 - (MapcellHeight + 1) / 2 + Interval);
-                label.Text = Convert.ToString(player.playernum);
-                label.ForeColor = Color.White;
-                label.TextAlign = ContentAlignment.TopRight;
-                label.Font = new Font("Times New Roman", 8);
-                label.Click += delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
-                switch (player.teamnum)
+                if (PlayerLabelSet.ContainsKey(player.id))
                 {
-                    case 1:
-                        label.BackColor = Color.SteelBlue;
-                        break;
-                    case 2:
-                        label.BackColor = Color.Green;
-                        break;
-                    case 3:
-                        label.BackColor = Color.Blue;
-                        break;
-                    case 4:
-                        label.BackColor = Color.Pink;
-                        break;
+                    PlayerLabelSet[player.id].label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    PlayerLabelSet[player.id].label.BringToFront();
+                    PlayerLabelSet[player.id].used = true;
+                    PlayerLabelSet[player.id].label.Click+= delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
                 }
-                this.Controls.Add(label);
-                label.BringToFront();
-                PlayerLabelSet.Add(player.teamnum * 10 + player.playernum, label);
-                player.existed = true;
-            }
+                else
+                {
+                    BoolLabel label = new BoolLabel();
+                    label.label.Size = new Size(MapcellWidth + 1, MapcellHeight + 1);
+                    label.label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    label.label.Text = Convert.ToString(player.playernum);
+                    label.label.ForeColor = Color.White;
+                    label.label.TextAlign = ContentAlignment.TopRight;
+                    label.label.Font = new Font("Times New Roman", 8);
+                    label.label.Click += delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
+                    switch (player.teamnum)
+                    {
+                        case 1:
+                            label.label.BackColor = Color.SteelBlue;
+                            break;
+                        case 2:
+                            label.label.BackColor = Color.Green;
+                            break;
+                        case 3:
+                            label.label.BackColor = Color.Blue;
+                            break;
+                        case 4:
+                            label.label.BackColor = Color.Pink;
+                            break;
+                    }
+                    this.Controls.Add(label.label);
+                    label.label.BringToFront();
+                    PlayerLabelSet.Add(player.id, label);
+                }
+            }));
         }
         public void DrawBullet(Bullet bullet)  //绘制子弹
         {
-            if (bullet.existed)
+            this.Invoke(new Action(() =>
             {
-                BulletLabelSet[bullet.id].Location = new Point(bullet.x, bullet.y);
-                BulletLabelSet[bullet.id].BringToFront();
-            }
-            else
-            {
-                Label label = new Label();
-                label.Size = new Size(5, 5);
-                label.Location = new Point(bullet.x, bullet.y);  //或许会再修改
-                switch (bullet.teamnum)
+                if (BulletLabelSet.ContainsKey(bullet.id))
                 {
-                    case 1:
-                        label.BackColor = Color.SteelBlue;
-                        break;
-                    case 2:
-                        label.BackColor = Color.Green;
-                        break;
-                    case 3:
-                        label.BackColor = Color.Blue;
-                        break;
-                    case 4:
-                        label.BackColor = Color.Pink;
-                        break;
+                    BulletLabelSet[bullet.id].label.Location = new Point((bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    BulletLabelSet[bullet.id].label.BringToFront();
+                    BulletLabelSet[bullet.id].used = true;
                 }
-                this.Controls.Add(label);
-                label.BringToFront();
-                BulletLabelSet.Add(bullet.id, label);
-                bullet.existed = true;
-            }
+                else
+                {
+                    BoolLabel label = new BoolLabel();
+                    label.label.Size = new Size(5, 5);
+                    label.label.Location = new Point((bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);  //或许会再修改
+                    switch (bullet.teamnum)
+                    {
+                        case 1:
+                            label.label.BackColor = Color.SteelBlue;
+                            break;
+                        case 2:
+                            label.label.BackColor = Color.Green;
+                            break;
+                        case 3:
+                            label.label.BackColor = Color.Blue;
+                            break;
+                        case 4:
+                            label.label.BackColor = Color.Pink;
+                            break;
+                    }
+                    this.Controls.Add(label.label);
+                    label.label.BringToFront();
+                    BulletLabelSet.Add(bullet.id, label);
+                }
+            }));
         }
         public void DrawItem(Item item)  //绘制道具
         {
-            if (item.existed)
-            {
-                ItemLabelSet[item.id].Location = new Point(item.xnum * MapcellWidth + Interval, item.ynum * MapcellHeight + Interval);
-                ItemLabelSet[item.id].BringToFront();
-            }
-            else
-            {
-                Label label = new Label
+            this.Invoke(new Action(() =>
+            {                
+                if (ItemLabelSet.ContainsKey(item.id))
                 {
-                    Location = new Point(item.xnum * MapcellWidth + Interval, item.ynum * MapcellHeight + Interval),  //或许会再修改
-                    Size = new Size(MapcellWidth, MapcellHeight),
-                    ForeColor = Color.Red,
-                    TextAlign = ContentAlignment.TopCenter,
-                    Font = new Font("Times New Roman", 9),
-                    BackColor = Color.Yellow
-                };
-                switch (item.type)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        label.Text = "🏃";
-                        break;
-                    case 2:
-                        label.Text = "⚔";
-                        break;
-                    case 3:
-                        label.Text = "⭯";
-                        break;
-                    case 4:
-                        label.Text = "❤";
-                        break;
-                    case 5:
-                        label.Text = "⛨";
-                        break;
-                    case 6:
-                        label.Text = "⍏";
-                        break;
-                    case 7:
-                        label.Text = "❎";
-                        break;
-                    case 8:
-                    case 9:
-                    case 10:
-                        label.Text = "🚩";
-                        break;
+                    ItemLabelSet[item.id].label.Location = new Point(item.xnum * MapcellWidth + Interval, item.ynum * MapcellHeight + Interval);
+                    ItemLabelSet[item.id].label.BringToFront();
+                    ItemLabelSet[item.id].used = true;
                 }
-                label.Click += delegate (object sender, EventArgs e) { ItemClick(sender, e, item); }; ;
-                this.Controls.Add(label);
-                label.BringToFront();
-                ItemLabelSet.Add(item.id, label);
-                item.existed = true;
-            }
+                else
+                {
+                    BoolLabel label = new BoolLabel();
+                    label.label.Location = new Point(item.xnum * MapcellWidth + Interval, item.ynum * MapcellHeight + Interval);  //或许会再修改
+                    label.label.Size = new Size(MapcellWidth, MapcellHeight);
+                    label.label.ForeColor = Color.Red;
+                    label.label.TextAlign = ContentAlignment.TopCenter;
+                    label.label.Font = new Font("Times New Roman", 9);
+                    label.label.BackColor = Color.Yellow;
+                    switch (item.type)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            label.label.Text = "🏃";
+                            break;
+                        case 2:
+                            label.label.Text = "⚔";
+                            break;
+                        case 3:
+                            label.label.Text = "⭯";
+                            break;
+                        case 4:
+                            label.label.Text = "❤";
+                            break;
+                        case 5:
+                            label.label.Text = "⛨";
+                            break;
+                        case 6:
+                            label.label.Text = "⍏";
+                            break;
+                        case 7:
+                            label.label.Text = "❎";
+                            break;
+                        case 8:
+                        case 9:
+                        case 10:
+                            label.label.Text = "🚩";
+                            break;
+                    }
+                    label.label.Click += delegate (object sender, EventArgs e) { ItemClick(sender, e, item); }; ;
+                    this.Controls.Add(label.label);
+                    label.label.BringToFront();
+                    ItemLabelSet.Add(item.id, label);
+                }
+            }));
         }
         private void LabelClick(object sender, EventArgs e)  //标签单击事件处理
         {
@@ -495,12 +515,12 @@ namespace Logic.Client
             }
             else if (mouseEventArgs.Button == MouseButtons.Right)
             {
-                int y = label.Location.X + mouseEventArgs.X - Interval;
-                int x = label.Location.Y + mouseEventArgs.Y - Interval;
+                int y = this.PointToClient(Control.MousePosition).X;
+                int x = this.PointToClient(Control.MousePosition).Y;
                 MessageToServer msg = new MessageToServer();
                 msg.MessageType = MessageType.Move;
-                msg.Angle = Math.Atan2(y - Program.y, x - Program.x);//目前为弧度
-                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - Program.y), 2)+Math.Pow((double)(x - Program.x), 2))*1024/MapcellHeight/Program.movespeed+0.5);
+                msg.Angle = Math.Atan2(y - PlayerLabelSet[Program.selfguid].label.Location.X-7, x - PlayerLabelSet[Program.selfguid].label.Location.Y-6);//目前为弧度
+                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[Program.selfguid].label.Location.X-7), 2)+Math.Pow((double)(x - PlayerLabelSet[Program.selfguid].label.Location.Y-6), 2))*Program.cell/MapcellHeight/Program.movespeed+0.5);
                 //TO DO:向server发移动指令消息
                 Program.clientCommunicator.SendMessage(msg);
             }
@@ -512,8 +532,8 @@ namespace Logic.Client
             ObjectInfoWord[2].Text = "TeamNum : " + Convert.ToString(player.teamnum);
             ObjectInfoWord[3].Text = "PlayerNum : " + Convert.ToString(player.playernum);
             ObjectInfoWord[4].Text = "Profession : " + Convert.ToString(player.job);
-            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / 1024) + " (+" + Convert.ToString(player.x % 1024) + ")";
-            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / 1024) + " (+" + Convert.ToString(player.y % 1024) + ")";
+            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
+            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
             ObjectInfoWord[7].Text = "Health : " + Convert.ToString(player.health);
             String tempo = "";
             switch ((int)player.possession)
@@ -615,7 +635,7 @@ namespace Logic.Client
                     int x=this.PointToClient(Control.MousePosition).Y;
                     MessageToServer msg1 = new MessageToServer();
                     msg1.MessageType = MessageType.Attack;
-                    msg1.Angle = Math.Atan2(y - Program.y, x - Program.x);//目前为弧度
+                    msg1.Angle = Math.Atan2(y - PlayerLabelSet[Program.selfguid].label.Location.X, x - PlayerLabelSet[Program.selfguid].label.Location.Y);//目前为弧度
                     Program.clientCommunicator.SendMessage(msg1);
                     break;
                 case 'w':
@@ -630,7 +650,11 @@ namespace Logic.Client
                     MessageToServer msg3 = new MessageToServer();
                     msg3.MessageType = MessageType.Pick;
                     //TO DO:发消息
-                    Program.clientCommunicator.SendMessage(msg3);
+                    for (int i = 1; i < 11; i++)
+                    {
+                        msg3.PropType = (PropType)i;
+                        Program.clientCommunicator.SendMessage(msg3);
+                    }
                     break;
                 case 'r':
                 case 'R':
@@ -645,19 +669,46 @@ namespace Logic.Client
         //地雷先不画出“🚩”——锅
         public void Rebuild()  //刷新界面
         {
-            foreach (var item in PlayerLabelSet)
+            this.Invoke(new Action(() =>
             {
-                this.Controls.Remove(item.Value);
-            }
-            foreach (var item in BulletLabelSet)
-            {
-                this.Controls.Remove(item.Value);
-            }
-            foreach (var item in ItemLabelSet)
-            {
-                this.Controls.Remove(item.Value);
-            }
-            Redraw(Program.ColorState);
+                foreach (var item in PlayerLabelSet)
+                {
+                    if (item.Value.used)
+                    {
+                        item.Value.used = false;
+                    }
+                    else 
+                    { 
+                        this.Controls.Remove(item.Value.label);
+                        PlayerLabelSet.Remove(item.Key);
+                    }
+                }
+                foreach (var item in BulletLabelSet)
+                {
+                    if (item.Value.used)
+                    {
+                        item.Value.used = false;
+                    }
+                    else
+                    {
+                        this.Controls.Remove(item.Value.label);
+                        BulletLabelSet.Remove(item.Key);
+                    }
+                }
+                foreach (var item in ItemLabelSet)
+                {
+                    if (item.Value.used)
+                    {
+                        item.Value.used = false;
+                    }
+                    else
+                    {
+                        this.Controls.Remove(item.Value.label);
+                        ItemLabelSet.Remove(item.Key);
+                    }
+                }
+                Redraw(Program.ColorState);
+            }));
         }
         public void Redraw(int[,]vs) //重绘地图
         {
@@ -665,6 +716,7 @@ namespace Logic.Client
             {
                 for(int j = 0; j < 50; j++)
                 {
+                    if(Program.ColorChange[i,j])
                     switch (vs[i,j])
                     {
                         case -2:  //出生点:深灰色+边框
