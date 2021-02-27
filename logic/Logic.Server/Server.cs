@@ -124,6 +124,7 @@ namespace Logic.Server
 			msg.PlayerID = msgRecv.SendToPlayerID;
 			msg.TeamID = msgRecv.TeamID;
 			msg.Message = msgRecv.Message;
+			msg.MessageType = MessageType.Send;
 			serverCommunicator.SendMessage(msg);
 			game.SendMessage(communicationToGameID[msgRecv.TeamID, msgRecv.PlayerID], communicationToGameID[msg.TeamID, msg.PlayerID], msgRecv.Message);
 		}
