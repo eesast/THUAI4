@@ -67,7 +67,6 @@ namespace Communication.Proto
             //If true, output is left open when the returned CodedOutputStream is disposed; if false, the provided stream is disposed as well.
             using (CodedOutputStream output = new CodedOutputStream(ostream, true))
             {
-                Console.WriteLine(Content.GetType().FullName);
                 Content.WriteTo(output);
                 output.Flush();
             }

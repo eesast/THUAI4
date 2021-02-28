@@ -23,8 +23,11 @@ namespace servertest
                 {   
                     MessageToServer mm = msg.Content as MessageToServer;
                     Console.WriteLine($"Receive a message from {mm.PlayerID}");
-                    Console.WriteLine($"Message type::{msg.PacketType}");
-                    Console.WriteLine($"Info:{mm.JobType}");
+                    Console.WriteLine($"Message type::{mm.MessageType}");
+                    if (mm.MessageType == MessageType.Send)
+                    {
+                        Console.WriteLine(mm.Message);
+                    }
 
                 }
                 else
@@ -35,8 +38,8 @@ namespace servertest
             Console.ReadLine();
 
             MessageToOneClient m = new MessageToOneClient();
-            m.PlayerID = 1;
-            m.TeamID = 123;
+            m.PlayerID = 4;
+            m.TeamID = 0;
             m.MessageType = MessageType.AddPlayer;
             m.Guid = 888;
             server.SendMessage(m);

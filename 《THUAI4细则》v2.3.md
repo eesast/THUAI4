@@ -88,7 +88,7 @@ enum class MessageType
     Pick = 3,
     Use = 4,
     Throw = 5,
-    Send = 6
+    Send = 6 
     
     InvalidPlayer = 7,
     ValidPlayer = 8,
@@ -132,7 +132,6 @@ struct GameObjInfo
     int32 maxHp;
     int32 hp;
     int32 lifeNum;		//第几次复活
-    string message;
 }
 
 struct MessageToOneClient
@@ -140,8 +139,9 @@ struct MessageToOneClient
     int64 playerID;			//指明发送给谁
     int64 teamID;			//指明发送给谁
     
-    MessageType messageType;	//消息类型，可能是 InvalidPlayer、ValidPlayer
+    MessageType messageType;	//消息类型，可能是 InvalidPlayer、ValidPlayer或Send
     int64 guid;				//自己的guid
+    string message;         
 }
 
 struct MessageToClient
@@ -231,7 +231,7 @@ struct MessageToServer
 
    
 
-3. `std::list<GameObjInfo> GetGameObj(int cellX, int cellY)` 返回位于参数所示的 cell 中的所有可见的游戏对象的列表。（函数中实现视野，**并屏蔽掉已经被放置的地雷**）
+3. `const std::list<GameObjInfo>& GetGameObj(int cellX, int cellY)` 返回位于参数所示的 cell 中的所有可见的游戏对象的列表。（函数中实现视野，**并屏蔽掉已经被放置的地雷**）
 
 4. `ColorType GetColor(int cellX, int cellY)` 返回 `cellColors[cellX][cellY]` 。
 
