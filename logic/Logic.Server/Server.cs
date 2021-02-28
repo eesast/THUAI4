@@ -47,7 +47,6 @@ namespace Logic.Server
 				}
 			}
 
-			/*TODO: 绑定OnReceive、开始监听，未完成*/
 			serverCommunicator = new Communication.CommServer.CommServer();
 
 			while (!serverCommunicator.Listen(options.ServerPort))
@@ -65,11 +64,13 @@ namespace Logic.Server
 
 			serverCommunicator.OnReceive += delegate ()
 			{
-				/*TODO: 绑定OnReceive未完成*/
-
-				//IMsg msg;
-				//if (serverCommunicator.TryTake(out IMsg msg))
+				if (serverCommunicator.TryTake(out IMsg msg) && msg.PacketType == PacketType.MessageToServer)
+				{
+					this.OnReceive((MessageToServer)msg.Content);
+				}
 			};
+
+			Thread.Sleep(int.MaxValue);
 		}
 
 		private void OnReceive(MessageToServer msg)
@@ -109,7 +110,23 @@ namespace Logic.Server
 					game.Throw(communicationToGameID[msg.TeamID, msg.PlayerID], msg.TimeInMilliseconds, msg.Angle);
 				}
 				break;
+			case MessageType.Send:
+				SendMessageToTeammate(msg);
+				break;
 			}
+		}
+
+		private void SendMessageToTeammate(MessageToServer msgRecv)
+		{
+			if (!ValidTeamIDAndPlayerID(msgRecv.TeamID, msgRecv.PlayerID)) return;
+			if (msgRecv.Message.Length > 64) return;
+			MessageToOneClient msg = new MessageToOneClient();
+			msg.PlayerID = msgRecv.SendToPlayerID;
+			msg.TeamID = msgRecv.TeamID;
+			msg.Message = msgRecv.Message;
+			msg.MessageType = MessageType.Send;
+			serverCommunicator.SendMessage(msg);
+			game.SendMessage(communicationToGameID[msgRecv.TeamID, msgRecv.PlayerID], communicationToGameID[msg.TeamID, msg.PlayerID], msgRecv.Message);
 		}
 
 		private void SendAddPlayerResponse(MessageToServer msgRecv, bool isValid)	//作为对 AddPlayer 消息的响应，给客户端发送信息
@@ -119,7 +136,12 @@ namespace Logic.Server
 			msg2Send.TeamID = msgRecv.TeamID;
 			msg2Send.MessageType = isValid ? MessageType.ValidPlayer : MessageType.InvalidPlayer;
 
-			/*TODO: 发送消息，未完成*/
+			serverCommunicator.SendMessage(msg2Send);
+
+			lock (addPlayerLock)
+			{
+				CheckStart();       //检查是否该开始游戏了
+			}
 		}
 
 		private bool AddPlayer(MessageToServer msg)
@@ -160,7 +182,6 @@ namespace Logic.Server
 				if (newPlayerID == GameObject.invalidID) return false;
 				communicationToGameID[msg.TeamID, msg.PlayerID] = newPlayerID;
 
-				CheckStart();		//检查是否该开始游戏了
 				return true;
 			}
 		}
@@ -207,6 +228,13 @@ namespace Logic.Server
 		{
 			//向所有玩家发送结束游戏消息
 			SendMessageToAllClients(MessageType.EndGame);
+
+			//打印各个队伍的分数
+			Console.WriteLine("Final score: ");
+			for (ushort i = 0; i < options.TeamCount; ++i)
+			{
+				Console.WriteLine("Team {0}: {1}", i, game.GetTeamScore(i));
+			}
 		}
 		
 		private void SendMessageToAllClients(MessageType msgType)		//向所有的客户端发送消息
@@ -235,6 +263,17 @@ namespace Logic.Server
 				msgGameObjs.Add(CopyInfo.Auto((GameObject)gameObj));
 			}
 
+			//记录所有GUID信息
+			Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs> playerGUIDs = new Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs>();
+			for (int x = 0; x < options.TeamCount; ++x)
+			{
+				playerGUIDs.Add(new MessageToClient.Types.OneTeamGUIDs());
+				for (int y = 0; y < options.PlayerCountPerTeam; ++y)
+				{
+					playerGUIDs[x].TeammateGUIDs.Add(communicationToGameID[x, y]);
+				}
+			}
+				
 
 			for (int i = 0; i < options.TeamCount; ++i)
 			{
@@ -247,9 +286,9 @@ namespace Logic.Server
 					msg.MessageType = msgType;
 					msg.SelfInfo = CopyInfo.Player(game.GetPlayerFromTeam(communicationToGameID[i, j]));
 
-					for (int k = 0; k < options.PlayerCountPerTeam; ++k)
+					for (int k = 0; k < options.TeamCount; ++k)
 					{
-						msg.TeammateGUIDs.Add(communicationToGameID[i, k]);
+						msg.PlayerGUIDs.Add(playerGUIDs[k]);
 					}
 
 					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(game.TeamToColor(i));
@@ -266,7 +305,7 @@ namespace Logic.Server
 
 					msg.TeamScore = teamScore;
 
-					/*TODO: 向该玩家发送消息，未完成*/
+					serverCommunicator.SendMessage(msg);
 				}
 			}
 		}
