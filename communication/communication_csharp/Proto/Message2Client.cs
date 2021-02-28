@@ -36,36 +36,36 @@ namespace Communication.Proto {
             "CBIPCgdpc0R5aW5nGBAgASgIEiIKB2pvYlR5cGUYESABKA4yES5Qcm90b2J1",
             "Zi5Kb2JUeXBlEgoKAkNEGBIgASgFEhQKDG1heEJ1bGxldE51bRgTIAEoBRIR",
             "CglidWxsZXROdW0YFCABKAUSDQoFbWF4SHAYFSABKAUSCgoCaHAYFiABKAUS",
-            "DwoHbGlmZU51bRgXIAEoBSJwChJNZXNzYWdlVG9PbmVDbGllbnQSEAoIcGxh",
-            "eWVySUQYASABKAMSDgoGdGVhbUlEGAIgASgDEioKC21lc3NhZ2VUeXBlGAMg",
-            "ASgOMhUuUHJvdG9idWYuTWVzc2FnZVR5cGUSDAoEZ3VpZBgEIAEoAyL1AgoP",
-            "TWVzc2FnZVRvQ2xpZW50EhAKCHBsYXllcklEGAEgASgDEg4KBnRlYW1JRBgC",
-            "IAEoAxIqCgttZXNzYWdlVHlwZRgDIAEoDjIVLlByb3RvYnVmLk1lc3NhZ2VU",
-            "eXBlEicKCHNlbGZJbmZvGAQgASgLMhUuUHJvdG9idWYuR2FtZU9iakluZm8S",
-            "FQoNdGVhbW1hdGVHVUlEcxgFIAMoAxIqCg1zZWxmVGVhbUNvbG9yGAYgASgO",
-            "MhMuUHJvdG9idWYuQ29sb3JUeXBlEicKCGdhbWVPYmpzGAcgAygLMhUuUHJv",
-            "dG9idWYuR2FtZU9iakluZm8SNwoKY2VsbENvbG9ycxgIIAMoCzIjLlByb3Rv",
-            "YnVmLk1lc3NhZ2VUb0NsaWVudC5PbmVEaW1WZWMSEQoJdGVhbVNjb3JlGAkg",
-            "ASgFGjMKCU9uZURpbVZlYxImCglyb3dDb2xvcnMYASADKA4yEy5Qcm90b2J1",
-            "Zi5Db2xvclR5cGUqYQoLR2FtZU9ialR5cGUSDQoJQ2hhcmFjdGVyEAASCAoE",
-            "V2FsbBABEggKBFByb3AQAhIKCgZCdWxsZXQQAxIOCgpCaXJ0aFBvaW50EAQS",
-            "EwoPT3V0T2ZCb3VuZEJsb2NrEAUqmAEKCFByb3BUeXBlEggKBE51bGwQABII",
-            "CgRCaWtlEAESDQoJQW1wbGlmaWVyEAISCwoHSmluS2VMYRADEggKBFJpY2UQ",
-            "BBIUChBOZWdhdGl2ZUZlZWRiYWNrEAUSCQoFVG90ZW0QBhIKCgZQaGFzZXIQ",
-            "BxIICgREaXJ0EAgSDgoKQXR0ZW51YXRvchAJEgsKB0RpdmlkZXIQCiojCglT",
-            "aGFwZVR5cGUSCgoGQ2lyY2xlEAASCgoGU3F1YXJlEAEqTwoHSm9iVHlwZRII",
-            "CgRKb2IwEAASCAoESm9iMRABEggKBEpvYjIQAhIICgRKb2IzEAMSCAoESm9i",
-            "NBAEEggKBEpvYjUQBRIICgRKb2I2EAYqZwoKQnVsbGV0VHlwZRILCgdCdWxs",
-            "ZXQwEAASCwoHQnVsbGV0MRABEgsKB0J1bGxldDIQAhILCgdCdWxsZXQzEAMS",
-            "CwoHQnVsbGV0NBAEEgsKB0J1bGxldDUQBRILCgdCdWxsZXQ2EAYqRQoJQ29s",
-            "b3JUeXBlEggKBE5vbmUQABIKCgZDb2xvcjEQARIKCgZDb2xvcjIQAhIKCgZD",
-            "b2xvcjMQAxIKCgZDb2xvcjQQBEIWqgITQ29tbXVuaWNhdGlvbi5Qcm90b2IG",
-            "cHJvdG8z"));
+            "DwoHbGlmZU51bRgXIAEoBSKBAQoSTWVzc2FnZVRvT25lQ2xpZW50EhAKCHBs",
+            "YXllcklEGAEgASgDEg4KBnRlYW1JRBgCIAEoAxIqCgttZXNzYWdlVHlwZRgD",
+            "IAEoDjIVLlByb3RvYnVmLk1lc3NhZ2VUeXBlEgwKBGd1aWQYBCABKAMSDwoH",
+            "bWVzc2FnZRgFIAEoCSL1AgoPTWVzc2FnZVRvQ2xpZW50EhAKCHBsYXllcklE",
+            "GAEgASgDEg4KBnRlYW1JRBgCIAEoAxIqCgttZXNzYWdlVHlwZRgDIAEoDjIV",
+            "LlByb3RvYnVmLk1lc3NhZ2VUeXBlEicKCHNlbGZJbmZvGAQgASgLMhUuUHJv",
+            "dG9idWYuR2FtZU9iakluZm8SFQoNdGVhbW1hdGVHVUlEcxgFIAMoAxIqCg1z",
+            "ZWxmVGVhbUNvbG9yGAYgASgOMhMuUHJvdG9idWYuQ29sb3JUeXBlEicKCGdh",
+            "bWVPYmpzGAcgAygLMhUuUHJvdG9idWYuR2FtZU9iakluZm8SNwoKY2VsbENv",
+            "bG9ycxgIIAMoCzIjLlByb3RvYnVmLk1lc3NhZ2VUb0NsaWVudC5PbmVEaW1W",
+            "ZWMSEQoJdGVhbVNjb3JlGAkgASgFGjMKCU9uZURpbVZlYxImCglyb3dDb2xv",
+            "cnMYASADKA4yEy5Qcm90b2J1Zi5Db2xvclR5cGUqYQoLR2FtZU9ialR5cGUS",
+            "DQoJQ2hhcmFjdGVyEAASCAoEV2FsbBABEggKBFByb3AQAhIKCgZCdWxsZXQQ",
+            "AxIOCgpCaXJ0aFBvaW50EAQSEwoPT3V0T2ZCb3VuZEJsb2NrEAUqmAEKCFBy",
+            "b3BUeXBlEggKBE51bGwQABIICgRCaWtlEAESDQoJQW1wbGlmaWVyEAISCwoH",
+            "SmluS2VMYRADEggKBFJpY2UQBBIUChBOZWdhdGl2ZUZlZWRiYWNrEAUSCQoF",
+            "VG90ZW0QBhIKCgZQaGFzZXIQBxIICgREaXJ0EAgSDgoKQXR0ZW51YXRvchAJ",
+            "EgsKB0RpdmlkZXIQCiojCglTaGFwZVR5cGUSCgoGQ2lyY2xlEAASCgoGU3F1",
+            "YXJlEAEqTwoHSm9iVHlwZRIICgRKb2IwEAASCAoESm9iMRABEggKBEpvYjIQ",
+            "AhIICgRKb2IzEAMSCAoESm9iNBAEEggKBEpvYjUQBRIICgRKb2I2EAYqZwoK",
+            "QnVsbGV0VHlwZRILCgdCdWxsZXQwEAASCwoHQnVsbGV0MRABEgsKB0J1bGxl",
+            "dDIQAhILCgdCdWxsZXQzEAMSCwoHQnVsbGV0NBAEEgsKB0J1bGxldDUQBRIL",
+            "CgdCdWxsZXQ2EAYqRQoJQ29sb3JUeXBlEggKBE5vbmUQABIKCgZDb2xvcjEQ",
+            "ARIKCgZDb2xvcjIQAhIKCgZDb2xvcjMQAxIKCgZDb2xvcjQQBEIWqgITQ29t",
+            "bXVuaWNhdGlvbi5Qcm90b2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Communication.Proto.MessageTypeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Communication.Proto.GameObjType), typeof(global::Communication.Proto.PropType), typeof(global::Communication.Proto.ShapeType), typeof(global::Communication.Proto.JobType), typeof(global::Communication.Proto.BulletType), typeof(global::Communication.Proto.ColorType), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.GameObjInfo), global::Communication.Proto.GameObjInfo.Parser, new[]{ "GameObjType", "Guid", "X", "Y", "FacingDirection", "MoveSpeed", "CanMove", "IsMoving", "ShapeType", "Radius", "TeamID", "Ap", "BulletType", "PropType", "IsLaid", "IsDying", "JobType", "CD", "MaxBulletNum", "BulletNum", "MaxHp", "Hp", "LifeNum" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToOneClient), global::Communication.Proto.MessageToOneClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "Guid" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToOneClient), global::Communication.Proto.MessageToOneClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "Guid", "Message" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient), global::Communication.Proto.MessageToClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "SelfInfo", "TeammateGUIDs", "SelfTeamColor", "GameObjs", "CellColors", "TeamScore" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient.Types.OneDimVec), global::Communication.Proto.MessageToClient.Types.OneDimVec.Parser, new[]{ "RowColors" }, null, null, null, null)})
           }));
     }
@@ -1165,6 +1165,7 @@ namespace Communication.Proto {
       teamID_ = other.teamID_;
       messageType_ = other.messageType_;
       guid_ = other.guid_;
+      message_ = other.message_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1226,6 +1227,17 @@ namespace Communication.Proto {
       }
     }
 
+    /// <summary>Field number for the "message" field.</summary>
+    public const int MessageFieldNumber = 5;
+    private string message_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Message {
+      get { return message_; }
+      set {
+        message_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as MessageToOneClient);
@@ -1243,6 +1255,7 @@ namespace Communication.Proto {
       if (TeamID != other.TeamID) return false;
       if (MessageType != other.MessageType) return false;
       if (Guid != other.Guid) return false;
+      if (Message != other.Message) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1253,6 +1266,7 @@ namespace Communication.Proto {
       if (TeamID != 0L) hash ^= TeamID.GetHashCode();
       if (MessageType != global::Communication.Proto.MessageType.AddPlayer) hash ^= MessageType.GetHashCode();
       if (Guid != 0L) hash ^= Guid.GetHashCode();
+      if (Message.Length != 0) hash ^= Message.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1285,6 +1299,10 @@ namespace Communication.Proto {
         output.WriteRawTag(32);
         output.WriteInt64(Guid);
       }
+      if (Message.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Message);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1310,6 +1328,10 @@ namespace Communication.Proto {
         output.WriteRawTag(32);
         output.WriteInt64(Guid);
       }
+      if (Message.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Message);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -1330,6 +1352,9 @@ namespace Communication.Proto {
       }
       if (Guid != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(Guid);
+      }
+      if (Message.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Message);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1353,6 +1378,9 @@ namespace Communication.Proto {
       }
       if (other.Guid != 0L) {
         Guid = other.Guid;
+      }
+      if (other.Message.Length != 0) {
+        Message = other.Message;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -1384,6 +1412,10 @@ namespace Communication.Proto {
             Guid = input.ReadInt64();
             break;
           }
+          case 42: {
+            Message = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -1412,6 +1444,10 @@ namespace Communication.Proto {
           }
           case 32: {
             Guid = input.ReadInt64();
+            break;
+          }
+          case 42: {
+            Message = input.ReadString();
             break;
           }
         }
