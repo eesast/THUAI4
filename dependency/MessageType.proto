@@ -10,9 +10,10 @@ enum MessageType
     Pick = 3;
     Use = 4;
     Throw = 5;
-    InvalidPlayer = 6;
-    ValidPlayer = 7;
-    StartGame = 8;
-    Gaming = 9;
-    EndGame = 10;
+    Send = 6;
+    InvalidPlayer = 7;
+    ValidPlayer = 8;
+    StartGame = 9;
+    Gaming = 10;
+    EndGame = 11;
 }
