@@ -112,6 +112,7 @@ message MessageToOneClient
     
     MessageType messageType = 3;
     int64 guid = 4;             //自己的guid
+    string message = 5;
 }
 
 //发送全局信息时
