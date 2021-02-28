@@ -25,17 +25,17 @@ namespace Communication.Proto {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChRNZXNzYWdlMlNlcnZlci5wcm90bxIIUHJvdG9idWYaEU1lc3NhZ2VUeXBl",
-            "LnByb3RvGhRNZXNzYWdlMkNsaWVudC5wcm90byLUAQoPTWVzc2FnZVRvU2Vy",
+            "LnByb3RvGhRNZXNzYWdlMkNsaWVudC5wcm90byL5AQoPTWVzc2FnZVRvU2Vy",
             "dmVyEioKC21lc3NhZ2VUeXBlGAEgASgOMhUuUHJvdG9idWYuTWVzc2FnZVR5",
-            "cGUSIgoHam9iVHlwZRgCIAEoDjIRLlByb3RvYnVmLkpvYlR5cGUSDgoGdGVh",
-            "bUlEGAMgASgDEiQKCHByb3BUeXBlGAQgASgOMhIuUHJvdG9idWYuUHJvcFR5",
-            "cGUSGgoSdGltZUluTWlsbGlzZWNvbmRzGAUgASgFEg0KBWFuZ2xlGAYgASgB",
-            "EhAKCHBsYXllcklEGAcgASgDQhaqAhNDb21tdW5pY2F0aW9uLlByb3RvYgZw",
-            "cm90bzM="));
+            "cGUSEAoIcGxheWVySUQYAiABKAMSDgoGdGVhbUlEGAMgASgDEiIKB2pvYlR5",
+            "cGUYBCABKA4yES5Qcm90b2J1Zi5Kb2JUeXBlEiQKCHByb3BUeXBlGAUgASgO",
+            "MhIuUHJvdG9idWYuUHJvcFR5cGUSGgoSdGltZUluTWlsbGlzZWNvbmRzGAYg",
+            "ASgFEg0KBWFuZ2xlGAcgASgBEhIKClRvUGxheWVySUQYCCABKAMSDwoHbWVz",
+            "c2FnZRgJIAEoCUIWqgITQ29tbXVuaWNhdGlvbi5Qcm90b2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Communication.Proto.MessageTypeReflection.Descriptor, global::Communication.Proto.Message2ClientReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToServer), global::Communication.Proto.MessageToServer.Parser, new[]{ "MessageType", "JobType", "TeamID", "PropType", "TimeInMilliseconds", "Angle", "PlayerID" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToServer), global::Communication.Proto.MessageToServer.Parser, new[]{ "MessageType", "PlayerID", "TeamID", "JobType", "PropType", "TimeInMilliseconds", "Angle", "ToPlayerID", "Message" }, null, null, null, null)
           }));
     }
     #endregion
@@ -72,12 +72,14 @@ namespace Communication.Proto {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public MessageToServer(MessageToServer other) : this() {
       messageType_ = other.messageType_;
-      jobType_ = other.jobType_;
+      playerID_ = other.playerID_;
       teamID_ = other.teamID_;
+      jobType_ = other.jobType_;
       propType_ = other.propType_;
       timeInMilliseconds_ = other.timeInMilliseconds_;
       angle_ = other.angle_;
-      playerID_ = other.playerID_;
+      toPlayerID_ = other.toPlayerID_;
+      message_ = other.message_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -97,8 +99,36 @@ namespace Communication.Proto {
       }
     }
 
+    /// <summary>Field number for the "playerID" field.</summary>
+    public const int PlayerIDFieldNumber = 2;
+    private long playerID_;
+    /// <summary>
+    ///消息发送者的playerID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long PlayerID {
+      get { return playerID_; }
+      set {
+        playerID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "teamID" field.</summary>
+    public const int TeamIDFieldNumber = 3;
+    private long teamID_;
+    /// <summary>
+    ///消息发送者所在队伍的ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long TeamID {
+      get { return teamID_; }
+      set {
+        teamID_ = value;
+      }
+    }
+
     /// <summary>Field number for the "jobType" field.</summary>
-    public const int JobTypeFieldNumber = 2;
+    public const int JobTypeFieldNumber = 4;
     private global::Communication.Proto.JobType jobType_ = global::Communication.Proto.JobType.Job0;
     /// <summary>
     ///messageType为AddPlayer时选择的职业
@@ -111,22 +141,8 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "teamID" field.</summary>
-    public const int TeamIDFieldNumber = 3;
-    private long teamID_;
-    /// <summary>
-    ///messageType为AddPlayer时选择的队伍
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public long TeamID {
-      get { return teamID_; }
-      set {
-        teamID_ = value;
-      }
-    }
-
     /// <summary>Field number for the "propType" field.</summary>
-    public const int PropTypeFieldNumber = 4;
+    public const int PropTypeFieldNumber = 5;
     private global::Communication.Proto.PropType propType_ = global::Communication.Proto.PropType.Null;
     /// <summary>
     ///messageType为Pick时要捡起的道具类型
@@ -140,7 +156,7 @@ namespace Communication.Proto {
     }
 
     /// <summary>Field number for the "timeInMilliseconds" field.</summary>
-    public const int TimeInMillisecondsFieldNumber = 5;
+    public const int TimeInMillisecondsFieldNumber = 6;
     private int timeInMilliseconds_;
     /// <summary>
     ///时间参数
@@ -154,7 +170,7 @@ namespace Communication.Proto {
     }
 
     /// <summary>Field number for the "angle" field.</summary>
-    public const int AngleFieldNumber = 6;
+    public const int AngleFieldNumber = 7;
     private double angle_;
     /// <summary>
     ///角度参数
@@ -167,17 +183,31 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "playerID" field.</summary>
-    public const int PlayerIDFieldNumber = 7;
-    private long playerID_;
+    /// <summary>Field number for the "ToPlayerID" field.</summary>
+    public const int ToPlayerIDFieldNumber = 8;
+    private long toPlayerID_;
     /// <summary>
-    ///发送的玩家ID
+    ///当messageType为Send时有效，为发送对象的ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public long PlayerID {
-      get { return playerID_; }
+    public long ToPlayerID {
+      get { return toPlayerID_; }
       set {
-        playerID_ = value;
+        toPlayerID_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "message" field.</summary>
+    public const int MessageFieldNumber = 9;
+    private string message_ = "";
+    /// <summary>
+    ///当messageType为Send时有效，为发送的消息
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Message {
+      get { return message_; }
+      set {
+        message_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -195,12 +225,14 @@ namespace Communication.Proto {
         return true;
       }
       if (MessageType != other.MessageType) return false;
-      if (JobType != other.JobType) return false;
+      if (PlayerID != other.PlayerID) return false;
       if (TeamID != other.TeamID) return false;
+      if (JobType != other.JobType) return false;
       if (PropType != other.PropType) return false;
       if (TimeInMilliseconds != other.TimeInMilliseconds) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Angle, other.Angle)) return false;
-      if (PlayerID != other.PlayerID) return false;
+      if (ToPlayerID != other.ToPlayerID) return false;
+      if (Message != other.Message) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -208,12 +240,14 @@ namespace Communication.Proto {
     public override int GetHashCode() {
       int hash = 1;
       if (MessageType != global::Communication.Proto.MessageType.AddPlayer) hash ^= MessageType.GetHashCode();
-      if (JobType != global::Communication.Proto.JobType.Job0) hash ^= JobType.GetHashCode();
+      if (PlayerID != 0L) hash ^= PlayerID.GetHashCode();
       if (TeamID != 0L) hash ^= TeamID.GetHashCode();
+      if (JobType != global::Communication.Proto.JobType.Job0) hash ^= JobType.GetHashCode();
       if (PropType != global::Communication.Proto.PropType.Null) hash ^= PropType.GetHashCode();
       if (TimeInMilliseconds != 0) hash ^= TimeInMilliseconds.GetHashCode();
       if (Angle != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Angle);
-      if (PlayerID != 0L) hash ^= PlayerID.GetHashCode();
+      if (ToPlayerID != 0L) hash ^= ToPlayerID.GetHashCode();
+      if (Message.Length != 0) hash ^= Message.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -234,29 +268,37 @@ namespace Communication.Proto {
         output.WriteRawTag(8);
         output.WriteEnum((int) MessageType);
       }
-      if (JobType != global::Communication.Proto.JobType.Job0) {
+      if (PlayerID != 0L) {
         output.WriteRawTag(16);
-        output.WriteEnum((int) JobType);
+        output.WriteInt64(PlayerID);
       }
       if (TeamID != 0L) {
         output.WriteRawTag(24);
         output.WriteInt64(TeamID);
       }
-      if (PropType != global::Communication.Proto.PropType.Null) {
+      if (JobType != global::Communication.Proto.JobType.Job0) {
         output.WriteRawTag(32);
+        output.WriteEnum((int) JobType);
+      }
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        output.WriteRawTag(40);
         output.WriteEnum((int) PropType);
       }
       if (TimeInMilliseconds != 0) {
-        output.WriteRawTag(40);
+        output.WriteRawTag(48);
         output.WriteInt32(TimeInMilliseconds);
       }
       if (Angle != 0D) {
-        output.WriteRawTag(49);
+        output.WriteRawTag(57);
         output.WriteDouble(Angle);
       }
-      if (PlayerID != 0L) {
-        output.WriteRawTag(56);
-        output.WriteInt64(PlayerID);
+      if (ToPlayerID != 0L) {
+        output.WriteRawTag(64);
+        output.WriteInt64(ToPlayerID);
+      }
+      if (Message.Length != 0) {
+        output.WriteRawTag(74);
+        output.WriteString(Message);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -271,29 +313,37 @@ namespace Communication.Proto {
         output.WriteRawTag(8);
         output.WriteEnum((int) MessageType);
       }
-      if (JobType != global::Communication.Proto.JobType.Job0) {
+      if (PlayerID != 0L) {
         output.WriteRawTag(16);
-        output.WriteEnum((int) JobType);
+        output.WriteInt64(PlayerID);
       }
       if (TeamID != 0L) {
         output.WriteRawTag(24);
         output.WriteInt64(TeamID);
       }
-      if (PropType != global::Communication.Proto.PropType.Null) {
+      if (JobType != global::Communication.Proto.JobType.Job0) {
         output.WriteRawTag(32);
+        output.WriteEnum((int) JobType);
+      }
+      if (PropType != global::Communication.Proto.PropType.Null) {
+        output.WriteRawTag(40);
         output.WriteEnum((int) PropType);
       }
       if (TimeInMilliseconds != 0) {
-        output.WriteRawTag(40);
+        output.WriteRawTag(48);
         output.WriteInt32(TimeInMilliseconds);
       }
       if (Angle != 0D) {
-        output.WriteRawTag(49);
+        output.WriteRawTag(57);
         output.WriteDouble(Angle);
       }
-      if (PlayerID != 0L) {
-        output.WriteRawTag(56);
-        output.WriteInt64(PlayerID);
+      if (ToPlayerID != 0L) {
+        output.WriteRawTag(64);
+        output.WriteInt64(ToPlayerID);
+      }
+      if (Message.Length != 0) {
+        output.WriteRawTag(74);
+        output.WriteString(Message);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -307,11 +357,14 @@ namespace Communication.Proto {
       if (MessageType != global::Communication.Proto.MessageType.AddPlayer) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MessageType);
       }
-      if (JobType != global::Communication.Proto.JobType.Job0) {
-        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) JobType);
+      if (PlayerID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(PlayerID);
       }
       if (TeamID != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(TeamID);
+      }
+      if (JobType != global::Communication.Proto.JobType.Job0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) JobType);
       }
       if (PropType != global::Communication.Proto.PropType.Null) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) PropType);
@@ -322,8 +375,11 @@ namespace Communication.Proto {
       if (Angle != 0D) {
         size += 1 + 8;
       }
-      if (PlayerID != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(PlayerID);
+      if (ToPlayerID != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ToPlayerID);
+      }
+      if (Message.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Message);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -339,11 +395,14 @@ namespace Communication.Proto {
       if (other.MessageType != global::Communication.Proto.MessageType.AddPlayer) {
         MessageType = other.MessageType;
       }
-      if (other.JobType != global::Communication.Proto.JobType.Job0) {
-        JobType = other.JobType;
+      if (other.PlayerID != 0L) {
+        PlayerID = other.PlayerID;
       }
       if (other.TeamID != 0L) {
         TeamID = other.TeamID;
+      }
+      if (other.JobType != global::Communication.Proto.JobType.Job0) {
+        JobType = other.JobType;
       }
       if (other.PropType != global::Communication.Proto.PropType.Null) {
         PropType = other.PropType;
@@ -354,8 +413,11 @@ namespace Communication.Proto {
       if (other.Angle != 0D) {
         Angle = other.Angle;
       }
-      if (other.PlayerID != 0L) {
-        PlayerID = other.PlayerID;
+      if (other.ToPlayerID != 0L) {
+        ToPlayerID = other.ToPlayerID;
+      }
+      if (other.Message.Length != 0) {
+        Message = other.Message;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -376,7 +438,7 @@ namespace Communication.Proto {
             break;
           }
           case 16: {
-            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
+            PlayerID = input.ReadInt64();
             break;
           }
           case 24: {
@@ -384,19 +446,27 @@ namespace Communication.Proto {
             break;
           }
           case 32: {
-            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
             break;
           }
           case 40: {
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            break;
+          }
+          case 48: {
             TimeInMilliseconds = input.ReadInt32();
             break;
           }
-          case 49: {
+          case 57: {
             Angle = input.ReadDouble();
             break;
           }
-          case 56: {
-            PlayerID = input.ReadInt64();
+          case 64: {
+            ToPlayerID = input.ReadInt64();
+            break;
+          }
+          case 74: {
+            Message = input.ReadString();
             break;
           }
         }
@@ -418,7 +488,7 @@ namespace Communication.Proto {
             break;
           }
           case 16: {
-            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
+            PlayerID = input.ReadInt64();
             break;
           }
           case 24: {
@@ -426,19 +496,27 @@ namespace Communication.Proto {
             break;
           }
           case 32: {
-            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            JobType = (global::Communication.Proto.JobType) input.ReadEnum();
             break;
           }
           case 40: {
+            PropType = (global::Communication.Proto.PropType) input.ReadEnum();
+            break;
+          }
+          case 48: {
             TimeInMilliseconds = input.ReadInt32();
             break;
           }
-          case 49: {
+          case 57: {
             Angle = input.ReadDouble();
             break;
           }
-          case 56: {
-            PlayerID = input.ReadInt64();
+          case 64: {
+            ToPlayerID = input.ReadInt64();
+            break;
+          }
+          case 74: {
+            Message = input.ReadString();
             break;
           }
         }

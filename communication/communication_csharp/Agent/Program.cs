@@ -15,7 +15,8 @@ namespace Communication.Agent
     {
         private static readonly TcpPackServer server = new TcpPackServer();
         private static readonly TcpPackClient client = new TcpPackClient();
-        private static readonly ConcurrentDictionary<long, IntPtr> dict = new ConcurrentDictionary<long, IntPtr>();
+        private static readonly ConcurrentDictionary<UInt64, IntPtr> dict = new ConcurrentDictionary<UInt64, IntPtr>();
+        //teamID和playID不能超过32位，否则会GG
 
         static int Main(string[] args)
         {
@@ -58,12 +59,13 @@ namespace Communication.Agent
                     if (message.PacketType == PacketType.MessageToServer)//是否有其他可能？如何处理？
                     {
                         MessageToServer msg = message.Content as MessageToServer;
-                        if (dict.ContainsKey(msg.PlayerID))
+                        UInt64 key = ((UInt64)msg.PlayerID | ((UInt64)msg.TeamID << 32));
+                        if (dict.ContainsKey(key))
                         {
-                            Console.WriteLine($"More than one client claims to have the same ID {msg.PlayerID}.");
+                            Console.WriteLine($"More than one client claims to have the same ID {msg.TeamID} {msg.PlayerID}.");
                             return HandleResult.Error;
                         }
-                        dict.TryAdd(msg.PlayerID, connId);//不可能false
+                        dict.TryAdd(key, connId);//不可能false
                     }
                 }
                 client.Send(bytes, bytes.Length);
@@ -72,12 +74,12 @@ namespace Communication.Agent
             //去年是Client退出前还要专门发一个消息，今年不太清楚，暂且如此
             server.OnClose += delegate (IServer sender, IntPtr connId, SocketOperation socketOperation, int errorCode)
             {
-                foreach (int id in dict.Keys)
+                foreach (UInt64 id in dict.Keys)
                 {
                     if (dict[id] == connId)
                     {
                         if (!dict.TryRemove(id, out IntPtr temp)) return HandleResult.Error;
-                        Console.WriteLine($"Player {id} closed the connection.");
+                        Console.WriteLine($"Player {id>>32} {id&0xffffffff} closed the connection.");
                         break;
                     }
                 }
@@ -95,14 +97,16 @@ namespace Communication.Agent
                     Message m = new Message();
                     m.MergeFrom(bytes);
                     MessageToOneClient message = m.Content as MessageToOneClient;
-                    if (!dict.ContainsKey(message.PlayerID))
+                    UInt64 key = ((UInt64)message.PlayerID | ((UInt64)message.TeamID << 32));
+
+                    if (!dict.ContainsKey(key))
                     {
-                        Console.WriteLine($"Error: No such player corresponding to ID {message.PlayerID}");
+                        Console.WriteLine($"Error: No such player corresponding to ID {message.TeamID} {message.PlayerID}");
                         return HandleResult.Error;
                     }
-                    if (!server.Send(dict[message.PlayerID], bytes, bytes.Length))
+                    if (!server.Send(dict[key], bytes, bytes.Length))
                     {
-                        Console.WriteLine($"向{dict[message.PlayerID]}发送失败。");
+                        Console.WriteLine($"向{dict[key]}发送失败。");
                     }
                     return HandleResult.Ok;
                 }

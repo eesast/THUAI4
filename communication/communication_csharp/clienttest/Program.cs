@@ -31,6 +31,7 @@ namespace clienttest
 
             MessageToServer mm = new MessageToServer();
             mm.PlayerID = int.Parse(args[1]);
+            mm.TeamID = int.Parse(args[0]);
             mm.JobType = Communication.Proto.JobType.Job1;
             client.SendMessage(mm);
 

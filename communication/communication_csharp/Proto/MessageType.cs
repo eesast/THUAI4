@@ -24,11 +24,12 @@ namespace Communication.Proto {
     static MessageTypeReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChFNZXNzYWdlVHlwZS5wcm90bxIIUHJvdG9idWYqnAEKC01lc3NhZ2VUeXBl",
+            "ChFNZXNzYWdlVHlwZS5wcm90bxIIUHJvdG9idWYqpgEKC01lc3NhZ2VUeXBl",
             "Eg0KCUFkZFBsYXllchAAEggKBE1vdmUQARIKCgZBdHRhY2sQAhIICgRQaWNr",
-            "EAMSBwoDVXNlEAQSCQoFVGhyb3cQBRIRCg1JbnZhbGlkUGxheWVyEAYSDwoL",
-            "VmFsaWRQbGF5ZXIQBxINCglTdGFydEdhbWUQCBIKCgZHYW1pbmcQCRILCgdF",
-            "bmRHYW1lEApCFqoCE0NvbW11bmljYXRpb24uUHJvdG9iBnByb3RvMw=="));
+            "EAMSBwoDVXNlEAQSCQoFVGhyb3cQBRIICgRTZW5kEAYSEQoNSW52YWxpZFBs",
+            "YXllchAHEg8KC1ZhbGlkUGxheWVyEAgSDQoJU3RhcnRHYW1lEAkSCgoGR2Ft",
+            "aW5nEAoSCwoHRW5kR2FtZRALQhaqAhNDb21tdW5pY2F0aW9uLlByb3RvYgZw",
+            "cm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Communication.Proto.MessageType), }, null, null));
@@ -44,11 +45,12 @@ namespace Communication.Proto {
     [pbr::OriginalName("Pick")] Pick = 3,
     [pbr::OriginalName("Use")] Use = 4,
     [pbr::OriginalName("Throw")] Throw = 5,
-    [pbr::OriginalName("InvalidPlayer")] InvalidPlayer = 6,
-    [pbr::OriginalName("ValidPlayer")] ValidPlayer = 7,
-    [pbr::OriginalName("StartGame")] StartGame = 8,
-    [pbr::OriginalName("Gaming")] Gaming = 9,
-    [pbr::OriginalName("EndGame")] EndGame = 10,
+    [pbr::OriginalName("Send")] Send = 6,
+    [pbr::OriginalName("InvalidPlayer")] InvalidPlayer = 7,
+    [pbr::OriginalName("ValidPlayer")] ValidPlayer = 8,
+    [pbr::OriginalName("StartGame")] StartGame = 9,
+    [pbr::OriginalName("Gaming")] Gaming = 10,
+    [pbr::OriginalName("EndGame")] EndGame = 11,
   }
 
   #endregion
