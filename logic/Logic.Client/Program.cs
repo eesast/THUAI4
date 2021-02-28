@@ -1,5 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using CommandLine;
+using Communication.Proto;
+using Communication.CSharpClient;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Logic.Client
 {
@@ -9,53 +15,205 @@ namespace Logic.Client
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            for (int i = 0; i < 50; i++)
+            //å–å¾—å¼€å§‹å‘½ä»¤
+            AOption? options = null;
+            Parser.Default.ParseArguments<AOption>(args).WithParsed(o => { options = o; });
+            if (options == null)
+            {
+                Application.Run(new Starting());
+            }
+            else
+            {
+                teamID = options.teamID;
+                playerID = options.playerID;
+                jobType = (JobType)options.job;
+                port = options.ServerPort;
+            }
+            clientCommunicator = new Communication.CSharpClient.CSharpClient();
+            if (clientCommunicator.Connect("127.0.0.1", port))
+            {
+                MessageBox.Show("æˆåŠŸè¿æ¥Agent");
+            }
+            else
+            {
+                MessageBox.Show("è¿æ¥Agentå¤±è´¥");
+                return;
+            }
+            //å‘serverå‘æ¶ˆæ¯
+            MessageToServer msg01 = new MessageToServer();
+            msg01.MessageType = MessageType.AddPlayer;
+            msg01.TeamID = teamID - 1;
+            msg01.PlayerID = playerID - 1;
+            msg01.JobType = jobType;
+            //TO DO:å‘å‡ºæ¶ˆæ¯
+            clientCommunicator.OnReceive += delegate ()
+            {
+                if (gaming) return;
+                if (clientCommunicator.TryTake(out IMsg msg))
+                    messageline.Add(new Tuple<IMsg, long>(msg,System.Environment.TickCount64));
+            };
+            messageline = new BlockingCollection<Tuple<IMsg, long>>();
+            gameform = new Form1();
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    if (messageline.TryTake(out Tuple<IMsg, long> msg))
+                    {
+                        if (msg.Item1.PacketType == PacketType.MessageToOneClient)
+                        {
+                            MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
+                            OnReciveShort(mm);
+                        }
+                        else if (msg.Item1.PacketType == PacketType.MessageToClient)
+                        {
+                            MessageToClient mm = msg.Item1.Content as MessageToClient;
+                            OnReciveNormal(mm,msg.Item2);
+                        }
+                    }
+                }
+            }
+                ).Start();
+            clientCommunicator.SendMessage(msg01);
+            Application.Run(gameform);
+        }
+        public static int[,] ColorState = new int[50, 50];  //å‚¨å­˜æ¯ä¸ªåœ°å›¾æ ¼çš„æŸ“è‰²çŠ¶æ€ 0:æœªè¢«æŸ“è‰² i:ç¬¬ié˜ŸæŸ“è‰² -1:å¢™ä½“ -2:å‡ºç”Ÿç‚¹
+        public static bool[,] ColorChange = new bool[50, 50];  //å‚¨å­˜æ¯ä¸ªåœ°å›¾æ ¼çš„æŸ“è‰²çŠ¶æ€ 0:æœªè¢«æŸ“è‰² i:ç¬¬ié˜ŸæŸ“è‰² -1:å¢™ä½“ -2:å‡ºç”Ÿç‚¹
+        public static Int64 teamID;
+        public static Int64 playerID;
+        public static JobType jobType;
+        public static ushort port;
+        public static Int64 selfguid;
+        public static int movespeed;
+        private static Dictionary<Int64, Tuple<int, int>> Hashable;
+        private static Form1 gameform; //æ¸¸æˆçª—ä½“
+        public static CSharpClient clientCommunicator;
+        private static BlockingCollection<Tuple<IMsg,long>> messageline;
+        private static bool gaming = false;
+        public const int cell = 1000;
+        private static void OnReciveShort(MessageToOneClient msg)  //è¿æ¥æ˜¯å¦æˆåŠŸ
+        {
+            if (msg.MessageType == MessageType.ValidPlayer)
+            {
+                MessageBox.Show("Loading");
+            }
+            else
+            {
+                MessageBox.Show("Invalid Player");
+                Application.Run(new Starting());
+                MessageToServer msg1 = new MessageToServer();
+                msg1.MessageType = MessageType.AddPlayer;
+                msg1.TeamID = teamID - 1;
+                msg1.PlayerID = playerID - 1;
+                msg1.JobType = jobType;
+                clientCommunicator.SendMessage(msg1);
+            }
+        }
+        private static void OnReciveNormal(MessageToClient msg,long clock) //å¤„ç†æ¸¸æˆæ¶ˆæ¯
+        {
+            switch (msg.MessageType)
+            {
+                case MessageType.StartGame:
+                    MessageBox.Show("game start");
+                    Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                    for (int i = 0; i < 1; i++)
+                    {
+                        for (int j = 0; j < 1; j++)
+                        {
+                            Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                        }
+                    }
+                    movespeed = msg.SelfInfo.MoveSpeed;
+                    break;
+                case MessageType.Gaming:
+                    if (System.Environment.TickCount64 - clock > 50) break;
+                    Refresh(msg);
+                    break;
+                case MessageType.EndGame:
+                    Application.Exit();
+                    break;
+                default: break;
+            }
+        }
+        private static void Refresh(MessageToClient msg)  //åˆ·æ–°ç•Œé¢
+        {
+            selfguid = msg.SelfInfo.Guid;
+            movespeed = msg.SelfInfo.MoveSpeed;
+            for (int i = 0; i < 50; i++) //è¯»å–é¢œè‰²
             {
                 for (int j = 0; j < 50; j++)
                 {
-                    System.Random random = new System.Random();
-                    ColorState[i, j] = random.Next(-2, 5);
+                    if (ColorState[i, j] == (int)msg.CellColors[j].RowColors[i])
+                        ColorChange[i, j] = false;
+                    else
+                    {
+                        ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
+                        ColorChange[i, j] = true;
+                    }
                 }
             }
-            Application.Run(new Form1());
+            foreach (var objinfo in msg.GameObjs)
+            {
+                Objdeal(objinfo);
+            }
+            gameform.Rebuild();
         }
-        static int[,] ColorState = new int[50, 50];  //´¢´æÃ¿¸öµØÍ¼¸ñµÄÈ¾É«×´Ì¬ 0:Î´±»È¾É« i:µÚi¶ÓÈ¾É« -1:Ç½Ìå -2:³öÉúµã
-        public static int GetColorState(int x, int y)  //ÀàÍâÈ¡ÑÕÉ«ĞÅÏ¢
+        private static void Objdeal(GameObjInfo obj)  //å¤„ç†ç‰©ä½“
         {
-            return ColorState[x, y];
+            switch (obj.GameObjType)
+            {
+                case GameObjType.BirthPoint:
+                    if (ColorState[obj.Y / cell, obj.X / cell] == -2)
+                        ColorChange[obj.Y / cell, obj.X / cell] = false;
+                    else
+                    {
+                        ColorState[obj.Y / cell, obj.X / cell] = -2;
+                        ColorChange[obj.Y / cell, obj.X / cell] = true;
+                    }
+                    break;
+                case GameObjType.Wall:
+                    if (ColorState[obj.Y / cell, obj.X / cell] == -1)
+                        ColorChange[obj.Y / cell, obj.X / cell] = false;
+                    else
+                    {
+                        ColorState[obj.Y / cell, obj.X / cell] = -1;
+                        ColorChange[obj.Y / cell, obj.X / cell] = true;
+                    }
+                    break;
+                case GameObjType.Character:
+                    if (obj.IsDying) break;
+                    Player player = new Player(obj.Y, obj.X, (byte)(obj.TeamID + 1), (byte)(Hashable[obj.Guid].Item2 + 1), obj.JobType, (short)obj.Hp,obj.Guid,obj.PropType);
+                    gameform.DrawPlayer(player);
+                    break;
+                case GameObjType.Bullet:
+                    Bullet bullet = new Bullet(obj.Y, obj.X, (int)obj.TeamID + 1, obj.BulletType, obj.Guid);
+                    gameform.DrawBullet(bullet);
+                    break;
+                case GameObjType.Prop:
+                    if (obj.IsLaid) break;
+                    Item item = new Item(obj.Y / cell, obj.X / cell, obj.PropType,obj.Guid);
+                    gameform.DrawItem(item);
+                    break;
+                default: break;
+            }
         }
-
     }
-    class Player  //Íæ¼ÒÏÔÊ¾Àà
+    public class Player  //ç©å®¶æ˜¾ç¤ºç±»
     {
-        public int x; //¾«Ï¸×ø±ê
-        public int y; //¾«Ï¸×ø±ê
+        public int x; //ç²¾ç»†åæ ‡
+        public int y; //ç²¾ç»†åæ ‡
         public byte teamnum;
         public byte playernum;
-        public enum Job //Ö°Òµ
-        { Profession0 = 0, Profession1 = 1, Profession2 = 2, Profession3 = 3, Profession4 = 4, Profession5 = 5, Profession6 = 6 }
-        public enum Possession //³ÖÓĞµÄµÀ¾ßÖÖÀà
-        {
-            None = 0,
-            SpeedUp = 1,
-            DamageUp = 2,
-            Shorter_Reload_CD = 3,
-
-        };
-        public Job job;
-        public Possession possession = 0;
+        public Int64 id;
+        public JobType job;
+        public PropType possession = 0;
         public short health = 0;
-        public byte shield = 0;  //0ÎŞ×´Ì¬ 1ÓĞ¶Ü 2ÓĞ¸´»î¼×(revive)
-        public byte speed = 0;  //0ÎŞ×´Ì¬ 1ÔöÒæ 2¸ºÃæĞ§¹û
-        public byte damage = 0;  //0ÎŞ×´Ì¬ 1ÔöÒæ 2¸ºÃæĞ§¹û
-        public byte stunned = 0;  //0ÎŞ×´Ì¬ 1±»Ñ£ÔÎ
-        public bool existed = false;
-        public Player(int x, int y, byte teamnum, byte playernum, Job job, short health)
+        public Player(int x, int y, byte teamnum, byte playernum, JobType job, short health,Int64 guid,PropType possession)
         {
             this.x = x;
             this.y = y;
@@ -63,57 +221,60 @@ namespace Logic.Client
             this.playernum = playernum;
             this.health = health;
             this.job = job;
+            this.id = guid;
+            this.possession = possession;
         }
     }
-    class Bullet  //×Óµ¯Àà
+    public class Bullet  //å­å¼¹ç±»
     {
-        public int x; //ºá×ø±ê(¾«Ï¸)
-        public int y; //×İ×ø±ê(¾«Ï¸)
-        public int teamnum;
-        public bool towards;//0:ºáÏò  1:×İÏò
-        public bool existed = false;
-        public long id = 0;
-        public static long ID = 0;
-        public Bullet(int x, int y, int teamnum, bool towards)
+        public int x; //æ¨ªåæ ‡(ç²¾ç»†)
+        public int y; //çºµåæ ‡(ç²¾ç»†)
+        public Int64 teamnum;
+        public BulletType bulletType;
+        public Int64 id = 0;
+        public Bullet(int x, int y, int teamnum, BulletType bulletType, Int64 guid)
         {
             this.x = x;
             this.y = y;
             this.teamnum = teamnum;
-            this.towards = towards;
-            this.id = ID;
-            ID++;
+            this.bulletType = bulletType;
+            this.id = guid;
         }
     }
-    class Item  //µÀ¾ßÀà
+    public class Item  //é“å…·ç±»
     {
-        public int xnum; //ºá×ø±ê´ó¸ñ
-        public int ynum; //×İ×ø±ê´ó¸ñ
+        public int xnum; //æ¨ªåæ ‡å¤§æ ¼
+        public int ynum; //çºµåæ ‡å¤§æ ¼
         public byte type = 0;
         /*
-         * 0:¼ÓËÙ
-         * 1:ÔöÉË
-         * 2:¼õCD
-         * 3:»ØÑª
-         * 4:¶Ü
-         * 5:¸´»î¼×
-         * 6:¼õËÙµØÀ×
-         * 7:¼õÉËµØÀ×
-         * 8:¼ÓCDµØÀ×
-         * 9:¿ÛÑªµØÀ×
-         * 10:Ñ£ÔÎµØÀ×
-         * 11:ÆÆ¶Ü
+         * 0:NULL
+         * 1:åŠ é€Ÿ
+         * 2:åŠ ä¼¤
+         * 4:å›è¡€
+         * 5:ç›¾
+         * 6:å¤æ´»ç”²
+         * 7:ç ´ç›¾
+         * 8:å‡é€Ÿåœ°é›·
+         * 9:å‡ä¼¤åœ°é›·
+         * 10:åŠ CDåœ°é›·
          */
-        public bool existed = false;
-        public long id = 0;
-        public static long ID = 0;
-        public Item(int xnum, int ynum, byte type)
+        public Int64 id;
+        public Item(int xnum, int ynum, PropType type,Int64 guid)
         {
             this.xnum = xnum;
             this.ynum = ynum;
-            this.type = type;
-            this.id = ID;
-            ID++;
+            this.type = (byte)type;
+            this.id = guid;
         }
     }
-
+    public class BoolLabel
+    {
+        public bool used;
+        public Label label;
+        public BoolLabel()
+        {
+            label = new Label();
+            used = true;
+        }
+    }
 }

@@ -123,9 +123,15 @@ message MessageToClient
     
     MessageType messageType = 3;
     GameObjInfo selfInfo = 4;	//自己的个人信息
-    repeated int64 teammateGUIDs = 5;	//所有队友的GUID，其0、1、2、3元素分别为playerID为0、1、2、3的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
     ColorType selfTeamColor = 6;	//自己队伍的所属颜色
     repeated GameObjInfo gameObjs = 7;		//当前地图上的所有对象
+
+    message OneTeamGUIDs
+    {
+        repeated int64 teammateGUIDs = 1;
+    }
+
+    repeated OneTeamGUIDs PlayerGUIDs = 5;  //所有玩家的GUID，第一维的 0、1、2…… 分别为队伍编号，每个队伍的0、1、2、……元素分别为playerID为0、1、2、……的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
 
     message OneDimVec
     {
