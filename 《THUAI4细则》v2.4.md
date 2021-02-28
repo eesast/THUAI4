@@ -1,4 +1,10 @@
-# 《THUAI4》细则 v2.2
+# 《THUAI4》细则 v2.4
+
+---
+
+**本次修改：关于队友通信的 proto**
+
+---
 
 ## 一、通信接口建议
 
@@ -12,162 +18,178 @@
 
 当时间到达后，`Server` 就向所有的 `Client` 发送 `EndGame` 消息，`Client` 随即停止游戏。  
 
+其中，还有 `Send 消息，用于队友通信。
+
 根据这个思路，编写如下通信接口：
 
-### 应实现的proto（用C++伪代码编写，需改成proto）
+### 实现的proto
 
-```c++
-enum class GameObjType
+```protobuf
+enum MessageType
 {
-    Character = 0,
-    Wall = 1,
-    Prop = 2,
-    Bullet = 3,
-    BirthPoint = 4,
-    OutOfBoundBlock = 5
+    AddPlayer = 0;
+    Move = 1;
+    Attack = 2;
+    Pick = 3;
+    Use = 4;
+    Throw = 5;
+    Send = 6;
+    InvalidPlayer = 7;
+    ValidPlayer = 8;
+    StartGame = 9;
+    Gaming = 10;
+    EndGame = 11;
+}
+
+enum GameObjType
+{
+    Character = 0;
+    Wall = 1;
+    Prop = 2;
+    Bullet = 3;
+    BirthPoint = 4;
+    OutOfBoundBlock = 5;
 }
 
 //道具类型，此为编写时的临时名称，具体道具名称可以待主题确定后更改
-enum class PropType
+enum PropType
 {
-    Null = 0,
-    Bike = 1,
-    Amplifier = 2,
-    JinKeLa = 3,
-    Rice = 4,
-    NegativeFeedback = 5,
-    Totem = 6,
-    Phaser = 7,
-    Dirt = 8,
-    Attenuator = 9,
-    Divider = 10
+    Null = 0;
+    Bike = 1;
+    Amplifier = 2;
+    JinKeLa = 3;
+    Rice = 4;
+    NegativeFeedback = 5;
+    Totem = 6;
+    Phaser = 7;
+    Dirt = 8;
+    Attenuator = 9;
+    Divider = 10;
 }
 
-enum class ShapeType
+enum ShapeType
 {
-	Circle = 0,
-	Square = 1
+	Circle = 0;
+	Square = 1;
 }
 
-enum class JobType
+enum JobType
 {
-    Job0 = 0,
-    Job1 = 1,
-    Job2 = 2,
-    Job3 = 3,
-    Job4 = 4,
-    Job5 = 5,
-    Job6 = 6
+    Job0 = 0;
+    Job1 = 1;
+    Job2 = 2;
+    Job3 = 3;
+    Job4 = 4;
+    Job5 = 5;
+    Job6 = 6;
 }
 
-enum class BulletType
+enum BulletType
 {
-    Bullet0 = 0,
-    Bullet1 = 1,
-    Bullet2 = 2,
-    Bullet3 = 3,
-    Bullet4 = 4,
-    Bullet5 = 5,
-    Bullet6 = 6
+    Bullet0 = 0;
+    Bullet1 = 1;
+    Bullet2 = 2;
+    Bullet3 = 3;
+    Bullet4 = 4;
+    Bullet5 = 5;
+    Bullet6 = 6;
 }
 
-enum class ColorType
+enum ColorType
 {
-    None = 0,
-    Color1 = 1,
-    Color2 = 2,
-    Color3 = 3,
-    Color4 = 4
+    None = 0;
+    Color1 = 1;
+    Color2 = 2;
+    Color3 = 3;
+    Color4 = 4;
 }
 
-enum class MessageType
+message GameObjInfo
 {
-    AddPlayer = 0,
-    Move = 1,
-    Attack = 2,
-    Pick = 3,
-    Use = 4,
-    Throw = 5,
-    Send = 6 
-    
-    InvalidPlayer = 7,
-    ValidPlayer = 8,
-    StartGame = 9,
-    Gaming = 10,
-    EndGame = 11
-}
-
-struct GameObjInfo
-{
-    GameObjType gameObjType;
+    GameObjType gameObjType = 1;
     
     //以下当gameObjType为任意值时均时有效
-    int64 guid;			//每个游戏对象有一个全局ID，即guid
-    int32 x;
-    int32 y;
-    double facingDirection;
-    int32 moveSpeed;
-    bool canMove;
-    bool isMoving;
-    ShapeType shapeType;	//形状
-    int32 radius;		//圆形物体的半径或正方形内切圆半径
+    int64 guid = 2;			//每个游戏对象有一个全局ID，即guid
+    int32 x = 3;
+    int32 y = 4;
+    double facingDirection = 5;
+    int32 moveSpeed = 6;
+    bool canMove = 7;
+    bool isMoving = 8;
+    ShapeType shapeType = 9;	//形状
+    int32 radius = 10;		//圆形物体的半径或正方形内切圆半径
     
     //以下当gameObjType为Character和Bullet时才有效
-    int64 teamID;		//人物所属队伍ID或子弹的发射主人所属队伍ID，其他情况为无效ID
-    int32 ap;			//攻击力
-    BulletType bulletType;	//子弹类型
+    int64 teamID = 11;		//人物所属队伍ID或子弹的发射主人所属队伍ID，其他情况为无效ID
+    int32 ap = 12;			//攻击力
+    BulletType bulletType = 13;	//子弹类型
     
     //以下当gameObjType为Character和Prop时有效
-    PropType propType;	//当前人物持有的道具类型或道具的类型
+    PropType propType = 14;	//当前人物持有的道具类型或道具的类型
     
     //以下仅当gameObjType为Prop时有效
-    bool isLaid;		//是否已经被放置
+    bool isLaid = 15;		//是否已经被放置
     
     //以下仅当gameObjType为Character时有效
-    bool isDying;		//正在死亡复活中……
-    JobType jobType;
-    int32 CD;
-    int32 maxBulletNum;
-    int32 bulletNum;
-    int32 maxHp;
-    int32 hp;
-    int32 lifeNum;		//第几次复活
+    bool isDying = 16;		//正在死亡复活中……
+    JobType jobType = 17;
+    int32 CD = 18;
+    int32 maxBulletNum = 19;
+    int32 bulletNum = 20;
+    int32 maxHp = 21;
+    int32 hp = 22;
+    int32 lifeNum = 23;		//第几次复活
 }
 
-struct MessageToOneClient
+//发送单个信息时
+message MessageToOneClient
 {
-    int64 playerID;			//指明发送给谁
-    int64 teamID;			//指明发送给谁
+    int64 playerID = 1;			//指明发送给谁
+    int64 teamID = 2;			//指明发送给谁
     
-    MessageType messageType;	//消息类型，可能是 InvalidPlayer、ValidPlayer或Send
-    int64 guid;				//自己的guid
-    string message;         
+    MessageType messageType = 3;
+    int64 guid = 4;             //自己的guid
+    string message = 5;         //如果 messageType 为 Send，则为要发送的消息
 }
 
-struct MessageToClient
+//发送全局信息时
+message MessageToClient
 {
-    int64 playerID;			//指明发送给谁
-    int64 teamID;			//指明发送给谁
+    int64 playerID = 1;			//指明发送给谁
+    int64 teamID = 2;			//指明发送给谁
     
-    MessageType messageType;	//消息类型，可能是除 InvalidPlayer、ValidPlayer 之外的任何消息
-    GameObjInfo selfInfo;	//自己的个人信息
-    int64[] teammateGUIDs;	//所有队友的GUID，其0、1、2、3元素分别为playerID为0、1、2、3的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
-    ColorType selfTeamColor;	//自己队伍的所属颜色
-    GameObjInfo[] gameObjs;		//当前地图上的所有对象
-    ColorType[][] cellColors;	//每个 cell 的颜色
+    MessageType messageType = 3;
+    GameObjInfo selfInfo = 4;	//自己的个人信息
+    ColorType selfTeamColor = 6;	//自己队伍的所属颜色
+    repeated GameObjInfo gameObjs = 7;		//当前地图上的所有对象
+
+    message OneTeamGUIDs
+    {
+        repeated int64 teammateGUIDs = 1;
+    }
+
+    repeated OneTeamGUIDs PlayerGUIDs = 5;  //所有玩家的GUID，第一维的 0、1、2…… 分别为队伍编号，每个队伍的0、1、2、……元素分别为playerID为0、1、2、……的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
+
+    message OneDimVec
+    {
+        repeated ColorType rowColors = 1;
+    }
+
+    repeated OneDimVec cellColors = 8;	//每个 cell 的颜色
+    int32 teamScore = 9;                //本队伍的分数
 }
 
-struct MessageToServer
+message MessageToServer
 {
-    MessageType messageType;
-    int64 playerID;		//消息发送者的playerID
-    int64 teamID;		//消息发送者所在队伍的ID
-    JobType jobType;	//messageType为AddPlayer时选择的职业
-    PropType propType;	//messageType为Pick时要捡起的道具类型
-    int timeInMilliseconds;	//时间参数
-    double angle;		//角度参数
-    int64 ToPlayerID;	//当messageType为Send时有效，为发送对象的ID
-    string message;		//当messageType为Send时有效，为发送的消息
+    MessageType messageType = 1;
+    JobType jobType = 2;	//messageType为AddPlayer时选择的职业
+    int64 teamID = 3;		//messageType为AddPlayer时选择的队伍
+    PropType propType = 4;	//messageType为Pick时要捡起的道具类型
+    int32 timeInMilliseconds = 5;	//时间参数
+    double angle = 6;		//角度参数
+    int64 playerID = 7;     //发送的玩家ID
+    string message = 8;     //如果messageType为Send，则为要发送的消息
+    int64 SendToPlayerID = 9;     //如果messageType为Send，则为要发送对象的 playerID（本队伍）
 }
 
 ```
@@ -231,7 +253,7 @@ struct MessageToServer
 
    
 
-3. `const std::list<GameObjInfo>& GetGameObj(int cellX, int cellY)` 返回位于参数所示的 cell 中的所有可见的游戏对象的列表。（函数中实现视野，**并屏蔽掉已经被放置的地雷**）
+3. `std::list<GameObjInfo> GetGameObj(int cellX, int cellY)` 返回位于参数所示的 cell 中的所有可见的游戏对象的列表。（函数中实现视野，**并屏蔽掉已经被放置的地雷**）
 
 4. `ColorType GetColor(int cellX, int cellY)` 返回 `cellColors[cellX][cellY]` 。
 
