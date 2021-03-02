@@ -27,7 +27,7 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi
 	character->propType = (THUAI4::PropType)goi.proptype();
 	character->radius = goi.radius();
 	character->shapeType = (THUAI4::ShapeType)goi.shapetype();
-	character->teamID = goi.teamid();
+	character->teamID = static_cast<uint16_t>(goi.teamid());
 	character->x = goi.x();
 	character->y = goi.y();
 	return character;
@@ -68,7 +68,7 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->moveSpeed = goi.movespeed();
 	bullet->radius = goi.radius();
 	bullet->shapeType = (THUAI4::ShapeType)goi.shapetype();
-	bullet->teamID = goi.teamid();
+	bullet->teamID = static_cast<uint16_t>(goi.teamid());
 	bullet->x = goi.x();
 	bullet->y = goi.y();
 	return bullet;
@@ -79,7 +79,7 @@ std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& g
 	birthpoint->guid = goi.guid();
 	birthpoint->radius = goi.radius();
 	birthpoint->shapeType = (THUAI4::ShapeType) goi.shapetype();
-	birthpoint->teamID = goi.teamid();
+	birthpoint->teamID = static_cast<uint16_t>(goi.teamid());
 	birthpoint->x = goi.x();
 	birthpoint->y = goi.y();
 	return birthpoint;
@@ -181,7 +181,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		for (int i = 0; i < THUAI4::State::nTeams; i++) {
 			for (int j = 0; j < THUAI4::State::nPlayers; j++) {
-				pBuffer->playerGUIDs[i][j] = pM2C->playerguids(i).teammateguids(j);
+				pBuffer->playerGUIDs[i][j] = static_cast<int32_t>(pM2C->playerguids(i).teammateguids(j));
 			}
 		}
 
