@@ -39,34 +39,37 @@ namespace Communication.Proto {
             "DwoHbGlmZU51bRgXIAEoBSKBAQoSTWVzc2FnZVRvT25lQ2xpZW50EhAKCHBs",
             "YXllcklEGAEgASgDEg4KBnRlYW1JRBgCIAEoAxIqCgttZXNzYWdlVHlwZRgD",
             "IAEoDjIVLlByb3RvYnVmLk1lc3NhZ2VUeXBlEgwKBGd1aWQYBCABKAMSDwoH",
-            "bWVzc2FnZRgFIAEoCSL1AgoPTWVzc2FnZVRvQ2xpZW50EhAKCHBsYXllcklE",
+            "bWVzc2FnZRgFIAEoCSLCAwoPTWVzc2FnZVRvQ2xpZW50EhAKCHBsYXllcklE",
             "GAEgASgDEg4KBnRlYW1JRBgCIAEoAxIqCgttZXNzYWdlVHlwZRgDIAEoDjIV",
             "LlByb3RvYnVmLk1lc3NhZ2VUeXBlEicKCHNlbGZJbmZvGAQgASgLMhUuUHJv",
-            "dG9idWYuR2FtZU9iakluZm8SFQoNdGVhbW1hdGVHVUlEcxgFIAMoAxIqCg1z",
-            "ZWxmVGVhbUNvbG9yGAYgASgOMhMuUHJvdG9idWYuQ29sb3JUeXBlEicKCGdh",
-            "bWVPYmpzGAcgAygLMhUuUHJvdG9idWYuR2FtZU9iakluZm8SNwoKY2VsbENv",
-            "bG9ycxgIIAMoCzIjLlByb3RvYnVmLk1lc3NhZ2VUb0NsaWVudC5PbmVEaW1W",
-            "ZWMSEQoJdGVhbVNjb3JlGAkgASgFGjMKCU9uZURpbVZlYxImCglyb3dDb2xv",
-            "cnMYASADKA4yEy5Qcm90b2J1Zi5Db2xvclR5cGUqYQoLR2FtZU9ialR5cGUS",
-            "DQoJQ2hhcmFjdGVyEAASCAoEV2FsbBABEggKBFByb3AQAhIKCgZCdWxsZXQQ",
-            "AxIOCgpCaXJ0aFBvaW50EAQSEwoPT3V0T2ZCb3VuZEJsb2NrEAUqmAEKCFBy",
-            "b3BUeXBlEggKBE51bGwQABIICgRCaWtlEAESDQoJQW1wbGlmaWVyEAISCwoH",
-            "SmluS2VMYRADEggKBFJpY2UQBBIUChBOZWdhdGl2ZUZlZWRiYWNrEAUSCQoF",
-            "VG90ZW0QBhIKCgZQaGFzZXIQBxIICgREaXJ0EAgSDgoKQXR0ZW51YXRvchAJ",
-            "EgsKB0RpdmlkZXIQCiojCglTaGFwZVR5cGUSCgoGQ2lyY2xlEAASCgoGU3F1",
-            "YXJlEAEqTwoHSm9iVHlwZRIICgRKb2IwEAASCAoESm9iMRABEggKBEpvYjIQ",
-            "AhIICgRKb2IzEAMSCAoESm9iNBAEEggKBEpvYjUQBRIICgRKb2I2EAYqZwoK",
-            "QnVsbGV0VHlwZRILCgdCdWxsZXQwEAASCwoHQnVsbGV0MRABEgsKB0J1bGxl",
-            "dDIQAhILCgdCdWxsZXQzEAMSCwoHQnVsbGV0NBAEEgsKB0J1bGxldDUQBRIL",
-            "CgdCdWxsZXQ2EAYqRQoJQ29sb3JUeXBlEggKBE5vbmUQABIKCgZDb2xvcjEQ",
-            "ARIKCgZDb2xvcjIQAhIKCgZDb2xvcjMQAxIKCgZDb2xvcjQQBEIWqgITQ29t",
-            "bXVuaWNhdGlvbi5Qcm90b2IGcHJvdG8z"));
+            "dG9idWYuR2FtZU9iakluZm8SKgoNc2VsZlRlYW1Db2xvchgGIAEoDjITLlBy",
+            "b3RvYnVmLkNvbG9yVHlwZRInCghnYW1lT2JqcxgHIAMoCzIVLlByb3RvYnVm",
+            "LkdhbWVPYmpJbmZvEjsKC1BsYXllckdVSURzGAUgAygLMiYuUHJvdG9idWYu",
+            "TWVzc2FnZVRvQ2xpZW50Lk9uZVRlYW1HVUlEcxI3CgpjZWxsQ29sb3JzGAgg",
+            "AygLMiMuUHJvdG9idWYuTWVzc2FnZVRvQ2xpZW50Lk9uZURpbVZlYxIRCgl0",
+            "ZWFtU2NvcmUYCSABKAUaJQoMT25lVGVhbUdVSURzEhUKDXRlYW1tYXRlR1VJ",
+            "RHMYASADKAMaMwoJT25lRGltVmVjEiYKCXJvd0NvbG9ycxgBIAMoDjITLlBy",
+            "b3RvYnVmLkNvbG9yVHlwZSphCgtHYW1lT2JqVHlwZRINCglDaGFyYWN0ZXIQ",
+            "ABIICgRXYWxsEAESCAoEUHJvcBACEgoKBkJ1bGxldBADEg4KCkJpcnRoUG9p",
+            "bnQQBBITCg9PdXRPZkJvdW5kQmxvY2sQBSqYAQoIUHJvcFR5cGUSCAoETnVs",
+            "bBAAEggKBEJpa2UQARINCglBbXBsaWZpZXIQAhILCgdKaW5LZUxhEAMSCAoE",
+            "UmljZRAEEhQKEE5lZ2F0aXZlRmVlZGJhY2sQBRIJCgVUb3RlbRAGEgoKBlBo",
+            "YXNlchAHEggKBERpcnQQCBIOCgpBdHRlbnVhdG9yEAkSCwoHRGl2aWRlchAK",
+            "KiMKCVNoYXBlVHlwZRIKCgZDaXJjbGUQABIKCgZTcXVhcmUQASpPCgdKb2JU",
+            "eXBlEggKBEpvYjAQABIICgRKb2IxEAESCAoESm9iMhACEggKBEpvYjMQAxII",
+            "CgRKb2I0EAQSCAoESm9iNRAFEggKBEpvYjYQBipnCgpCdWxsZXRUeXBlEgsK",
+            "B0J1bGxldDAQABILCgdCdWxsZXQxEAESCwoHQnVsbGV0MhACEgsKB0J1bGxl",
+            "dDMQAxILCgdCdWxsZXQ0EAQSCwoHQnVsbGV0NRAFEgsKB0J1bGxldDYQBipF",
+            "CglDb2xvclR5cGUSCAoETm9uZRAAEgoKBkNvbG9yMRABEgoKBkNvbG9yMhAC",
+            "EgoKBkNvbG9yMxADEgoKBkNvbG9yNBAEQhaqAhNDb21tdW5pY2F0aW9uLlBy",
+            "b3RvYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Communication.Proto.MessageTypeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Communication.Proto.GameObjType), typeof(global::Communication.Proto.PropType), typeof(global::Communication.Proto.ShapeType), typeof(global::Communication.Proto.JobType), typeof(global::Communication.Proto.BulletType), typeof(global::Communication.Proto.ColorType), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.GameObjInfo), global::Communication.Proto.GameObjInfo.Parser, new[]{ "GameObjType", "Guid", "X", "Y", "FacingDirection", "MoveSpeed", "CanMove", "IsMoving", "ShapeType", "Radius", "TeamID", "Ap", "BulletType", "PropType", "IsLaid", "IsDying", "JobType", "CD", "MaxBulletNum", "BulletNum", "MaxHp", "Hp", "LifeNum" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToOneClient), global::Communication.Proto.MessageToOneClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "Guid", "Message" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient), global::Communication.Proto.MessageToClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "SelfInfo", "TeammateGUIDs", "SelfTeamColor", "GameObjs", "CellColors", "TeamScore" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient.Types.OneDimVec), global::Communication.Proto.MessageToClient.Types.OneDimVec.Parser, new[]{ "RowColors" }, null, null, null, null)})
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient), global::Communication.Proto.MessageToClient.Parser, new[]{ "PlayerID", "TeamID", "MessageType", "SelfInfo", "SelfTeamColor", "GameObjs", "PlayerGUIDs", "CellColors", "TeamScore" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs), global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs.Parser, new[]{ "TeammateGUIDs" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Communication.Proto.MessageToClient.Types.OneDimVec), global::Communication.Proto.MessageToClient.Types.OneDimVec.Parser, new[]{ "RowColors" }, null, null, null, null)})
           }));
     }
     #endregion
@@ -1493,9 +1496,9 @@ namespace Communication.Proto {
       teamID_ = other.teamID_;
       messageType_ = other.messageType_;
       selfInfo_ = other.selfInfo_ != null ? other.selfInfo_.Clone() : null;
-      teammateGUIDs_ = other.teammateGUIDs_.Clone();
       selfTeamColor_ = other.selfTeamColor_;
       gameObjs_ = other.gameObjs_.Clone();
+      playerGUIDs_ = other.playerGUIDs_.Clone();
       cellColors_ = other.cellColors_.Clone();
       teamScore_ = other.teamScore_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -1559,19 +1562,6 @@ namespace Communication.Proto {
       }
     }
 
-    /// <summary>Field number for the "teammateGUIDs" field.</summary>
-    public const int TeammateGUIDsFieldNumber = 5;
-    private static readonly pb::FieldCodec<long> _repeated_teammateGUIDs_codec
-        = pb::FieldCodec.ForInt64(42);
-    private readonly pbc::RepeatedField<long> teammateGUIDs_ = new pbc::RepeatedField<long>();
-    /// <summary>
-    ///所有队友的GUID，其0、1、2、3元素分别为playerID为0、1、2、3的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<long> TeammateGUIDs {
-      get { return teammateGUIDs_; }
-    }
-
     /// <summary>Field number for the "selfTeamColor" field.</summary>
     public const int SelfTeamColorFieldNumber = 6;
     private global::Communication.Proto.ColorType selfTeamColor_ = global::Communication.Proto.ColorType.None;
@@ -1597,6 +1587,19 @@ namespace Communication.Proto {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<global::Communication.Proto.GameObjInfo> GameObjs {
       get { return gameObjs_; }
+    }
+
+    /// <summary>Field number for the "PlayerGUIDs" field.</summary>
+    public const int PlayerGUIDsFieldNumber = 5;
+    private static readonly pb::FieldCodec<global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs> _repeated_playerGUIDs_codec
+        = pb::FieldCodec.ForMessage(42, global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs.Parser);
+    private readonly pbc::RepeatedField<global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs> playerGUIDs_ = new pbc::RepeatedField<global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs>();
+    /// <summary>
+    ///所有玩家的GUID，第一维的 0、1、2…… 分别为队伍编号，每个队伍的0、1、2、……元素分别为playerID为0、1、2、……的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Communication.Proto.MessageToClient.Types.OneTeamGUIDs> PlayerGUIDs {
+      get { return playerGUIDs_; }
     }
 
     /// <summary>Field number for the "cellColors" field.</summary>
@@ -1643,9 +1646,9 @@ namespace Communication.Proto {
       if (TeamID != other.TeamID) return false;
       if (MessageType != other.MessageType) return false;
       if (!object.Equals(SelfInfo, other.SelfInfo)) return false;
-      if(!teammateGUIDs_.Equals(other.teammateGUIDs_)) return false;
       if (SelfTeamColor != other.SelfTeamColor) return false;
       if(!gameObjs_.Equals(other.gameObjs_)) return false;
+      if(!playerGUIDs_.Equals(other.playerGUIDs_)) return false;
       if(!cellColors_.Equals(other.cellColors_)) return false;
       if (TeamScore != other.TeamScore) return false;
       return Equals(_unknownFields, other._unknownFields);
@@ -1658,9 +1661,9 @@ namespace Communication.Proto {
       if (TeamID != 0L) hash ^= TeamID.GetHashCode();
       if (MessageType != global::Communication.Proto.MessageType.AddPlayer) hash ^= MessageType.GetHashCode();
       if (selfInfo_ != null) hash ^= SelfInfo.GetHashCode();
-      hash ^= teammateGUIDs_.GetHashCode();
       if (SelfTeamColor != global::Communication.Proto.ColorType.None) hash ^= SelfTeamColor.GetHashCode();
       hash ^= gameObjs_.GetHashCode();
+      hash ^= playerGUIDs_.GetHashCode();
       hash ^= cellColors_.GetHashCode();
       if (TeamScore != 0) hash ^= TeamScore.GetHashCode();
       if (_unknownFields != null) {
@@ -1695,7 +1698,7 @@ namespace Communication.Proto {
         output.WriteRawTag(34);
         output.WriteMessage(SelfInfo);
       }
-      teammateGUIDs_.WriteTo(output, _repeated_teammateGUIDs_codec);
+      playerGUIDs_.WriteTo(output, _repeated_playerGUIDs_codec);
       if (SelfTeamColor != global::Communication.Proto.ColorType.None) {
         output.WriteRawTag(48);
         output.WriteEnum((int) SelfTeamColor);
@@ -1731,7 +1734,7 @@ namespace Communication.Proto {
         output.WriteRawTag(34);
         output.WriteMessage(SelfInfo);
       }
-      teammateGUIDs_.WriteTo(ref output, _repeated_teammateGUIDs_codec);
+      playerGUIDs_.WriteTo(ref output, _repeated_playerGUIDs_codec);
       if (SelfTeamColor != global::Communication.Proto.ColorType.None) {
         output.WriteRawTag(48);
         output.WriteEnum((int) SelfTeamColor);
@@ -1763,11 +1766,11 @@ namespace Communication.Proto {
       if (selfInfo_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(SelfInfo);
       }
-      size += teammateGUIDs_.CalculateSize(_repeated_teammateGUIDs_codec);
       if (SelfTeamColor != global::Communication.Proto.ColorType.None) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) SelfTeamColor);
       }
       size += gameObjs_.CalculateSize(_repeated_gameObjs_codec);
+      size += playerGUIDs_.CalculateSize(_repeated_playerGUIDs_codec);
       size += cellColors_.CalculateSize(_repeated_cellColors_codec);
       if (TeamScore != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(TeamScore);
@@ -1798,11 +1801,11 @@ namespace Communication.Proto {
         }
         SelfInfo.MergeFrom(other.SelfInfo);
       }
-      teammateGUIDs_.Add(other.teammateGUIDs_);
       if (other.SelfTeamColor != global::Communication.Proto.ColorType.None) {
         SelfTeamColor = other.SelfTeamColor;
       }
       gameObjs_.Add(other.gameObjs_);
+      playerGUIDs_.Add(other.playerGUIDs_);
       cellColors_.Add(other.cellColors_);
       if (other.TeamScore != 0) {
         TeamScore = other.TeamScore;
@@ -1840,9 +1843,8 @@ namespace Communication.Proto {
             input.ReadMessage(SelfInfo);
             break;
           }
-          case 42:
-          case 40: {
-            teammateGUIDs_.AddEntriesFrom(input, _repeated_teammateGUIDs_codec);
+          case 42: {
+            playerGUIDs_.AddEntriesFrom(input, _repeated_playerGUIDs_codec);
             break;
           }
           case 48: {
@@ -1894,9 +1896,8 @@ namespace Communication.Proto {
             input.ReadMessage(SelfInfo);
             break;
           }
-          case 42:
-          case 40: {
-            teammateGUIDs_.AddEntriesFrom(ref input, _repeated_teammateGUIDs_codec);
+          case 42: {
+            playerGUIDs_.AddEntriesFrom(ref input, _repeated_playerGUIDs_codec);
             break;
           }
           case 48: {
@@ -1924,6 +1925,169 @@ namespace Communication.Proto {
     /// <summary>Container for nested types declared in the MessageToClient message type.</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static partial class Types {
+      public sealed partial class OneTeamGUIDs : pb::IMessage<OneTeamGUIDs>
+      #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+          , pb::IBufferMessage
+      #endif
+      {
+        private static readonly pb::MessageParser<OneTeamGUIDs> _parser = new pb::MessageParser<OneTeamGUIDs>(() => new OneTeamGUIDs());
+        private pb::UnknownFieldSet _unknownFields;
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public static pb::MessageParser<OneTeamGUIDs> Parser { get { return _parser; } }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public static pbr::MessageDescriptor Descriptor {
+          get { return global::Communication.Proto.MessageToClient.Descriptor.NestedTypes[0]; }
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        pbr::MessageDescriptor pb::IMessage.Descriptor {
+          get { return Descriptor; }
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public OneTeamGUIDs() {
+          OnConstruction();
+        }
+
+        partial void OnConstruction();
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public OneTeamGUIDs(OneTeamGUIDs other) : this() {
+          teammateGUIDs_ = other.teammateGUIDs_.Clone();
+          _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public OneTeamGUIDs Clone() {
+          return new OneTeamGUIDs(this);
+        }
+
+        /// <summary>Field number for the "teammateGUIDs" field.</summary>
+        public const int TeammateGUIDsFieldNumber = 1;
+        private static readonly pb::FieldCodec<long> _repeated_teammateGUIDs_codec
+            = pb::FieldCodec.ForInt64(10);
+        private readonly pbc::RepeatedField<long> teammateGUIDs_ = new pbc::RepeatedField<long>();
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public pbc::RepeatedField<long> TeammateGUIDs {
+          get { return teammateGUIDs_; }
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public override bool Equals(object other) {
+          return Equals(other as OneTeamGUIDs);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public bool Equals(OneTeamGUIDs other) {
+          if (ReferenceEquals(other, null)) {
+            return false;
+          }
+          if (ReferenceEquals(other, this)) {
+            return true;
+          }
+          if(!teammateGUIDs_.Equals(other.teammateGUIDs_)) return false;
+          return Equals(_unknownFields, other._unknownFields);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public override int GetHashCode() {
+          int hash = 1;
+          hash ^= teammateGUIDs_.GetHashCode();
+          if (_unknownFields != null) {
+            hash ^= _unknownFields.GetHashCode();
+          }
+          return hash;
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public override string ToString() {
+          return pb::JsonFormatter.ToDiagnosticString(this);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public void WriteTo(pb::CodedOutputStream output) {
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+          output.WriteRawMessage(this);
+        #else
+          teammateGUIDs_.WriteTo(output, _repeated_teammateGUIDs_codec);
+          if (_unknownFields != null) {
+            _unknownFields.WriteTo(output);
+          }
+        #endif
+        }
+
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+          teammateGUIDs_.WriteTo(ref output, _repeated_teammateGUIDs_codec);
+          if (_unknownFields != null) {
+            _unknownFields.WriteTo(ref output);
+          }
+        }
+        #endif
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public int CalculateSize() {
+          int size = 0;
+          size += teammateGUIDs_.CalculateSize(_repeated_teammateGUIDs_codec);
+          if (_unknownFields != null) {
+            size += _unknownFields.CalculateSize();
+          }
+          return size;
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public void MergeFrom(OneTeamGUIDs other) {
+          if (other == null) {
+            return;
+          }
+          teammateGUIDs_.Add(other.teammateGUIDs_);
+          _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+        }
+
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        public void MergeFrom(pb::CodedInputStream input) {
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+          input.ReadRawMessage(this);
+        #else
+          uint tag;
+          while ((tag = input.ReadTag()) != 0) {
+            switch(tag) {
+              default:
+                _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+                break;
+              case 10:
+              case 8: {
+                teammateGUIDs_.AddEntriesFrom(input, _repeated_teammateGUIDs_codec);
+                break;
+              }
+            }
+          }
+        #endif
+        }
+
+        #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+        void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+          uint tag;
+          while ((tag = input.ReadTag()) != 0) {
+            switch(tag) {
+              default:
+                _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+                break;
+              case 10:
+              case 8: {
+                teammateGUIDs_.AddEntriesFrom(ref input, _repeated_teammateGUIDs_codec);
+                break;
+              }
+            }
+          }
+        }
+        #endif
+
+      }
+
       public sealed partial class OneDimVec : pb::IMessage<OneDimVec>
       #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
           , pb::IBufferMessage
@@ -1936,7 +2100,7 @@ namespace Communication.Proto {
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public static pbr::MessageDescriptor Descriptor {
-          get { return global::Communication.Proto.MessageToClient.Descriptor.NestedTypes[0]; }
+          get { return global::Communication.Proto.MessageToClient.Descriptor.NestedTypes[1]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
