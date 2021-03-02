@@ -2,11 +2,13 @@
 using System.Linq;
 using Communication.CommServer;
 using Communication.Proto;
+using System.Threading;
 using Google.Protobuf;
 namespace servertest
 {
     class Test
     {
+        static CommServer server;
         static void Main()
         {
             CommServer server = new CommServer();
@@ -20,7 +22,7 @@ namespace servertest
                 byte[] data;
                 IMsg msg;
                 if (server.TryTake(out msg))
-                {   
+                {
                     MessageToServer mm = msg.Content as MessageToServer;
                     Console.WriteLine($"Receive a message from {mm.PlayerID}");
                     Console.WriteLine($"Message type::{mm.MessageType}");
@@ -35,19 +37,87 @@ namespace servertest
                     Console.WriteLine("fail to dequeue");
                 }
             };
+            Console.WriteLine("============================");
             Console.ReadLine();
 
-            MessageToOneClient m = new MessageToOneClient();
-            m.PlayerID = 4;
-            m.TeamID = 0;
-            m.MessageType = MessageType.AddPlayer;
-            m.Guid = 888;
-            server.SendMessage(m);
+            {
+                MessageToOneClient m = new MessageToOneClient();
+                m.PlayerID = 0;
+                m.TeamID = 0;
+                m.MessageType = MessageType.ValidPlayer;
+                m.Guid = 888;
+                server.SendMessage(m);
+                Console.WriteLine("已发送Validplayer");
+            }
 
-
+            Console.ReadLine();
+            server.SendMessage(TestMessage(0,MessageType.StartGame));
+            Console.WriteLine("已发送StartGame");
+            Console.ReadLine();
+            for(int i = 0; i < 100; i++)
+            {
+                server.SendMessage(TestMessage(i, MessageType.Gaming));
+                Thread.Sleep(50);
+            }
+            Console.WriteLine("Gaming");
+            Console.ReadLine();
+            for (int i = 0; i < 100; i++)
+            {
+                server.SendMessage(TestMessage(i+100, MessageType.Gaming));
+                Thread.Sleep(50);
+            }
+            server.SendMessage(TestMessage(666, MessageType.EndGame));
+            Console.WriteLine("GameOver");
             Console.ReadLine();
             server.Dispose();
             server.Stop();
         }
+        static private MessageToClient TestMessage(long guid, MessageType msgType)
+        {
+
+            var rows = 50;
+            var cols = 50;
+
+            //记录颜色信息，避免重复构造颜色信息
+            Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneDimVec> msgCellColors = new Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneDimVec>();
+            for (int x = 0; x < rows; ++x)
+            {
+                msgCellColors.Add(new MessageToClient.Types.OneDimVec());
+                for (int y = 0; y < cols; ++y)
+                {
+                    msgCellColors[x].RowColors.Add(ColorType.Color2);
+                }
+            }
+
+
+            //记录所有GUID信息
+            Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs> playerGUIDs = new Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneTeamGUIDs>();
+            for (int x = 0; x < 2; ++x)
+            {
+                playerGUIDs.Add(new MessageToClient.Types.OneTeamGUIDs());
+                for (int y = 0; y < 4; ++y)
+                {
+                    playerGUIDs[x].TeammateGUIDs.Add(x * 100 + y);
+                }
+            }
+
+            MessageToClient msg = new MessageToClient();
+            msg.PlayerID = 0;
+            msg.TeamID = 0;
+            msg.MessageType = msgType;
+            msg.SelfInfo = new GameObjInfo();
+            msg.SelfInfo.Guid = guid;
+            for (int k = 0; k < 2; ++k)
+            {
+                msg.PlayerGUIDs.Add(playerGUIDs[k]);
+            }
+            msg.SelfTeamColor = ColorType.Color3;
+            for (int x = 0; x < rows; ++x)
+            {
+                msg.CellColors.Add(msgCellColors[x]);
+            }
+            return msg;
+        }
+        
     }
 }
