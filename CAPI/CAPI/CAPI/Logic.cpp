@@ -27,7 +27,7 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi
 	character->propType = (THUAI4::PropType)goi.proptype();
 	character->radius = goi.radius();
 	character->shapeType = (THUAI4::ShapeType)goi.shapetype();
-	character->teamID = goi.teamid();
+	character->teamID = static_cast<uint16_t>(goi.teamid());
 	character->x = goi.x();
 	character->y = goi.y();
 	return character;
@@ -68,7 +68,7 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->moveSpeed = goi.movespeed();
 	bullet->radius = goi.radius();
 	bullet->shapeType = (THUAI4::ShapeType)goi.shapetype();
-	bullet->teamID = goi.teamid();
+	bullet->teamID = static_cast<uint16_t>(goi.teamid());
 	bullet->x = goi.x();
 	bullet->y = goi.y();
 	return bullet;
@@ -79,7 +79,7 @@ std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& g
 	birthpoint->guid = goi.guid();
 	birthpoint->radius = goi.radius();
 	birthpoint->shapeType = (THUAI4::ShapeType) goi.shapetype();
-	birthpoint->teamID = goi.teamid();
+	birthpoint->teamID = static_cast<uint16_t>(goi.teamid());
 	birthpoint->x = goi.x();
 	birthpoint->y = goi.y();
 	return birthpoint;
@@ -93,7 +93,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		load(pM2C);//第一帧AI线程还没开始 加载到buffer然后交换指针
 		{
 			std::lock_guard<std::mutex> lck(mtx_game);
-			gamePhase = Gaming;
+			gamePhase = GamePhase::Gaming;
 		}
 		cv_game.notify_one();
 		break;
@@ -104,7 +104,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	case Protobuf::MessageType::EndGame:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
-		gamePhase = GameOver;
+		gamePhase = GamePhase::GameOver;
 	}
 	cv_game.notify_one();
 	break;
@@ -119,7 +119,7 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	case Protobuf::MessageType::ValidPlayer:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
-		validity = Valid;
+		validity = Validity::Valid;
 	}
 	cv_game.notify_one();
 	break;
@@ -128,7 +128,7 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	case Protobuf::MessageType::InvalidPlayer:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
-		validity = Invalid;
+		validity = Validity::Invalid;
 	}
 	cv_game.notify_one();
 	break;
@@ -141,7 +141,7 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 }
 
-Logic::Logic() :capi(this), ai(this), pState(storage), pBuffer(storage + 1) {}
+Logic::Logic() : capi(*this), ai(*this), pState(storage), pBuffer(storage + 1) {}
 
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
@@ -179,14 +179,14 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			}
 		}
 
-		for (int i = 0; i < THUAI4::State::nTeams; i++) {
-			for (int j = 0; j < THUAI4::State::nPlayers; j++) {
-				pBuffer->playerGUIDs[i][j] = pM2C->playerguids(i).teammateguids(j);
+		for (int i = 0; i < (int)pBuffer->playerGUIDs.size(); i++) {
+			for (int j = 0; j < (int)pBuffer->playerGUIDs[i].size(); j++) {
+				pBuffer->playerGUIDs[i][j] = static_cast<int32_t>(pM2C->playerguids(i).teammateguids(j));
 			}
 		}
 
-		for (int i = 0; i < THUAI4::State::nCells; i++) {
-			for (int j = 0; j < THUAI4::State::nCells; j++) {
+		for (int i = 0; i < (int)pBuffer->cellColors.size(); i++) {
+			for (int j = 0; j < (int)pBuffer->cellColors[i].size(); j++) {
 				pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
 			}
 		}
@@ -210,7 +210,7 @@ void Logic::ProcessMessage()
 {
 	std::unique_lock<std::mutex> lock_game(mtx_game);
 	Pointer2Message p2M;
-	while (gamePhase != GameOver && !UnexpectedlyClosed && validity != Invalid) {
+	while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed && validity != Validity::Invalid) {
 		lock_game.unlock();
 
 		//无消息处理时停下来少占资源
@@ -255,7 +255,7 @@ void Logic::PlayerWrapper()
 	//while判断时保证gamePhase和UnexpectedlyClosed不被其他线程访问
 	std::unique_lock<std::mutex> lock_game(mtx_game);
 
-	while (gamePhase == Gaming && !UnexpectedlyClosed) {
+	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed) {
 		lock_game.unlock();
 
 		std::lock_guard<std::mutex> lck_state(mtx_state);
@@ -299,7 +299,7 @@ void Logic::PlayerWrapper()
 	std::cout << "AI thread terminates" << std::endl;
 }
 
-void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType)
+void Logic::Main(const char* address, unsigned short port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType)
 {
 	capi.set_player(playerID, teamID, jobType);
 	//CAPI先连接Agent
@@ -357,7 +357,7 @@ void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t tea
 
 
 		//然后AI决策知道游戏结束
-		while (gamePhase != GameOver && !UnexpectedlyClosed)
+		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
 			cv_game.wait(lck);
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";

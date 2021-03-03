@@ -1,11 +1,18 @@
 #pragma once
+
+#ifndef STRUCTURES_H
+
+#define STRUCTURES_H
+
 #include<cstdint>
 #include<array>
 #include<unordered_map>
 #include<vector>
-namespace THUAI4 {
 
-	enum PropType :unsigned char
+namespace THUAI4
+{
+
+	enum class PropType: unsigned char
 	{
 		Null = 0,
 		Bike = 1,
@@ -20,13 +27,13 @@ namespace THUAI4 {
 		Divider = 10
 	};
 
-	enum ShapeType :unsigned char
+	enum class ShapeType : unsigned char
 	{
 		Circle = 0,
 		Square = 1
 	};
 
-	enum JobType :unsigned char
+	enum class JobType : unsigned char
 	{
 		Job0 = 0,
 		Job1 = 1,
@@ -37,7 +44,7 @@ namespace THUAI4 {
 		Job6 = 6,
 	};
 
-	enum BulletType :unsigned char
+	enum class BulletType : unsigned char
 	{
 		Bullet0 = 0,
 		Bullet1 = 1,
@@ -48,7 +55,7 @@ namespace THUAI4 {
 		Bullet6 = 6
 	};
 
-	enum ColorType :unsigned char
+	enum class ColorType : unsigned char
 	{
 		None = 0,
 		Color1 = 1,
@@ -57,13 +64,14 @@ namespace THUAI4 {
 		Color4 = 4,
 	};
 
-	struct Character {
+	struct Character
+	{
 		bool isMoving;
 		bool isDying;
-		ShapeType shapeType : 1;
-		BulletType bulletType : 4;
-		PropType propType : 4;
-		JobType jobType : 4;
+		ShapeType shapeType;
+		BulletType bulletType;
+		PropType propType;
+		JobType jobType;
 		uint16_t lifeNum;
 		uint16_t teamID;
 		uint16_t radius;
@@ -81,7 +89,8 @@ namespace THUAI4 {
 		double facingDirection;
 	};
 
-	struct Wall {
+	struct Wall
+	{
 		ShapeType shapeType:1;
 		uint16_t radius;
 		uint32_t x;
@@ -89,11 +98,12 @@ namespace THUAI4 {
 		uint64_t guid;
 	};
 
-	struct Prop {
+	struct Prop
+	{
 		bool isMoving;
 		bool isLaid;
-		ShapeType shapeType:1;
-		PropType propType:4;
+		ShapeType shapeType;
+		PropType propType;
 		uint16_t radius;
 		uint32_t x;
 		uint32_t y;
@@ -102,10 +112,11 @@ namespace THUAI4 {
 		double facingDirection;
 	};
 
-	struct Bullet {
+	struct Bullet
+	{
 		bool isMoving;
-		ShapeType shapeType:1;
-		BulletType bulletType:4;
+		ShapeType shapeType;
+		BulletType bulletType;
 		uint16_t radius;
 		uint16_t teamID;
 		uint32_t x;
@@ -116,7 +127,8 @@ namespace THUAI4 {
 		double facingDirection;
 	};
 
-	struct BirthPoint {
+	struct BirthPoint
+	{
 		ShapeType shapeType;
 		uint16_t teamID;
 		uint16_t radius;
@@ -125,15 +137,17 @@ namespace THUAI4 {
 		uint64_t guid;
 	};
 
-	struct Message {
+	struct Message
+	{
 		uint16_t playerID;
 		std::string message;
 	};
 
-	struct State {
-		const static uint32_t nTeams = 2;
-		const static uint32_t nPlayers = 4;
-		const static uint32_t nCells = 50;
+	struct State
+	{
+		static constexpr inline uint32_t nTeams = 1;
+		static constexpr uint32_t nPlayers = 1;
+		static constexpr uint32_t nCells = 50;
 		ColorType selfTeamColor;
 		uint32_t teamScore;
 		std::vector<std::shared_ptr<Character>> characters;
@@ -147,3 +161,4 @@ namespace THUAI4 {
 	};
 }
 
+#endif	//!STRUCTURES_H
