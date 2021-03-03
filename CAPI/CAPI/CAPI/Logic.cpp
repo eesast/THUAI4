@@ -8,9 +8,7 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 
 void Logic::OnClose()
 {
-
 #ifdef ENABLE_RECONNECTION//饼饼
-
 
 #else
 	{
@@ -22,7 +20,6 @@ void Logic::OnClose()
 #endif 
 
 }
-
 
 std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi)
 {
@@ -158,17 +155,23 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 }
 
+//构造函数执行顺序：
+//1.基类的构造函数
+//2.成员类的构造函数 按类声明顺序
+//3.派生类的构造函数
 Logic::Logic() :\
+pState(storage),
+pBuffer(storage + 1),
 capi(playerID,
 	teamID,
-	jobType, 
-	mtxOnReceive, 
-	cvOnReceive, 
+	jobType,
+	mtxOnReceive,
+	cvOnReceive,
 	[this]() {OnClose(); }),
 	ai(playerID,
 		teamID,
 		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
-	pState), pState(storage), pBuffer(storage + 1) {}
+		pState) {}
 
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
@@ -284,7 +287,7 @@ void Logic::PlayerWrapper()
 
 	while (gamePhase == Gaming && !UnexpectedlyClosed) {
 		lock_game.unlock();
-
+		
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed) {
 			ai.play();
@@ -302,10 +305,10 @@ void Logic::PlayerWrapper()
 				BufferUpdated = false;
 			}
 			else {//如果当前state已经接触过且buffer没更新，那就等到buffer更新
-				
+
 				  //意外断线这里也会锁住
 				lock_game.lock();
-				while (!BufferUpdated && !UnexpectedlyClosed) {
+				while (!BufferUpdated && !UnexpectedlyClosed && gamePhase != GamePhase::GameOver) {
 					lock_game.unlock();
 					cv_buffer.wait(lck_buffer);
 					lock_game.lock();
@@ -319,7 +322,7 @@ void Logic::PlayerWrapper()
 				BufferUpdated = false;
 			}
 		}
-
+		
 		lock_game.lock();
 	}
 	lock_game.unlock();
@@ -400,6 +403,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		std::cout << "Game ends\n";
 
 		lck.unlock();
+		cv_buffer.notify_one();
 		tPM.join();
 		tAI.join();
 	}

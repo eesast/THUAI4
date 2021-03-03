@@ -3,8 +3,9 @@
 
 const static double PI = 3.14159265358979323846;
 
-API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, const THUAI4::State* pS) :
-	playerID(pID), teamID(tID), SendMessage(f), pState(pS) {}
+
+API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f,THUAI4::State*& pS):\
+playerID(pID), teamID(tID), SendMessage(f), pState(pS) { }
 
 
 void API::Use()
