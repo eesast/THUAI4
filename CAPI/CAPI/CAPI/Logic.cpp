@@ -1,4 +1,3 @@
-#include"CAPI.h"
 #include"Logic.h"
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
@@ -6,6 +5,24 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 	return !(g.gameobjtype() == Protobuf::GameObjType::Prop && g.islaid());
 
 }
+
+void Logic::OnClose()
+{
+
+#ifdef ENABLE_RECONNECTION//饼饼
+
+
+#else
+	{
+		std::lock_guard<std::mutex> lck(mtx_game);
+		UnexpectedlyClosed = true;
+	}
+	cv_game.notify_one();
+
+#endif 
+
+}
+
 
 std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi)
 {
@@ -141,7 +158,17 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 }
 
-Logic::Logic() :capi(this), ai(this), pState(storage), pBuffer(storage + 1) {}
+Logic::Logic() :\
+capi(playerID,
+	teamID,
+	jobType, 
+	mtxOnReceive, 
+	cvOnReceive, 
+	[this]() {OnClose(); }),
+	ai(playerID,
+		teamID,
+		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
+	pState), pState(storage), pBuffer(storage + 1) {}
 
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
@@ -216,11 +243,11 @@ void Logic::ProcessMessage()
 		//无消息处理时停下来少占资源
 
 		{
-			std::unique_lock<std::mutex> lck(capi.mtx);//OnReceive里往队列里Push时也锁了
+			std::unique_lock<std::mutex> lck(mtxOnReceive);//OnReceive里往队列里Push时也锁了
 			lock_game.lock();
 			while (capi.IsEmpty() && !UnexpectedlyClosed) {//否则在这断线就会锁住
 				lock_game.unlock();
-				capi.cv.wait(lck);
+				cvOnReceive.wait(lck);
 				lock_game.lock();
 			}
 			lock_game.unlock();
@@ -299,9 +326,11 @@ void Logic::PlayerWrapper()
 	std::cout << "AI thread terminates" << std::endl;
 }
 
-void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType)
+void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType)
 {
-	capi.set_player(playerID, teamID, jobType);
+	this->playerID = playerID;
+	this->teamID = teamID;
+	this->jobType = jobType;
 	//CAPI先连接Agent
 	if (!capi.Connect(address, port)) {
 		std::cout << "无法连接到Agent" << std::endl;
@@ -324,7 +353,7 @@ void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t tea
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();//否则PM线程会一直等
 			tPM.join();
 			return;
 		}
@@ -334,7 +363,7 @@ void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t tea
 		else {
 			std::cout << "Invalid player!" << std::endl;
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();
 			tPM.join();
 			return;
 		}
@@ -345,7 +374,7 @@ void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t tea
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();
 			tPM.join();
 			return;
 		}
@@ -362,7 +391,7 @@ void Logic::Main(const char* address, USHORT port, int32_t playerID, int32_t tea
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();
 			cv_buffer.notify_one();
 			tPM.join();
 			tAI.join();

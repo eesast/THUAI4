@@ -1,11 +1,13 @@
 #include"CAPI.h"
-#include"Logic.h"
+#include"Structures.h"
 #include<iostream>
 
+Listener::Listener(std::mutex& mtx, std::condition_variable& cv, std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
+	mtxOnReceive(mtx), cvOnReceive(cv), Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
 
 EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
-	pCAPI->OnConnect();
+	OnConnectL();
 	return HR_OK;
 }
 EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
@@ -33,24 +35,36 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 	}
 
 	{
-		std::lock_guard<std::mutex> lck(pCAPI->mtx);
-		pCAPI->Push(p2m);
+		std::lock_guard<std::mutex> lck(mtxOnReceive);
+		Push(p2m);
 	}
-	pCAPI->cv.notify_one();
+	cvOnReceive.notify_one();
 	//std::cout << "Listener OnReceive" << std::endl;
 	return HR_OK;
 }
 EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
-	pCAPI->OnClose();
+	OnCloseL();
 	return HR_OK;
 }
 
-CAPI::CAPI(Logic* pl) :listener(this), pclient(&listener), plogic(pl)
-{
+CAPI::CAPI(const int32_t& pID,
+	const int32_t& tID,
+	const THUAI4::JobType& jT,
+	std::mutex& mtx,
+	std::condition_variable& cv,
+	std::function<void()> onclose) :\
+	playerID(pID), teamID(tID), jobType(jT),
+	listener(mtx, cv,
+		[this](Pointer2Message p2M) {Push(p2M); },
+		[this]() {OnConnect(); },
+		onclose
+	), pclient(&listener) {
 	queue.clear();
 }
-bool CAPI::Connect(const char* address, USHORT port)
+
+
+bool CAPI::Connect(const char* address, uint16_t port)
 {
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
@@ -97,40 +111,18 @@ bool CAPI::TryPop(Pointer2Message& ptr)
 	if (queue.empty()) return false;
 	return queue.try_pop(ptr);
 }
-bool CAPI::IsEmpty() 
+bool CAPI::IsEmpty()
 {
 	return queue.empty();
 }
 
-void CAPI::set_player(int32_t playerID, int32_t teamID, Protobuf::JobType jobType)
-{
-	this->playerID = playerID;
-	this->teamID = teamID;
-	this->jobtype = jobType;
-}
 void CAPI::OnConnect()
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::AddPlayer);
 	message.set_playerid(playerID);
 	message.set_teamid(teamID);
-	message.set_jobtype(jobtype);
+	message.set_jobtype((Protobuf::JobType)jobType);
 	Send(message);
-}
-void CAPI::OnClose()
-{
-
-#ifdef ENABLE_RECONNECTION//±ý±ý
-
-
-#else
-	{
-		std::lock_guard<std::mutex> lck(plogic->mtx_game);
-		plogic->UnexpectedlyClosed = true;
-	}
-	plogic->cv_game.notify_one();
-
-#endif 
-	
 }
 

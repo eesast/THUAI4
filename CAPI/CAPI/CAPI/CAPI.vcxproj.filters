@@ -30,11 +30,11 @@
     <ClInclude Include="Structures.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="API.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="API.cpp">
-      <Filter>头文件</Filter>
-    </ClCompile>
     <ClCompile Include="AI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -54,6 +54,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="proto\MessageType.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="API.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

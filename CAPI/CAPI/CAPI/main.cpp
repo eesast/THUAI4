@@ -4,17 +4,17 @@ Logic logic;
 int main(int argc, char** argv)
 {
 	std::string aIP;
-	USHORT aPort;
+	uint16_t aPort;
 	int pID;
 	int tID;
-	Protobuf::JobType jType;
+	THUAI4::JobType jType;
 	try {
 		TCLAP::CmdLine cmd("THUAI4 C++接口命令行参数介绍");
 
 		TCLAP::ValueArg<std::string> agentIP("I", "agentIP", "Agent`s IP 127.0.0.1 in default", false, "127.0.0.1", "string");
 		cmd.add(agentIP);
 
-		TCLAP::ValueArg<USHORT> agentPort("P", "agentPort", "Port the agent listens to", true, 0, "USHORT");
+		TCLAP::ValueArg<uint16_t> agentPort("P", "agentPort", "Port the agent listens to", true, 0, "USHORT");
 		cmd.add(agentPort);
 
 		std::vector<int> validPlayerIDs{ 0,1,2,3, };
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 		aPort = agentPort.getValue();
 		pID = playerID.getValue();
 		tID = teamID.getValue();
-		jType = (Protobuf::JobType)jobType.getValue();
+		jType = (THUAI4::JobType)jobType.getValue();
 	}
 	catch (TCLAP::ArgException& e)  // catch exceptions
 	{

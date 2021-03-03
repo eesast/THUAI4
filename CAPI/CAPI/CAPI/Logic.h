@@ -32,11 +32,18 @@ private:
 	};
 	Validity validity = Unknown;
 
+	int32_t playerID = 0;
+	int32_t teamID = 0;
+	THUAI4::JobType jobType = THUAI4::JobType::Job0;
+
 	//state buffer分别指向storage的两个区域，信息收到以后直接写给buffer
 	//不能与state buffer换位同时进行
 
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
+
+	std::mutex mtxOnReceive;
+	std::condition_variable cvOnReceive;
 
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
@@ -60,13 +67,11 @@ private:
 	static std::shared_ptr <THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi);
 	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
-
+	void OnClose();
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//将收到的M2C加载到buffer
 public:
 	Logic();
-	void Main(const char* address, USHORT port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType);
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType);
 	void ProcessMessage();
 	void PlayerWrapper();
-	friend class API;
-	friend class CAPI;
 };

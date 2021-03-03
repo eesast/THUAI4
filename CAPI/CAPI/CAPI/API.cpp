@@ -1,7 +1,11 @@
 #include"API.h"
-#include"Logic.h"
+#include<functional>
 
 const static double PI = 3.14159265358979323846;
+
+API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, const THUAI4::State* pS) :
+	playerID(pID), teamID(tID), SendMessage(f), pState(pS) {}
+
 
 void API::Use()
 {
@@ -9,7 +13,7 @@ void API::Use()
 	message.set_messagetype(Protobuf::MessageType::Use);
 	message.set_playerid(playerID);
 	message.set_teamid(teamID);
-	plogic->capi.Send(message);
+	SendMessage(message);
 }
 void API::Pick(Protobuf::PropType propType)
 {
@@ -18,7 +22,7 @@ void API::Pick(Protobuf::PropType propType)
 	message.set_playerid(playerID);
 	message.set_teamid(teamID);
 	message.set_proptype(propType);
-	plogic->capi.Send(message);
+	SendMessage(message);
 }
 void API::Throw(int timeInMilliseconds, double angle)
 {
@@ -28,7 +32,7 @@ void API::Throw(int timeInMilliseconds, double angle)
 	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	plogic->capi.Send(message);
+	SendMessage(message);
 }
 void API::Attack(int timeInMilliseconds, double angle)
 {
@@ -38,7 +42,7 @@ void API::Attack(int timeInMilliseconds, double angle)
 	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	plogic->capi.Send(message);
+	SendMessage(message);
 }
 void API::Send(int toPlayerID, std::string message)
 {
@@ -48,7 +52,7 @@ void API::Send(int toPlayerID, std::string message)
 	msg.set_teamid(teamID);
 	msg.set_toplayerid(toPlayerID);
 	msg.set_message(message);
-	plogic->capi.Send(msg);
+	SendMessage(msg);
 }
 
 void API::MovePlayer(int timeInMilliseconds, double angle)
@@ -59,7 +63,7 @@ void API::MovePlayer(int timeInMilliseconds, double angle)
 	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	plogic->capi.Send(message);
+	SendMessage(message);
 }
 void API::MoveRight(int timeInMilliseconds)
 {
@@ -78,64 +82,64 @@ void API::MoveDown(int timeInMilliseconds)
 	MovePlayer(timeInMilliseconds, 0);
 }
 
-std::vector<const THUAI4::Character*> API::getCharacters() const
+std::vector<const THUAI4::Character*> API::GetCharacters() const
 {
 	std::vector<const THUAI4::Character*> characters;
-	for (auto it : plogic->pState->characters) {
+	for (auto it : pState->characters) {
 		characters.push_back(it.get());
 	}
 	return characters;
-	
+
 }
-std::vector<const THUAI4::Wall*> API::getWalls() const
+std::vector<const THUAI4::Wall*> API::GetWalls() const
 {
 	std::vector<const THUAI4::Wall*> walls;
-	for (auto it : plogic->pState->walls) {
+	for (auto it : pState->walls) {
 		walls.push_back(it.get());
 	}
 	return walls;
 }
-std::vector<const THUAI4::Prop*> API::getProps() const
+std::vector<const THUAI4::Prop*> API::GetProps() const
 {
 	std::vector<const THUAI4::Prop*> props;
-	for (auto it : plogic->pState->props) {
+	for (auto it : pState->props) {
 		props.push_back(it.get());
 	}
 	return props;
 }
-std::vector<const THUAI4::Bullet*> API::getBullets() const
+std::vector<const THUAI4::Bullet*> API::GetBullets() const
 {
 	std::vector<const THUAI4::Bullet*> bullets;
-	for (auto it : plogic->pState->bullets) {
+	for (auto it : pState->bullets) {
 		bullets.push_back(it.get());
 	}
 	return bullets;
 }
-std::vector<const THUAI4::BirthPoint*> API::getBirthPoints() const
+std::vector<const THUAI4::BirthPoint*> API::GetBirthPoints() const
 {
 	std::vector<const THUAI4::BirthPoint*> birthpoints;
-	for (auto it : plogic->pState->birthpoints) {
+	for (auto it : pState->birthpoints) {
 		birthpoints.push_back(it.get());
 	}
 	return birthpoints;
 }
-const THUAI4::Character& API::getSelfInfo() const
+const THUAI4::Character& API::GetSelfInfo() const
 {
-	return *plogic->pState->self;
+	return *pState->self;
 }
-THUAI4::ColorType API::getSelfTeamColor() const
+THUAI4::ColorType API::GetSelfTeamColor() const
 {
-	return plogic->pState->selfTeamColor;
+	return pState->selfTeamColor;
 }
-uint32_t API::getTeamScore() const
+uint32_t API::GetTeamScore() const
 {
-	return plogic->pState->teamScore;
+	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& API::getPlayerGUIDs() const
+const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& API::GetPlayerGUIDs() const
 {
-	return plogic->pState->playerGUIDs;
+	return pState->playerGUIDs;
 }
-const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& API::getCellColors() const
+const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& API::GetCellColors() const
 {
-	return plogic->pState->cellColors;
+	return pState->cellColors;
 }
