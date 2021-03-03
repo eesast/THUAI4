@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef LOGIC_H
+
+#define LOGIC_H
+
 #include"proto/Message2Client.pb.h"
 #include<list>
 #include<array>
@@ -13,33 +17,36 @@
 
 class Logic {
 private:
-	bool UnexpectedlyClosed = false;//ÓÃÓÚ±êÊ¾ÓÎÏ·½áÊøÇ°ÒâÍâ¶ÏÏß
-	//bufferºÍstateµÄ×´Ì¬
+	bool UnexpectedlyClosed = false;//ç”¨äºæ ‡ç¤ºæ¸¸æˆç»“æŸå‰æ„å¤–æ–­çº¿
+	//bufferå’Œstateçš„çŠ¶æ€
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
-	enum GamePhase :unsigned char {
+	enum class GamePhase : unsigned char 
+	{
 		Uninitialized = 0,
 		Gaming = 1,
 		GameOver = 2,
 	};
-	GamePhase gamePhase = Uninitialized;
 
-	enum Validity :unsigned char {
+	GamePhase gamePhase = GamePhase::Uninitialized;
+
+	enum class Validity : unsigned char
+	{
 		Unknown = 0,
 		Valid = 1,
 		Invalid = 2
 	};
-	Validity validity = Unknown;
+	Validity validity = Validity::Unknown;
 
 	int32_t playerID = 0;
 	int32_t teamID = 0;
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
 
-	//state buffer·Ö±ğÖ¸ÏòstorageµÄÁ½¸öÇøÓò£¬ĞÅÏ¢ÊÕµ½ÒÔºóÖ±½ÓĞ´¸øbuffer
-	//²»ÄÜÓëstate buffer»»Î»Í¬Ê±½øĞĞ
+	//state bufferåˆ†åˆ«æŒ‡å‘storageçš„ä¸¤ä¸ªåŒºåŸŸï¼Œä¿¡æ¯æ”¶åˆ°ä»¥åç›´æ¥å†™ç»™buffer
+	//ä¸èƒ½ä¸state bufferæ¢ä½åŒæ—¶è¿›è¡Œ
 
-	THUAI4::State storage[2];//ÍÅÍÅ×ª
+	THUAI4::State storage[2];//å›¢å›¢è½¬
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
 
@@ -50,7 +57,7 @@ private:
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
 
-	//ÓÎÏ·½áµãµÄ¿ØÖÆ
+	//æ¸¸æˆç»“ç‚¹çš„æ§åˆ¶
 	std::mutex mtx_game;
 	std::condition_variable cv_game;
 
@@ -59,8 +66,8 @@ private:
 
 	
 
-	//Ò»Ğ©¸¨Öúº¯Êı
-	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//±ı
+	//ä¸€äº›è¾…åŠ©å‡½æ•°
+	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//é¥¼
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
@@ -69,10 +76,13 @@ private:
 	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 	void OnClose();
-	void load(std::shared_ptr<Protobuf::MessageToClient>);//½«ÊÕµ½µÄM2C¼ÓÔØµ½buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>);//å°†æ”¶åˆ°çš„M2CåŠ è½½åˆ°buffer
+
 public:
 	Logic();
 	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType);
 	void ProcessMessage();
 	void PlayerWrapper();
 };
+
+#endif	//!LOGIC_H
