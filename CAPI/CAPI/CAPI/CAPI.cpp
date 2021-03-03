@@ -1,6 +1,7 @@
-#include"CAPI.h"
-#include"Logic.h"
-#include<iostream>
+#include "CAPI.h"
+#include "Logic.h"
+#include <iostream>
+#include <cstdint>
 
 
 EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
@@ -8,22 +9,22 @@ EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 	pCAPI->OnConnect();
 	return HR_OK;
 }
-EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
+
+EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const uint8_t* pData, int iLength)
 {
 	int32_t type = (int32_t)pData[0];
 	type |= ((int32_t)pData[1]) << 8;
 	type |= ((int32_t)pData[2]) << 16;
 	type |= ((int32_t)pData[3]) << 24;
-	//type = *((int32_t*)pData);
 
 	Pointer2Message p2m;
 	if (type == Constants::MessageToClient) {
-		std::shared_ptr<Protobuf::MessageToClient> pM2C = std::make_shared<Protobuf::MessageToClient>();
+		auto pM2C = std::make_shared<Protobuf::MessageToClient>();
 		pM2C->ParseFromArray(pData + 4, iLength - 4);
 		p2m = pM2C;
 	}
 	else if (type == Constants::MessageToOneClient) {
-		std::shared_ptr<Protobuf::MessageToOneClient> pM2OC = std::make_shared<Protobuf::MessageToOneClient>();
+		auto pM2OC = std::make_shared<Protobuf::MessageToOneClient>();
 		pM2OC->ParseFromArray(pData + 4, iLength - 4);
 		p2m = pM2OC;
 	}
@@ -40,17 +41,19 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 	//std::cout << "Listener OnReceive" << std::endl;
 	return HR_OK;
 }
+
 EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	pCAPI->OnClose();
 	return HR_OK;
 }
 
-CAPI::CAPI(Logic* pl) :listener(this), pclient(&listener), plogic(pl)
+CAPI::CAPI(Logic& l) : listener(this), pclient(&listener), logic(l)
 {
 	queue.clear();
 }
-bool CAPI::Connect(const char* address, USHORT port)
+
+bool CAPI::Connect(const char* address, unsigned short port)
 {
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
@@ -79,6 +82,7 @@ void CAPI::Send(const Protobuf::MessageToServer& message)
 		std::cout << pclient->GetLastError() << std::endl;
 	}
 }
+
 void CAPI::Stop()
 {
 	if (pclient->Stop());
@@ -87,16 +91,19 @@ void CAPI::Stop()
 		std::cout << pclient->GetLastError() << std::endl;
 	}
 }
+
 void CAPI::Push(Pointer2Message ptr)
 {
 
 	queue.push(ptr);
 }
+
 bool CAPI::TryPop(Pointer2Message& ptr)
 {
 	if (queue.empty()) return false;
 	return queue.try_pop(ptr);
 }
+
 bool CAPI::IsEmpty() 
 {
 	return queue.empty();
@@ -125,10 +132,10 @@ void CAPI::OnClose()
 
 #else
 	{
-		std::lock_guard<std::mutex> lck(plogic->mtx_game);
-		plogic->UnexpectedlyClosed = true;
+		std::lock_guard<std::mutex> lck(logic.mtx_game);
+		logic.UnexpectedlyClosed = true;
 	}
-	plogic->cv_game.notify_one();
+	logic.cv_game.notify_one();
 
 #endif 
 	
