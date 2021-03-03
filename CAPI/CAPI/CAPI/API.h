@@ -9,11 +9,11 @@
 class Logic;
 class API {
 public:
-	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, const THUAI4::State*);
+	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>,THUAI4::State*&);
 private:
 	const int32_t& playerID;
 	const int32_t& teamID;
-	const THUAI4::State*& pState;//指针的常引用
+	THUAI4::State*& pState;//指针的常引用
 	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;// \xfgg/
 
 	//选手API 

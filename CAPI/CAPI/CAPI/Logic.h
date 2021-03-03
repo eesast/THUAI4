@@ -39,6 +39,7 @@ private:
 	//state buffer分别指向storage的两个区域，信息收到以后直接写给buffer
 	//不能与state buffer换位同时进行
 
+	THUAI4::State storage[2];//团团转
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
 
@@ -56,7 +57,7 @@ private:
 	CAPI capi;
 	AI ai;
 
-	THUAI4::State storage[2];//团团转
+	
 
 	//一些辅助函数
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//饼
