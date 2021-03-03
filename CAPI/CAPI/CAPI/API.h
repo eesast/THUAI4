@@ -1,21 +1,34 @@
 #pragma once
-#include<list>
-#include<string>
-#include"proto/Message2Server.pb.h"
-#include<HPSocket/HPSocket.h>
-#include<HPSocket/SocketInterface.h>
-#include"Structures.h"
+
+#ifndef API_H
+
+#define API_H
+
+#include <list>
+#include <string>
+#include "proto/Message2Server.pb.h"
+#include <HPSocket/HPSocket.h>
+#include <HPSocket/SocketInterface.h>
+#include "Structures.h"
+#include "Constants.h"
+
 class Logic;
-class API {
+
+class API
+{
 public:
-	API(Logic* l) :plogic(l) {}
+
+	API(Logic& l) : logic(l) {}
+
 private:
+
 	int64_t playerID = ~0;
 	int64_t teamID = ~0;
-	Logic* const plogic;
+	Logic& logic;
 
 	//选手API 
 protected:
+
 	//选手可进行的操作
 	void MovePlayer(int timeInMilliseconds, double angle);
 	void MoveRight(int timeInMilliseconds);
@@ -27,21 +40,22 @@ protected:
 	void Throw(int timeInMilliseconds, double angle);
 	void Attack(int timeInMilliseconds, double angle);
 	void Send(int toPlayerID, std::string message);
+
 	//选手可获取的信息
 
-	//据网上说vector作为返回值不会拷贝构造，那还比较合理
-	std::vector<const THUAI4::Character*> getCharacters() const;
-	std::vector<const THUAI4::Wall*> getWalls() const;
-	std::vector<const THUAI4::Prop*> getProps() const;
-	std::vector<const THUAI4::Bullet*> getBullets() const;
-	std::vector<const THUAI4::BirthPoint*> getBirthPoints() const;
-	const THUAI4::Character& getSelfInfo() const;
-	THUAI4::ColorType getSelfTeamColor() const;
-	uint32_t getTeamScore() const;
-	const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& getPlayerGUIDs() const;
-	const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& getCellColors() const;
+	std::vector<const THUAI4::Character*> GetCharacters() const;
+	std::vector<const THUAI4::Wall*> GetWalls() const;
+	std::vector<const THUAI4::Prop*> GetProps() const;
+	std::vector<const THUAI4::Bullet*> GetBullets() const;
+	std::vector<const THUAI4::BirthPoint*> GetBirthPoints() const;
+	const THUAI4::Character& GetSelfInfo() const;
+	THUAI4::ColorType GetSelfTeamColor() const;
+	uint32_t GetTeamScore() const;
+	const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& GetPlayerGUIDs() const;
+	const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& GetCellColors() const;
 
 public:
 	virtual void play() = 0;
 };
 
+#endif	//!API_H

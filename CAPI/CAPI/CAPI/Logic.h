@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef LOGIC_H
+
+#define LOGIC_H
+
 #include"proto/Message2Client.pb.h"
 #include<list>
 #include<array>
@@ -18,19 +22,22 @@ private:
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
-	enum GamePhase :unsigned char {
+	enum class GamePhase : unsigned char 
+	{
 		Uninitialized = 0,
 		Gaming = 1,
 		GameOver = 2,
 	};
-	GamePhase gamePhase = Uninitialized;
 
-	enum Validity :unsigned char {
+	GamePhase gamePhase = GamePhase::Uninitialized;
+
+	enum class Validity : unsigned char
+	{
 		Unknown = 0,
 		Valid = 1,
 		Invalid = 2
 	};
-	Validity validity = Unknown;
+	Validity validity = Validity::Unknown;
 
 	//state buffer分别指向storage的两个区域，信息收到以后直接写给buffer
 	//不能与state buffer换位同时进行
@@ -62,11 +69,14 @@ private:
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//将收到的M2C加载到buffer
+
 public:
 	Logic();
-	void Main(const char* address, USHORT port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType);
+	void Main(const char* address, unsigned short port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType);
 	void ProcessMessage();
 	void PlayerWrapper();
 	friend class API;
 	friend class CAPI;
 };
+
+#endif	//!LOGIC_H

@@ -1,20 +1,23 @@
 #include<tclap/CmdLine.h>
 #include"Logic.h"
+
 Logic logic;
+
 int main(int argc, char** argv)
 {
 	std::string aIP;
-	USHORT aPort;
+	unsigned short aPort;
 	int pID;
 	int tID;
 	Protobuf::JobType jType;
-	try {
+	try
+	{
 		TCLAP::CmdLine cmd("THUAI4 C++接口命令行参数介绍");
 
 		TCLAP::ValueArg<std::string> agentIP("I", "agentIP", "Agent`s IP 127.0.0.1 in default", false, "127.0.0.1", "string");
 		cmd.add(agentIP);
 
-		TCLAP::ValueArg<USHORT> agentPort("P", "agentPort", "Port the agent listens to", true, 0, "USHORT");
+		TCLAP::ValueArg<unsigned short> agentPort("P", "agentPort", "Port the agent listens to", true, 0, "unsigned short");
 		cmd.add(agentPort);
 
 		std::vector<int> validPlayerIDs{ 0,1,2,3, };
