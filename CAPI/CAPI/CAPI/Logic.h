@@ -17,8 +17,8 @@
 
 class Logic {
 private:
-	bool UnexpectedlyClosed = false;//ÓÃÓÚ±êÊ¾ÓÎÏ·½áÊøÇ°ÒâÍâ¶ÏÏß
-	//bufferºÍstateµÄ×´Ì¬
+	bool UnexpectedlyClosed = false;//ç”¨äºæ ‡ç¤ºæ¸¸æˆç»“æŸå‰æ„å¤–æ–­çº¿
+	//bufferå’Œstateçš„çŠ¶æ€
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
@@ -39,27 +39,35 @@ private:
 	};
 	Validity validity = Validity::Unknown;
 
-	//state buffer·Ö±ğÖ¸ÏòstorageµÄÁ½¸öÇøÓò£¬ĞÅÏ¢ÊÕµ½ÒÔºóÖ±½ÓĞ´¸øbuffer
-	//²»ÄÜÓëstate buffer»»Î»Í¬Ê±½øĞĞ
+	int32_t playerID = 0;
+	int32_t teamID = 0;
+	THUAI4::JobType jobType = THUAI4::JobType::Job0;
 
+	//state bufferåˆ†åˆ«æŒ‡å‘storageçš„ä¸¤ä¸ªåŒºåŸŸï¼Œä¿¡æ¯æ”¶åˆ°ä»¥åç›´æ¥å†™ç»™buffer
+	//ä¸èƒ½ä¸state bufferæ¢ä½åŒæ—¶è¿›è¡Œ
+
+	THUAI4::State storage[2];//å›¢å›¢è½¬
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
+
+	std::mutex mtxOnReceive;
+	std::condition_variable cvOnReceive;
 
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
 
-	//ÓÎÏ·½áµãµÄ¿ØÖÆ
+	//æ¸¸æˆç»“ç‚¹çš„æ§åˆ¶
 	std::mutex mtx_game;
 	std::condition_variable cv_game;
 
 	CAPI capi;
 	AI ai;
 
-	THUAI4::State storage[2];//ÍÅÍÅ×ª
+	
 
-	//Ò»Ğ©¸¨Öúº¯Êı
-	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//±ı
+	//ä¸€äº›è¾…åŠ©å‡½æ•°
+	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//é¥¼
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
@@ -67,16 +75,14 @@ private:
 	static std::shared_ptr <THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi);
 	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
-
-	void load(std::shared_ptr<Protobuf::MessageToClient>);//½«ÊÕµ½µÄM2C¼ÓÔØµ½buffer
+	void OnClose();
+	void load(std::shared_ptr<Protobuf::MessageToClient>);//å°†æ”¶åˆ°çš„M2CåŠ è½½åˆ°buffer
 
 public:
 	Logic();
-	void Main(const char* address, unsigned short port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType);
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType);
 	void ProcessMessage();
 	void PlayerWrapper();
-	friend class API;
-	friend class CAPI;
 };
 
 #endif	//!LOGIC_H

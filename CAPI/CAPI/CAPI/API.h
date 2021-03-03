@@ -1,35 +1,29 @@
 #pragma once
 
-#ifndef API_H
-
-#define API_H
-
-#include <list>
-#include <string>
-#include "proto/Message2Server.pb.h"
-#include <HPSocket/HPSocket.h>
-#include <HPSocket/SocketInterface.h>
-#include "Structures.h"
-#include "Constants.h"
+#include<string>
+#include"proto/Message2Server.pb.h"
+#include<HPSocket/HPSocket.h>
+#include<HPSocket/SocketInterface.h>
+#include<functional>
+#include"Structures.h"
+#include<cstdint>
 
 class Logic;
 
 class API
 {
 public:
-
-	API(Logic& l) : logic(l) {}
-
+	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>,THUAI4::State*&);
 private:
+	const int32_t& playerID;
+	const int32_t& teamID;
+	THUAI4::State*& pState;//鎸囬拡鐨勫父寮曠敤
+	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;// \xfgg/
 
-	int64_t playerID = ~0;
-	int64_t teamID = ~0;
-	Logic& logic;
-
-	//选手API 
+	//閫夋墜API 
 protected:
 
-	//选手可进行的操作
+	//閫夋墜鍙繘琛岀殑鎿嶄綔
 	void MovePlayer(int timeInMilliseconds, double angle);
 	void MoveRight(int timeInMilliseconds);
 	void MoveUp(int timeInMilliseconds);
@@ -41,8 +35,7 @@ protected:
 	void Attack(int timeInMilliseconds, double angle);
 	void Send(int toPlayerID, std::string message);
 
-	//选手可获取的信息
-
+	//閫夋墜鍙幏鍙栫殑淇℃伅
 	std::vector<const THUAI4::Character*> GetCharacters() const;
 	std::vector<const THUAI4::Wall*> GetWalls() const;
 	std::vector<const THUAI4::Prop*> GetProps() const;
@@ -58,4 +51,3 @@ public:
 	virtual void play() = 0;
 };
 
-#endif	//!API_H

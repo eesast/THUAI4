@@ -106,7 +106,28 @@ namespace servertest
             msg.TeamID = 0;
             msg.MessageType = msgType;
             msg.SelfInfo = new GameObjInfo();
+            msg.SelfInfo.Ap = 100;
+            msg.SelfInfo.BulletNum = 12;
+            msg.SelfInfo.BulletType = BulletType.Bullet0;
+            msg.SelfInfo.CanMove = true;
+            msg.SelfInfo.CD = 5;
+            msg.SelfInfo.FacingDirection = 0.0;
+            msg.SelfInfo.GameObjType = GameObjType.Character;
+            msg.SelfInfo.Hp = 1000;
             msg.SelfInfo.Guid = guid;
+            msg.SelfInfo.IsDying = false;
+            msg.SelfInfo.IsMoving = true;
+            msg.SelfInfo.JobType = JobType.Job0;
+            msg.SelfInfo.LifeNum = 10;
+            msg.SelfInfo.MaxBulletNum = 50;
+            msg.SelfInfo.MaxHp = 2500;
+            msg.SelfInfo.MoveSpeed = 10;
+            msg.SelfInfo.PropType = PropType.Null;
+            msg.SelfInfo.Radius = 250;
+            msg.SelfInfo.ShapeType = ShapeType.Circle;
+            msg.SelfInfo.TeamID = 0;
+            msg.SelfInfo.X = 5000;
+            msg.SelfInfo.Y = 5000;
             for (int k = 0; k < 2; ++k)
             {
                 msg.PlayerGUIDs.Add(playerGUIDs[k]);
