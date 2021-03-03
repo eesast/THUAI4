@@ -1,61 +1,47 @@
 #pragma once
 
-#ifndef CAPI_H
-
-#define CAPI_H
-
-#include "Constants.h"
-#include "proto/Message2Client.pb.h"
-#include "proto/Message2Server.pb.h"
-#include <concurrent_queue.h>
-#include <HPSocket/HPSocket.h>
-#include <HPSocket/SocketInterface.h>
-#include <variant>
-
-using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>>;
-
+#include"Constants.h"
+#include"Structures.h"
+#include"proto/Message2Client.pb.h"
+#include"proto/Message2Server.pb.h"
+#include<concurrent_queue.h>
+#include<HPSocket/HPSocket.h>
+#include<HPSocket/SocketInterface.h>
+#include<variant>//c++17
+typedef std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>> Pointer2Message;
 //index: 0 message2client 1 message2oneclient
 class Logic;
-
 class CAPI;
-
-class Listener : public CTcpClientListener
-{
+class Listener :public CTcpClientListener {
 private:
-
-	CAPI* const pCAPI;
-
+	std::mutex& mtxOnReceive;
+	std::condition_variable& cvOnReceive;//æ”¶åˆ°æ–°æ¶ˆæ¯æ—¶é€šçŸ¥PM
+	const std::function<void(Pointer2Message)> Push;
+	const std::function<void()> OnCloseL;
+	const std::function<void()> OnConnectL;
 public:
-	Listener(CAPI* ptr) : pCAPI(ptr) {};
+	Listener(std::mutex&, std::condition_variable&, std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);
 	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
 	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
 };
-
-class CAPI
-{
+class CAPI {
 private:
+	//è¿™è¿˜å¼•ç”¨ä¼¼ä¹æœ‰ç‚¹è ¢â€¦â€¦
+	const int32_t& playerID;
+	const int32_t& teamID;
+	const THUAI4::JobType& jobType;
 
-	Protobuf::JobType jobtype;
-	int32_t playerID;
-	int32_t teamID;
-	Logic& logic;
-	//ËÆºõÆÕÍ¨¶ÓÁĞÒ²¿ÉÒÔ£¬¾ÍÏÈÕâÑù°É
+
+	//ä¼¼ä¹æ™®é€šé˜Ÿåˆ—ä¹Ÿå¯ä»¥ï¼Œå°±å…ˆè¿™æ ·å§
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	Listener listener;
 	CTcpPackClientPtr pclient;
-
 public:
 
-	void set_player(int32_t playerID, int32_t teamID, Protobuf::JobType jobType);
-
-	std::mutex mtx;//Õâ¸öËøµÄÖ÷Òª×÷ÓÃÊÇÈÃ¶ÓÁĞÎª¿ÕÊ±ProcessMessageµÈ×Å
-	//ËÆºõÒ²ÄÜ·ÀÖ¹Í¬Ê±PUSH/PULL µ«Õâ¸ö¶ÓÁĞ¾İËµÊÇ°²È«µÄ
-	std::condition_variable cv;
-	CAPI(Logic& l);
+	CAPI(const int32_t&, const int32_t&, const THUAI4::JobType&, std::mutex&, std::condition_variable&,std::function<void()>);
 	void OnConnect();
-	void OnClose();
-	bool Connect(const char* address, unsigned short port);
+	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);
 	void Stop();
 	void Push(Pointer2Message);
@@ -63,4 +49,3 @@ public:
 	bool IsEmpty();
 };
 
-#endif // !CAPI_H

@@ -1,9 +1,23 @@
-#include"CAPI.h"
 #include"Logic.h"
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
 	return !(g.gameobjtype() == Protobuf::GameObjType::Prop && g.islaid());
+
+}
+
+void Logic::OnClose()
+{
+#ifdef ENABLE_RECONNECTION//é¥¼é¥¼
+
+#else
+	{
+		std::lock_guard<std::mutex> lck(mtx_game);
+		UnexpectedlyClosed = true;
+	}
+	cv_game.notify_one();
+
+#endif 
 
 }
 
@@ -89,8 +103,8 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
 	switch (pM2C->messagetype()) {
 	case Protobuf::MessageType::StartGame:
-		//Ê×ÏÈloadµ½buffer
-		load(pM2C);//µÚÒ»Ö¡AIÏß³Ì»¹Ã»¿ªÊ¼ ¼ÓÔØµ½bufferÈ»ºó½»»»Ö¸Õë
+		//é¦–å…ˆloadåˆ°buffer
+		load(pM2C);//ç¬¬ä¸€å¸§AIçº¿ç¨‹è¿˜æ²¡å¼€å§‹ åŠ è½½åˆ°bufferç„¶åäº¤æ¢æŒ‡é’ˆ
 		{
 			std::lock_guard<std::mutex> lck(mtx_game);
 			gamePhase = GamePhase::Gaming;
@@ -141,13 +155,27 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 }
 
-Logic::Logic() : capi(*this), ai(*this), pState(storage), pBuffer(storage + 1) {}
+
+Logic::Logic() :\
+pState(storage),
+pBuffer(storage + 1),
+capi(playerID,
+	teamID,
+	jobType,
+	mtxOnReceive,
+	cvOnReceive,
+	[this]() {OnClose(); }),
+	ai(playerID,
+		teamID,
+		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
+		pState) {}
+
 
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
 	{
-		//Ê×ÏÈloadµ½buffer
+		//é¦–å…ˆloadåˆ°buffer
 		std::lock_guard<std::mutex> lck(mtx_buffer);
 		pBuffer->characters.clear();
 		pBuffer->walls.clear();
@@ -193,7 +221,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		BufferUpdated = true;
 
-		//Èç¹ûÕâÊ±ºòstate»¹Ã»±»player·ÃÎÊ£¬¾Í°Ñbuffer×ªµ½state
+		//å¦‚æœè¿™æ—¶å€™stateè¿˜æ²¡è¢«playerè®¿é—®ï¼Œå°±æŠŠbufferè½¬åˆ°state
 		if (mtx_state.try_lock()) {
 			THUAI4::State* temp = pState;
 			pState = pBuffer;
@@ -213,26 +241,26 @@ void Logic::ProcessMessage()
 	while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed && validity != Validity::Invalid) {
 		lock_game.unlock();
 
-		//ÎŞÏûÏ¢´¦ÀíÊ±Í£ÏÂÀ´ÉÙÕ¼×ÊÔ´
+		//æ— æ¶ˆæ¯å¤„ç†æ—¶åœä¸‹æ¥å°‘å èµ„æº
 
 		{
-			std::unique_lock<std::mutex> lck(capi.mtx);//OnReceiveÀïÍù¶ÓÁĞÀïPushÊ±Ò²ËøÁË
+			std::unique_lock<std::mutex> lck(mtxOnReceive);//OnReceiveé‡Œå¾€é˜Ÿåˆ—é‡ŒPushæ—¶ä¹Ÿé”äº†
 			lock_game.lock();
-			while (capi.IsEmpty() && !UnexpectedlyClosed) {//·ñÔòÔÚÕâ¶ÏÏß¾Í»áËø×¡
+			while (capi.IsEmpty() && !UnexpectedlyClosed) {//å¦åˆ™åœ¨è¿™æ–­çº¿å°±ä¼šé”ä½
 				lock_game.unlock();
-				capi.cv.wait(lck);
+				cvOnReceive.wait(lck);
 				lock_game.lock();
 			}
 			lock_game.unlock();
 		}
-		//std::cout << "ProcessMessageÓĞÏûÏ¢´¦Àí" << std::endl;
+		//std::cout << "ProcessMessageæœ‰æ¶ˆæ¯å¤„ç†" << std::endl;
 		if (!capi.TryPop(p2M)) {
 			std::cout << "Failed to pop the message\n";
 			lock_game.lock();
 			continue;
 		}
 
-		//´¦ÀíÏûÏ¢
+		//å¤„ç†æ¶ˆæ¯
 		switch (p2M.index()) {
 		case 0://M2C
 			ProcessM2C(std::get<std::shared_ptr<Protobuf::MessageToClient>>(p2M));
@@ -252,20 +280,20 @@ void Logic::ProcessMessage()
 
 void Logic::PlayerWrapper()
 {
-	//whileÅĞ¶ÏÊ±±£Ö¤gamePhaseºÍUnexpectedlyClosed²»±»ÆäËûÏß³Ì·ÃÎÊ
+	//whileåˆ¤æ–­æ—¶ä¿è¯gamePhaseå’ŒUnexpectedlyClosedä¸è¢«å…¶ä»–çº¿ç¨‹è®¿é—®
 	std::unique_lock<std::mutex> lock_game(mtx_game);
 
 	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed) {
 		lock_game.unlock();
-
+		
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed) {
 			ai.play();
 			CurrentStateAccessed = true;
 		}
 		else {
-			//·ñÔò¿´bufferÊÇ·ñÓĞ¸üĞÂ£¬¸üĞÂµÄÇ°ÌáÊÇbufferÃ»±»Õ¼ÓÃ
-			//ËùÒÔÕâÀï¶ÂÈûÊÇ¿ÉÒÔ½ÓÊÜµÄ
+			//å¦åˆ™çœ‹bufferæ˜¯å¦æœ‰æ›´æ–°ï¼Œæ›´æ–°çš„å‰ææ˜¯bufferæ²¡è¢«å ç”¨
+			//æ‰€ä»¥è¿™é‡Œå µå¡æ˜¯å¯ä»¥æ¥å—çš„
 			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
 			if (BufferUpdated) {
 				THUAI4::State* temp = pState;
@@ -274,11 +302,11 @@ void Logic::PlayerWrapper()
 				CurrentStateAccessed = false;
 				BufferUpdated = false;
 			}
-			else {//Èç¹ûµ±Ç°stateÒÑ¾­½Ó´¥¹ıÇÒbufferÃ»¸üĞÂ£¬ÄÇ¾ÍµÈµ½buffer¸üĞÂ
-				
-				  //ÒâÍâ¶ÏÏßÕâÀïÒ²»áËø×¡
+			else {//å¦‚æœå½“å‰stateå·²ç»æ¥è§¦è¿‡ä¸”bufferæ²¡æ›´æ–°ï¼Œé‚£å°±ç­‰åˆ°bufferæ›´æ–°
+
+				  //æ„å¤–æ–­çº¿è¿™é‡Œä¹Ÿä¼šé”ä½
 				lock_game.lock();
-				while (!BufferUpdated && !UnexpectedlyClosed) {
+				while (!BufferUpdated && !UnexpectedlyClosed && gamePhase != GamePhase::GameOver) {
 					lock_game.unlock();
 					cv_buffer.wait(lck_buffer);
 					lock_game.lock();
@@ -292,28 +320,31 @@ void Logic::PlayerWrapper()
 				BufferUpdated = false;
 			}
 		}
-
+		
 		lock_game.lock();
 	}
 	lock_game.unlock();
 	std::cout << "AI thread terminates" << std::endl;
 }
 
-void Logic::Main(const char* address, unsigned short port, int32_t playerID, int32_t teamID, Protobuf::JobType jobType)
+
+void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType)
 {
-	capi.set_player(playerID, teamID, jobType);
-	//CAPIÏÈÁ¬½ÓAgent
+	this->playerID = playerID;
+	this->teamID = teamID;
+	this->jobType = jobType;
+	//CAPIå…ˆè¿æ¥Agent
 	if (!capi.Connect(address, port)) {
-		std::cout << "ÎŞ·¨Á¬½Óµ½Agent" << std::endl;
+		std::cout << "æ— æ³•è¿æ¥åˆ°Agent" << std::endl;
 		capi.Stop();
 		return;
 	}
-	std::cout << "³É¹¦Á¬½Óµ½Agent" << std::endl;
+	std::cout << "æˆåŠŸè¿æ¥åˆ°Agent" << std::endl;
 
 	{
-		//OnConnect() Ò»Á¬ÉÏCAPI¾Í·¢AddPlayer
-		//µÈ´ıServer·¢ ValidPlayer GameStart
-		//±ı£ºInvalidPlayer²¹¾ÈÒ»ÏÂ
+		//OnConnect() ä¸€è¿ä¸ŠCAPIå°±å‘AddPlayer
+		//ç­‰å¾…Serverå‘ ValidPlayer GameStart
+		//é¥¼ï¼šInvalidPlayerè¡¥æ•‘ä¸€ä¸‹
 		std::unique_lock<std::mutex> lck(mtx_game);
 
 		std::thread tPM(&Logic::ProcessMessage, this);
@@ -324,7 +355,7 @@ void Logic::Main(const char* address, unsigned short port, int32_t playerID, int
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();//å¦åˆ™PMçº¿ç¨‹ä¼šä¸€ç›´ç­‰
 			tPM.join();
 			return;
 		}
@@ -334,7 +365,7 @@ void Logic::Main(const char* address, unsigned short port, int32_t playerID, int
 		else {
 			std::cout << "Invalid player!" << std::endl;
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();
 			tPM.join();
 			return;
 		}
@@ -345,24 +376,24 @@ void Logic::Main(const char* address, unsigned short port, int32_t playerID, int
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();
 			tPM.join();
 			return;
 		}
 
-		std::cout << "ÓÎÏ·¿ªÊ¼£¡" << std::endl;
+		std::cout << "æ¸¸æˆå¼€å§‹ï¼" << std::endl;
 
 
 		std::thread tAI(&Logic::PlayerWrapper, this);
 
 
-		//È»ºóAI¾ö²ßÖªµÀÓÎÏ·½áÊø
+		//ç„¶åAIå†³ç­–çŸ¥é“æ¸¸æˆç»“æŸ
 		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
 			cv_game.wait(lck);
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			capi.cv.notify_one();
+			cvOnReceive.notify_one();
 			cv_buffer.notify_one();
 			tPM.join();
 			tAI.join();
@@ -371,6 +402,7 @@ void Logic::Main(const char* address, unsigned short port, int32_t playerID, int
 		std::cout << "Game ends\n";
 
 		lck.unlock();
+		cv_buffer.notify_one();
 		tPM.join();
 		tAI.join();
 	}
