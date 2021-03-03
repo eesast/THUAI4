@@ -121,7 +121,7 @@ namespace Logic.Server
 			if (!ValidTeamIDAndPlayerID(msgRecv.TeamID, msgRecv.PlayerID)) return;
 			if (msgRecv.Message.Length > 64) return;
 			MessageToOneClient msg = new MessageToOneClient();
-			msg.PlayerID = msgRecv.SendToPlayerID;
+			msg.PlayerID = msgRecv.ToPlayerID;
 			msg.TeamID = msgRecv.TeamID;
 			msg.Message = msgRecv.Message;
 			msg.MessageType = MessageType.Send;

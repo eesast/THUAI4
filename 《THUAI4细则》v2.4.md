@@ -73,36 +73,7 @@ enum ShapeType
 	Square = 1;
 }
 
-enum JobType
-{
-    Job0 = 0;
-    Job1 = 1;
-    Job2 = 2;
-    Job3 = 3;
-    Job4 = 4;
-    Job5 = 5;
-    Job6 = 6;
-}
 
-enum BulletType
-{
-    Bullet0 = 0;
-    Bullet1 = 1;
-    Bullet2 = 2;
-    Bullet3 = 3;
-    Bullet4 = 4;
-    Bullet5 = 5;
-    Bullet6 = 6;
-}
-
-enum ColorType
-{
-    None = 0;
-    Color1 = 1;
-    Color2 = 2;
-    Color3 = 3;
-    Color4 = 4;
-}
 
 message GameObjInfo
 {
@@ -118,9 +89,10 @@ message GameObjInfo
     bool isMoving = 8;
     ShapeType shapeType = 9;	//形状
     int32 radius = 10;		//圆形物体的半径或正方形内切圆半径
+    int64 teamID = 11;		//人物所属队伍ID或子弹、道具的发射主人所属队伍ID或出生点
     
     //以下当gameObjType为Character和Bullet时才有效
-    int64 teamID = 11;		//人物所属队伍ID或子弹的发射主人所属队伍ID，其他情况为无效ID
+    
     int32 ap = 12;			//攻击力
     BulletType bulletType = 13;	//子弹类型
     
