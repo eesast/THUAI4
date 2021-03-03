@@ -1,18 +1,20 @@
 #pragma once
-#include<list>
 #include<string>
 #include"proto/Message2Server.pb.h"
 #include<HPSocket/HPSocket.h>
 #include<HPSocket/SocketInterface.h>
+#include<functional>
 #include"Structures.h"
+#include<cstdint>
 class Logic;
 class API {
 public:
-	API(Logic* l) :plogic(l) {}
+	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, const THUAI4::State*);
 private:
-	int64_t playerID = ~0;
-	int64_t teamID = ~0;
-	Logic* const plogic;
+	const int32_t& playerID;
+	const int32_t& teamID;
+	const THUAI4::State*& pState;//指针的常引用
+	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;// \xfgg/
 
 	//选手API 
 protected:
@@ -30,16 +32,16 @@ protected:
 	//选手可获取的信息
 
 	//据网上说vector作为返回值不会拷贝构造，那还比较合理
-	std::vector<const THUAI4::Character*> getCharacters() const;
-	std::vector<const THUAI4::Wall*> getWalls() const;
-	std::vector<const THUAI4::Prop*> getProps() const;
-	std::vector<const THUAI4::Bullet*> getBullets() const;
-	std::vector<const THUAI4::BirthPoint*> getBirthPoints() const;
-	const THUAI4::Character& getSelfInfo() const;
-	THUAI4::ColorType getSelfTeamColor() const;
-	uint32_t getTeamScore() const;
-	const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& getPlayerGUIDs() const;
-	const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& getCellColors() const;
+	std::vector<const THUAI4::Character*> GetCharacters() const;
+	std::vector<const THUAI4::Wall*> GetWalls() const;
+	std::vector<const THUAI4::Prop*> GetProps() const;
+	std::vector<const THUAI4::Bullet*> GetBullets() const;
+	std::vector<const THUAI4::BirthPoint*> GetBirthPoints() const;
+	const THUAI4::Character& GetSelfInfo() const;
+	THUAI4::ColorType GetSelfTeamColor() const;
+	uint32_t GetTeamScore() const;
+	const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& GetPlayerGUIDs() const;
+	const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& GetCellColors() const;
 
 public:
 	virtual void play() = 0;

@@ -1,7 +1,7 @@
 #pragma once
+#include<boost/shared_ptr.hpp>
 #include<cstdint>
 #include<array>
-#include<unordered_map>
 #include<vector>
 namespace THUAI4 {
 

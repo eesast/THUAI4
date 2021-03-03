@@ -1,7 +1,7 @@
 #pragma once
 
-#pragma comment(lib,"lib/HPSocket.lib")
 #include"Constants.h"
+#include"Structures.h"
 #include"proto/Message2Client.pb.h"
 #include"proto/Message2Server.pb.h"
 #include<concurrent_queue.h>
@@ -14,37 +14,34 @@ class Logic;
 class CAPI;
 class Listener :public CTcpClientListener {
 private:
-
-	CAPI* const pCAPI;
+	std::mutex& mtxOnReceive;
+	std::condition_variable& cvOnReceive;//收到新消息时通知PM
+	const std::function<void(Pointer2Message)> Push;
+	const std::function<void()> OnCloseL;
+	const std::function<void()> OnConnectL;
 public:
-	Listener(CAPI* ptr) :pCAPI(ptr) {};
+	Listener(std::mutex&, std::condition_variable&, std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);
 	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
 	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
 };
 class CAPI {
 private:
+	//这还引用似乎有点蠢……
+	const int32_t& playerID;
+	const int32_t& teamID;
+	const THUAI4::JobType& jobType;
 
-	Protobuf::JobType jobtype;
-	int32_t playerID;
-	int32_t teamID;
-	Logic* plogic;
+
 	//似乎普通队列也可以，就先这样吧
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	Listener listener;
 	CTcpPackClientPtr pclient;
-
 public:
 
-	void set_player(int32_t playerID, int32_t teamID, Protobuf::JobType jobType);
-
-	std::mutex mtx;//这个锁的主要作用是让队列为空时ProcessMessage等着
-	//似乎也能防止同时PUSH/PULL 但这个队列据说是安全的
-	std::condition_variable cv;
-	CAPI(Logic* pl);
+	CAPI(const int32_t&, const int32_t&, const THUAI4::JobType&, std::mutex&, std::condition_variable&,std::function<void()>);
 	void OnConnect();
-	void OnClose();
-	bool Connect(const char* address, USHORT port);
+	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);
 	void Stop();
 	void Push(Pointer2Message);
