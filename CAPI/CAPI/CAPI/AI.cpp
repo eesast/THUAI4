@@ -1,4 +1,8 @@
-#include"AI.h"
+#include "AI.h"
+#include "Constants.h"
+
+/* 请于 VS2019 项目属性中开启 C++17 标准：/std:c++17 */
+
 void AI::play()
 {
 	std::cout << "I`m playing......" << std::endl;
