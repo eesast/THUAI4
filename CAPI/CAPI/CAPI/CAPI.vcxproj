@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="AI.h" />
     <ClInclude Include="API.h" />
+    <ClInclude Include="Base.h" />
     <ClInclude Include="CAPI.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Logic.h" />
