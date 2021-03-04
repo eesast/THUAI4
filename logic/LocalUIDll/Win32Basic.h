@@ -4,7 +4,7 @@
 
 
 //#ifndef WIN32_LEAN_AND_MEAN
-//#define WIN32_LEAN_AND_MEAN             // ´Ó Windows Í·ÎÄ¼şÖĞÅÅ³ı¼«ÉÙÊ¹ÓÃµÄÄÚÈİ
+//#define WIN32_LEAN_AND_MEAN             // ä» Windows å¤´æ–‡ä»¶ä¸­æ’é™¤æå°‘ä½¿ç”¨çš„å†…å®¹
 //#endif	// #ifndef WIN32_LEAN_AND_MEAN
 
 #include <windows.h>

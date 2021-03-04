@@ -14,7 +14,7 @@ BOOL BasicWindow::Init
         return FALSE;
     }
 
-    // Ö´ĞĞÓ¦ÓÃ³ÌĞò³õÊ¼»¯:
+    // æ‰§è¡Œåº”ç”¨ç¨‹åºåˆå§‹åŒ–:
     if (!InitInstance(hInstance, nCmdShow, x, y, cx, cy, dwStyle, wcex.lpszClassName, c_lpszWndTitle))
     {
         MessageBox(NULL, TEXT("Window creating failed!"), c_lpszError, MB_OK | MB_ICONERROR);
@@ -26,14 +26,14 @@ BOOL BasicWindow::Init
 
 
 //
-//   º¯Êı: InitInstance(HINSTANCE, int)
+//   å‡½æ•°: InitInstance(HINSTANCE, int)
 //
-//   Ä¿±ê: ±£´æÊµÀı¾ä±ú¡¢Ö÷´°¿Ú¾ä±ú²¢´´½¨Ö÷´°¿Ú
+//   ç›®æ ‡: ä¿å­˜å®ä¾‹å¥æŸ„ã€ä¸»çª—å£å¥æŸ„å¹¶åˆ›å»ºä¸»çª—å£
 //
 
 BOOL BasicWindow::InitInstance(HINSTANCE hInstance, int nCmdShow, int x, int y, int cx, int cy, DWORD dwStyle, LPCTSTR c_lpszWndClassName, LPCTSTR c_lpszWndTitle)
 {
-    m_hInst = hInstance;  //½«ÊµÀı¾ä±ú´æ´¢ÔÚ³ÉÔ±±äÁ¿ÖĞ
+    m_hInst = hInstance;  //å°†å®ä¾‹å¥æŸ„å­˜å‚¨åœ¨æˆå‘˜å˜é‡ä¸­
 
     HWND hWnd = CreateWindow(c_lpszWndClassName, c_lpszWndTitle, dwStyle,
                              x, y, cx, cy, NULL, NULL, hInstance, this);
@@ -43,7 +43,7 @@ BOOL BasicWindow::InitInstance(HINSTANCE hInstance, int nCmdShow, int x, int y, 
         return FALSE;
     }
 
-    m_hWnd = hWnd;    //½«Ö÷´°¿Ú¾ä±ú´æ´¢ÔÚ³ÉÔ±±äÁ¿ÖĞ
+    m_hWnd = hWnd;    //å°†ä¸»çª—å£å¥æŸ„å­˜å‚¨åœ¨æˆå‘˜å˜é‡ä¸­
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
@@ -56,7 +56,7 @@ LRESULT CALLBACK BasicWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LP
     BasicWindow* thisWnd = NULL;
     if (message == WM_CREATE)
     {
-        thisWnd = (BasicWindow*)(((LPCREATESTRUCT)lParam)->lpCreateParams);     //»ñÈ¡´°¿Ú¶ÔÏóÖ¸Õë
+        thisWnd = (BasicWindow*)(((LPCREATESTRUCT)lParam)->lpCreateParams);     //è·å–çª—å£å¯¹è±¡æŒ‡é’ˆ
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)thisWnd);
     }
     else thisWnd = (BasicWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
