@@ -8,7 +8,7 @@
 #include "Structures.h"
 #include "proto/Message2Client.pb.h"
 #include "proto/Message2Server.pb.h"
-#include <concurrent_queue.h>
+#include "concurrent_queue.hpp"
 #include <HPSocket/HPSocket.h>
 #include <HPSocket/SocketInterface.h>
 #include <variant>	//c++17

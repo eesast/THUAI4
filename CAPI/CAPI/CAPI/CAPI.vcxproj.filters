@@ -36,6 +36,9 @@
     <ClInclude Include="API.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="concurrent_queue.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AI.cpp">
