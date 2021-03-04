@@ -1,6 +1,8 @@
-#include<tclap/CmdLine.h>
-#include"Logic.h"
+#include <tclap/CmdLine.h>
+#include "Logic.h"
+
 Logic logic;
+
 int main(int argc, char** argv)
 {
 	std::string aIP;

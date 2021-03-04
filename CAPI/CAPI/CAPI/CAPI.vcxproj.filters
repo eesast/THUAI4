@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\proto">
+      <UniqueIdentifier>{e35482da-c484-4233-92a3-8e8a2cb5ed91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h">
@@ -47,17 +50,17 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="proto\Message2Client.pb.cc">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="proto\Message2Server.pb.cc">
+    <ClCompile Include="API.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="proto\MessageType.pb.cc">
-      <Filter>源文件</Filter>
+      <Filter>源文件\proto</Filter>
     </ClCompile>
-    <ClCompile Include="API.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="proto\Message2Client.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="proto\Message2Server.pb.cc">
+      <Filter>源文件\proto</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

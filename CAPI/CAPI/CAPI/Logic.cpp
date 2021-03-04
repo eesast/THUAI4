@@ -1,4 +1,5 @@
-#include"Logic.h"
+#include "Logic.h"
+
 //#define _ALL_VISIBLE_
 
 Logic::Logic() :\
@@ -82,6 +83,7 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi
 	character->y = goi.y();
 	return character;
 }
+
 std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Wall> wall = std::make_shared<THUAI4::Wall>();
@@ -92,6 +94,7 @@ std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
 	wall->y = goi.y();
 	return wall;
 }
+
 std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Prop> prop = std::make_shared<THUAI4::Prop>();
@@ -123,6 +126,7 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->y = goi.y();
 	return bullet;
 }
+
 std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::BirthPoint> birthpoint = std::make_shared<THUAI4::BirthPoint>();
@@ -163,6 +167,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		std::cout << "Invalid MessageType wrt M2C" << std::endl;
 	}
 }
+
 void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 {
 	switch (pM2OC->messagetype()) {

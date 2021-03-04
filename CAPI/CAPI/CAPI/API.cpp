@@ -1,12 +1,12 @@
 
-#include"API.h"
-#include<functional>
+#include "API.h"
+#include <functional>
 
 
-const static double PI = 3.14159265358979323846;
+constexpr static double PI = 3.14159265358979323846;
 
 
-API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM) :\
+API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM) :
 playerID(pID), teamID(tID), SendMessage(f), pState(pS)
 {
 	MessageStorage.clear();
