@@ -1,14 +1,49 @@
 #include"Logic.h"
+//#define _ALL_VISIBLE_
+
+Logic::Logic() :\
+pState(storage),
+pBuffer(storage + 1),
+capi(playerID,
+	teamID,
+	jobType,
+	mtxOnReceive,
+	cvOnReceive,
+	[this]() {OnClose(); }),
+	ai(playerID,
+		teamID,
+		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
+		pState, AddMessage) {};
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
-	return !(g.gameobjtype() == Protobuf::GameObjType::Prop && g.islaid());
+	Protobuf::PropType pT = g.proptype();
+	if (g.islaid()
+		&& (pT == Protobuf::PropType::Attenuator
+			|| pT == Protobuf::PropType::Dirt
+			|| pT == Protobuf::PropType::Divider)) return false;
 
+	int64_t dx = x - g.x();
+	int64_t dy = y - g.y();
+	uint64_t distanceSquared = dx * dx + dy * dy;
+	return distanceSquared <= Constants::SightRadiusSquared;
+
+}
+
+//圆和正方形是否相交 
+inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
+{
+	int32_t centerX = CellX * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
+	int32_t centerY = CellY * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
+	int32_t dx = std::abs(centerX - x);
+	int32_t dy = std::abs(centerY - y);
+	int32_t D = (Constants::numOfGridPerCell >> 1) + Constants::SightRadius;
+	return dx <= D && dy <= D;
 }
 
 void Logic::OnClose()
 {
-#ifdef ENABLE_RECONNECTION//饼饼
+#ifdef _ENABLE_RECONNECTION_//饼饼
 
 #else
 	{
@@ -107,7 +142,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		load(pM2C);//第一帧AI线程还没开始 加载到buffer然后交换指针
 		{
 			std::lock_guard<std::mutex> lck(mtx_game);
-			gamePhase = Gaming;
+			gamePhase = GamePhase::Gaming;
 		}
 		cv_game.notify_one();
 		break;
@@ -118,7 +153,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	case Protobuf::MessageType::EndGame:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
-		gamePhase = GameOver;
+		gamePhase = GamePhase::GameOver;
 	}
 	cv_game.notify_one();
 	break;
@@ -133,7 +168,7 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	case Protobuf::MessageType::ValidPlayer:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
-		validity = Valid;
+		validity = Validity::Valid;
 	}
 	cv_game.notify_one();
 	break;
@@ -142,37 +177,19 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	case Protobuf::MessageType::InvalidPlayer:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
-		validity = Invalid;
+		validity = Validity::Invalid;
 	}
 	cv_game.notify_one();
 	break;
 
 
 	case Protobuf::MessageType::Send:
-
+		AddMessage(pM2OC->message());
+		break;
 	default:
 		std::cout << "Invalid MessageType wrt M2OC" << std::endl;
 	}
 }
-
-//构造函数执行顺序：
-//1.基类的构造函数
-//2.成员类的构造函数 按类声明顺序
-//3.派生类的构造函数
-Logic::Logic() :\
-pState(storage),
-pBuffer(storage + 1),
-capi(playerID,
-	teamID,
-	jobType,
-	mtxOnReceive,
-	cvOnReceive,
-	[this]() {OnClose(); }),
-	ai(playerID,
-		teamID,
-		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
-		pState) {}
-
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
@@ -184,29 +201,45 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		pBuffer->props.clear();
 		pBuffer->bullets.clear();
 		pBuffer->birthpoints.clear();
+#ifdef _COLOR_MAP_BY_HASHING_
+		pBuffer->cellColors.clear();
+#endif // _COLOR_MAP_BY_HASHING_
 		pBuffer->teamScore = pM2C->teamscore();
 		pBuffer->selfTeamColor = (THUAI4::ColorType)pM2C->selfteamcolor();
 		pBuffer->self = obj2C(pM2C->selfinfo());
+		int selfX = pBuffer->self->x;
+		int selfY = pBuffer->self->y;
+
 		for (auto it : pM2C->gameobjs()) {
-			switch (it.gameobjtype()) {
-			case Protobuf::GameObjType::Character:
-				pBuffer->characters.push_back(obj2C(it));
-				break;
-			case Protobuf::GameObjType::Wall:
-				pBuffer->walls.push_back(obj2W(it));
-				break;
-			case Protobuf::GameObjType::Prop:
-				pBuffer->props.push_back(obj2P(it));
-				break;
-			case Protobuf::GameObjType::Bullet:
-				pBuffer->bullets.push_back(obj2Blt(it));
-				break;
-			case Protobuf::GameObjType::BirthPoint:
-				pBuffer->birthpoints.push_back(obj2Bp(it));
-				break;
-			default:
-				std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
+			if (
+#ifdef _ALL_VISIBLE_
+				true
+#else
+				visible(selfX, selfY, it)
+#endif // _ALL_VISIBLE_			
+				) {
+				switch (it.gameobjtype()) {
+				case Protobuf::GameObjType::Character:
+					pBuffer->characters.push_back(obj2C(it));
+					break;
+				case Protobuf::GameObjType::Wall:
+					pBuffer->walls.push_back(obj2W(it));
+					break;
+				case Protobuf::GameObjType::Prop:
+					pBuffer->props.push_back(obj2P(it));
+					break;
+				case Protobuf::GameObjType::Bullet:
+					pBuffer->bullets.push_back(obj2Blt(it));
+					break;
+				case Protobuf::GameObjType::BirthPoint:
+					pBuffer->birthpoints.push_back(obj2Bp(it));
+					break;
+				default:
+					std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
+				}
+
 			}
+
 		}
 
 		for (int i = 0; i < THUAI4::State::nTeams; i++) {
@@ -217,7 +250,27 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		for (int i = 0; i < THUAI4::State::nCells; i++) {
 			for (int j = 0; j < THUAI4::State::nCells; j++) {
-				pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
+				if (
+#ifdef _ALL_VISIBLE_
+					true
+#else
+					CellColorVisible(selfX, selfY, i, j)
+#endif 		
+					) {
+#ifdef _COLOR_MAP_BY_HASHING_
+					pBuffer->cellColors.insert(std::pair((i << 16) + j, (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j)));
+#else
+					pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
+#endif // _COLOR_MAP_BY_HASHING_
+
+
+				}
+#ifndef _COLOR_MAP_BY_HASHING_
+				//unorderer_map不可见就不插入，节省空间 似乎查找速度也不会慢？
+				else {
+					pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
+				}
+#endif // _COLOR_MAP_BY_HASHING_
 			}
 		}
 
@@ -240,7 +293,7 @@ void Logic::ProcessMessage()
 {
 	std::unique_lock<std::mutex> lock_game(mtx_game);
 	Pointer2Message p2M;
-	while (gamePhase != GameOver && !UnexpectedlyClosed && validity != Invalid) {
+	while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed && validity != Validity::Invalid) {
 		lock_game.unlock();
 
 		//无消息处理时停下来少占资源
@@ -285,9 +338,9 @@ void Logic::PlayerWrapper()
 	//while判断时保证gamePhase和UnexpectedlyClosed不被其他线程访问
 	std::unique_lock<std::mutex> lock_game(mtx_game);
 
-	while (gamePhase == Gaming && !UnexpectedlyClosed) {
+	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed) {
 		lock_game.unlock();
-		
+
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed) {
 			ai.play();
@@ -322,7 +375,7 @@ void Logic::PlayerWrapper()
 				BufferUpdated = false;
 			}
 		}
-		
+
 		lock_game.lock();
 	}
 	lock_game.unlock();
@@ -383,13 +436,10 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		}
 
 		std::cout << "游戏开始！" << std::endl;
-
-
 		std::thread tAI(&Logic::PlayerWrapper, this);
 
-
 		//然后AI决策知道游戏结束
-		while (gamePhase != GameOver && !UnexpectedlyClosed)
+		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
 			cv_game.wait(lck);
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
@@ -407,6 +457,4 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		tPM.join();
 		tAI.join();
 	}
-
-
 }

@@ -4,8 +4,12 @@
 const static double PI = 3.14159265358979323846;
 
 
-API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f,THUAI4::State*& pS):\
-playerID(pID), teamID(tID), SendMessage(f), pState(pS) { }
+API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM) :\
+playerID(pID), teamID(tID), SendMessage(f), pState(pS)
+{
+	MessageStorage.clear();
+	aM = [this](std::string msg) {MessageStorage.push(msg); };
+}
 
 
 void API::Use()
@@ -83,6 +87,15 @@ void API::MoveDown(int timeInMilliseconds)
 	MovePlayer(timeInMilliseconds, 0);
 }
 
+bool API::MessageAvailable()
+{
+	return !MessageStorage.empty();
+}
+bool API::TryGetMessage(std::string& str)
+{
+	return MessageStorage.try_pop(str);
+}
+
 std::vector<const THUAI4::Character*> API::GetCharacters() const
 {
 	std::vector<const THUAI4::Character*> characters;
@@ -140,7 +153,18 @@ const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::n
 {
 	return pState->playerGUIDs;
 }
-const std::array<std::array<THUAI4::ColorType, THUAI4::State::nCells>, THUAI4::State::nCells>& API::GetCellColors() const
+const THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 {
-	return pState->cellColors;
+	assert(CellX >= 0 && CellX < THUAI4::State::nCells&& CellY >= 0 && CellY < THUAI4::State::nCells);
+#ifdef _COLOR_MAP_BY_HASHING_
+	auto it = pState->cellColors.find((CellX << 16) + CellY);
+	if (it == pState->cellColors.end()) {
+		return THUAI4::ColorType::Invisible;
+	}
+	return it->second;
+#else
+	return pState->cellColors[CellX][CellY];
+#endif // _COLOR_MAP_BY_HASHING_
+
+
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include"proto/Message2Client.pb.h"
-#include<list>
+#include<functional>
 #include<array>
 #include<thread>
 #include<mutex>
@@ -9,7 +9,6 @@
 #include"Constants.h"
 #include"AI.h"
 #include"CAPI.h"
-#include"Structures.h"
 
 class Logic {
 private:
@@ -18,30 +17,30 @@ private:
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
-	enum GamePhase :unsigned char {
+	enum class GamePhase :unsigned char {
 		Uninitialized = 0,
 		Gaming = 1,
 		GameOver = 2,
 	};
-	GamePhase gamePhase = Uninitialized;
+	GamePhase gamePhase = GamePhase::Uninitialized;
 
-	enum Validity :unsigned char {
+	enum class Validity :unsigned char {
 		Unknown = 0,
 		Valid = 1,
 		Invalid = 2
 	};
-	Validity validity = Unknown;
+	Validity validity = Validity::Unknown;
 
+	THUAI4::JobType jobType = THUAI4::JobType::Job0;
 	int32_t playerID = 0;
 	int32_t teamID = 0;
-	THUAI4::JobType jobType = THUAI4::JobType::Job0;
 
 	//state buffer分别指向storage的两个区域，信息收到以后直接写给buffer
-	//不能与state buffer换位同时进行
-
-	THUAI4::State storage[2];//团团转
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
+	THUAI4::State storage[2];//团团转
+
+	std::function<void(std::string)> AddMessage;//向API中的MessageStorage Push
 
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
@@ -57,10 +56,10 @@ private:
 	CAPI capi;
 	AI ai;
 
-	
 
 	//一些辅助函数
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//饼
+	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
@@ -68,7 +67,7 @@ private:
 	static std::shared_ptr <THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi);
 	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
-	void OnClose();
+	void OnClose();//不支持断线重连 断了就退出
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//将收到的M2C加载到buffer
 public:
 	Logic();
