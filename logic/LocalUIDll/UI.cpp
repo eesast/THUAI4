@@ -200,9 +200,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SelectObject(hdcMem, hPenNull);
             HBRUSH hbrBkGnd = CreateSolidBrush(RGB(0, 0, 0));
             HBRUSH hbrOld = (HBRUSH)SelectObject(hdcMem, hbrBkGnd);
-            Rectangle(hdcMem, 0, 0, width, height);     //ªÊ÷∆±≥æ∞
+            Rectangle(hdcMem, 0, 0, width, height);     //ÁªòÂà∂ËÉåÊôØ
 
-            //ªÊ÷∆µÿÕº—’…´
+            //ÁªòÂà∂Âú∞ÂõæÈ¢úËâ≤
 
             HBRUSH hbrColor1 = CreateSolidBrush(RGB(100, 0, 0));
             HBRUSH hbrColor2 = CreateSolidBrush(RGB(0, 100, 0));
@@ -232,7 +232,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             DeleteObject(hbrColor3);
             DeleteObject(hbrColor4);
 
-            //œ‘ æ»ÀŒÔ–≈œ¢
+            //ÊòæÁ§∫‰∫∫Áâ©‰ø°ÊÅØ
             
             HFONT hfInfo = CreateFont
             (
@@ -249,7 +249,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 CLIP_DEFAULT_PRECIS,
                 DEFAULT_QUALITY,
                 DEFAULT_PITCH,
-                TEXT("ø¨ È")
+                TEXT("Ê•∑‰π¶")
             );
             HFONT hfOld = (HFONT)SelectObject(hdcMem, hfInfo);
             SetBkColor(hdcMem, RGB(0, 0, 0));
@@ -258,17 +258,17 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             std::wostringstream wsout;
 
             wsout.imbue(std::locale("chs"));
-            wsout << L"∂”ŒÈ1£∫∑÷ ˝£∫" << pMW->map->GetTeamScore(0) << '\n';
+            wsout << L"Èòü‰ºç1ÔºöÂàÜÊï∞Ôºö" << pMW->map->GetTeamScore(0) << '\n';
             auto hPlayer1 = pMW->map->GetPlayerFromTeam(player1ID), hPlayer2 = pMW->map->GetPlayerFromTeam(player2ID);
-            wsout << L"ÕÊº“1£∫\n…˙√¸£∫" << hPlayer1->HP << L"\n £”‡◊”µØ ˝£∫" << hPlayer1->BulletNum << L"\n∑÷ ˝£∫" << hPlayer1->Score << L"\n";
-            wsout << L"“∆∂ØÀŸ∂»£∫" << hPlayer1->MoveSpeed << "\n";
-            wsout << L"π•ª˜¡¶£∫" << hPlayer1->AP << "\n";
+            wsout << L"Áé©ÂÆ∂1Ôºö\nÁîüÂëΩÔºö" << hPlayer1->HP << L"\nÂâ©‰ΩôÂ≠êÂºπÊï∞Ôºö" << hPlayer1->BulletNum << L"\nÂàÜÊï∞Ôºö" << hPlayer1->Score << L"\n";
+            wsout << L"ÁßªÂä®ÈÄüÂ∫¶Ôºö" << hPlayer1->MoveSpeed << "\n";
+            wsout << L"ÊîªÂáªÂäõÔºö" << hPlayer1->AP << "\n";
             wsout << '\n';
 
-            wsout << L"∂”ŒÈ2£∫∑÷ ˝£∫" << pMW->map->GetTeamScore(1) << '\n';
-            wsout << L"ÕÊº“2£∫\n…˙√¸£∫" << hPlayer2->HP << L"\n £”‡◊”µØ ˝£∫" << hPlayer2->BulletNum << L"\n∑÷ ˝£∫" << hPlayer2->Score << L"\n";
-            wsout << L"“∆∂ØÀŸ∂»£∫" << hPlayer2->MoveSpeed << "\n";
-            wsout << L"π•ª˜¡¶£∫" << hPlayer2->AP << "\n";
+            wsout << L"Èòü‰ºç2ÔºöÂàÜÊï∞Ôºö" << pMW->map->GetTeamScore(1) << '\n';
+            wsout << L"Áé©ÂÆ∂2Ôºö\nÁîüÂëΩÔºö" << hPlayer2->HP << L"\nÂâ©‰ΩôÂ≠êÂºπÊï∞Ôºö" << hPlayer2->BulletNum << L"\nÂàÜÊï∞Ôºö" << hPlayer2->Score << L"\n";
+            wsout << L"ÁßªÂä®ÈÄüÂ∫¶Ôºö" << hPlayer2->MoveSpeed << "\n";
+            wsout << L"ÊîªÂáªÂäõÔºö" << hPlayer2->AP << "\n";
             wsout << '\n';
 
             DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &RECT({ width - appendCx + 20, 20, width, height }), 0);
@@ -276,9 +276,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SelectObject(hdcMem, hfOld);
             DeleteObject(hfInfo);
 
-            //ªÊ÷∆”Œœ∑∂‘œÛ
+            //ÁªòÂà∂Ê∏∏ÊàèÂØπË±°
 
-            //µ¿æﬂ◊™ªªµΩ◊÷∑˚
+            //ÈÅìÂÖ∑ËΩ¨Êç¢Âà∞Â≠óÁ¨¶
             static const std::unordered_map<int, TCHAR> propToChar
             {
                 std::pair<int, TCHAR>((int)THUnity2D::PropType::Bike, TEXT('B')),
