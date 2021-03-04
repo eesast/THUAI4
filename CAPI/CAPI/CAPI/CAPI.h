@@ -24,7 +24,7 @@ class Listener :public CTcpClientListener
 private:
 
 	std::mutex& mtxOnReceive;
-	std::condition_variable& cvOnReceive;//ÊÕµ½ĞÂÏûÏ¢Ê±Í¨ÖªPM
+	std::condition_variable& cvOnReceive;//æ”¶åˆ°æ–°æ¶ˆæ¯æ—¶é€šçŸ¥PM
 	const std::function<void(Pointer2Message)> Push;
 	const std::function<void()> OnCloseL;
 	const std::function<void()> OnConnectL;
@@ -41,7 +41,7 @@ class CAPI
 {
 private:
 
-	//Õâ»¹ÒıÓÃËÆºõÓĞµã´À¡­¡­
+	//è¿™è¿˜å¼•ç”¨ä¼¼ä¹æœ‰ç‚¹è ¢â€¦â€¦
 	const int32_t& playerID;
 	const int32_t& teamID;
 	const THUAI4::JobType& jobType;

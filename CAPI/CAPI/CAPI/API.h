@@ -20,7 +20,7 @@ class API
 public:
 
 	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
-
+  
 private:
 
 	const int32_t& playerID;
@@ -44,7 +44,7 @@ protected:
 	void Send(int toPlayerID, std::string message);
 
 
-	//选手可获取的信息
+	//脩隆脢脰驴脡禄帽脠隆碌脛脨脜脧垄
 
 	bool MessageAvailable();
 	bool TryGetMessage(std::string&);
