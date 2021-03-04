@@ -1,14 +1,50 @@
 #include"Logic.h"
+//#define _ALL_VISIBLE_
+
+Logic::Logic() :\
+pState(storage),
+pBuffer(storage + 1),
+capi(playerID,
+	teamID,
+	jobType,
+	mtxOnReceive,
+	cvOnReceive,
+	[this]() {OnClose(); }),
+	ai(playerID,
+		teamID,
+		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
+		pState, AddMessage) {};
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
-	return !(g.gameobjtype() == Protobuf::GameObjType::Prop && g.islaid());
+	Protobuf::PropType pT = g.proptype();
+	if (g.islaid()
+		&& (pT == Protobuf::PropType::Attenuator
+			|| pT == Protobuf::PropType::Dirt
+			|| pT == Protobuf::PropType::Divider)) return false;
 
+	int64_t dx = x - g.x();
+	int64_t dy = y - g.y();
+	uint64_t distanceSquared = dx * dx + dy * dy;
+	return distanceSquared <= Constants::SightRadiusSquared;
+
+}
+
+//Բ�������Ƿ��ཻ 
+inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
+{
+	int32_t centerX = CellX * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
+	int32_t centerY = CellY * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
+	int32_t dx = std::abs(centerX - x);
+	int32_t dy = std::abs(centerY - y);
+	int32_t D = (Constants::numOfGridPerCell >> 1) + Constants::SightRadius;
+	return dx <= D && dy <= D;
 }
 
 void Logic::OnClose()
 {
-#ifdef ENABLE_RECONNECTION//饼饼
+
+#ifdef _ENABLE_RECONNECTION_//���
 
 #else
 	{
@@ -149,27 +185,12 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 
 
 	case Protobuf::MessageType::Send:
-
+		AddMessage(pM2OC->message());
+		break;
 	default:
 		std::cout << "Invalid MessageType wrt M2OC" << std::endl;
 	}
 }
-
-
-Logic::Logic() :\
-pState(storage),
-pBuffer(storage + 1),
-capi(playerID,
-	teamID,
-	jobType,
-	mtxOnReceive,
-	cvOnReceive,
-	[this]() {OnClose(); }),
-	ai(playerID,
-		teamID,
-		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
-		pState) {}
-
 
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
@@ -182,29 +203,45 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		pBuffer->props.clear();
 		pBuffer->bullets.clear();
 		pBuffer->birthpoints.clear();
+#ifdef _COLOR_MAP_BY_HASHING_
+		pBuffer->cellColors.clear();
+#endif // _COLOR_MAP_BY_HASHING_
 		pBuffer->teamScore = pM2C->teamscore();
 		pBuffer->selfTeamColor = (THUAI4::ColorType)pM2C->selfteamcolor();
 		pBuffer->self = obj2C(pM2C->selfinfo());
+		int selfX = pBuffer->self->x;
+		int selfY = pBuffer->self->y;
+
 		for (auto it : pM2C->gameobjs()) {
-			switch (it.gameobjtype()) {
-			case Protobuf::GameObjType::Character:
-				pBuffer->characters.push_back(obj2C(it));
-				break;
-			case Protobuf::GameObjType::Wall:
-				pBuffer->walls.push_back(obj2W(it));
-				break;
-			case Protobuf::GameObjType::Prop:
-				pBuffer->props.push_back(obj2P(it));
-				break;
-			case Protobuf::GameObjType::Bullet:
-				pBuffer->bullets.push_back(obj2Blt(it));
-				break;
-			case Protobuf::GameObjType::BirthPoint:
-				pBuffer->birthpoints.push_back(obj2Bp(it));
-				break;
-			default:
-				std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
+			if (
+#ifdef _ALL_VISIBLE_
+				true
+#else
+				visible(selfX, selfY, it)
+#endif // _ALL_VISIBLE_			
+				) {
+				switch (it.gameobjtype()) {
+				case Protobuf::GameObjType::Character:
+					pBuffer->characters.push_back(obj2C(it));
+					break;
+				case Protobuf::GameObjType::Wall:
+					pBuffer->walls.push_back(obj2W(it));
+					break;
+				case Protobuf::GameObjType::Prop:
+					pBuffer->props.push_back(obj2P(it));
+					break;
+				case Protobuf::GameObjType::Bullet:
+					pBuffer->bullets.push_back(obj2Blt(it));
+					break;
+				case Protobuf::GameObjType::BirthPoint:
+					pBuffer->birthpoints.push_back(obj2Bp(it));
+					break;
+				default:
+					std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
+				}
+
 			}
+
 		}
 
 		for (int i = 0; i < (int)pBuffer->playerGUIDs.size(); i++) {
@@ -213,9 +250,29 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			}
 		}
 
-		for (int i = 0; i < (int)pBuffer->cellColors.size(); i++) {
-			for (int j = 0; j < (int)pBuffer->cellColors[i].size(); j++) {
-				pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
+		for (int i = 0; i < THUAI4::State::nCells; i++) {
+			for (int j = 0; j < THUAI4::State::nCells; j++) {
+				if (
+#ifdef _ALL_VISIBLE_
+					true
+#else
+					CellColorVisible(selfX, selfY, i, j)
+#endif 		
+					) {
+#ifdef _COLOR_MAP_BY_HASHING_
+					pBuffer->cellColors.insert(std::pair((i << 16) + j, (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j)));
+#else
+					pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
+#endif // _COLOR_MAP_BY_HASHING_
+
+
+				}
+#ifndef _COLOR_MAP_BY_HASHING_
+				//unorderer_map���ɼ�Ͳ����룬��ʡ�ռ� �ƺ�����ٶ�Ҳ������
+				else {
+					pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
+				}
+#endif // _COLOR_MAP_BY_HASHING_
 			}
 		}
 
@@ -285,7 +342,7 @@ void Logic::PlayerWrapper()
 
 	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed) {
 		lock_game.unlock();
-		
+
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed) {
 			ai.play();
@@ -320,7 +377,7 @@ void Logic::PlayerWrapper()
 				BufferUpdated = false;
 			}
 		}
-		
+
 		lock_game.lock();
 	}
 	lock_game.unlock();
@@ -381,13 +438,10 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			return;
 		}
 
-		std::cout << "游戏开始！" << std::endl;
-
-
+		std::cout << "��Ϸ��ʼ��" << std::endl;
 		std::thread tAI(&Logic::PlayerWrapper, this);
 
 
-		//然后AI决策知道游戏结束
 		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
 			cv_game.wait(lck);
 		if (UnexpectedlyClosed) {
@@ -406,6 +460,4 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		tPM.join();
 		tAI.join();
 	}
-
-
 }

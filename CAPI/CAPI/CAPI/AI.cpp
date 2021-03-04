@@ -1,11 +1,15 @@
 #include "AI.h"
 #include "Constants.h"
 
-/* ÇëÓÚ VS2019 ÏîÄ¿ÊôĞÔÖĞ¿ªÆô C++17 ±ê×¼£º/std:c++17 */
+/* è¯·äº VS2019 é¡¹ç›®å±æ€§ä¸­å¼€å¯ C++17 æ ‡å‡†ï¼š/std:c++17 */
 
 void AI::play()
 {
 	std::cout << "I`m playing......" << std::endl;
-	std::cout << "Frame:" << GetSelfInfo().guid << std::endl;
-	std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	if (MessageAvailable()) {
+		std::string str;
+		TryGetMessage(str);
+		std::cout << "Oh! I get a message:" << str << std::endl;
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }

@@ -39,7 +39,6 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 		Push(p2m);
 	}
 	cvOnReceive.notify_one();
-	//std::cout << "Listener OnReceive" << std::endl;
 	return HR_OK;
 }
 EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
@@ -69,7 +68,7 @@ bool CAPI::Connect(const char* address, uint16_t port)
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
 		if (!pclient->Start((LPCTSTR)address, port)) {
-			std::cout << "Failed to connect with the agent.\n Error code:";
+			std::cout << "Failed to connect with the agent. Error code:";
 			std::cout << pclient->GetLastError() << std::endl;
 			return false;
 		}
