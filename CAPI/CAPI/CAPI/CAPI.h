@@ -39,7 +39,7 @@ private:
 	CTcpPackClientPtr pclient;
 public:
 
-	CAPI(const int32_t&, const int32_t&, const THUAI4::JobType&, std::mutex&, std::condition_variable&,std::function<void()>);
+	CAPI(const int32_t&, const int32_t&, const THUAI4::JobType&, std::mutex&, std::condition_variable&, std::function<void()>);
 	void OnConnect();
 	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);
