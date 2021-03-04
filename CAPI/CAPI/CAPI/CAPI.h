@@ -24,7 +24,7 @@ class Listener :public CTcpClientListener
 private:
 
 	std::mutex& mtxOnReceive;
-	std::condition_variable& cvOnReceive;//收到新消息时通知PM
+	std::condition_variable& cvOnReceive;
 	const std::function<void(Pointer2Message)> Push;
 	const std::function<void()> OnCloseL;
 	const std::function<void()> OnConnectL;
@@ -41,7 +41,6 @@ class CAPI
 {
 private:
 
-	//这还引用似乎有点蠢……
 	const int32_t& playerID;
 	const int32_t& teamID;
 	const THUAI4::JobType& jobType;
