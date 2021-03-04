@@ -66,6 +66,19 @@ namespace servertest
                 server.SendMessage(TestMessage(i+100, MessageType.Gaming));
                 Thread.Sleep(50);
             }
+            MessageToOneClient m2OC = new MessageToOneClient();
+            m2OC.Guid = 12345;
+            m2OC.PlayerID = 0;
+            m2OC.TeamID = 0;
+            m2OC.MessageType = MessageType.Send;
+            m2OC.Message = "Hello world!";
+            server.SendMessage(m2OC);
+            Console.WriteLine("Msg sent");
+            for (int i = 0; i < 100; i++)
+            {
+                server.SendMessage(TestMessage(i + 200, MessageType.Gaming));
+                Thread.Sleep(50);
+            }
             server.SendMessage(TestMessage(666, MessageType.EndGame));
             Console.WriteLine("GameOver");
             Console.ReadLine();

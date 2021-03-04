@@ -12,11 +12,16 @@
 #define _NODISCARD [[nodiscard]]
 
 namespace Constants
-{	
-	G_SCI int maxlength = 64;		//������Ϣ��󳤶�
-	G_SCI int32_t MessageToClient = 0;
-	G_SCI int32_t MessageToServer = 1;
-	G_SCI int32_t MessageToOneClient = 2;
+{
+	static const int maxlength = 1000;//Message2BytesÊ±»º³åÇøµÄ³¤¶È£¬¹»´ó¾ÍÐÐ
+	static const int32_t MessageToClient = 0;
+	static const int32_t MessageToServer = 1;
+	static const int32_t MessageToOneClient = 2;
+	//ÊÓÒ°°ë¾¶ **ÊýÖµÊÇÎÒËæÊÖÐ´µÄ**
+	static const uint64_t SightRadius = 5000;
+	static const uint64_t SightRadiusSquared = SightRadius * SightRadius;
+	static const uint32_t numOfGridPerCell = 1000;
+
 }
 
 #undef GF_CI

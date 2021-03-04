@@ -3,9 +3,15 @@
 #include<cstdint>
 #include<array>
 #include<vector>
+#define _COLOR_MAP_BY_HASHING_
+
+#ifdef _COLOR_MAP_BY_HASHING_
+#include<unordered_map>
+#endif
+
 namespace THUAI4 {
 
-	enum PropType :unsigned char
+	enum class PropType :unsigned char
 	{
 		Null = 0,
 		Bike = 1,
@@ -20,13 +26,13 @@ namespace THUAI4 {
 		Divider = 10
 	};
 
-	enum ShapeType :unsigned char
+	enum class ShapeType :unsigned char
 	{
 		Circle = 0,
 		Square = 1
 	};
 
-	enum JobType :unsigned char
+	enum class JobType :unsigned char
 	{
 		Job0 = 0,
 		Job1 = 1,
@@ -37,7 +43,7 @@ namespace THUAI4 {
 		Job6 = 6,
 	};
 
-	enum BulletType :unsigned char
+	enum class BulletType :unsigned char
 	{
 		Bullet0 = 0,
 		Bullet1 = 1,
@@ -48,13 +54,14 @@ namespace THUAI4 {
 		Bullet6 = 6
 	};
 
-	enum ColorType :unsigned char
+	enum class ColorType :unsigned char
 	{
 		None = 0,
 		Color1 = 1,
 		Color2 = 2,
 		Color3 = 3,
 		Color4 = 4,
+		Invisible = 5
 	};
 
 	struct Character {
@@ -82,7 +89,7 @@ namespace THUAI4 {
 	};
 
 	struct Wall {
-		ShapeType shapeType:1;
+		ShapeType shapeType : 1;
 		uint16_t radius;
 		uint32_t x;
 		uint32_t y;
@@ -92,8 +99,8 @@ namespace THUAI4 {
 	struct Prop {
 		bool isMoving;
 		bool isLaid;
-		ShapeType shapeType:1;
-		PropType propType:4;
+		ShapeType shapeType : 1;
+		PropType propType : 4;
 		uint16_t radius;
 		uint32_t x;
 		uint32_t y;
@@ -104,8 +111,8 @@ namespace THUAI4 {
 
 	struct Bullet {
 		bool isMoving;
-		ShapeType shapeType:1;
-		BulletType bulletType:4;
+		ShapeType shapeType : 1;
+		BulletType bulletType : 4;
 		uint16_t radius;
 		uint16_t teamID;
 		uint32_t x;
@@ -125,10 +132,6 @@ namespace THUAI4 {
 		uint64_t guid;
 	};
 
-	struct Message {
-		uint16_t playerID;
-		std::string message;
-	};
 
 	struct State {
 		const static uint32_t nTeams = 2;
@@ -143,7 +146,11 @@ namespace THUAI4 {
 		std::vector<std::shared_ptr<BirthPoint>> birthpoints;
 		std::array<std::array<uint32_t, nPlayers>, nTeams> playerGUIDs;
 		std::shared_ptr<Character> self;
+#ifdef _COLOR_MAP_BY_HASHING_
+		std::unordered_map<uint32_t, ColorType> cellColors;
+#else
 		std::array<std::array<ColorType, nCells>, nCells> cellColors;
+#endif
 	};
 }
 
