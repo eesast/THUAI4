@@ -461,14 +461,14 @@ const char* GameObjInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       // int32 x = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          x_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          x_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
       // int32 y = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          y_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          y_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -482,7 +482,7 @@ const char* GameObjInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       // int32 moveSpeed = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
-          movespeed_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          movespeed_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -511,7 +511,7 @@ const char* GameObjInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       // int32 radius = 10;
       case 10:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
-          radius_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          radius_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -525,7 +525,7 @@ const char* GameObjInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       // int32 ap = 12;
       case 12:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
-          ap_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          ap_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -570,42 +570,42 @@ const char* GameObjInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
       // int32 CD = 18;
       case 18:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 144)) {
-          cd_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          cd_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
       // int32 maxBulletNum = 19;
       case 19:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 152)) {
-          maxbulletnum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          maxbulletnum_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
       // int32 bulletNum = 20;
       case 20:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
-          bulletnum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          bulletnum_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
       // int32 maxHp = 21;
       case 21:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
-          maxhp_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          maxhp_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
       // int32 hp = 22;
       case 22:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
-          hp_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          hp_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
       // int32 lifeNum = 23;
       case 23:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
-          lifenum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          lifenum_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -1982,7 +1982,7 @@ const char* MessageToClient::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
       // int32 teamScore = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          teamscore_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          teamscore_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;

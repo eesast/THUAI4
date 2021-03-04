@@ -213,7 +213,7 @@ const char* MessageToServer::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
       // int32 timeInMilliseconds = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
-          timeinmilliseconds_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          timeinmilliseconds_ = static_cast<uint32_t>(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
