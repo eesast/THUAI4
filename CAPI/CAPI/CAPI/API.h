@@ -1,7 +1,7 @@
 #pragma once
 
 #include<string>
-#include<concurrent_queue.h>
+//#include<concurrent_queue.h>
 #include"proto/Message2Server.pb.h"
 #include<HPSocket/HPSocket.h>
 #include<HPSocket/SocketInterface.h>
@@ -15,6 +15,7 @@ class Logic;
 class API:public GameApi
 {
 public:
+
 	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
 
 	virtual void MovePlayer(int timeInMilliseconds, double angle);
@@ -42,5 +43,6 @@ public:
 	virtual uint32_t GetTeamScore() const;
 	virtual const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& GetPlayerGUIDs() const;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
+
 };
 

@@ -3,7 +3,7 @@
 #include<functional>
 #include"Structures.h"
 #include"proto/Message2Server.pb.h"
-#include<concurrent_queue.h>
+#include"concurrent_queue.hpp"
 
 class GameApi {
 protected:
