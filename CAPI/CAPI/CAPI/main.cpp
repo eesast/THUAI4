@@ -1,6 +1,8 @@
-#include<tclap/CmdLine.h>
-#include"Logic.h"
+#include <tclap/CmdLine.h>
+#include "Logic.h"
+
 Logic logic;
+
 int main(int argc, char** argv)
 {
 	std::string aIP;
@@ -9,7 +11,7 @@ int main(int argc, char** argv)
 	int tID;
 	THUAI4::JobType jType;
 	try {
-		TCLAP::CmdLine cmd("THUAI4 C++æ¥å£å‘½ä»¤è¡Œå‚æ•°ä»‹ç»");
+		TCLAP::CmdLine cmd("THUAI4 C++½Ó¿ÚÃüÁîĞĞ²ÎÊı½éÉÜ");
 
 		TCLAP::ValueArg<std::string> agentIP("I", "agentIP", "Agent`s IP 127.0.0.1 in default", false, "127.0.0.1", "string");
 		cmd.add(agentIP);

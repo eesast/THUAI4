@@ -1,17 +1,23 @@
 #pragma once
-#include<boost/shared_ptr.hpp>
-#include<cstdint>
-#include<array>
-#include<vector>
+
+#ifndef STRUCTURES_H
+
+#define STRUCTURES_H
+
+#include <memory>
+#include <cstdint>
+#include <array>
+#include <vector>
 #define _COLOR_MAP_BY_HASHING_
 
 #ifdef _COLOR_MAP_BY_HASHING_
 #include<unordered_map>
 #endif
 
-namespace THUAI4 {
+namespace THUAI4
+{
 
-	enum class PropType :unsigned char
+	enum class PropType : unsigned char
 	{
 		Null = 0,
 		Bike = 1,
@@ -26,13 +32,13 @@ namespace THUAI4 {
 		Divider = 10
 	};
 
-	enum class ShapeType :unsigned char
+	enum class ShapeType : unsigned char
 	{
 		Circle = 0,
 		Square = 1
 	};
 
-	enum class JobType :unsigned char
+	enum class JobType : unsigned char
 	{
 		Job0 = 0,
 		Job1 = 1,
@@ -43,7 +49,7 @@ namespace THUAI4 {
 		Job6 = 6,
 	};
 
-	enum class BulletType :unsigned char
+	enum class BulletType : unsigned char
 	{
 		Bullet0 = 0,
 		Bullet1 = 1,
@@ -54,7 +60,7 @@ namespace THUAI4 {
 		Bullet6 = 6
 	};
 
-	enum class ColorType :unsigned char
+	enum class ColorType : unsigned char
 	{
 		None = 0,
 		Color1 = 1,
@@ -64,7 +70,8 @@ namespace THUAI4 {
 		Invisible = 5
 	};
 
-	struct Character {
+	struct Character 
+	{
 		bool isMoving;
 		bool isDying;
 		ShapeType shapeType : 1;
@@ -88,7 +95,8 @@ namespace THUAI4 {
 		double facingDirection;
 	};
 
-	struct Wall {
+	struct Wall 
+	{
 		ShapeType shapeType : 1;
 		uint16_t radius;
 		uint32_t x;
@@ -96,7 +104,8 @@ namespace THUAI4 {
 		uint64_t guid;
 	};
 
-	struct Prop {
+	struct Prop 
+	{
 		bool isMoving;
 		bool isLaid;
 		ShapeType shapeType : 1;
@@ -109,7 +118,8 @@ namespace THUAI4 {
 		double facingDirection;
 	};
 
-	struct Bullet {
+	struct Bullet 
+	{
 		bool isMoving;
 		ShapeType shapeType : 1;
 		BulletType bulletType : 4;
@@ -123,7 +133,8 @@ namespace THUAI4 {
 		double facingDirection;
 	};
 
-	struct BirthPoint {
+	struct BirthPoint 
+	{
 		ShapeType shapeType;
 		uint16_t teamID;
 		uint16_t radius;
@@ -133,10 +144,11 @@ namespace THUAI4 {
 	};
 
 
-	struct State {
-		const static uint32_t nTeams = 2;
-		const static uint32_t nPlayers = 4;
-		const static uint32_t nCells = 50;
+	struct State 
+	{
+		constexpr static uint32_t nTeams = 2;
+		constexpr static uint32_t nPlayers = 4;
+		constexpr static uint32_t nCells = 50;
 		ColorType selfTeamColor;
 		uint32_t teamScore;
 		std::vector<std::shared_ptr<Character>> characters;
@@ -154,3 +166,4 @@ namespace THUAI4 {
 	};
 }
 
+#endif //!STRUCTURES_H

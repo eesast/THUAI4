@@ -1,6 +1,6 @@
-#include"CAPI.h"
-#include"Structures.h"
-#include<iostream>
+#include "CAPI.h"
+#include "Structures.h"
+#include <iostream>
 
 Listener::Listener(std::mutex& mtx, std::condition_variable& cv, std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
 	mtxOnReceive(mtx), cvOnReceive(cv), Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
@@ -10,6 +10,7 @@ EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 	OnConnectL();
 	return HR_OK;
 }
+
 EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
 	int32_t type = (int32_t)pData[0];
@@ -41,6 +42,7 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 	cvOnReceive.notify_one();
 	return HR_OK;
 }
+
 EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	OnCloseL();
@@ -67,7 +69,7 @@ bool CAPI::Connect(const char* address, uint16_t port)
 {
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
-		if (!pclient->Start((LPCTSTR)address, port)) {
+		if (!pclient->Start(address, port)) {
 			std::cout << "Failed to connect with the agent. Error code:";
 			std::cout << pclient->GetLastError() << std::endl;
 			return false;
@@ -92,6 +94,7 @@ void CAPI::Send(const Protobuf::MessageToServer& message)
 		std::cout << pclient->GetLastError() << std::endl;
 	}
 }
+
 void CAPI::Stop()
 {
 	if (pclient->Stop());
@@ -100,16 +103,19 @@ void CAPI::Stop()
 		std::cout << pclient->GetLastError() << std::endl;
 	}
 }
+
 void CAPI::Push(Pointer2Message ptr)
 {
 
 	queue.push(ptr);
 }
+
 bool CAPI::TryPop(Pointer2Message& ptr)
 {
 	if (queue.empty()) return false;
 	return queue.try_pop(ptr);
 }
+
 bool CAPI::IsEmpty()
 {
 	return queue.empty();
