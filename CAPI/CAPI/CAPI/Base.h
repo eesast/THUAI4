@@ -34,7 +34,7 @@ public:
 	virtual void Attack(int timeInMilliseconds, double angle) = 0;
 	virtual void Send(int toPlayerID, std::string message) = 0;
 
-	//选手可获取的信息
+	//閫夋墜鍙幏鍙栫殑淇℃伅
 	virtual bool MessageAvailable() = 0;
 	virtual bool TryGetMessage(std::string&) = 0;
 	virtual std::vector<const THUAI4::Character*> GetCharacters() const = 0;
