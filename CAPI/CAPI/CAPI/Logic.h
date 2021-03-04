@@ -12,6 +12,7 @@
 #include"Constants.h"
 #include"AI.h"
 #include"CAPI.h"
+#include"API.h"
 
 class Logic {
 private:
@@ -57,9 +58,8 @@ private:
 	std::condition_variable cv_game;
 
 	CAPI capi;
-	AI ai;
-
-
+	API api;
+	AIBase* pAI;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
@@ -76,7 +76,7 @@ private:
 
 public:
 	Logic();
-	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType);
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType,CreateAIFunc f);
 	void ProcessMessage();
 	void PlayerWrapper();
 };
