@@ -24,7 +24,7 @@ public:
         while (!q.empty()) q.pop();
     }
 
-    bool empty() const
+    [[nodiscard]] bool empty() const
     {
         std::lock_guard<std::mutex> lg(mtx);
         bool ret = q.empty();
