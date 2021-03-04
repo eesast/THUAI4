@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <array>
 #include <vector>
+
 #define _COLOR_MAP_BY_HASHING_
 
 #ifdef _COLOR_MAP_BY_HASHING_
