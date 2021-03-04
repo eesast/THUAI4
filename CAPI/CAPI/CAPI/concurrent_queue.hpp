@@ -24,18 +24,18 @@ public:
         while (!q.empty()) q.pop();
     }
 
-    bool empty() const
+    [[nodiscard]] bool empty() const
     {
         std::lock_guard<std::mutex> lg(mtx);
         bool ret = q.empty();
         return ret;
     }
 
-    template <typename Ts>
-    void push(Ts&& args)
+    template <typename... Ts>
+    void push(Ts&&... args)
     {
         std::lock_guard<std::mutex> lg(mtx);
-        q.emplace(std::forward<Ts>(args));
+        q.emplace(std::forward<Ts>(args)...);
     }
 
     bool try_pop(Elem& out)
