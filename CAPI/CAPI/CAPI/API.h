@@ -1,7 +1,6 @@
 #pragma once
 
 #include<string>
-//#include<concurrent_queue.h>
 #include"proto/Message2Server.pb.h"
 #include<HPSocket/HPSocket.h>
 #include<HPSocket/SocketInterface.h>
@@ -29,7 +28,7 @@ public:
 	virtual void Attack(int timeInMilliseconds, double angle);
 	virtual void Send(int toPlayerID, std::string message);
 
-	//选手可获取的信息
+	//Information the player can get
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string&);
 
