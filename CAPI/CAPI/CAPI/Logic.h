@@ -15,8 +15,8 @@
 
 class Logic {
 private:
-	bool UnexpectedlyClosed = false;//ç”¨äºæ ‡ç¤ºæ¸¸æˆç»“æŸå‰æ„å¤–æ–­çº¿
-	//bufferå’Œstateçš„çŠ¶æ€
+	bool UnexpectedlyClosed = false;//ÓÃÓÚ±êÊ¾ÓÎÏ·½áÊøÇ°ÒâÍâ¶ÏÏß
+	//bufferºÍstateµÄ×´Ì¬
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
@@ -42,10 +42,9 @@ private:
 
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
-	THUAI4::State storage[2];//ï¿½ï¿½ï¿½ï¿½×ª
+	THUAI4::State storage[2];//
 
-	std::function<void(std::string)> AddMessage;//ï¿½ï¿½APIï¿½Ğµï¿½MessageStorage Push
-
+	std::function<void(std::string)> AddMessage;
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
 
@@ -53,7 +52,7 @@ private:
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
 
-	//æ¸¸æˆç»“ç‚¹çš„æ§åˆ¶
+	//ÓÎÏ·½áµãµÄ¿ØÖÆ
 	std::mutex mtx_game;
 	std::condition_variable cv_game;
 
@@ -62,7 +61,7 @@ private:
 
 
 
-	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//ï¿½ï¿½
+	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr <THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
@@ -73,7 +72,7 @@ private:
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void OnClose();
-	void load(std::shared_ptr<Protobuf::MessageToClient>);//å°†æ”¶åˆ°çš„M2CåŠ è½½åˆ°buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>);//½«ÊÕµ½µÄM2C¼ÓÔØµ½buffer
 
 public:
 	Logic();
