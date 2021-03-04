@@ -1,21 +1,19 @@
-#pragma once
-
 #ifndef LOGIC_H
 
 #define LOGIC_H
 
-#include "proto/Message2Client.pb.h"
-#include <functional>
-#include <array>
-#include <thread>
-#include <mutex>
-#include <iostream>
-#include "Constants.h"
-#include "AI.h"
-#include "CAPI.h"
+#include"proto/Message2Client.pb.h"
+#include<functional>
+#include<array>
+#include<thread>
+#include<mutex>
+#include<iostream>
+#include"Constants.h"
+#include"AI.h"
+#include"CAPI.h"
+#include"API.h"
 
-class Logic
-{
+class Logic {
 private:
 
 	bool UnexpectedlyClosed = false;	//用于标志意外断线
@@ -61,9 +59,8 @@ private:
 	std::condition_variable cv_game;
 
 	CAPI capi;
-	AI ai;
-
-
+	API api;
+	AIBase* pAI;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
@@ -80,7 +77,7 @@ private:
 
 public:
 	Logic();
-	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType);
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType,CreateAIFunc f);
 	void ProcessMessage();
 	void PlayerWrapper();
 };

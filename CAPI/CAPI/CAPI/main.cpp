@@ -1,6 +1,8 @@
-#include <tclap/CmdLine.h>
-#include "Logic.h"
-
+#include<tclap/CmdLine.h>
+#include"Logic.h"
+AIBase* CreateAI() {
+	return new AI();
+}
 Logic logic;
 
 int main(int argc, char** argv)
@@ -51,6 +53,6 @@ int main(int argc, char** argv)
 		std::cerr << "Parsing error: " << e.error() << " for arg " << e.argId() << std::endl;
 		return 0;
 	}
-	logic.Main(aIP.c_str(), aPort, pID, tID, jType);
+	logic.Main(aIP.c_str(), aPort, pID, tID, jType,CreateAI);
 	return 0;
 }

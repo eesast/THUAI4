@@ -69,7 +69,7 @@ bool CAPI::Connect(const char* address, uint16_t port)
 {
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
-		if (!pclient->Start(address, port)) {
+		if (!pclient->Start((LPCTSTR)address, port)) {
 			std::cout << "Failed to connect with the agent. Error code:";
 			std::cout << pclient->GetLastError() << std::endl;
 			return false;
