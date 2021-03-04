@@ -1,4 +1,5 @@
 #pragma once
+
 #include<string>
 #include<concurrent_queue.h>
 #include"proto/Message2Server.pb.h"
@@ -7,19 +8,23 @@
 #include<functional>
 #include"Structures.h"
 #include<cstdint>
+
 class Logic;
-class API {
+
+class API
+{
 public:
 	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
 private:
 	const int32_t& playerID;
 	const int32_t& teamID;
-	THUAI4::State*& pState;//指针的引用
-	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;// \xfgg/
+	THUAI4::State*& pState;
+	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;
 	concurrency::concurrent_queue<std::string> MessageStorage;
-	//选手API 
+ 
 protected:
-	//选手可进行的操作
+
+
 	void MovePlayer(int timeInMilliseconds, double angle);
 	void MoveRight(int timeInMilliseconds);
 	void MoveUp(int timeInMilliseconds);
@@ -31,9 +36,12 @@ protected:
 	void Attack(int timeInMilliseconds, double angle);
 	void Send(int toPlayerID, std::string message);
 
+
 	//选手可获取的信息
+
 	bool MessageAvailable();
 	bool TryGetMessage(std::string&);
+
 	std::vector<const THUAI4::Character*> GetCharacters() const;
 	std::vector<const THUAI4::Wall*> GetWalls() const;
 	std::vector<const THUAI4::Prop*> GetProps() const;

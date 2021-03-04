@@ -1,14 +1,30 @@
 #pragma once
+
+#ifndef CONSTANTS_H
+
+#define CONSTANTS_H
+
 #include <cstdint>
+#include <numeric>
+
+#define G_SCI static constexpr inline
+#define GF_CI constexpr inline
+#define _NODISCARD [[nodiscard]]
+
 namespace Constants
 {
-	static const int maxlength = 1000;//Message2Bytes时缓冲区的长度，够大就行
+	static const int maxlength = 1000;//Message2Bytes脢卤禄潞鲁氓脟酶碌脛鲁陇露脠拢卢鹿禄麓贸戮脥脨脨
 	static const int32_t MessageToClient = 0;
 	static const int32_t MessageToServer = 1;
 	static const int32_t MessageToOneClient = 2;
-	//视野半径 **数值是我随手写的**
+	//脢脫脪掳掳毛戮露 **脢媒脰碌脢脟脦脪脣忙脢脰脨麓碌脛**
 	static const uint64_t SightRadius = 5000;
 	static const uint64_t SightRadiusSquared = SightRadius * SightRadius;
 	static const uint32_t numOfGridPerCell = 1000;
+
 }
 
+#undef GF_CI
+#undef G_SCI
+
+#endif //!CONSTANTS_H

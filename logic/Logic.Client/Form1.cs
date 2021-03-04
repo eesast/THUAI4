@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
-using Communication.Proto; 
+using Communication.Proto;
 
 namespace Logic.Client
 {
     public partial class Form1 : Form
     {
-        public Form1()  //窗体构造时的初始化
+        public Form1(Int64 teamID, Int64 playerID, int bulletspeed, JobType job)  //窗体构造时的初始化
         {
+            this.teamid = teamID;
+            this.playerid = playerID;
+            this.bulletspeed = bulletspeed;
             InitializeComponent();
             this.ClientSize = new Size(50 * MapcellWidth + Interval + 250, 50 * MapcellHeight + 2 * Interval);
             this.AutoScroll = true;
@@ -18,7 +21,7 @@ namespace Logic.Client
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.Text = "Client---简易调试界面";
+            this.Text = "Client--- TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(job);
             //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             //this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             //绘制地图
@@ -284,7 +287,7 @@ namespace Logic.Client
         protected readonly int MapcellWidth = 13;  //单元格长度
         protected readonly int MapcellHeight = 13;  //单元格高度
         protected readonly int Interval = 10;  //单元格间距
-        protected Label[,] Maplabels = new Label[50, 50];  //地图
+        public Label[,] Maplabels = new Label[50, 50];  //地图
         protected Label[] Examplelabels = new Label[20];  //图例        
         //显示地图信息
         protected Label MapInfoPic = new Label();
@@ -326,6 +329,13 @@ namespace Logic.Client
         Dictionary<long, BoolLabel> PlayerLabelSet = new Dictionary<long, BoolLabel>();
         Dictionary<long, BoolLabel> BulletLabelSet = new Dictionary<long, BoolLabel>();
         Dictionary<long, BoolLabel> ItemLabelSet = new Dictionary<long, BoolLabel>();
+        public int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
+        public bool[,] ColorChange = new bool[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
+        public Int64 teamid;
+        public Int64 playerid;
+        public Int64 selfguid;
+        public int movespeed;
+        public int bulletspeed;
         public void DrawPlayer(Player player)  //绘制玩家
         {
             this.Invoke(new Action(() =>
@@ -335,7 +345,7 @@ namespace Logic.Client
                     PlayerLabelSet[player.id].label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
                     PlayerLabelSet[player.id].label.BringToFront();
                     PlayerLabelSet[player.id].used = true;
-                    PlayerLabelSet[player.id].label.Click+= delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
+                    PlayerLabelSet[player.id].label.Click += delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
                 }
                 else
                 {
@@ -407,7 +417,7 @@ namespace Logic.Client
         public void DrawItem(Item item)  //绘制道具
         {
             this.Invoke(new Action(() =>
-            {                
+            {
                 if (ItemLabelSet.ContainsKey(item.id))
                 {
                     ItemLabelSet[item.id].label.Location = new Point(item.xnum * MapcellWidth + Interval, item.ynum * MapcellHeight + Interval);
@@ -473,12 +483,12 @@ namespace Logic.Client
                 if (y < Interval || y > Interval + 50 * MapcellHeight) return;
                 int xnum = (x - Interval) / MapcellWidth;
                 int ynum = (y - Interval) / MapcellHeight;
-                int colorstate = Program.ColorState[xnum, ynum];
+                int colorstate = ColorState[xnum, ynum];
                 switch (colorstate)
                 {
                     case -2:  //出生点:深灰色+边框
-                        MapInfoPic.BackColor = Color.DarkGray;
                         MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
+                        MapInfoPic.BackColor = Color.DarkGray;
                         MapInfoWord.Text = "这是出生点";
                         break;
                     case -1:  //墙体:黑色+边框
@@ -518,11 +528,14 @@ namespace Logic.Client
                 int y = this.PointToClient(Control.MousePosition).X;
                 int x = this.PointToClient(Control.MousePosition).Y;
                 MessageToServer msg = new MessageToServer();
+                msg.PlayerID = playerid;
+                msg.TeamID = teamid;
                 msg.MessageType = MessageType.Move;
-                msg.Angle = Math.Atan2(y - PlayerLabelSet[Program.selfguid].label.Location.X-7, x - PlayerLabelSet[Program.selfguid].label.Location.Y-6);//目前为弧度
-                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[Program.selfguid].label.Location.X-7), 2)+Math.Pow((double)(x - PlayerLabelSet[Program.selfguid].label.Location.Y-6), 2))*Program.cell/MapcellHeight/Program.movespeed+0.5);
+                msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
+                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
                 //TO DO:向server发移动指令消息
                 Program.clientCommunicator.SendMessage(msg);
+
             }
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
@@ -632,16 +645,21 @@ namespace Logic.Client
                 case 'q':
                 case 'Q':
                     int y = this.PointToClient(Control.MousePosition).X;
-                    int x=this.PointToClient(Control.MousePosition).Y;
+                    int x = this.PointToClient(Control.MousePosition).Y;
                     MessageToServer msg1 = new MessageToServer();
+                    msg1.PlayerID = playerid;
+                    msg1.TeamID = teamid;
                     msg1.MessageType = MessageType.Attack;
-                    msg1.Angle = Math.Atan2(y - PlayerLabelSet[Program.selfguid].label.Location.X, x - PlayerLabelSet[Program.selfguid].label.Location.Y);//目前为弧度
+                    msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X, x - PlayerLabelSet[selfguid].label.Location.Y);//目前为弧度
+                    msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
                     Program.clientCommunicator.SendMessage(msg1);
                     break;
                 case 'w':
                 case 'W':
                     MessageToServer msg2 = new MessageToServer();
                     msg2.MessageType = MessageType.Use;
+                    msg2.PlayerID = playerid;
+                    msg2.TeamID = teamid;
                     //TO DO:发消息
                     Program.clientCommunicator.SendMessage(msg2);
                     break;
@@ -649,6 +667,8 @@ namespace Logic.Client
                 case 'E':
                     MessageToServer msg3 = new MessageToServer();
                     msg3.MessageType = MessageType.Pick;
+                    msg3.PlayerID = playerid;
+                    msg3.TeamID = teamid;
                     //TO DO:发消息
                     for (int i = 1; i < 11; i++)
                     {
@@ -660,8 +680,14 @@ namespace Logic.Client
                 case 'R':
                     MessageToServer msg4 = new MessageToServer();
                     msg4.MessageType = MessageType.Throw;
+                    msg4.PlayerID = playerid;
+                    msg4.TeamID = teamid;
                     //TO DO:发消息
                     Program.clientCommunicator.SendMessage(msg4);
+                    break;
+                case 'a':
+                case 'A':
+                    Application.Exit();
                     break;
                 default: break;
             }
@@ -677,8 +703,8 @@ namespace Logic.Client
                     {
                         item.Value.used = false;
                     }
-                    else 
-                    { 
+                    else
+                    {
                         this.Controls.Remove(item.Value.label);
                         PlayerLabelSet.Remove(item.Key);
                     }
@@ -707,44 +733,48 @@ namespace Logic.Client
                         ItemLabelSet.Remove(item.Key);
                     }
                 }
-                Redraw(Program.ColorState);
+                Redraw(ColorState);
             }));
         }
-        public void Redraw(int[,]vs) //重绘地图
+        public void Redraw(int[,] vs) //重绘地图
         {
-            for(int i =0; i < 50; i++)
+            for (int i = 0; i < 50; i++)
             {
-                for(int j = 0; j < 50; j++)
+                for (int j = 0; j < 50; j++)
                 {
-                    if(Program.ColorChange[i,j])
-                    switch (vs[i,j])
-                    {
-                        case -2:  //出生点:深灰色+边框
-                            Maplabels[i, j].BackColor = Color.DarkGray;
-                            Maplabels[i, j].BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
-                            break;
-                        case -1:  //墙体:黑色+边框
-                            Maplabels[i, j].BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
-                            Maplabels[i, j].BackColor = Color.Brown;
-                            break;
-                        case 0:   //未染色区域:淡灰
-                            Maplabels[i, j].BackColor = Color.LightGray;
-                            break;
-                        case 1:   //队伍1:淡钢青色
-                            Maplabels[i, j].BackColor = Color.LightSteelBlue;
-                            break;
-                        case 2:   //队伍2:淡绿色
-                            Maplabels[i, j].BackColor = Color.LightGreen;
-                            break;
-                        case 3:   //队伍3:淡蓝色
-                            Maplabels[i, j].BackColor = Color.LightBlue;
-                            break;
-                        case 4:   //队伍4:淡粉色
-                            Maplabels[i, j].BackColor = Color.LightPink;
-                            break;
-                    }
+                    if (ColorChange[i, j])
+                        switch (vs[i, j])
+                        {
+                            case -2:  //出生点:深灰色+边框
+                                Maplabels[i, j].BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
+                                break;
+                            case -1:  //墙体:黑色+边框
+                                Maplabels[i, j].BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
+                                Maplabels[i, j].BackColor = Color.Brown;
+                                break;
+                            case 0:   //未染色区域:淡灰
+                                Maplabels[i, j].BackColor = Color.LightGray;
+                                break;
+                            case 1:   //队伍1:淡钢青色
+                                Maplabels[i, j].BackColor = Color.LightSteelBlue;
+                                break;
+                            case 2:   //队伍2:淡绿色
+                                Maplabels[i, j].BackColor = Color.LightGreen;
+                                break;
+                            case 3:   //队伍3:淡蓝色
+                                Maplabels[i, j].BackColor = Color.LightBlue;
+                                break;
+                            case 4:   //队伍4:淡粉色
+                                Maplabels[i, j].BackColor = Color.LightPink;
+                                break;
+                        }
                 }
             }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
