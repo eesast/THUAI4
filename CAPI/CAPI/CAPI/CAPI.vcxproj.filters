@@ -36,6 +36,15 @@
     <ClInclude Include="Base.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="proto\Message2Client.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="proto\Message2Server.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="proto\MessageType.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AI.cpp">

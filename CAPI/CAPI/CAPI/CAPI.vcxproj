@@ -147,6 +147,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/source-charset:utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -163,6 +164,9 @@
     <ClInclude Include="CAPI.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Logic.h" />
+    <ClInclude Include="proto\Message2Client.pb.h" />
+    <ClInclude Include="proto\Message2Server.pb.h" />
+    <ClInclude Include="proto\MessageType.pb.h" />
     <ClInclude Include="Structures.h" />
   </ItemGroup>
   <ItemGroup>
