@@ -4,6 +4,7 @@ AIBase* CreateAI() {
 	return new AI();
 }
 Logic logic;
+
 int main(int argc, char** argv)
 {
 	std::string aIP;
