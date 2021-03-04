@@ -11,7 +11,7 @@ capi(playerID,
 	mtxOnReceive,
 	cvOnReceive,
 	[this]() {OnClose(); }),
-	ai(playerID,
+	api(playerID,
 		teamID,
 		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
 		pState, AddMessage) {};
@@ -350,7 +350,7 @@ void Logic::PlayerWrapper()
 
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed) {
-			ai.play();
+			pAI->play(api);
 			CurrentStateAccessed = true;
 		}
 		else {
@@ -390,11 +390,12 @@ void Logic::PlayerWrapper()
 }
 
 
-void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType)
+void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f)
 {
 	this->playerID = playerID;
 	this->teamID = teamID;
 	this->jobType = jobType;
+	this->pAI = f();
 	//CAPI先连接Agent
 	if (!capi.Connect(address, port)) {
 		std::cout << "无法连接到Agent" << std::endl;

@@ -1,18 +1,9 @@
+#include"API.h"
+#include<functional>
 
-#include "API.h"
-#include <functional>
+const static double PI = 3.14159265358979323846;
 
-
-constexpr static double PI = 3.14159265358979323846;
-
-
-API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM) :
-playerID(pID), teamID(tID), SendMessage(f), pState(pS)
-{
-	MessageStorage.clear();
-	aM = [this](std::string msg) {MessageStorage.push(msg); };
-}
-
+API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM):GameApi(pID,tID,f,pS,aM){}
 
 void API::Use()
 {
@@ -22,7 +13,6 @@ void API::Use()
 	message.set_teamid(teamID);
 	SendMessage(message);
 }
-
 void API::Pick(Protobuf::PropType propType)
 {
 	Protobuf::MessageToServer message;
@@ -32,7 +22,6 @@ void API::Pick(Protobuf::PropType propType)
 	message.set_proptype(propType);
 	SendMessage(message);
 }
-
 void API::Throw(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
@@ -43,7 +32,6 @@ void API::Throw(int timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessage(message);
 }
-
 void API::Attack(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
@@ -54,7 +42,6 @@ void API::Attack(int timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessage(message);
 }
-
 void API::Send(int toPlayerID, std::string message)
 {
 	Protobuf::MessageToServer msg;
@@ -65,7 +52,6 @@ void API::Send(int toPlayerID, std::string message)
 	msg.set_message(message);
 	SendMessage(msg);
 }
-
 void API::MovePlayer(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
@@ -76,27 +62,22 @@ void API::MovePlayer(int timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessage(message);
 }
-
 void API::MoveRight(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 0.5);
 }
-
 void API::MoveUp(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI);
 }
-
 void API::MoveLeft(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 1.5);
 }
-
 void API::MoveDown(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
 }
-
 bool API::MessageAvailable()
 {
 	return !MessageStorage.empty();
@@ -166,7 +147,7 @@ const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::n
 {
 	return pState->playerGUIDs;
 }
-const THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
+THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 {
 	assert(CellX >= 0 && CellX < THUAI4::State::nCells&& CellY >= 0 && CellY < THUAI4::State::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
