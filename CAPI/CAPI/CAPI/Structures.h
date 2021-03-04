@@ -1,5 +1,5 @@
 #pragma once
-#include<boost/shared_ptr.hpp>
+#include<memory>
 #include<cstdint>
 #include<array>
 #include<vector>
