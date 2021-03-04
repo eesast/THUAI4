@@ -5,7 +5,7 @@
 #define API_H
 
 #include <string>
-#include <concurrent_queue.h>
+#include "concurrent_queue.hpp"
 #include "proto/Message2Server.pb.h"
 #include <HPSocket/HPSocket.h>
 #include <HPSocket/SocketInterface.h>

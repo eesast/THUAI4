@@ -18,8 +18,9 @@ class Logic
 {
 private:
 
-	bool UnexpectedlyClosed = false;//用于标示游戏结束前意外断线
-	//buffer和state的状态
+	bool UnexpectedlyClosed = false;	//用于标志意外断线
+
+	//The state of buffer and state
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
@@ -56,7 +57,6 @@ private:
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
 
-	//游戏结点的控制
 	std::mutex mtx_game;
 	std::condition_variable cv_game;
 
@@ -76,7 +76,7 @@ private:
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void OnClose();
-	void load(std::shared_ptr<Protobuf::MessageToClient>);//将收到的M2C加载到buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>);//降收到的M2C加载到buffer
 
 public:
 	Logic();
