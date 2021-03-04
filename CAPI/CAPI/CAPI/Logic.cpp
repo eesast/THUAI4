@@ -30,7 +30,7 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 
 }
 
-//Ô²ºÍÕı·½ĞÎÊÇ·ñÏà½» 
+//Ô²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½à½» 
 inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 {
 	int32_t centerX = CellX * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
@@ -43,7 +43,8 @@ inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t
 
 void Logic::OnClose()
 {
-#ifdef _ENABLE_RECONNECTION_//±ı±ı
+
+#ifdef _ENABLE_RECONNECTION_//ï¿½ï¿½ï¿½
 
 #else
 	{
@@ -76,7 +77,7 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi
 	character->propType = (THUAI4::PropType)goi.proptype();
 	character->radius = goi.radius();
 	character->shapeType = (THUAI4::ShapeType)goi.shapetype();
-	character->teamID = goi.teamid();
+	character->teamID = static_cast<uint16_t>(goi.teamid());
 	character->x = goi.x();
 	character->y = goi.y();
 	return character;
@@ -117,7 +118,7 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->moveSpeed = goi.movespeed();
 	bullet->radius = goi.radius();
 	bullet->shapeType = (THUAI4::ShapeType)goi.shapetype();
-	bullet->teamID = goi.teamid();
+	bullet->teamID = static_cast<uint16_t>(goi.teamid());
 	bullet->x = goi.x();
 	bullet->y = goi.y();
 	return bullet;
@@ -128,7 +129,7 @@ std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& g
 	birthpoint->guid = goi.guid();
 	birthpoint->radius = goi.radius();
 	birthpoint->shapeType = (THUAI4::ShapeType) goi.shapetype();
-	birthpoint->teamID = goi.teamid();
+	birthpoint->teamID = static_cast<uint16_t>(goi.teamid());
 	birthpoint->x = goi.x();
 	birthpoint->y = goi.y();
 	return birthpoint;
@@ -138,8 +139,8 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
 	switch (pM2C->messagetype()) {
 	case Protobuf::MessageType::StartGame:
-		//Ê×ÏÈloadµ½buffer
-		load(pM2C);//µÚÒ»Ö¡AIÏß³Ì»¹Ã»¿ªÊ¼ ¼ÓÔØµ½bufferÈ»ºó½»»»Ö¸Õë
+		//é¦–å…ˆloadåˆ°buffer
+		load(pM2C);//ç¬¬ä¸€å¸§AIçº¿ç¨‹è¿˜æ²¡å¼€å§‹ åŠ è½½åˆ°bufferç„¶åäº¤æ¢æŒ‡é’ˆ
 		{
 			std::lock_guard<std::mutex> lck(mtx_game);
 			gamePhase = GamePhase::Gaming;
@@ -191,10 +192,11 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 }
 
+
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
 	{
-		//Ê×ÏÈloadµ½buffer
+		//é¦–å…ˆloadåˆ°buffer
 		std::lock_guard<std::mutex> lck(mtx_buffer);
 		pBuffer->characters.clear();
 		pBuffer->walls.clear();
@@ -242,9 +244,9 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		}
 
-		for (int i = 0; i < THUAI4::State::nTeams; i++) {
-			for (int j = 0; j < THUAI4::State::nPlayers; j++) {
-				pBuffer->playerGUIDs[i][j] = pM2C->playerguids(i).teammateguids(j);
+		for (int i = 0; i < (int)pBuffer->playerGUIDs.size(); i++) {
+			for (int j = 0; j < (int)pBuffer->playerGUIDs[i].size(); j++) {
+				pBuffer->playerGUIDs[i][j] = static_cast<int32_t>(pM2C->playerguids(i).teammateguids(j));
 			}
 		}
 
@@ -266,7 +268,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 				}
 #ifndef _COLOR_MAP_BY_HASHING_
-				//unorderer_map²»¿É¼û¾Í²»²åÈë£¬½ÚÊ¡¿Õ¼ä ËÆºõ²éÕÒËÙ¶ÈÒ²²»»áÂı£¿
+				//unorderer_mapï¿½ï¿½ï¿½É¼ï¿½Í²ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½Ê¡ï¿½Õ¼ï¿½ ï¿½Æºï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				else {
 					pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
 				}
@@ -276,7 +278,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		BufferUpdated = true;
 
-		//Èç¹ûÕâÊ±ºòstate»¹Ã»±»player·ÃÎÊ£¬¾Í°Ñbuffer×ªµ½state
+		//å¦‚æœè¿™æ—¶å€™stateè¿˜æ²¡è¢«playerè®¿é—®ï¼Œå°±æŠŠbufferè½¬åˆ°state
 		if (mtx_state.try_lock()) {
 			THUAI4::State* temp = pState;
 			pState = pBuffer;
@@ -296,26 +298,26 @@ void Logic::ProcessMessage()
 	while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed && validity != Validity::Invalid) {
 		lock_game.unlock();
 
-		//ÎŞÏûÏ¢´¦ÀíÊ±Í£ÏÂÀ´ÉÙÕ¼×ÊÔ´
+		//æ— æ¶ˆæ¯å¤„ç†æ—¶åœä¸‹æ¥å°‘å èµ„æº
 
 		{
-			std::unique_lock<std::mutex> lck(mtxOnReceive);//OnReceiveÀïÍù¶ÓÁĞÀïPushÊ±Ò²ËøÁË
+			std::unique_lock<std::mutex> lck(mtxOnReceive);//OnReceiveé‡Œå¾€é˜Ÿåˆ—é‡ŒPushæ—¶ä¹Ÿé”äº†
 			lock_game.lock();
-			while (capi.IsEmpty() && !UnexpectedlyClosed) {//·ñÔòÔÚÕâ¶ÏÏß¾Í»áËø×¡
+			while (capi.IsEmpty() && !UnexpectedlyClosed) {//å¦åˆ™åœ¨è¿™æ–­çº¿å°±ä¼šé”ä½
 				lock_game.unlock();
 				cvOnReceive.wait(lck);
 				lock_game.lock();
 			}
 			lock_game.unlock();
 		}
-		//std::cout << "ProcessMessageÓĞÏûÏ¢´¦Àí" << std::endl;
+		//std::cout << "ProcessMessageæœ‰æ¶ˆæ¯å¤„ç†" << std::endl;
 		if (!capi.TryPop(p2M)) {
 			std::cout << "Failed to pop the message\n";
 			lock_game.lock();
 			continue;
 		}
 
-		//´¦ÀíÏûÏ¢
+		//å¤„ç†æ¶ˆæ¯
 		switch (p2M.index()) {
 		case 0://M2C
 			ProcessM2C(std::get<std::shared_ptr<Protobuf::MessageToClient>>(p2M));
@@ -335,7 +337,7 @@ void Logic::ProcessMessage()
 
 void Logic::PlayerWrapper()
 {
-	//whileÅĞ¶ÏÊ±±£Ö¤gamePhaseºÍUnexpectedlyClosed²»±»ÆäËûÏß³Ì·ÃÎÊ
+	//whileåˆ¤æ–­æ—¶ä¿è¯gamePhaseå’ŒUnexpectedlyClosedä¸è¢«å…¶ä»–çº¿ç¨‹è®¿é—®
 	std::unique_lock<std::mutex> lock_game(mtx_game);
 
 	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed) {
@@ -347,8 +349,8 @@ void Logic::PlayerWrapper()
 			CurrentStateAccessed = true;
 		}
 		else {
-			//·ñÔò¿´bufferÊÇ·ñÓĞ¸üĞÂ£¬¸üĞÂµÄÇ°ÌáÊÇbufferÃ»±»Õ¼ÓÃ
-			//ËùÒÔÕâÀï¶ÂÈûÊÇ¿ÉÒÔ½ÓÊÜµÄ
+			//å¦åˆ™çœ‹bufferæ˜¯å¦æœ‰æ›´æ–°ï¼Œæ›´æ–°çš„å‰ææ˜¯bufferæ²¡è¢«å ç”¨
+			//æ‰€ä»¥è¿™é‡Œå µå¡æ˜¯å¯ä»¥æ¥å—çš„
 			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
 			if (BufferUpdated) {
 				THUAI4::State* temp = pState;
@@ -357,9 +359,9 @@ void Logic::PlayerWrapper()
 				CurrentStateAccessed = false;
 				BufferUpdated = false;
 			}
-			else {//Èç¹ûµ±Ç°stateÒÑ¾­½Ó´¥¹ıÇÒbufferÃ»¸üĞÂ£¬ÄÇ¾ÍµÈµ½buffer¸üĞÂ
+			else {//å¦‚æœå½“å‰stateå·²ç»æ¥è§¦è¿‡ä¸”bufferæ²¡æ›´æ–°ï¼Œé‚£å°±ç­‰åˆ°bufferæ›´æ–°
 
-				  //ÒâÍâ¶ÏÏßÕâÀïÒ²»áËø×¡
+				  //æ„å¤–æ–­çº¿è¿™é‡Œä¹Ÿä¼šé”ä½
 				lock_game.lock();
 				while (!BufferUpdated && !UnexpectedlyClosed && gamePhase != GamePhase::GameOver) {
 					lock_game.unlock();
@@ -382,23 +384,24 @@ void Logic::PlayerWrapper()
 	std::cout << "AI thread terminates" << std::endl;
 }
 
+
 void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType)
 {
 	this->playerID = playerID;
 	this->teamID = teamID;
 	this->jobType = jobType;
-	//CAPIÏÈÁ¬½ÓAgent
+	//CAPIå…ˆè¿æ¥Agent
 	if (!capi.Connect(address, port)) {
-		std::cout << "ÎŞ·¨Á¬½Óµ½Agent" << std::endl;
+		std::cout << "æ— æ³•è¿æ¥åˆ°Agent" << std::endl;
 		capi.Stop();
 		return;
 	}
-	std::cout << "³É¹¦Á¬½Óµ½Agent" << std::endl;
+	std::cout << "æˆåŠŸè¿æ¥åˆ°Agent" << std::endl;
 
 	{
-		//OnConnect() Ò»Á¬ÉÏCAPI¾Í·¢AddPlayer
-		//µÈ´ıServer·¢ ValidPlayer GameStart
-		//±ı£ºInvalidPlayer²¹¾ÈÒ»ÏÂ
+		//OnConnect() ä¸€è¿ä¸ŠCAPIå°±å‘AddPlayer
+		//ç­‰å¾…Serverå‘ ValidPlayer GameStart
+		//é¥¼ï¼šInvalidPlayerè¡¥æ•‘ä¸€ä¸‹
 		std::unique_lock<std::mutex> lck(mtx_game);
 
 		std::thread tPM(&Logic::ProcessMessage, this);
@@ -409,7 +412,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		if (UnexpectedlyClosed) {
 			std::cout << "Connection was unexpectedly closed.\n";
 			lck.unlock();
-			cvOnReceive.notify_one();//·ñÔòPMÏß³Ì»áÒ»Ö±µÈ
+			cvOnReceive.notify_one();//å¦åˆ™PMçº¿ç¨‹ä¼šä¸€ç›´ç­‰
 			tPM.join();
 			return;
 		}
@@ -435,10 +438,10 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			return;
 		}
 
-		std::cout << "ÓÎÏ·¿ªÊ¼£¡" << std::endl;
+		std::cout << "ï¿½ï¿½Ï·ï¿½ï¿½Ê¼ï¿½ï¿½" << std::endl;
 		std::thread tAI(&Logic::PlayerWrapper, this);
 
-		//È»ºóAI¾ö²ßÖªµÀÓÎÏ·½áÊø
+
 		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
 			cv_game.wait(lck);
 		if (UnexpectedlyClosed) {
