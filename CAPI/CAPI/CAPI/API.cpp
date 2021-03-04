@@ -1,5 +1,7 @@
+
 #include"API.h"
 #include<functional>
+
 
 const static double PI = 3.14159265358979323846;
 
@@ -20,6 +22,7 @@ void API::Use()
 	message.set_teamid(teamID);
 	SendMessage(message);
 }
+
 void API::Pick(Protobuf::PropType propType)
 {
 	Protobuf::MessageToServer message;
@@ -29,6 +32,7 @@ void API::Pick(Protobuf::PropType propType)
 	message.set_proptype(propType);
 	SendMessage(message);
 }
+
 void API::Throw(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
@@ -39,6 +43,7 @@ void API::Throw(int timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessage(message);
 }
+
 void API::Attack(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
@@ -49,6 +54,7 @@ void API::Attack(int timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessage(message);
 }
+
 void API::Send(int toPlayerID, std::string message)
 {
 	Protobuf::MessageToServer msg;
@@ -70,18 +76,22 @@ void API::MovePlayer(int timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessage(message);
 }
+
 void API::MoveRight(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 0.5);
 }
+
 void API::MoveUp(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI);
 }
+
 void API::MoveLeft(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 1.5);
 }
+
 void API::MoveDown(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
@@ -99,6 +109,7 @@ bool API::TryGetMessage(std::string& str)
 std::vector<const THUAI4::Character*> API::GetCharacters() const
 {
 	std::vector<const THUAI4::Character*> characters;
+
 	for (auto it : pState->characters) {
 		characters.push_back(it.get());
 	}
@@ -116,6 +127,7 @@ std::vector<const THUAI4::Wall*> API::GetWalls() const
 std::vector<const THUAI4::Prop*> API::GetProps() const
 {
 	std::vector<const THUAI4::Prop*> props;
+
 	for (auto it : pState->props) {
 		props.push_back(it.get());
 	}
@@ -124,6 +136,7 @@ std::vector<const THUAI4::Prop*> API::GetProps() const
 std::vector<const THUAI4::Bullet*> API::GetBullets() const
 {
 	std::vector<const THUAI4::Bullet*> bullets;
+
 	for (auto it : pState->bullets) {
 		bullets.push_back(it.get());
 	}
@@ -166,5 +179,5 @@ const THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 	return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
 
-
 }
+

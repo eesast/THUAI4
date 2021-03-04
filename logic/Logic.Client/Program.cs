@@ -23,21 +23,24 @@ namespace Logic.Client
             //取得开始命令
             AOption? options = null;
             Parser.Default.ParseArguments<AOption>(args).WithParsed(o => { options = o; });
+            Int64 teamid, playerid;
+            ClientData client;
             if (options == null)
             {
-                Application.Run(new Starting());
+                Starting starting = new Starting();
+                Application.Run(starting);
+                teamid = starting.teamid;
+                playerid = starting.playerid;
+                client = new ClientData(starting.teamid, starting.playerid, starting.job, starting.port);
             }
             else
             {
-                teamID = options.teamID;
-                playerID = options.playerID;
-                jobType = (JobType)options.job;
-                port = options.ServerPort;
+                teamid = options.teamID;
+                playerid = options.playerID;
+                client = new ClientData(options.teamID, options.playerID, (JobType)options.job, options.ServerPort);
             }
-            clientCommunicator = new Communication.CSharpClient.CSharpClient();
-            if (clientCommunicator.Connect("127.0.0.1", port))
+            if (clientCommunicator.Connect("127.0.0.1", client.port))
             {
-                MessageBox.Show("成功连接Agent");
             }
             else
             {
@@ -45,163 +48,73 @@ namespace Logic.Client
                 return;
             }
             //向server发消息
-            MessageToServer msg01 = new MessageToServer();
-            msg01.MessageType = MessageType.AddPlayer;
-            msg01.TeamID = teamID - 1;
-            msg01.PlayerID = playerID - 1;
-            msg01.JobType = jobType;
+            MessageToServer msg = new MessageToServer();
+            msg.MessageType = MessageType.AddPlayer;
+            msg.TeamID = teamid;
+            msg.PlayerID = playerid;
+            msg.JobType = client.jobType;
             //TO DO:发出消息
             clientCommunicator.OnReceive += delegate ()
             {
-                if (gaming) return;
                 if (clientCommunicator.TryTake(out IMsg msg))
-                    messageline.Add(new Tuple<IMsg, long>(msg,System.Environment.TickCount64));
+                    client.messageline.Add(new Tuple<IMsg, long>(msg, System.Environment.TickCount64));
             };
-            messageline = new BlockingCollection<Tuple<IMsg, long>>();
-            gameform = new Form1();
+            client.messageline = new BlockingCollection<Tuple<IMsg, long>>();
+            int bulletspeed;
+            switch (client.jobType)
+            {
+                default:
+                case JobType.Job0:
+                    bulletspeed = Program.basicBulletMoveSpeed;
+                    break;
+                case JobType.Job1:
+                    bulletspeed = Program.basicBulletMoveSpeed * 2;
+                    break;
+                case JobType.Job2:
+                    bulletspeed = Program.basicBulletMoveSpeed / 2;
+                    break;
+                case JobType.Job3:
+                    bulletspeed = Program.basicBulletMoveSpeed / 2;
+                    break;
+                case JobType.Job4:
+                    bulletspeed = Program.basicBulletMoveSpeed * 4;
+                    break;
+                case JobType.Job5:
+                    bulletspeed = Program.basicBulletMoveSpeed;
+                    break;
+                case JobType.Job6:
+                    bulletspeed = Program.basicBulletMoveSpeed;
+                    break;
+            }
+            client.gameform = new Form1(teamid, playerid, bulletspeed, client.jobType);
             new Thread(() =>
             {
                 while (true)
                 {
-                    if (messageline.TryTake(out Tuple<IMsg, long> msg))
+                    if (client.messageline.TryTake(out Tuple<IMsg, long> msg))
                     {
                         if (msg.Item1.PacketType == PacketType.MessageToOneClient)
                         {
                             MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
-                            OnReciveShort(mm);
+                            if (mm.TeamID == teamid && mm.PlayerID == playerid) client.OnReciveShort(mm);
                         }
                         else if (msg.Item1.PacketType == PacketType.MessageToClient)
                         {
                             MessageToClient mm = msg.Item1.Content as MessageToClient;
-                            OnReciveNormal(mm,msg.Item2);
+                            if (mm.TeamID == teamid && mm.PlayerID == playerid) client.OnReciveNormal(mm, msg.Item2);
                         }
                     }
                 }
             }
                 ).Start();
-            clientCommunicator.SendMessage(msg01);
-            Application.Run(gameform);
+            clientCommunicator.SendMessage(msg);
+            Application.Run(client.gameform);
+            Application.Exit();
         }
-        public static int[,] ColorState = new int[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
-        public static bool[,] ColorChange = new bool[50, 50];  //储存每个地图格的染色状态 0:未被染色 i:第i队染色 -1:墙体 -2:出生点
-        public static Int64 teamID;
-        public static Int64 playerID;
-        public static JobType jobType;
-        public static ushort port;
-        public static Int64 selfguid;
-        public static int movespeed;
-        private static Dictionary<Int64, Tuple<int, int>> Hashable;
-        private static Form1 gameform; //游戏窗体
-        public static CSharpClient clientCommunicator;
-        private static BlockingCollection<Tuple<IMsg,long>> messageline;
-        private static bool gaming = false;
         public const int cell = 1000;
-        private static void OnReciveShort(MessageToOneClient msg)  //连接是否成功
-        {
-            if (msg.MessageType == MessageType.ValidPlayer)
-            {
-                MessageBox.Show("Loading");
-            }
-            else
-            {
-                MessageBox.Show("Invalid Player");
-                Application.Run(new Starting());
-                MessageToServer msg1 = new MessageToServer();
-                msg1.MessageType = MessageType.AddPlayer;
-                msg1.TeamID = teamID - 1;
-                msg1.PlayerID = playerID - 1;
-                msg1.JobType = jobType;
-                clientCommunicator.SendMessage(msg1);
-            }
-        }
-        private static void OnReciveNormal(MessageToClient msg,long clock) //处理游戏消息
-        {
-            switch (msg.MessageType)
-            {
-                case MessageType.StartGame:
-                    MessageBox.Show("game start");
-                    Hashable = new Dictionary<Int64, Tuple<int, int>>();
-                    for (int i = 0; i < 1; i++)
-                    {
-                        for (int j = 0; j < 1; j++)
-                        {
-                            Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
-                        }
-                    }
-                    movespeed = msg.SelfInfo.MoveSpeed;
-                    break;
-                case MessageType.Gaming:
-                    if (System.Environment.TickCount64 - clock > 50) break;
-                    Refresh(msg);
-                    break;
-                case MessageType.EndGame:
-                    Application.Exit();
-                    break;
-                default: break;
-            }
-        }
-        private static void Refresh(MessageToClient msg)  //刷新界面
-        {
-            selfguid = msg.SelfInfo.Guid;
-            movespeed = msg.SelfInfo.MoveSpeed;
-            for (int i = 0; i < 50; i++) //读取颜色
-            {
-                for (int j = 0; j < 50; j++)
-                {
-                    if (ColorState[i, j] == (int)msg.CellColors[j].RowColors[i])
-                        ColorChange[i, j] = false;
-                    else
-                    {
-                        ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
-                        ColorChange[i, j] = true;
-                    }
-                }
-            }
-            foreach (var objinfo in msg.GameObjs)
-            {
-                Objdeal(objinfo);
-            }
-            gameform.Rebuild();
-        }
-        private static void Objdeal(GameObjInfo obj)  //处理物体
-        {
-            switch (obj.GameObjType)
-            {
-                case GameObjType.BirthPoint:
-                    if (ColorState[obj.Y / cell, obj.X / cell] == -2)
-                        ColorChange[obj.Y / cell, obj.X / cell] = false;
-                    else
-                    {
-                        ColorState[obj.Y / cell, obj.X / cell] = -2;
-                        ColorChange[obj.Y / cell, obj.X / cell] = true;
-                    }
-                    break;
-                case GameObjType.Wall:
-                    if (ColorState[obj.Y / cell, obj.X / cell] == -1)
-                        ColorChange[obj.Y / cell, obj.X / cell] = false;
-                    else
-                    {
-                        ColorState[obj.Y / cell, obj.X / cell] = -1;
-                        ColorChange[obj.Y / cell, obj.X / cell] = true;
-                    }
-                    break;
-                case GameObjType.Character:
-                    if (obj.IsDying) break;
-                    Player player = new Player(obj.Y, obj.X, (byte)(obj.TeamID + 1), (byte)(Hashable[obj.Guid].Item2 + 1), obj.JobType, (short)obj.Hp,obj.Guid,obj.PropType);
-                    gameform.DrawPlayer(player);
-                    break;
-                case GameObjType.Bullet:
-                    Bullet bullet = new Bullet(obj.Y, obj.X, (int)obj.TeamID + 1, obj.BulletType, obj.Guid);
-                    gameform.DrawBullet(bullet);
-                    break;
-                case GameObjType.Prop:
-                    if (obj.IsLaid) break;
-                    Item item = new Item(obj.Y / cell, obj.X / cell, obj.PropType,obj.Guid);
-                    gameform.DrawItem(item);
-                    break;
-                default: break;
-            }
-        }
+        public const int basicBulletMoveSpeed = cell * 6;
+        public static bool initneed = true;
+        public static CSharpClient clientCommunicator = new CSharpClient();
     }
     public class Player  //玩家显示类
     {
@@ -213,7 +126,7 @@ namespace Logic.Client
         public JobType job;
         public PropType possession = 0;
         public short health = 0;
-        public Player(int x, int y, byte teamnum, byte playernum, JobType job, short health,Int64 guid,PropType possession)
+        public Player(int x, int y, byte teamnum, byte playernum, JobType job, short health, Int64 guid, PropType possession)
         {
             this.x = x;
             this.y = y;
@@ -259,7 +172,7 @@ namespace Logic.Client
          * 10:加CD地雷
          */
         public Int64 id;
-        public Item(int xnum, int ynum, PropType type,Int64 guid)
+        public Item(int xnum, int ynum, PropType type, Int64 guid)
         {
             this.xnum = xnum;
             this.ynum = ynum;
@@ -275,6 +188,146 @@ namespace Logic.Client
         {
             label = new Label();
             used = true;
+        }
+    }
+    public class ClientData
+    {
+        public Int64 teamID;
+        public Int64 playerID;
+        public JobType jobType;
+        public int bulletspeed;
+        public ushort port;
+        public Form1 gameform; //游戏窗体
+        private Dictionary<Int64, Tuple<int, int>> Hashable;
+        public Int64 selfguid;
+        public bool searched = false;
+        public BlockingCollection<Tuple<IMsg, long>> messageline;
+        public ClientData(Int64 teamID, Int64 playerID, JobType jobType, ushort port)
+        {
+            this.teamID = teamID;
+            this.playerID = playerID;
+            this.jobType = jobType;
+            this.port = port;
+        }
+        public void OnReciveShort(MessageToOneClient msg)  //连接是否成功
+        {
+            if (msg.MessageType == MessageType.ValidPlayer)
+            {
+            }
+            else
+            {
+                MessageBox.Show("Invalid Player");
+                Starting starting = new Starting();
+                Application.Run(new Starting());
+                MessageToServer msg1 = new MessageToServer();
+                msg1.MessageType = MessageType.AddPlayer;
+                msg1.TeamID = starting.teamid;
+                msg1.PlayerID = starting.playerid;
+                msg1.JobType = starting.job;
+                Program.clientCommunicator.SendMessage(msg1);
+            }
+        }
+        public void OnReciveNormal(MessageToClient msg, long clock) //处理游戏消息
+        {
+            switch (msg.MessageType)
+            {
+                case MessageType.StartGame:
+                    Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                    for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
+                    {
+                        for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                        {
+                            Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                        }
+                    }
+                    gameform.movespeed = msg.SelfInfo.MoveSpeed;
+                    break;
+                case MessageType.Gaming:
+                    if (System.Environment.TickCount64 - clock > 50) break;
+                    Refresh(msg);
+                    break;
+                case MessageType.EndGame:
+                    Application.Exit();
+                    break;
+                default: break;
+            }
+        }
+        private void Refresh(MessageToClient msg)  //刷新界面
+        {
+            gameform.selfguid = msg.SelfInfo.Guid;
+            gameform.movespeed = msg.SelfInfo.MoveSpeed;
+            for (int i = 0; i < 50; i++) //读取颜色
+            {
+                for (int j = 0; j < 50; j++)
+                {
+                    if (gameform.ColorState[i, j] == (int)msg.CellColors[j].RowColors[i])
+                        gameform.ColorChange[i, j] = false;
+                    else
+                    {
+                        gameform.ColorState[i, j] = (int)msg.CellColors[j].RowColors[i];
+                        gameform.ColorChange[i, j] = true;
+                    }
+                }
+            }
+            foreach (var objinfo in msg.GameObjs)
+            {
+                Objdeal(objinfo);
+            }
+            gameform.Rebuild();
+        }
+        private void Objdeal(GameObjInfo obj)  //处理物体
+        {
+            switch (obj.GameObjType)
+            {
+                case GameObjType.BirthPoint:
+                    if (gameform.ColorState[obj.Y / Program.cell, obj.X / Program.cell] == -2)
+                        gameform.ColorChange[obj.Y / Program.cell, obj.X / Program.cell] = false;
+                    else
+                    {
+                        switch (gameform.ColorState[obj.Y / Program.cell, obj.X / Program.cell])
+                        {
+                            case 1:   //队伍1:淡钢青色
+                                gameform.Maplabels[obj.Y / Program.cell, obj.X / Program.cell].BackColor = System.Drawing.Color.LightSteelBlue;
+                                break;
+                            case 2:   //队伍2:淡绿色
+                                gameform.Maplabels[obj.Y / Program.cell, obj.X / Program.cell].BackColor = System.Drawing.Color.LightGreen;
+                                break;
+                            case 3:   //队伍3:淡蓝色
+                                gameform.Maplabels[obj.Y / Program.cell, obj.X / Program.cell].BackColor = System.Drawing.Color.LightBlue;
+                                break;
+                            case 4:   //队伍4:淡粉色
+                                gameform.Maplabels[obj.Y / Program.cell, obj.X / Program.cell].BackColor = System.Drawing.Color.LightPink;
+                                break;
+                        }
+                        gameform.ColorState[obj.Y / Program.cell, obj.X / Program.cell] = -2;
+                        gameform.ColorChange[obj.Y / Program.cell, obj.X / Program.cell] = true;
+                    }
+                    break;
+                case GameObjType.Wall:
+                    if (gameform.ColorState[obj.Y / Program.cell, obj.X / Program.cell] == -1)
+                        gameform.ColorChange[obj.Y / Program.cell, obj.X / Program.cell] = false;
+                    else
+                    {
+                        gameform.ColorState[obj.Y / Program.cell, obj.X / Program.cell] = -1;
+                        gameform.ColorChange[obj.Y / Program.cell, obj.X / Program.cell] = true;
+                    }
+                    break;
+                case GameObjType.Character:
+                    if (obj.IsDying) break;
+                    Player player = new Player(obj.Y, obj.X, (byte)(obj.TeamID + 1), (byte)(Hashable[obj.Guid].Item2 + 1), obj.JobType, (short)obj.Hp, obj.Guid, obj.PropType);
+                    gameform.DrawPlayer(player);
+                    break;
+                case GameObjType.Bullet:
+                    Bullet bullet = new Bullet(obj.Y, obj.X, (int)obj.TeamID + 1, obj.BulletType, obj.Guid);
+                    gameform.DrawBullet(bullet);
+                    break;
+                case GameObjType.Prop:
+                    if (obj.IsLaid) break;
+                    Item item = new Item(obj.Y / Program.cell, obj.X / Program.cell, obj.PropType, obj.Guid);
+                    gameform.DrawItem(item);
+                    break;
+                default: break;
+            }
         }
     }
 }

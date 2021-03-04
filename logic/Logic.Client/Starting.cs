@@ -22,11 +22,15 @@ namespace Logic.Client
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Program.teamID = comboBox1.SelectedIndex+1;
-            Program.jobType = (Communication.Proto.JobType)comboBox2.SelectedIndex;
-            Program.playerID = comboBox3.SelectedIndex+1;
-            Program.port = (ushort)numericUpDown1.Value;
+            teamid = comboBox1.SelectedIndex;
+            job = (Communication.Proto.JobType)comboBox2.SelectedIndex;
+            playerid = comboBox3.SelectedIndex;
+            port = (ushort)numericUpDown1.Value;
             this.Close();
         }
+        public Int64 teamid;
+        public Int64 playerid;
+        public JobType job;
+        public ushort port;
     }
 }
