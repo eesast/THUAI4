@@ -1,30 +1,37 @@
 #pragma once
 
-#include<string>
-#include<concurrent_queue.h>
-#include"proto/Message2Server.pb.h"
-#include<HPSocket/HPSocket.h>
-#include<HPSocket/SocketInterface.h>
-#include<functional>
-#include"Structures.h"
-#include<cstdint>
+#ifndef API_H
+
+#define API_H
+
+#include <string>
+#include <concurrent_queue.h>
+#include "proto/Message2Server.pb.h"
+#include <HPSocket/HPSocket.h>
+#include <HPSocket/SocketInterface.h>
+#include <functional>
+#include "Structures.h"
+#include <cstdint>
 
 class Logic;
 
 class API
 {
 public:
-	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>,THUAI4::State*&, std::function<void(std::string)>&);
+
+	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
+
 private:
+
 	const int32_t& playerID;
 	const int32_t& teamID;
-	THUAI4::State*& pState;//ָ�������
-	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;// \xfgg/
+	THUAI4::State*& pState;
+	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;
 	concurrency::concurrent_queue<std::string> MessageStorage;
-	//ѡ��API 
+ 
 protected:
 
-	//选手可进行的操作
+
 	void MovePlayer(int timeInMilliseconds, double angle);
 	void MoveRight(int timeInMilliseconds);
 	void MoveUp(int timeInMilliseconds);
@@ -35,8 +42,10 @@ protected:
 	void Throw(int timeInMilliseconds, double angle);
 	void Attack(int timeInMilliseconds, double angle);
 	void Send(int toPlayerID, std::string message);
-	
-	//ѡ�ֿɻ�ȡ����Ϣ
+
+
+	//ѡ�ֿɻ�ȡ����Ϣ
+
 	bool MessageAvailable();
 	bool TryGetMessage(std::string&);
 
@@ -49,9 +58,10 @@ protected:
 	THUAI4::ColorType GetSelfTeamColor() const;
 	uint32_t GetTeamScore() const;
 	const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& GetPlayerGUIDs() const;
-	const THUAI4::ColorType GetCellColor(int CellX,int CellY) const;
+	const THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 
 public:
 	virtual void play() = 0;
 };
 
+#endif

@@ -1,26 +1,29 @@
+#pragma once
 
 #ifndef LOGIC_H
 
 #define LOGIC_H
 
-#include"proto/Message2Client.pb.h"
-#include<functional>
-#include<array>
-#include<thread>
-#include<mutex>
-#include<iostream>
-#include"Constants.h"
-#include"AI.h"
-#include"CAPI.h"
+#include "proto/Message2Client.pb.h"
+#include <functional>
+#include <array>
+#include <thread>
+#include <mutex>
+#include <iostream>
+#include "Constants.h"
+#include "AI.h"
+#include "CAPI.h"
 
-class Logic {
+class Logic
+{
 private:
-	bool UnexpectedlyClosed = false;//ç”¨äºæ ‡ç¤ºæ¸¸æˆç»“æŸå‰æ„å¤–æ–­çº¿
-	//bufferå’Œstateçš„çŠ¶æ€
+
+	bool UnexpectedlyClosed = false;//ÓÃÓÚ±êÊ¾ÓÎÏ·½áÊøÇ°ÒâÍâ¶ÏÏß
+	//bufferºÍstateµÄ×´Ì¬
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
-	enum class GamePhase :unsigned char {
+	enum class GamePhase : unsigned char {
 		Uninitialized = 0,
 		Gaming = 1,
 		GameOver = 2,
@@ -28,12 +31,13 @@ private:
 
 	GamePhase gamePhase = GamePhase::Uninitialized;
 
-	enum class Validity :unsigned char {
+	enum class Validity : unsigned char {
 
 		Unknown = 0,
 		Valid = 1,
 		Invalid = 2
 	};
+
 	Validity validity = Validity::Unknown;
 
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
@@ -42,10 +46,9 @@ private:
 
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
-	THUAI4::State storage[2];//ï¿½ï¿½ï¿½ï¿½×ª
+	THUAI4::State storage[2];//
 
-	std::function<void(std::string)> AddMessage;//ï¿½ï¿½APIï¿½Ğµï¿½MessageStorage Push
-
+	std::function<void(std::string)> AddMessage;
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
 
@@ -53,7 +56,7 @@ private:
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
 
-	//æ¸¸æˆç»“ç‚¹çš„æ§åˆ¶
+	//ÓÎÏ·½áµãµÄ¿ØÖÆ
 	std::mutex mtx_game;
 	std::condition_variable cv_game;
 
@@ -62,18 +65,18 @@ private:
 
 
 
-	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);//ï¿½ï¿½
+	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr <THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr <THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr <THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr <THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi);
+	static std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
+	static std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
+	static std::shared_ptr<THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo& goi);
+	static std::shared_ptr<THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi);
 	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void OnClose();
-	void load(std::shared_ptr<Protobuf::MessageToClient>);//å°†æ”¶åˆ°çš„M2CåŠ è½½åˆ°buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>);//½«ÊÕµ½µÄM2C¼ÓÔØµ½buffer
 
 public:
 	Logic();
