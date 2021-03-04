@@ -28,7 +28,7 @@ public:
 	virtual void Attack(int timeInMilliseconds, double angle);
 	virtual void Send(int toPlayerID, std::string message);
 
-	//选手可获取的信息
+	//閫夋墜鍙幏鍙栫殑淇℃伅
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string&);
 
