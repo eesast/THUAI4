@@ -3,22 +3,18 @@
 
 const static double PI = 3.14159265358979323846;
 
-API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM):GameApi(pID,tID,f,pS,aM){}
+API::API(std::function<void(Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM):GameApi(f,pS,aM){}
 
 void API::Use()
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Use);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	SendMessage(message);
 }
 void API::Pick(Protobuf::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_proptype(propType);
 	SendMessage(message);
 }
@@ -26,8 +22,6 @@ void API::Throw(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Throw);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
 	SendMessage(message);
@@ -36,8 +30,6 @@ void API::Attack(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Attack);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
 	SendMessage(message);
@@ -46,8 +38,6 @@ void API::Send(int toPlayerID, std::string message)
 {
 	Protobuf::MessageToServer msg;
 	msg.set_messagetype(Protobuf::MessageType::Send);
-	msg.set_playerid(playerID);
-	msg.set_teamid(teamID);
 	msg.set_toplayerid(toPlayerID);
 	msg.set_message(message);
 	SendMessage(msg);
@@ -56,8 +46,6 @@ void API::MovePlayer(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
 	SendMessage(message);
