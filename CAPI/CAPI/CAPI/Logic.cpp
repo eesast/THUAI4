@@ -255,8 +255,8 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			}
 		}
 
-		for (int i = 0; i < THUAI4::State::nCells; i++) {
-			for (int j = 0; j < THUAI4::State::nCells; j++) {
+		for (int i = 0; i < State::nCells; i++) {
+			for (int j = 0; j < State::nCells; j++) {
 				if (
 #ifdef _ALL_VISIBLE_
 					true
@@ -285,7 +285,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		//如果这时候state还没被player访问，就把buffer转到state
 		if (mtx_state.try_lock()) {
-			THUAI4::State* temp = pState;
+			State* temp = pState;
 			pState = pBuffer;
 			pBuffer = temp;
 			BufferUpdated = false;
@@ -358,7 +358,7 @@ void Logic::PlayerWrapper()
 			//所以这里堵塞是可以接受的
 			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
 			if (BufferUpdated) {
-				THUAI4::State* temp = pState;
+				State* temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
 				CurrentStateAccessed = false;
@@ -375,7 +375,7 @@ void Logic::PlayerWrapper()
 				}
 				lock_game.unlock();
 
-				THUAI4::State* temp = pState;
+				State* temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
 				CurrentStateAccessed = false;
