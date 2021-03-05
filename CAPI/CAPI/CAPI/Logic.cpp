@@ -3,7 +3,7 @@
 //#define _ALL_VISIBLE_
 
 Logic::Logic() :pState(storage), pBuffer(storage + 1),
-capi(mtxOnReceive, cvOnReceive, [this]() {OnConnect(); }, [this]() {OnClose(); }),
+capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); }),
 api([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); capi.Send(M2C); },
 	[this]() {return MessageStorage.empty(); },
 	[this](std::string& s) {return MessageStorage.try_pop(s); },
@@ -37,6 +37,10 @@ inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t
 	return dx <= D && dy <= D;
 }
 
+void Logic::OnReceive()
+{
+	cvOnReceive.notify_one();
+}
 void Logic::OnClose()
 {
 

@@ -21,13 +21,11 @@ class CAPI;
 class Listener :public CTcpClientListener
 {
 private:
-	std::mutex& mtxOnReceive;
-	std::condition_variable& cvOnReceive;
 	const std::function<void(Pointer2Message)> Push;
 	const std::function<void()> OnCloseL;
 	const std::function<void()> OnConnectL;
 public:
-	Listener(std::mutex&, std::condition_variable&, std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);
+	Listener(std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);
 	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
 	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
 	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
@@ -36,15 +34,15 @@ public:
 class CAPI
 {
 private:
+	const std::function<void()> OnReceive;
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	Listener listener;
 	CTcpPackClientPtr pclient;
 public:
-	CAPI(std::mutex&, std::condition_variable&, std::function<void()>, std::function<void()>);
+	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
 	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);
 	void Stop();
-	void Push(Pointer2Message);
 	bool TryPop(Pointer2Message&);
 	bool IsEmpty();
 };
