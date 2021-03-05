@@ -2,14 +2,13 @@
 
 //#define _ALL_VISIBLE_
 
-Logic::Logic() :\
+Logic::Logic() :
 pState(storage),
 pBuffer(storage + 1),
-capi(playerID,
-	teamID,
-	jobType,
+capi(
 	mtxOnReceive,
 	cvOnReceive,
+	[this]() {OnConnect(); },
 	[this]() {OnClose(); }),
 	api(playerID,
 		teamID,
@@ -56,6 +55,15 @@ void Logic::OnClose()
 
 #endif 
 
+}
+void Logic::OnConnect()
+{
+	Protobuf::MessageToServer message;
+	message.set_messagetype(Protobuf::MessageType::AddPlayer);
+	message.set_playerid(playerID);
+	message.set_teamid(teamID);
+	message.set_jobtype((Protobuf::JobType)jobType);
+	capi.Send(message);
 }
 
 std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi)

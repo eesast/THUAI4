@@ -49,16 +49,14 @@ EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketO
 	return HR_OK;
 }
 
-CAPI::CAPI(const int32_t& pID,
-	const int32_t& tID,
-	const THUAI4::JobType& jT,
+CAPI::CAPI(
 	std::mutex& mtx,
 	std::condition_variable& cv,
-	std::function<void()> onclose) :\
-	playerID(pID), teamID(tID), jobType(jT),
+	std::function<void()> onconnect,
+	std::function<void()> onclose) :
 	listener(mtx, cv,
 		[this](Pointer2Message p2M) {Push(p2M); },
-		[this]() {OnConnect(); },
+		onconnect,
 		onclose
 	), pclient(&listener) {
 	queue.clear();
@@ -69,7 +67,7 @@ bool CAPI::Connect(const char* address, uint16_t port)
 {
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
-		if (!pclient->Start((LPCTSTR)address, port)) {
+		if (!pclient->Start(address, port)) {
 			std::cout << "Failed to connect with the agent. Error code:";
 			std::cout << pclient->GetLastError() << std::endl;
 			return false;
@@ -106,7 +104,6 @@ void CAPI::Stop()
 
 void CAPI::Push(Pointer2Message ptr)
 {
-
 	queue.push(ptr);
 }
 
@@ -121,13 +118,4 @@ bool CAPI::IsEmpty()
 	return queue.empty();
 }
 
-void CAPI::OnConnect()
-{
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::AddPlayer);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
-	message.set_jobtype((Protobuf::JobType)jobType);
-	Send(message);
-}
 
