@@ -3,6 +3,7 @@
 
 const static double PI = 3.14159265358979323846;
 
+
 API::API(std::function<void(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp,
 	const THUAI4::State*& pS):GameApi(sm,e,tp,pS){}
@@ -13,11 +14,11 @@ void API::Use()
 	message.set_messagetype(Protobuf::MessageType::Use);
 	SendMessage(message);
 }
-void API::Pick(Protobuf::PropType propType)
+void API::Pick(THUAI4::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
-	message.set_proptype(propType);
+	message.set_proptype(Protobuf::PropType(propType));
 	SendMessage(message);
 }
 void API::Throw(int timeInMilliseconds, double angle)
@@ -133,7 +134,7 @@ uint32_t API::GetTeamScore() const
 {
 	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& API::GetPlayerGUIDs() const
+const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& API::GetPlayerGUIDs() const
 {
 	return pState->playerGUIDs;
 }
