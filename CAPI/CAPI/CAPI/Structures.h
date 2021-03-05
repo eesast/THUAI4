@@ -9,6 +9,8 @@
 #include <array>
 #include <vector>
 
+#include "Constants.h"
+
 #define _COLOR_MAP_BY_HASHING_
 
 #ifdef _COLOR_MAP_BY_HASHING_
@@ -147,8 +149,8 @@ namespace THUAI4
 
 	struct State 
 	{
-		constexpr static uint32_t nTeams = 2;
-		constexpr static uint32_t nPlayers = 4;
+		constexpr static uint32_t nTeams = Constants::numOfTeam;
+		constexpr static uint32_t nPlayers = Constants::numOfPlayer;
 		constexpr static uint32_t nCells = 50;
 		ColorType selfTeamColor;
 		uint32_t teamScore;
