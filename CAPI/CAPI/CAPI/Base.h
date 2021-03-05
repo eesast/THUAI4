@@ -38,3 +38,5 @@ public:
 	virtual void play(GameApi& g) = 0;
 };
 using CreateAIFunc = AIBase * (*)();
+
+int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
