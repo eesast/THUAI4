@@ -2,8 +2,8 @@
 #include "Structures.h"
 #include <iostream>
 
-Listener::Listener(std::mutex& mtx, std::condition_variable& cv, std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
-	mtxOnReceive(mtx), cvOnReceive(cv), Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
+Listener::Listener(std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
+	Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
 
 EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
@@ -34,12 +34,7 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 		std::cout << "Unknown type of message!!!" << std::endl;
 		return HR_ERROR;
 	}
-
-	{
-		std::lock_guard<std::mutex> lck(mtxOnReceive);
-		Push(p2m);
-	}
-	cvOnReceive.notify_one();
+	Push(p2m);
 	return HR_OK;
 }
 
@@ -50,12 +45,12 @@ EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketO
 }
 
 CAPI::CAPI(
-	std::mutex& mtx,
-	std::condition_variable& cv,
 	std::function<void()> onconnect,
-	std::function<void()> onclose) :
-	listener(mtx, cv,
-		[this](Pointer2Message p2M) {Push(p2M); },
+	std::function<void()> onclose, std::function<void()> onreceive) :
+	OnReceive(onreceive),
+	listener([this](Pointer2Message p2M){
+		queue.push(p2M);
+		OnReceive(); },
 		onconnect,
 		onclose
 	), pclient(&listener) {
@@ -100,11 +95,6 @@ void CAPI::Stop()
 		std::cout << "The client wasn`t stopped. Error code:";
 		std::cout << pclient->GetLastError() << std::endl;
 	}
-}
-
-void CAPI::Push(Pointer2Message ptr)
-{
-	queue.push(ptr);
 }
 
 bool CAPI::TryPop(Pointer2Message& ptr)

@@ -19,7 +19,7 @@ private:
 	bool UnexpectedlyClosed = false;
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
-	
+
 	enum class GamePhase : unsigned char {
 		Uninitialized = 0,
 		Gaming = 1,
@@ -56,7 +56,7 @@ private:
 
 	CAPI capi;
 	API api;
-	AIBase* pAI;
+	AIBase* pAI = NULL;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
@@ -69,15 +69,16 @@ private:
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void OnClose();
+	void OnReceive();
 	void OnConnect();
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//降收到的M2C加载到buffer
-	
+
 	void ProcessMessage();
 	void PlayerWrapper();
 public:
 	Logic();
 	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f);
-	
+
 };
 
 #endif	//!LOGIC_H
