@@ -6,7 +6,16 @@
 #include"Constants.h"
 
 class GameApi {
+protected:
+	const std::function<void(Protobuf::MessageToServer&)> SendMessage;//加入ID放到这个函数里了
+	const std::function<bool()> Empty;
+	const std::function<bool(std::string&)> TryPop;
+	const THUAI4::State*& pState;
 public:
+	GameApi(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const THUAI4::State*& pS) :
+		SendMessage(sm), Empty(e), TryPop(tp), pState(pS) {}
 	virtual void MovePlayer(int timeInMilliseconds, double angle) = 0;
 	virtual void MoveRight(int timeInMilliseconds) = 0;;
 	virtual void MoveUp(int timeInMilliseconds) = 0;
