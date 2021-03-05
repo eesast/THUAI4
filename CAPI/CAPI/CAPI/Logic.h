@@ -15,10 +15,8 @@
 
 class Logic {
 private:
-
-	bool UnexpectedlyClosed = false;	//用于标志意外断线
-
-	//The state of buffer and state
+	//Logic control
+	bool UnexpectedlyClosed = false;
 	bool BufferUpdated = false;
 	bool CurrentStateAccessed = false;
 
@@ -27,7 +25,6 @@ private:
 		Gaming = 1,
 		GameOver = 2,
 	};
-
 	GamePhase gamePhase = GamePhase::Uninitialized;
 
 	enum class Validity : unsigned char {
@@ -36,31 +33,30 @@ private:
 		Valid = 1,
 		Invalid = 2
 	};
-
 	Validity validity = Validity::Unknown;
 
+	std::mutex mtxOnReceive;
+	std::condition_variable cvOnReceive;
+	std::mutex mtx_buffer;
+	std::mutex mtx_state;
+	std::condition_variable cv_buffer;
+	std::mutex mtx_game;
+	std::condition_variable cv_game;
+
+
+	//Game data
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
 	int32_t playerID = 0;
 	int32_t teamID = 0;
 
 	THUAI4::State* pState;
 	THUAI4::State* pBuffer;
-	THUAI4::State storage[2];//
-
-	std::function<void(std::string)> AddMessage;
-	std::mutex mtxOnReceive;
-	std::condition_variable cvOnReceive;
-
-	std::mutex mtx_buffer;
-	std::mutex mtx_state;
-	std::condition_variable cv_buffer;
-
-	std::mutex mtx_game;
-	std::condition_variable cv_game;
+	THUAI4::State storage[2];
+	concurrency::concurrent_queue<std::string> MessageStorage;
 
 	CAPI capi;
 	API api;
-	AIBase* pAI;
+	AIBase* pAI = NULL;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
@@ -73,13 +69,16 @@ private:
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void OnClose();
+	void OnReceive();
+	void OnConnect();
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//降收到的M2C加载到buffer
 
-public:
-	Logic();
-	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType,CreateAIFunc f);
 	void ProcessMessage();
 	void PlayerWrapper();
+public:
+	Logic();
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f);
+
 };
 
 #endif	//!LOGIC_H

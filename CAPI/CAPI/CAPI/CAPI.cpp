@@ -2,8 +2,8 @@
 #include "Structures.h"
 #include <iostream>
 
-Listener::Listener(std::mutex& mtx, std::condition_variable& cv, std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
-	mtxOnReceive(mtx), cvOnReceive(cv), Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
+Listener::Listener(std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
+	Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
 
 EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 {
@@ -34,12 +34,7 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 		std::cout << "Unknown type of message!!!" << std::endl;
 		return HR_ERROR;
 	}
-
-	{
-		std::lock_guard<std::mutex> lck(mtxOnReceive);
-		Push(p2m);
-	}
-	cvOnReceive.notify_one();
+	Push(p2m);
 	return HR_OK;
 }
 
@@ -49,16 +44,14 @@ EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketO
 	return HR_OK;
 }
 
-CAPI::CAPI(const int32_t& pID,
-	const int32_t& tID,
-	const THUAI4::JobType& jT,
-	std::mutex& mtx,
-	std::condition_variable& cv,
-	std::function<void()> onclose) :\
-	playerID(pID), teamID(tID), jobType(jT),
-	listener(mtx, cv,
-		[this](Pointer2Message p2M) {Push(p2M); },
-		[this]() {OnConnect(); },
+CAPI::CAPI(
+	std::function<void()> onconnect,
+	std::function<void()> onclose, std::function<void()> onreceive) :
+	OnReceive(onreceive),
+	listener([this](Pointer2Message p2M){
+		queue.push(p2M);
+		OnReceive(); },
+		onconnect,
 		onclose
 	), pclient(&listener) {
 	queue.clear();
@@ -69,7 +62,7 @@ bool CAPI::Connect(const char* address, uint16_t port)
 {
 	std::cout << "Connecting......" << std::endl;
 	while (!pclient->IsConnected()) {
-		if (!pclient->Start((LPCTSTR)address, port)) {
+		if (!pclient->Start(address, port)) {
 			std::cout << "Failed to connect with the agent. Error code:";
 			std::cout << pclient->GetLastError() << std::endl;
 			return false;
@@ -104,12 +97,6 @@ void CAPI::Stop()
 	}
 }
 
-void CAPI::Push(Pointer2Message ptr)
-{
-
-	queue.push(ptr);
-}
-
 bool CAPI::TryPop(Pointer2Message& ptr)
 {
 	if (queue.empty()) return false;
@@ -121,13 +108,4 @@ bool CAPI::IsEmpty()
 	return queue.empty();
 }
 
-void CAPI::OnConnect()
-{
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::AddPlayer);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
-	message.set_jobtype((Protobuf::JobType)jobType);
-	Send(message);
-}
 
