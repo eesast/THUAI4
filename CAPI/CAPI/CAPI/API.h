@@ -12,8 +12,6 @@
 
 #define _COLOR_MAP_BY_HASHING_
 
-class Logic;
-
 struct State
 {
     constexpr static uint32_t nTeams = Constants::numOfTeam;
@@ -37,17 +35,11 @@ struct State
 
 class API:public GameApi
 {
-    const int32_t playerID;
-    const int32_t teamID;
-    State* const pState;
-    const std::function<void(const Protobuf::MessageToServer&)> SendMessage;
-    concurrency::concurrent_queue<std::string> MessageStorage;
-
 public:
 
 	API(std::function<void(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp,
-		const THUAI4::State*& pS);
+		const State*& pS);
 	virtual void MovePlayer(int timeInMilliseconds, double angle);
 	virtual void MoveRight(int timeInMilliseconds);
 	virtual void MoveUp(int timeInMilliseconds);

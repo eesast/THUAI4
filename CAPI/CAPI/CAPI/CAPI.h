@@ -21,7 +21,7 @@ class CAPI;
 class Listener :public CTcpClientListener
 {
 private:
-	const std::function<void(Pointer2Message)> Push;//不仅push还调用cvOnReceive.notify_one()
+	const std::function<void(Pointer2Message)> Push;//涓嶄粎push杩樿皟鐢╟vOnReceive.notify_one()
 	const std::function<void()> OnCloseL;
 	const std::function<void()> OnConnectL;
 public:
@@ -34,7 +34,7 @@ public:
 class CAPI
 {
 private:
-	const std::function<void()> OnReceive;//调用cvOnReceive.notify_one()
+	const std::function<void()> OnReceive;//璋冪敤cvOnReceive.notify_one()
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	Listener listener;
 	CTcpPackClientPtr pclient;
