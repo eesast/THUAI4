@@ -2,19 +2,14 @@
 
 //#define _ALL_VISIBLE_
 
-Logic::Logic() :\
-pState(storage),
-pBuffer(storage + 1),
-capi(playerID,
-	teamID,
-	jobType,
-	mtxOnReceive,
-	cvOnReceive,
-	[this]() {OnClose(); }),
-	api(playerID,
-		teamID,
-		[this](const Protobuf::MessageToServer& M2C) {capi.Send(M2C); },
-		pState, AddMessage) {};
+Logic::Logic() :pState(storage), pBuffer(storage + 1),
+capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); }),
+api([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); capi.Send(M2C); },
+	[this]() {return MessageStorage.empty(); },
+	[this](std::string& s) {return MessageStorage.try_pop(s); },
+	(const THUAI4::State*&)pState) {
+	MessageStorage.clear();
+}
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
@@ -42,6 +37,10 @@ inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t
 	return dx <= D && dy <= D;
 }
 
+void Logic::OnReceive()
+{
+	cvOnReceive.notify_one();
+}
 void Logic::OnClose()
 {
 
@@ -56,6 +55,15 @@ void Logic::OnClose()
 
 #endif 
 
+}
+void Logic::OnConnect()
+{
+	Protobuf::MessageToServer message;
+	message.set_messagetype(Protobuf::MessageType::AddPlayer);
+	message.set_playerid(playerID);
+	message.set_teamid(teamID);
+	message.set_jobtype((Protobuf::JobType)jobType);
+	capi.Send(message);
 }
 
 std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi)
@@ -83,7 +91,6 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi
 	character->y = goi.y();
 	return character;
 }
-
 std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Wall> wall = std::make_shared<THUAI4::Wall>();
@@ -94,7 +101,6 @@ std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
 	wall->y = goi.y();
 	return wall;
 }
-
 std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Prop> prop = std::make_shared<THUAI4::Prop>();
@@ -126,7 +132,6 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->y = goi.y();
 	return bullet;
 }
-
 std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::BirthPoint> birthpoint = std::make_shared<THUAI4::BirthPoint>();
@@ -178,8 +183,6 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 	cv_game.notify_one();
 	break;
-
-
 	case Protobuf::MessageType::InvalidPlayer:
 	{
 		std::lock_guard<std::mutex> lck(mtx_game);
@@ -187,10 +190,8 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 	cv_game.notify_one();
 	break;
-
-
 	case Protobuf::MessageType::Send:
-		AddMessage(pM2OC->message());
+		MessageStorage.push(pM2OC->message());
 		break;
 	default:
 		std::cout << "Invalid MessageType wrt M2OC" << std::endl;

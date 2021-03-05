@@ -14,9 +14,9 @@ class Logic;
 class API:public GameApi
 {
 public:
-
-	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
-
+	API(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const THUAI4::State*& pS);
 	virtual void MovePlayer(int timeInMilliseconds, double angle);
 	virtual void MoveRight(int timeInMilliseconds);
 	virtual void MoveUp(int timeInMilliseconds);
@@ -42,6 +42,5 @@ public:
 	virtual uint32_t GetTeamScore() const;
 	virtual const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& GetPlayerGUIDs() const;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
-
 };
 
