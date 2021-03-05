@@ -3,35 +3,21 @@
 
 const static double PI = 3.14159265358979323846;
 
-API::API(
-    int32_t pID, 
-    int32_t tID,
-    std::function<void(const Protobuf::MessageToServer&)> f,
-    State* pS,
-    std::function<void(std::string)>& aM):
-    playerID(pID),
-    teamID(tID),
-    pState(pS),
-    SendMessage(f)
-{
-    MessageStorage.clear();
-    aM = [this](std::string msg) {MessageStorage.push(msg); };
-}
+
+API::API(std::function<void(Protobuf::MessageToServer&)> sm,
+	std::function<bool()> e, std::function<bool(std::string&)> tp,
+	const THUAI4::State*& pS):GameApi(sm,e,tp,pS){}
 
 void API::Use()
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Use);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	SendMessage(message);
 }
 void API::Pick(THUAI4::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_proptype(Protobuf::PropType(propType));
 	SendMessage(message);
 }
@@ -39,8 +25,6 @@ void API::Throw(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Throw);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
 	SendMessage(message);
@@ -49,8 +33,6 @@ void API::Attack(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Attack);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
 	SendMessage(message);
@@ -59,8 +41,6 @@ void API::Send(int toPlayerID, std::string message)
 {
 	Protobuf::MessageToServer msg;
 	msg.set_messagetype(Protobuf::MessageType::Send);
-	msg.set_playerid(playerID);
-	msg.set_teamid(teamID);
 	msg.set_toplayerid(toPlayerID);
 	msg.set_message(message);
 	SendMessage(msg);
@@ -69,8 +49,6 @@ void API::MovePlayer(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
 	SendMessage(message);
@@ -93,11 +71,11 @@ void API::MoveDown(int timeInMilliseconds)
 }
 bool API::MessageAvailable()
 {
-	return !MessageStorage.empty();
+	return !Empty();
 }
 bool API::TryGetMessage(std::string& str)
 {
-	return MessageStorage.try_pop(str);
+	return !TryPop(str);
 }
 
 std::vector<const THUAI4::Character*> API::GetCharacters() const

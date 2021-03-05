@@ -45,8 +45,9 @@ class API:public GameApi
 
 public:
 
-	API(int32_t, int32_t, std::function<void(const Protobuf::MessageToServer&)>, State*, std::function<void(std::string)>&);
-
+	API(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const THUAI4::State*& pS);
 	virtual void MovePlayer(int timeInMilliseconds, double angle);
 	virtual void MoveRight(int timeInMilliseconds);
 	virtual void MoveUp(int timeInMilliseconds);
@@ -72,7 +73,6 @@ public:
 	virtual uint32_t GetTeamScore() const;
 	virtual const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& GetPlayerGUIDs() const;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
-
 };
 
 
