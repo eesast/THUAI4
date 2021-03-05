@@ -71,12 +71,13 @@ private:
 	void OnClose();
 	void OnConnect();
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//降收到的M2C加载到buffer
-
+	
+	void ProcessMessage();
+	void PlayerWrapper();
 public:
 	Logic();
 	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f);
-	void ProcessMessage();
-	void PlayerWrapper();
+	
 };
 
 #endif	//!LOGIC_H
