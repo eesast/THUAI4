@@ -3,7 +3,9 @@
 
 const static double PI = 3.14159265358979323846;
 
-API::API(std::function<void(Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM):GameApi(f,pS,aM){}
+API::API(std::function<void(Protobuf::MessageToServer&)> sm,
+	std::function<bool()> e, std::function<bool(std::string&)> tp,
+	const THUAI4::State*& pS):GameApi(sm,e,tp,pS){}
 
 void API::Use()
 {
@@ -68,11 +70,11 @@ void API::MoveDown(int timeInMilliseconds)
 }
 bool API::MessageAvailable()
 {
-	return !MessageStorage.empty();
+	return !Empty();
 }
 bool API::TryGetMessage(std::string& str)
 {
-	return MessageStorage.try_pop(str);
+	return !TryPop(str);
 }
 
 std::vector<const THUAI4::Character*> API::GetCharacters() const
