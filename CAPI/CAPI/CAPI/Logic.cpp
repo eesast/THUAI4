@@ -7,7 +7,7 @@ capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); })
 api([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); capi.Send(M2C); },
 	[this]() {return MessageStorage.empty(); },
 	[this](std::string& s) {return MessageStorage.try_pop(s); },
-	(const THUAI4::State*&)pState) {
+	(const State*&)pState) {
 	MessageStorage.clear();
 }
 
