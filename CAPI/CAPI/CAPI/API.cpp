@@ -3,7 +3,20 @@
 
 const static double PI = 3.14159265358979323846;
 
-API::API(const int32_t& pID, const int32_t& tID, std::function<void(const Protobuf::MessageToServer&)> f, THUAI4::State*& pS, std::function<void(std::string)>& aM):GameApi(pID,tID,f,pS,aM){}
+API::API(
+    int32_t pID, 
+    int32_t tID,
+    std::function<void(const Protobuf::MessageToServer&)> f,
+    THUAI4::State* pS,
+    std::function<void(std::string)>& aM):
+    playerID(pID),
+    teamID(tID),
+    pState(pS),
+    SendMessage(f)
+{
+    MessageStorage.clear();
+    aM = [this](std::string msg) {MessageStorage.push(msg); };
+}
 
 void API::Use()
 {

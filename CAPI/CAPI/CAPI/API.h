@@ -8,14 +8,21 @@
 #include"Structures.h"
 #include<cstdint>
 #include"Base.h"
+#include"concurrent_queue.hpp"
 
 class Logic;
 
 class API:public GameApi
 {
+    const int32_t playerID;
+    const int32_t teamID;
+    THUAI4::State* const pState;
+    const std::function<void(const Protobuf::MessageToServer&)> SendMessage;
+    concurrency::concurrent_queue<std::string> MessageStorage;
+
 public:
 
-	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
+	API(int32_t, int32_t, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*, std::function<void(std::string)>&);
 
 	virtual void MovePlayer(int timeInMilliseconds, double angle);
 	virtual void MoveRight(int timeInMilliseconds);
