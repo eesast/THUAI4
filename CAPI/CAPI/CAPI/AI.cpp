@@ -1,6 +1,10 @@
 #include "AI.h"
 #include "Constants.h"
 
+#include <iostream>
+#include <chrono>
+#include <thread>
+
 /* 请于 VS2019 项目属性中开启 C++17 标准：/std:c++17 */
 
 void AI::play(GameApi& g)
@@ -12,4 +16,12 @@ void AI::play(GameApi& g)
 		std::cout << "Oh! I get a message:" << str << std::endl;
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
+AIBase* CreateAI() {
+    return new AI();
+}
+
+int main(int argc, char** argv) {
+    thuai4_main(argc, argv, CreateAI);
 }

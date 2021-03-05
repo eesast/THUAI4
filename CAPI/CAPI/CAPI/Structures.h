@@ -4,16 +4,10 @@
 
 #define STRUCTURES_H
 
-#include <memory>
 #include <cstdint>
 #include <array>
-#include <vector>
 
-#define _COLOR_MAP_BY_HASHING_
-
-#ifdef _COLOR_MAP_BY_HASHING_
-#include<unordered_map>
-#endif
+#include "Constants.h"
 
 namespace THUAI4
 {
@@ -145,26 +139,7 @@ namespace THUAI4
 	};
 
 
-	struct State 
-	{
-		constexpr static uint32_t nTeams = 2;
-		constexpr static uint32_t nPlayers = 4;
-		constexpr static uint32_t nCells = 50;
-		ColorType selfTeamColor;
-		uint32_t teamScore;
-		std::vector<std::shared_ptr<Character>> characters;
-		std::vector<std::shared_ptr<Wall>> walls;
-		std::vector<std::shared_ptr<Prop>> props;
-		std::vector<std::shared_ptr<Bullet>> bullets;
-		std::vector<std::shared_ptr<BirthPoint>> birthpoints;
-		std::array<std::array<uint32_t, nPlayers>, nTeams> playerGUIDs;
-		std::shared_ptr<Character> self;
-#ifdef _COLOR_MAP_BY_HASHING_
-		std::unordered_map<uint32_t, ColorType> cellColors;
-#else
-		std::array<std::array<ColorType, nCells>, nCells> cellColors;
-#endif
-	};
+
 }
 
 #endif //!STRUCTURES_H
