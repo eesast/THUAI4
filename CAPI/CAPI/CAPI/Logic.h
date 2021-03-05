@@ -73,6 +73,7 @@ private:
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
 	void OnClose();
+	void OnConnect();
 	void load(std::shared_ptr<Protobuf::MessageToClient>);//降收到的M2C加载到buffer
 
 public:

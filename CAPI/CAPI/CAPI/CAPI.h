@@ -41,18 +41,13 @@ class CAPI
 {
 private:
 
-	const int32_t& playerID;
-	const int32_t& teamID;
-	const THUAI4::JobType& jobType;
-
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	Listener listener;
 	CTcpPackClientPtr pclient;
 
 public:
 
-	CAPI(const int32_t&, const int32_t&, const THUAI4::JobType&, std::mutex&, std::condition_variable&, std::function<void()>);
-	void OnConnect();
+	CAPI(std::mutex&, std::condition_variable&, std::function<void()>, std::function<void()>);
 	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);
 	void Stop();
