@@ -1,11 +1,10 @@
 #include<tclap/CmdLine.h>
+#include"Base.h"
 #include"Logic.h"
-AIBase* CreateAI() {
-	return new AI();
-}
+
 Logic logic;
 
-int main(int argc, char** argv)
+int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 {
 	std::string aIP;
 	uint16_t aPort;
@@ -53,6 +52,6 @@ int main(int argc, char** argv)
 		std::cerr << "Parsing error: " << e.error() << " for arg " << e.argId() << std::endl;
 		return 0;
 	}
-	logic.Main(aIP.c_str(), aPort, pID, tID, jType,CreateAI);
+	logic.Main(aIP.c_str(), aPort, pID, tID, jType, AIBuilder);
 	return 0;
 }
