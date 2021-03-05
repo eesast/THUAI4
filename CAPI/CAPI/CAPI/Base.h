@@ -7,18 +7,14 @@
 
 class GameApi {
 protected:
-	const int32_t& playerID;
-	const int32_t& teamID;
 	THUAI4::State*& pState;
-	const std::function<void(const Protobuf::MessageToServer&)> SendMessage;
+	const std::function<void(Protobuf::MessageToServer&)> SendMessage;//为了尽量解耦，加入ID放到这个函数里了
 	concurrency::concurrent_queue<std::string> MessageStorage;
 
 public:
-	GameApi(const int32_t& pID,
-		const int32_t& tID,
-		std::function<void(const Protobuf::MessageToServer&)> f,
+	GameApi(std::function<void(Protobuf::MessageToServer&)> f,
 		THUAI4::State*& pS, std::function<void(std::string)>& aM) :
-		playerID(pID), teamID(tID), SendMessage(f), pState(pS)
+		SendMessage(f), pState(pS)
 	{
 		MessageStorage.clear();
 		aM = [this](std::string msg) {MessageStorage.push(msg); };

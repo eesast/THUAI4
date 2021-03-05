@@ -15,7 +15,7 @@ class API:public GameApi
 {
 public:
 
-	API(const int32_t&, const int32_t&, std::function<void(const Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
+	API(std::function<void(Protobuf::MessageToServer&)>, THUAI4::State*&, std::function<void(std::string)>&);
 
 	virtual void MovePlayer(int timeInMilliseconds, double angle);
 	virtual void MoveRight(int timeInMilliseconds);
