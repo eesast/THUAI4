@@ -43,9 +43,9 @@ private:
 	int32_t playerID = 0;
 	int32_t teamID = 0;
 
-	THUAI4::State* pState;
-	THUAI4::State* pBuffer;
-	THUAI4::State storage[2];//
+	State* pState;
+	State* pBuffer;
+	State storage[2];//
 
 	std::function<void(std::string)> AddMessage;
 	std::mutex mtxOnReceive;

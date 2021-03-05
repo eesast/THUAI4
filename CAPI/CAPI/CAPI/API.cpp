@@ -7,7 +7,7 @@ API::API(
     int32_t pID, 
     int32_t tID,
     std::function<void(const Protobuf::MessageToServer&)> f,
-    THUAI4::State* pS,
+    State* pS,
     std::function<void(std::string)>& aM):
     playerID(pID),
     teamID(tID),
@@ -156,7 +156,7 @@ uint32_t API::GetTeamScore() const
 {
 	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, THUAI4::State::nPlayers>, THUAI4::State::nTeams>& API::GetPlayerGUIDs() const
+const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& API::GetPlayerGUIDs() const
 {
 	return pState->playerGUIDs;
 }
