@@ -1,6 +1,10 @@
 #include "AI.h"
 #include "Constants.h"
 
+#include <iostream>
+#include <chrono>
+#include <thread>
+
 /* 请于 VS2019 项目属性中开启 C++17 标准：/std:c++17 */
 
 void AI::play(GameApi& g)

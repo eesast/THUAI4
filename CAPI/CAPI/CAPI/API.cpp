@@ -26,13 +26,13 @@ void API::Use()
 	message.set_teamid(teamID);
 	SendMessage(message);
 }
-void API::Pick(Protobuf::PropType propType)
+void API::Pick(THUAI4::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
 	message.set_playerid(playerID);
 	message.set_teamid(teamID);
-	message.set_proptype(propType);
+	message.set_proptype(Protobuf::PropType(propType));
 	SendMessage(message);
 }
 void API::Throw(int timeInMilliseconds, double angle)

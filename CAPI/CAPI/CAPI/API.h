@@ -30,7 +30,7 @@ public:
 	virtual void MoveLeft(int timeInMilliseconds);
 	virtual void MoveDown(int timeInMilliseconds);
 	virtual void Use();
-	virtual void Pick(Protobuf::PropType propType);
+	virtual void Pick(THUAI4::PropType propType);
 	virtual void Throw(int timeInMilliseconds, double angle);
 	virtual void Attack(int timeInMilliseconds, double angle);
 	virtual void Send(int toPlayerID, std::string message);
