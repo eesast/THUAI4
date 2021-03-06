@@ -55,7 +55,7 @@ private:
 	concurrency::concurrent_queue<std::string> MessageStorage;
 
 	CAPI capi;
-	API api;
+	LogicInterface* pApi = NULL;
 	AIBase* pAI = NULL;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
@@ -77,7 +77,7 @@ private:
 public:
 	Logic();
 	~Logic();
-	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f);
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel,std::string filename="");
 
 };
 
