@@ -9,7 +9,7 @@
 #include<mutex>
 #include<iostream>
 #include"Constants.h"
-#include"Base.h"
+#include"AI.h"
 #include"CAPI.h"
 #include"API.h"
 
@@ -55,10 +55,11 @@ private:
 	concurrency::concurrent_queue<std::string> MessageStorage;
 
 	CAPI capi;
-	LogicInterface* pApi = NULL;
+	API api;
 	AIBase* pAI = NULL;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
+	static inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY);
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
 	static std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
@@ -76,8 +77,7 @@ private:
 	void PlayerWrapper();
 public:
 	Logic();
-	~Logic();
-	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel,std::string filename="");
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f);
 
 };
 

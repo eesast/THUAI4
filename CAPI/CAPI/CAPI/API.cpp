@@ -1,51 +1,41 @@
 #include"API.h"
-
 #include<functional>
-#include<chrono>
-#include<ctime>
-
 
 const static double PI = 3.14159265358979323846;
 
-double TimeSinceStart(const std::chrono::system_clock::time_point& sp)
-{
-	std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
-	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(tp - sp);
-	return time_span.count();
-}
 
 API::API(std::function<void(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp,
-	const State*& pS) :LogicInterface(sm, e, tp, pS) {}
+	const State*& pS):GameApi(sm,e,tp,pS){}
 
 void API::Use()
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Use);
-	SendMessageWrapper(message);
+	SendMessage(message);
 }
 void API::Pick(THUAI4::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
 	message.set_proptype(Protobuf::PropType(propType));
-	SendMessageWrapper(message);
+	SendMessage(message);
 }
-void API::Throw(uint32_t timeInMilliseconds, double angle)
+void API::Throw(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Throw);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	SendMessage(message);
 }
-void API::Attack(uint32_t timeInMilliseconds, double angle)
+void API::Attack(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Attack);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	SendMessage(message);
 }
 void API::Send(int toPlayerID, std::string message)
 {
@@ -53,29 +43,29 @@ void API::Send(int toPlayerID, std::string message)
 	msg.set_messagetype(Protobuf::MessageType::Send);
 	msg.set_toplayerid(toPlayerID);
 	msg.set_message(message);
-	SendMessageWrapper(msg);
+	SendMessage(msg);
 }
-void API::MovePlayer(uint32_t timeInMilliseconds, double angle)
+void API::MovePlayer(int timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	SendMessage(message);
 }
-void API::MoveRight(uint32_t timeInMilliseconds)
+void API::MoveRight(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 0.5);
 }
-void API::MoveUp(uint32_t timeInMilliseconds)
+void API::MoveUp(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI);
 }
-void API::MoveLeft(uint32_t timeInMilliseconds)
+void API::MoveLeft(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 1.5);
 }
-void API::MoveDown(uint32_t timeInMilliseconds)
+void API::MoveDown(int timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
 }
@@ -162,289 +152,4 @@ THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 #endif // _COLOR_MAP_BY_HASHING_
 
 }
-
-//Debug API
-//目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
-
-DebugApi::DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
-	std::function<bool()> e, std::function<bool(std::string&)> tp,
-	const State*& pS,
-	bool ev
-	, std::ostream& out) :
-	LogicInterface(sm, e, tp, pS), ExamineValidity(ev), OutStream(out) {}
-
-void DebugApi::StartTimer()
-{
-	StartPoint = std::chrono::system_clock::now();
-	std::time_t t = std::chrono::system_clock::to_time_t(StartPoint);
-	OutStream << "===New State===" << std::endl;
-	OutStream <<"Current time: "<< ctime(&t);
-}
-
-void DebugApi::EndTimer()
-{
-std::cout << "Time elapsed: " << TimeSinceStart(StartPoint) << "s" << std::endl;
-	OutStream << std::endl;
-}
-
-void DebugApi::Use()
-{
-	OutStream << "Call Use() at " << TimeSinceStart(StartPoint) << "s" << std::endl;
-	if (ExamineValidity) {
-		if (pState->self->isDying) {
-			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;//不合法发了也是白发
-		}
-		if (pState->self->propType == THUAI4::PropType::Null) {
-			OutStream << "[Warning: You don`t have any properties.]" << std::endl;
-			return;
-		}
-	}
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::Use);
-	SendMessageWrapper(message);
-}
-inline bool InSameCell(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2) {
-	return (x1 / Constants::numOfGridPerCell == x2 / Constants::numOfGridPerCell) ||
-		(y1 / Constants::numOfGridPerCell == y2 / Constants::numOfGridPerCell);
-}
-bool DebugApi::CanPick(THUAI4::PropType propType)
-{
-	for (auto it : pState->props) {
-		if (InSameCell(pState->self->x, pState->self->y, it->x, it->y) && propType == it->propType) {
-			return true;
-		}
-	}
-	return false;
-}
-void DebugApi::Pick(THUAI4::PropType propType)
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Pick(" << dict[propType] << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	if (ExamineValidity) {
-		if (pState->self->isDying) {
-			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
-		}
-		if (CanPick(propType)) {
-			OutStream << "[Warning: No such property to pick within the cell.]" << std::endl;
-			return;
-		}
-	}
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::Pick);
-	message.set_proptype(Protobuf::PropType(propType));
-	SendMessageWrapper(message);
-}
-void DebugApi::Throw(uint32_t timeInMilliseconds, double angle)
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Throw(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	if (ExamineValidity) {
-		if (pState->self->isDying) {
-			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
-		}
-		if (pState->self->propType == THUAI4::PropType::Null) {
-			OutStream << "[Warning: Nothing to throw.]" << std::endl;
-			return;
-		}
-	}
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::Throw);
-	message.set_timeinmilliseconds(timeInMilliseconds);
-	message.set_angle(angle);
-	SendMessageWrapper(message);
-}
-void DebugApi::Attack(uint32_t timeInMilliseconds, double angle)
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Attack(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	if (ExamineValidity) {
-		if (pState->self->isDying) {
-			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
-		}
-		if (pState->self->bulletNum == 0) {
-			OutStream << "[Warning: You are out of bullets.]" << std::endl;
-			return;
-		}
-	}
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::Attack);
-	message.set_timeinmilliseconds(timeInMilliseconds);
-	message.set_angle(angle);
-	SendMessageWrapper(message);
-}
-void DebugApi::Send(int toPlayerID, std::string message)
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Send(" << toPlayerID << "," << message << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	if (ExamineValidity) {//应该没啥必要
-		if (toPlayerID < 0 || toPlayerID >= Constants::numOfPlayer) {
-			OutStream << "[Warning: Illegal player ID.]" << std::endl;
-			return;
-		}
-		if (pState->playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid) {
-			OutStream << "[Warning: You are sending a message to yourself.]" << std::endl;
-			return;
-		}
-	}
-	Protobuf::MessageToServer msg;
-	msg.set_messagetype(Protobuf::MessageType::Send);
-	msg.set_toplayerid(toPlayerID);
-	msg.set_message(message);
-	SendMessageWrapper(msg);
-}
-void DebugApi::MovePlayer(uint32_t timeInMilliseconds, double angle)
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call MovePlayer(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	if (ExamineValidity) {
-		if (pState->self->isDying) {
-			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
-		}
-		//这里是否要加碰撞检测，但会比较复杂
-	}
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::Move);
-	message.set_timeinmilliseconds(timeInMilliseconds);
-	message.set_angle(angle);
-	SendMessageWrapper(message);
-}
-void DebugApi::MoveRight(uint32_t timeInMilliseconds)
-{
-	MovePlayer(timeInMilliseconds, PI * 0.5);
-}
-void DebugApi::MoveUp(uint32_t timeInMilliseconds)
-{
-	MovePlayer(timeInMilliseconds, PI);
-}
-void DebugApi::MoveLeft(uint32_t timeInMilliseconds)
-{
-	MovePlayer(timeInMilliseconds, PI * 1.5);
-}
-void DebugApi::MoveDown(uint32_t timeInMilliseconds)
-{
-	MovePlayer(timeInMilliseconds, 0);
-}
-bool DebugApi::MessageAvailable()
-{
-	return !Empty();
-}
-bool DebugApi::TryGetMessage(std::string& str)
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call TryGetMessage() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	bool res = TryPop(str);
-	if (ExamineValidity) {
-		if (!res) {
-			OutStream << "[Warning: Failed to get a message.]" << std::endl;
-		}
-	}
-	return res;
-}
-
-std::vector<const THUAI4::Character*> DebugApi::GetCharacters() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	std::vector<const THUAI4::Character*> characters;
-
-	for (auto it : pState->characters) {
-		characters.push_back(it.get());
-	}
-	return characters;
-
-}
-std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	std::vector<const THUAI4::Wall*> walls;
-	for (auto it : pState->walls) {
-		walls.push_back(it.get());
-	}
-	return walls;
-}
-std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	std::vector<const THUAI4::Prop*> props;
-	for (auto it : pState->props) {
-		props.push_back(it.get());
-	}
-	return props;
-}
-std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	std::vector<const THUAI4::Bullet*> bullets;
-	for (auto it : pState->bullets) {
-		bullets.push_back(it.get());
-	}
-	return bullets;
-}
-std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	std::vector<const THUAI4::BirthPoint*> birthpoints;
-	for (auto it : pState->birthpoints) {
-		birthpoints.push_back(it.get());
-	}
-	return birthpoints;
-}
-const THUAI4::Character& DebugApi::GetSelfInfo() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetSelfInfo() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	return *pState->self;
-}
-THUAI4::ColorType DebugApi::GetSelfTeamColor() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetSelfTeamColor() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	return pState->selfTeamColor;
-}
-uint32_t DebugApi::GetTeamScore() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetTeamScore() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	return pState->teamScore;
-}
-const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& DebugApi::GetPlayerGUIDs() const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	return pState->playerGUIDs;
-}
-
-THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
-{
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	assert(CellX >= 0 && CellX < State::nCells&& CellY >= 0 && CellY < State::nCells);
-	//非法直接就炸了，不用检查
-	if (ExamineValidity) {
-		if (!CellColorVisible(pState->self->x, pState->self->y, CellX, CellY)) {
-			OutStream << "[Warning: This cell is invisible.]" << std::endl;
-		}
-	}
-
-#ifdef _COLOR_MAP_BY_HASHING_
-	auto it = pState->cellColors.find((CellX << 16) + CellY);
-	if (it == pState->cellColors.end()) {
-		return THUAI4::ColorType::Invisible;
-	}
-	return it->second;
-#else
-	return pState->cellColors[CellX][CellY];
-#endif // _COLOR_MAP_BY_HASHING_
-
-	}
-
 
