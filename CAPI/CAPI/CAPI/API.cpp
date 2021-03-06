@@ -1,6 +1,5 @@
 #include"API.h"
 
- 
 #include<functional>
 #include<chrono>
 #include<ctime>
@@ -8,10 +7,16 @@
 
 const static double PI = 3.14159265358979323846;
 
+double TimeSinceStart(const std::chrono::system_clock::time_point& sp)
+{
+	std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(tp - sp);
+	return time_span.count();
+}
 
 API::API(std::function<void(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp,
-	const State*& pS) :GameApi(sm, e, tp, pS) {}
+	const State*& pS) :LogicInterface(sm, e, tp, pS) {}
 
 void API::Use()
 {
@@ -164,14 +169,27 @@ THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 DebugApi::DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp,
 	const State*& pS,
-	std::ostream& out
-	, bool ev) :
-	GameApi(sm, e, tp, pS), ExamineValidity(ev), OutStream(out) {}
+	bool ev
+	, std::ostream& out) :
+	LogicInterface(sm, e, tp, pS), ExamineValidity(ev), OutStream(out) {}
+
+void DebugApi::StartTimer()
+{
+	StartPoint = std::chrono::system_clock::now();
+	std::time_t t = std::chrono::system_clock::to_time_t(StartPoint);
+	OutStream << "===New State===" << std::endl;
+	OutStream <<"Current time: "<< ctime(&t);
+}
+
+void DebugApi::EndTimer()
+{
+std::cout << "Time elapsed: " << TimeSinceStart(StartPoint) << "s" << std::endl;
+	OutStream << std::endl;
+}
 
 void DebugApi::Use()
 {
-	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Use() at " << ctime(&t) << std::endl;
+	OutStream << "Call Use() at " << TimeSinceStart(StartPoint) << "s" << std::endl;
 	if (ExamineValidity) {
 		if (pState->self->isDying) {
 			OutStream << "[Warning: You have been slained.]" << std::endl;
@@ -202,7 +220,7 @@ bool DebugApi::CanPick(THUAI4::PropType propType)
 void DebugApi::Pick(THUAI4::PropType propType)
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Pick(" << dict[propType] << ") at " << ctime(&t) << std::endl;
+	OutStream << "Call Pick(" << dict[propType] << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	if (ExamineValidity) {
 		if (pState->self->isDying) {
 			OutStream << "[Warning: You have been slained.]" << std::endl;
@@ -221,7 +239,7 @@ void DebugApi::Pick(THUAI4::PropType propType)
 void DebugApi::Throw(uint32_t timeInMilliseconds, double angle)
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Throw(" << timeInMilliseconds << "," << angle << ") at " << ctime(&t) << std::endl;
+	OutStream << "Call Throw(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	if (ExamineValidity) {
 		if (pState->self->isDying) {
 			OutStream << "[Warning: You have been slained.]" << std::endl;
@@ -241,7 +259,7 @@ void DebugApi::Throw(uint32_t timeInMilliseconds, double angle)
 void DebugApi::Attack(uint32_t timeInMilliseconds, double angle)
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Attack(" << timeInMilliseconds << "," << angle << ") at " << ctime(&t) << std::endl;
+	OutStream << "Call Attack(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	if (ExamineValidity) {
 		if (pState->self->isDying) {
 			OutStream << "[Warning: You have been slained.]" << std::endl;
@@ -261,7 +279,7 @@ void DebugApi::Attack(uint32_t timeInMilliseconds, double angle)
 void DebugApi::Send(int toPlayerID, std::string message)
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call Send(" << toPlayerID << "," << message << ") at " << ctime(&t) << std::endl;
+	OutStream << "Call Send(" << toPlayerID << "," << message << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	if (ExamineValidity) {//应该没啥必要
 		if (toPlayerID < 0 || toPlayerID >= Constants::numOfPlayer) {
 			OutStream << "[Warning: Illegal player ID.]" << std::endl;
@@ -281,7 +299,7 @@ void DebugApi::Send(int toPlayerID, std::string message)
 void DebugApi::MovePlayer(uint32_t timeInMilliseconds, double angle)
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call MovePlayer(" << timeInMilliseconds << "," << angle << ") at " << ctime(&t) << std::endl;
+	OutStream << "Call MovePlayer(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	if (ExamineValidity) {
 		if (pState->self->isDying) {
 			OutStream << "[Warning: You have been slained.]" << std::endl;
@@ -318,7 +336,7 @@ bool DebugApi::MessageAvailable()
 bool DebugApi::TryGetMessage(std::string& str)
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call TryGetMessage() at " << ctime(&t) << std::endl;
+	OutStream << "Call TryGetMessage() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	bool res = TryPop(str);
 	if (ExamineValidity) {
 		if (!res) {
@@ -331,7 +349,7 @@ bool DebugApi::TryGetMessage(std::string& str)
 std::vector<const THUAI4::Character*> DebugApi::GetCharacters() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetCharacters() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	std::vector<const THUAI4::Character*> characters;
 
 	for (auto it : pState->characters) {
@@ -343,7 +361,7 @@ std::vector<const THUAI4::Character*> DebugApi::GetCharacters() const
 std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetWalls() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	std::vector<const THUAI4::Wall*> walls;
 	for (auto it : pState->walls) {
 		walls.push_back(it.get());
@@ -353,7 +371,7 @@ std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
 std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetProps() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	std::vector<const THUAI4::Prop*> props;
 	for (auto it : pState->props) {
 		props.push_back(it.get());
@@ -363,7 +381,7 @@ std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
 std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetBullets() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	std::vector<const THUAI4::Bullet*> bullets;
 	for (auto it : pState->bullets) {
 		bullets.push_back(it.get());
@@ -373,7 +391,7 @@ std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
 std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetBirthPoints() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	std::vector<const THUAI4::BirthPoint*> birthpoints;
 	for (auto it : pState->birthpoints) {
 		birthpoints.push_back(it.get());
@@ -383,32 +401,32 @@ std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
 const THUAI4::Character& DebugApi::GetSelfInfo() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetSelfInfo() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetSelfInfo() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	return *pState->self;
 }
 THUAI4::ColorType DebugApi::GetSelfTeamColor() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetSelfTeamColor() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetSelfTeamColor() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	return pState->selfTeamColor;
 }
 uint32_t DebugApi::GetTeamScore() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetTeamScore() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetTeamScore() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	return pState->teamScore;
 }
 const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& DebugApi::GetPlayerGUIDs() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetPlayerGUIDs() at " << ctime(&t) << std::endl;
+	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	return pState->playerGUIDs;
 }
 
 THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << ctime(&t) << std::endl;
+	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	assert(CellX >= 0 && CellX < State::nCells&& CellY >= 0 && CellY < State::nCells);
 	//非法直接就炸了，不用检查
 	if (ExamineValidity) {
@@ -427,6 +445,6 @@ THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
 	return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
 
-}
+	}
 
 

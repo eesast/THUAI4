@@ -34,10 +34,12 @@ struct State
 #endif
 };
 
-class API :public GameApi
+class API :public LogicInterface
 {
+private:
+	virtual void StartTimer() {}
+	virtual void EndTimer() {}
 public:
-
 	API(std::function<void(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp,
 		const State*& pS);
@@ -68,10 +70,11 @@ public:
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 
-class DebugApi :GameApi {
+class DebugApi : public LogicInterface {
 private:
 	bool ExamineValidity;
 	std::ostream& OutStream;
+	std::chrono::system_clock::time_point StartPoint;
 	bool CanPick(THUAI4::PropType propType);
 	std::map<THUAI4::PropType, std::string> dict
 	{
@@ -87,12 +90,14 @@ private:
 		{THUAI4::PropType::Rice,"Rice"},
 		{THUAI4::PropType::Totem,"Totem"}
 	};
+	virtual void StartTimer();
+	virtual void EndTimer();
 public:
 	DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp,
 		const State*& pS,
-		std::ostream& out = std::cout,
-		bool ev = false);
+		bool ev = false,
+		std::ostream& out = std::cout);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
 	virtual void MoveUp(uint32_t timeInMilliseconds);
