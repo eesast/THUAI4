@@ -6,7 +6,7 @@ const static double PI = 3.14159265358979323846;
 
 API::API(std::function<void(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp,
-	const THUAI4::State*& pS):GameApi(sm,e,tp,pS){}
+	const State*& pS):GameApi(sm,e,tp,pS){}
 
 void API::Use()
 {
@@ -75,7 +75,7 @@ bool API::MessageAvailable()
 }
 bool API::TryGetMessage(std::string& str)
 {
-	return !TryPop(str);
+	return TryPop(str);
 }
 
 std::vector<const THUAI4::Character*> API::GetCharacters() const
@@ -140,7 +140,7 @@ const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& API::Get
 }
 THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 {
-	assert(CellX >= 0 && CellX < THUAI4::State::nCells&& CellY >= 0 && CellY < THUAI4::State::nCells);
+	assert(CellX >= 0 && CellX < State::nCells&& CellY >= 0 && CellY < State::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
 	auto it = pState->cellColors.find((CellX << 16) + CellY);
 	if (it == pState->cellColors.end()) {
