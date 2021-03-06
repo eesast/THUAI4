@@ -11,6 +11,11 @@ api([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_
 	MessageStorage.clear();
 }
 
+Logic::~Logic()
+{
+	delete pAI;
+}
+
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
 	Protobuf::PropType pT = g.proptype();
@@ -26,16 +31,6 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 
 }
 
-
-inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
-{
-	int32_t centerX = CellX * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
-	int32_t centerY = CellY * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
-	int32_t dx = std::abs(centerX - x);
-	int32_t dy = std::abs(centerY - y);
-	int32_t D = (Constants::numOfGridPerCell >> 1) + Constants::SightRadius;
-	return dx <= D && dy <= D;
-}
 
 void Logic::OnReceive()
 {
