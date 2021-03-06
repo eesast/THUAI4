@@ -305,7 +305,6 @@ void DebugApi::MovePlayer(uint32_t timeInMilliseconds, double angle)
 			OutStream << "[Warning: You have been slained.]" << std::endl;
 			return;
 		}
-		//这里是否要加碰撞检测，但会比较复杂
 	}
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);

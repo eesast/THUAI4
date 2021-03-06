@@ -34,6 +34,21 @@ struct State
 #endif
 };
 
+struct LogicInterface :public GameApi {
+protected:
+	const std::function<void(Protobuf::MessageToServer&)> SendMessageWrapper;//加入ID放到这个函数里了
+	const std::function<bool()> Empty;
+	const std::function<bool(std::string&)> TryPop;
+	const State*& pState;
+public:
+	LogicInterface(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const State*& pS) :
+		SendMessageWrapper(sm), Empty(e), TryPop(tp), pState(pS) {}
+	virtual void StartTimer() = 0;
+	virtual void EndTimer() = 0;
+};
+
 class API :public LogicInterface
 {
 private:

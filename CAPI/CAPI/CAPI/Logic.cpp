@@ -8,11 +8,7 @@ capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); })
 	MessageStorage.clear();
 }
 
-Logic::~Logic()
-{
-	delete pAI;
-	delete pApi;
-}
+Logic::~Logic() {}
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
@@ -385,7 +381,6 @@ void Logic::PlayerWrapper()
 	std::cout << "AI thread terminates" << std::endl;
 }
 
-
 void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename)
 {
 	this->playerID = playerID;
@@ -394,16 +389,16 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 	this->pAI = f();
 
 	std::ofstream OutFile;
-	
+
 	if (!debuglevel) {
-		this->pApi = new API([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+		this->pApi = std::make_shared<API>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 			[this]() {return MessageStorage.empty(); },
 			[this](std::string& s) {return MessageStorage.try_pop(s); },
 			(const State*&)pState);
 	}
 	else {
 		if (filename == "") {
-			this->pApi = new DebugApi([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_shared <DebugApi>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 				[this]() {return MessageStorage.empty(); },
 				[this](std::string& s) {return MessageStorage.try_pop(s); },
 				(const State*&)pState, debuglevel != 1);
@@ -414,10 +409,10 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 				std::cout << "Failed to open the file " << filename << std::endl;
 				return;
 			}
-			this->pApi = new DebugApi([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_shared <DebugApi>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 				[this]() {return MessageStorage.empty(); },
 				[this](std::string& s) {return MessageStorage.try_pop(s); },
-				(const State*&)pState, debuglevel != 1,OutFile);
+				(const State*&)pState, debuglevel != 1, OutFile);
 		}
 
 	}
