@@ -55,8 +55,8 @@ private:
 	concurrency::concurrent_queue<std::string> MessageStorage;
 
 	CAPI capi;
-	LogicInterface* pApi = NULL;
-	AIBase* pAI = NULL;
+	std::shared_ptr<LogicInterface> pApi;
+	std::shared_ptr<AIBase> pAI;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);

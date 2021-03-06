@@ -20,12 +20,12 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 	//type = *((int32_t*)pData);
 
 	Pointer2Message p2m;
-	if (type == Constants::MessageToClient) {
+	if (type == MessageToClient) {
 		std::shared_ptr<Protobuf::MessageToClient> pM2C = std::make_shared<Protobuf::MessageToClient>();
 		pM2C->ParseFromArray(pData + 4, iLength - 4);
 		p2m = pM2C;
 	}
-	else if (type == Constants::MessageToOneClient) {
+	else if (type == MessageToOneClient) {
 		std::shared_ptr<Protobuf::MessageToOneClient> pM2OC = std::make_shared<Protobuf::MessageToOneClient>();
 		pM2OC->ParseFromArray(pData + 4, iLength - 4);
 		p2m = pM2OC;
@@ -74,11 +74,11 @@ bool CAPI::Connect(const char* address, uint16_t port)
 }
 void CAPI::Send(const Protobuf::MessageToServer& message)
 {
-	byte data[Constants::maxlength];
-	data[0] = Constants::MessageToServer & 0xff;
-	data[1] = (Constants::MessageToServer >> 8) & 0xff;
-	data[2] = (Constants::MessageToServer >> 16) & 0xff;
-	data[3] = (Constants::MessageToServer >> 24) & 0xff;
+	byte data[maxlength];
+	data[0] = MessageToServer & 0xff;
+	data[1] = (MessageToServer >> 8) & 0xff;
+	data[2] = (MessageToServer >> 16) & 0xff;
+	data[3] = (MessageToServer >> 24) & 0xff;
 	int msgSize = message.ByteSizeLong();
 	message.SerializeToArray(data + 4, msgSize);
 	if (pclient->Send(data, 4 + msgSize));

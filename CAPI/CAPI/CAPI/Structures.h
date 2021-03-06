@@ -138,8 +138,6 @@ namespace THUAI4
 		uint64_t guid;
 	};
 
-
-
 }
 
 #endif //!STRUCTURES_H
