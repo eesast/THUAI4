@@ -15,6 +15,8 @@ void AI::play(GameApi& g)
 		g.TryGetMessage(str);
 		std::cout << "Oh! I get a message:" << str << std::endl;
 	}
+	g.Attack(0, 0);
+	g.Throw(1, 2);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
