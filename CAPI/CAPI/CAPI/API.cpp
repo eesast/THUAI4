@@ -178,12 +178,12 @@ void DebugApi::StartTimer()
 	StartPoint = std::chrono::system_clock::now();
 	std::time_t t = std::chrono::system_clock::to_time_t(StartPoint);
 	OutStream << "===New State===" << std::endl;
-	OutStream <<"Current time: "<< ctime(&t);
+	OutStream << "Current time: " << ctime(&t);
 }
 
 void DebugApi::EndTimer()
 {
-std::cout << "Time elapsed: " << TimeSinceStart(StartPoint) << "s" << std::endl;
+	std::cout << "Time elapsed: " << TimeSinceStart(StartPoint) << "s" << std::endl;
 	OutStream << std::endl;
 }
 
@@ -444,6 +444,4 @@ THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
 	return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
 
-	}
-
-
+}

@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef CONSTANTS_H
 
 #define CONSTANTS_H
@@ -20,9 +18,9 @@ namespace Constants
 
 	static const uint32_t numOfGridPerCell = 1000;
 
-    static const uint32_t numOfPlayer = 4;
+	static const uint32_t numOfPlayer = 4;
 
-    static const uint32_t numOfTeam = 2;
+	static const uint32_t numOfTeam = 2;
 
 }
 

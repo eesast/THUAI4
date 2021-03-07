@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef CAPI_H
 
 #define CAPI_H
@@ -42,9 +40,9 @@ private:
 	Listener listener;
 	CTcpPackClientPtr pclient;
 public:
-	
+
 	static const int32_t MessageToServer = 1;
-	
+
 	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
 	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);

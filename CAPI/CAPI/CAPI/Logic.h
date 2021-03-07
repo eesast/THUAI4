@@ -77,7 +77,7 @@ private:
 public:
 	Logic();
 	~Logic();
-	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel,std::string filename="");
+	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename = "");
 
 };
 

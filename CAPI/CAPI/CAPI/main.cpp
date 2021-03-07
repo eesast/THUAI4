@@ -48,10 +48,10 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 			"Or you could specify a file to store it.";
 		TCLAP::SwitchArg debug("d", "debug", DebugDesc);
 		cmd.add(debug);
-		
+
 		TCLAP::ValueArg<std::string> FileName("f", "filename", "Specify a file to store the log.", false, "", "string");
 		cmd.add(FileName);
-		
+
 		TCLAP::SwitchArg warning("w", "warning", "Warn of some obviously invalid operations (only when \"-d\" is set).");
 		cmd.add(warning);
 
@@ -74,6 +74,6 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 		return 0;
 	}
 
-	logic.Main(aIP.c_str(), aPort, pID, tID, jType, AIBuilder, level,filename);
+	logic.Main(aIP.c_str(), aPort, pID, tID, jType, AIBuilder, level, filename);
 	return 0;
 }

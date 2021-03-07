@@ -1,4 +1,7 @@
-#pragma once
+#ifndef BASE_H
+
+#define BASE_H
+
 #include<cstdint>
 #include<string>
 #include<vector>
@@ -9,7 +12,7 @@
 
 struct State;
 
-class GameApi{
+class GameApi {
 public:
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle) = 0;
 	virtual void MoveRight(uint32_t timeInMilliseconds) = 0;;
@@ -41,6 +44,8 @@ class AIBase {
 public:
 	virtual void play(GameApi& g) = 0;
 };
-using CreateAIFunc = std::shared_ptr<AIBase> (*)();
+using CreateAIFunc = std::shared_ptr<AIBase>(*)();
 
 int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
+
+#endif // !BASE_H
