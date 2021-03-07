@@ -1,4 +1,6 @@
-#pragma once
+#ifndef API_H
+
+#define API_H
 
 #include<string>
 #include"proto/Message2Server.pb.h"
@@ -148,3 +150,6 @@ inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 	int32_t D = (Constants::numOfGridPerCell >> 1) + Constants::SightRadius;
 	return dx <= D && dy <= D;
 }
+
+#endif // !API_H
+

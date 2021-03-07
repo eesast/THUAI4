@@ -23,5 +23,5 @@ std::shared_ptr<AIBase> CreateAI() {
 }
 
 int main(int argc, char** argv) {
-    return thuai4_main(argc, argv, CreateAI);
+	return thuai4_main(argc, argv, CreateAI);
 }
