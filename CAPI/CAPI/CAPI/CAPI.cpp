@@ -20,12 +20,12 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 	//type = *((int32_t*)pData);
 
 	Pointer2Message p2m;
-	if (type == Constants::MessageToClient) {
+	if (type == MessageToClient) {
 		std::shared_ptr<Protobuf::MessageToClient> pM2C = std::make_shared<Protobuf::MessageToClient>();
 		pM2C->ParseFromArray(pData + 4, iLength - 4);
 		p2m = pM2C;
 	}
-	else if (type == Constants::MessageToOneClient) {
+	else if (type == MessageToOneClient) {
 		std::shared_ptr<Protobuf::MessageToOneClient> pM2OC = std::make_shared<Protobuf::MessageToOneClient>();
 		pM2OC->ParseFromArray(pData + 4, iLength - 4);
 		p2m = pM2OC;
@@ -48,64 +48,62 @@ CAPI::CAPI(
 	std::function<void()> onconnect,
 	std::function<void()> onclose, std::function<void()> onreceive) :
 	OnReceive(onreceive),
-	listener([this](Pointer2Message p2M){
-		queue.push(p2M);
-		OnReceive(); },
+	listener([this](Pointer2Message p2M) {
+	queue.push(p2M);
+	OnReceive(); },
 		onconnect,
 		onclose
-	), pclient(&listener) {
+		), pclient(&listener) {
 	queue.clear();
 }
 
 
-bool CAPI::Connect(const char* address, uint16_t port)
-{
-	std::cout << "Connecting......" << std::endl;
-	while (!pclient->IsConnected()) {
-		if (!pclient->Start(address, port)) {
-			std::cout << "Failed to connect with the agent. Error code:";
-			std::cout << pclient->GetLastError() << std::endl;
-			return false;
+	bool CAPI::Connect(const char* address, uint16_t port)
+	{
+		std::cout << "Connecting......" << std::endl;
+		while (!pclient->IsConnected()) {
+			if (!pclient->Start(address, port)) {
+				std::cout << "Failed to connect with the agent. Error code:";
+				std::cout << pclient->GetLastError() << std::endl;
+				return false;
+			}
+			Sleep(1000);
 		}
-		Sleep(1000);
+		return true;
+
 	}
-	return true;
-
-}
-void CAPI::Send(const Protobuf::MessageToServer& message)
-{
-	byte data[Constants::maxlength];
-	data[0] = Constants::MessageToServer & 0xff;
-	data[1] = (Constants::MessageToServer >> 8) & 0xff;
-	data[2] = (Constants::MessageToServer >> 16) & 0xff;
-	data[3] = (Constants::MessageToServer >> 24) & 0xff;
-	int msgSize = message.ByteSizeLong();
-	message.SerializeToArray(data + 4, msgSize);
-	if (pclient->Send(data, 4 + msgSize));
-	else {
-		std::cout << "Failed to send. Error code:";
-		std::cout << pclient->GetLastError() << std::endl;
+	void CAPI::Send(const Protobuf::MessageToServer& message)
+	{
+		byte data[maxlength];
+		data[0] = MessageToServer & 0xff;
+		data[1] = (MessageToServer >> 8) & 0xff;
+		data[2] = (MessageToServer >> 16) & 0xff;
+		data[3] = (MessageToServer >> 24) & 0xff;
+		int msgSize = message.ByteSizeLong();
+		message.SerializeToArray(data + 4, msgSize);
+		if (pclient->Send(data, 4 + msgSize));
+		else {
+			std::cout << "Failed to send. Error code:";
+			std::cout << pclient->GetLastError() << std::endl;
+		}
 	}
-}
 
-void CAPI::Stop()
-{
-	if (pclient->Stop());
-	else {
-		std::cout << "The client wasn`t stopped. Error code:";
-		std::cout << pclient->GetLastError() << std::endl;
+	void CAPI::Stop()
+	{
+		if (pclient->Stop());
+		else {
+			std::cout << "The client wasn`t stopped. Error code:";
+			std::cout << pclient->GetLastError() << std::endl;
+		}
 	}
-}
 
-bool CAPI::TryPop(Pointer2Message& ptr)
-{
-	if (queue.empty()) return false;
-	return queue.try_pop(ptr);
-}
+	bool CAPI::TryPop(Pointer2Message& ptr)
+	{
+		if (queue.empty()) return false;
+		return queue.try_pop(ptr);
+	}
 
-bool CAPI::IsEmpty()
-{
-	return queue.empty();
-}
-
-
+	bool CAPI::IsEmpty()
+	{
+		return queue.empty();
+	}

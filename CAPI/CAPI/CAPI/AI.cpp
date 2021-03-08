@@ -18,10 +18,10 @@ void AI::play(GameApi& g)
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
-AIBase* CreateAI() {
-    return new AI();
+std::shared_ptr<AIBase> CreateAI() {
+	return std::make_shared<AI>();
 }
 
 int main(int argc, char** argv) {
-    thuai4_main(argc, argv, CreateAI);
+	return thuai4_main(argc, argv, CreateAI);
 }

@@ -1,15 +1,14 @@
 #include "Logic.h"
-
+#include<fstream>
 //#define _ALL_VISIBLE_
 
 Logic::Logic() :pState(storage), pBuffer(storage + 1),
-capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); }),
-api([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); capi.Send(M2C); },
-	[this]() {return MessageStorage.empty(); },
-	[this](std::string& s) {return MessageStorage.try_pop(s); },
-	(const State*&)pState) {
+capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); })
+{
 	MessageStorage.clear();
 }
+
+Logic::~Logic() {}
 
 bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
@@ -26,16 +25,6 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 
 }
 
-
-inline bool Logic::CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
-{
-	int32_t centerX = CellX * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
-	int32_t centerY = CellY * Constants::numOfGridPerCell + (Constants::numOfGridPerCell >> 1);
-	int32_t dx = std::abs(centerX - x);
-	int32_t dy = std::abs(centerY - y);
-	int32_t D = (Constants::numOfGridPerCell >> 1) + Constants::SightRadius;
-	return dx <= D && dy <= D;
-}
 
 void Logic::OnReceive()
 {
@@ -351,7 +340,9 @@ void Logic::PlayerWrapper()
 
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed) {
-			pAI->play(api);
+			pApi->StartTimer();
+			pAI->play(*pApi);
+			pApi->EndTimer();
 			CurrentStateAccessed = true;
 		}
 		else {
@@ -390,17 +381,47 @@ void Logic::PlayerWrapper()
 	std::cout << "AI thread terminates" << std::endl;
 }
 
-
-void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f)
+void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename)
 {
 	this->playerID = playerID;
 	this->teamID = teamID;
 	this->jobType = jobType;
 	this->pAI = f();
+
+	std::ofstream OutFile;
+
+	if (!debuglevel) {
+		this->pApi = std::make_shared<API>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			[this]() {return MessageStorage.empty(); },
+			[this](std::string& s) {return MessageStorage.try_pop(s); },
+			(const State*&)pState);
+	}
+	else {
+		if (filename == "") {
+			this->pApi = std::make_shared <DebugApi>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				[this]() {return MessageStorage.empty(); },
+				[this](std::string& s) {return MessageStorage.try_pop(s); },
+				(const State*&)pState, debuglevel != 1);
+		}
+		else {
+			OutFile.open(filename);
+			if (OutFile.fail()) {
+				std::cout << "Failed to open the file " << filename << std::endl;
+				return;
+			}
+			this->pApi = std::make_shared <DebugApi>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				[this]() {return MessageStorage.empty(); },
+				[this](std::string& s) {return MessageStorage.try_pop(s); },
+				(const State*&)pState, debuglevel != 1, OutFile);
+		}
+
+	}
+
 	//CAPI先连接Agent
 	if (!capi.Connect(address, port)) {
 		std::cout << "无法连接到Agent" << std::endl;
 		capi.Stop();
+		OutFile.close();
 		return;
 	}
 	std::cout << "成功连接到Agent" << std::endl;
@@ -421,6 +442,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			lck.unlock();
 			cvOnReceive.notify_one();//否则PM线程会一直等
 			tPM.join();
+			OutFile.close();
 			return;
 		}
 		if (validity == Validity::Valid) {
@@ -431,6 +453,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			lck.unlock();
 			cvOnReceive.notify_one();
 			tPM.join();
+			OutFile.close();
 			return;
 		}
 
@@ -442,6 +465,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			lck.unlock();
 			cvOnReceive.notify_one();
 			tPM.join();
+			OutFile.close();
 			return;
 		}
 
@@ -458,6 +482,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			cv_buffer.notify_one();
 			tPM.join();
 			tAI.join();
+			OutFile.close();
 			return;
 		}
 		std::cout << "Game ends\n";
@@ -466,5 +491,6 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		cv_buffer.notify_one();
 		tPM.join();
 		tAI.join();
+		OutFile.close();
 	}
 }

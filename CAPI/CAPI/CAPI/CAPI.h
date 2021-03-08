@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef CAPI_H
 
 #define CAPI_H
@@ -21,6 +19,8 @@ class CAPI;
 class Listener :public CTcpClientListener
 {
 private:
+	static const int32_t MessageToClient = 0;
+	static const int32_t MessageToOneClient = 2;
 	const std::function<void(Pointer2Message)> Push;//不仅push还调用cvOnReceive.notify_one()
 	const std::function<void()> OnCloseL;
 	const std::function<void()> OnConnectL;
@@ -34,11 +34,15 @@ public:
 class CAPI
 {
 private:
+	static const int maxlength = 1000;
 	const std::function<void()> OnReceive;//调用cvOnReceive.notify_one()
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	Listener listener;
 	CTcpPackClientPtr pclient;
 public:
+
+	static const int32_t MessageToServer = 1;
+
 	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
 	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);

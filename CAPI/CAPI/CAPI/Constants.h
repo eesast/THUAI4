@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef CONSTANTS_H
 
 #define CONSTANTS_H
@@ -13,17 +11,17 @@
 
 namespace Constants
 {
-	static const int maxlength = 1000;
-	static const int32_t MessageToClient = 0;
-	static const int32_t MessageToServer = 1;
-	static const int32_t MessageToOneClient = 2;
 
 	static const uint64_t SightRadius = 5000;
+
 	static const uint64_t SightRadiusSquared = SightRadius * SightRadius;
+
 	static const uint32_t numOfGridPerCell = 1000;
 
-    static const uint32_t numOfPlayer = 4;
-    static const uint32_t numOfTeam = 2;
+	static const uint32_t numOfPlayer = 4;
+
+	static const uint32_t numOfTeam = 2;
+
 }
 
 #undef GF_CI
