@@ -1,0 +1,143 @@
+syntax = "proto3";
+package Protobuf;
+option csharp_namespace = "Communication.Proto";
+
+import "MessageType.proto";
+
+enum GameObjType
+{
+    Character = 0;
+    Wall = 1;
+    Prop = 2;
+    Bullet = 3;
+    BirthPoint = 4;
+    OutOfBoundBlock = 5;
+}
+
+//道具类型，此为编写时的临时名称，具体道具名称可以待主题确定后更改
+enum PropType
+{
+    Null = 0;
+    Bike = 1;
+    Amplifier = 2;
+    JinKeLa = 3;
+    Rice = 4;
+    NegativeFeedback = 5;
+    Totem = 6;
+    Phaser = 7;
+    Dirt = 8;
+    Attenuator = 9;
+    Divider = 10;
+}
+
+enum ShapeType
+{
+	Circle = 0;
+	Square = 1;
+}
+
+enum JobType
+{
+    Job0 = 0;
+    Job1 = 1;
+    Job2 = 2;
+    Job3 = 3;
+    Job4 = 4;
+    Job5 = 5;
+    Job6 = 6;
+}
+
+enum BulletType
+{
+    Bullet0 = 0;
+    Bullet1 = 1;
+    Bullet2 = 2;
+    Bullet3 = 3;
+    Bullet4 = 4;
+    Bullet5 = 5;
+    Bullet6 = 6;
+}
+
+enum ColorType
+{
+    None = 0;
+    Color1 = 1;
+    Color2 = 2;
+    Color3 = 3;
+    Color4 = 4;
+}
+
+message GameObjInfo
+{
+    GameObjType gameObjType = 1;
+    
+    //以下当gameObjType为任意值时均时有效
+    int64 guid = 2;			//每个游戏对象有一个全局ID，即guid
+    int32 x = 3;
+    int32 y = 4;
+    double facingDirection = 5;
+    int32 moveSpeed = 6;
+    bool canMove = 7;
+    bool isMoving = 8;
+    ShapeType shapeType = 9;	//形状
+    int32 radius = 10;		//圆形物体的半径或正方形内切圆半径
+    
+    //以下当gameObjType为Character和Bullet时才有效
+    int64 teamID = 11;		//人物所属队伍ID或子弹的发射主人所属队伍ID，其他情况为无效ID
+    int32 ap = 12;			//攻击力
+    BulletType bulletType = 13;	//子弹类型
+    
+    //以下当gameObjType为Character和Prop时有效
+    PropType propType = 14;	//当前人物持有的道具类型或道具的类型
+    
+    //以下仅当gameObjType为Prop时有效
+    bool isLaid = 15;		//是否已经被放置
+    
+    //以下仅当gameObjType为Character时有效
+    bool isDying = 16;		//正在死亡复活中……
+    JobType jobType = 17;
+    int32 CD = 18;
+    int32 maxBulletNum = 19;
+    int32 bulletNum = 20;
+    int32 maxHp = 21;
+    int32 hp = 22;
+    int32 lifeNum = 23;		//第几次复活
+}
+
+//发送单个信息时
+message MessageToOneClient
+{
+    int64 playerID = 1;			//指明发送给谁
+    int64 teamID = 2;			//指明发送给谁
+    
+    MessageType messageType = 3;
+    int64 guid = 4;             //自己的guid
+    string message = 5;
+}
+
+//发送全局信息时
+message MessageToClient
+{
+    int64 playerID = 1;			//指明发送给谁
+    int64 teamID = 2;			//指明发送给谁
+    
+    MessageType messageType = 3;
+    GameObjInfo selfInfo = 4;	//自己的个人信息
+    ColorType selfTeamColor = 6;	//自己队伍的所属颜色
+    repeated GameObjInfo gameObjs = 7;		//当前地图上的所有对象
+
+    message OneTeamGUIDs
+    {
+        repeated int64 teammateGUIDs = 1;
+    }
+
+    repeated OneTeamGUIDs PlayerGUIDs = 5;  //所有玩家的GUID，第一维的 0、1、2…… 分别为队伍编号，每个队伍的0、1、2、……元素分别为playerID为0、1、2、……的玩家的GUID，若不存在该玩家，则为Constant::Constant::InvalidGUID
+
+    message OneDimVec
+    {
+        repeated ColorType rowColors = 1;
+    }
+
+    repeated OneDimVec cellColors = 8;	//每个 cell 的颜色
+    int32 teamScore = 9;                //本队伍的分数
+}
