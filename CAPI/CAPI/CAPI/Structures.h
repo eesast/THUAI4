@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef STRUCTURES_H
 
 #define STRUCTURES_H
@@ -65,7 +63,7 @@ namespace THUAI4
 		Invisible = 5
 	};
 
-	struct Character 
+	struct Character
 	{
 		bool isMoving;
 		bool isDying;
@@ -90,7 +88,7 @@ namespace THUAI4
 		double facingDirection;
 	};
 
-	struct Wall 
+	struct Wall
 	{
 		ShapeType shapeType : 1;
 		uint16_t radius;
@@ -99,7 +97,7 @@ namespace THUAI4
 		uint64_t guid;
 	};
 
-	struct Prop 
+	struct Prop
 	{
 		bool isMoving;
 		bool isLaid;
@@ -113,7 +111,7 @@ namespace THUAI4
 		double facingDirection;
 	};
 
-	struct Bullet 
+	struct Bullet
 	{
 		bool isMoving;
 		ShapeType shapeType : 1;
@@ -128,7 +126,7 @@ namespace THUAI4
 		double facingDirection;
 	};
 
-	struct BirthPoint 
+	struct BirthPoint
 	{
 		ShapeType shapeType;
 		uint16_t teamID;
@@ -137,8 +135,6 @@ namespace THUAI4
 		uint32_t y;
 		uint64_t guid;
 	};
-
-
 
 }
 

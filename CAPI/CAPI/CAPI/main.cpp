@@ -11,6 +11,9 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 	int pID;
 	int tID;
 	THUAI4::JobType jType;
+	int level = 0;
+	std::string filename;
+
 	try {
 		TCLAP::CmdLine cmd("THUAI4 C++接口命令行参数介绍");
 
@@ -40,18 +43,37 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 			, true, 0, &jobTypeConstraint);
 		cmd.add(jobType);
 
+		std::string DebugDesc = "Set this flag to use API for debugging.\n"\
+			"If \"-f\" is not set, the log will be printed on the screen.\n"\
+			"Or you could specify a file to store it.";
+		TCLAP::SwitchArg debug("d", "debug", DebugDesc);
+		cmd.add(debug);
+
+		TCLAP::ValueArg<std::string> FileName("f", "filename", "Specify a file to store the log.", false, "", "string");
+		cmd.add(FileName);
+
+		TCLAP::SwitchArg warning("w", "warning", "Warn of some obviously invalid operations (only when \"-d\" is set).");
+		cmd.add(warning);
+
 		cmd.parse(argc, argv);
 		aIP = agentIP.getValue();
 		aPort = agentPort.getValue();
 		pID = playerID.getValue();
 		tID = teamID.getValue();
 		jType = (THUAI4::JobType)jobType.getValue();
+		bool d = debug.getValue();
+		bool w = warning.getValue();
+		if (d) {
+			level = 1 + w;
+		}
+		filename = FileName.getValue();
 	}
 	catch (TCLAP::ArgException& e)  // catch exceptions
 	{
 		std::cerr << "Parsing error: " << e.error() << " for arg " << e.argId() << std::endl;
 		return 0;
 	}
-	logic.Main(aIP.c_str(), aPort, pID, tID, jType, AIBuilder);
+
+	logic.Main(aIP.c_str(), aPort, pID, tID, jType, AIBuilder, level, filename);
 	return 0;
 }

@@ -1,4 +1,7 @@
-#pragma once
+#ifndef BASE_H
+
+#define BASE_H
+
 #include<cstdint>
 #include<string>
 #include<vector>
@@ -10,25 +13,16 @@
 struct State;
 
 class GameApi {
-protected:
-	const std::function<void(Protobuf::MessageToServer&)> SendMessage;//加入ID放到这个函数里了
-	const std::function<bool()> Empty;
-	const std::function<bool(std::string&)> TryPop;
-	const State*& pState;
 public:
-	GameApi(std::function<void(Protobuf::MessageToServer&)> sm,
-		std::function<bool()> e, std::function<bool(std::string&)> tp,
-		const State*& pS) :
-		SendMessage(sm), Empty(e), TryPop(tp), pState(pS) {}
-	virtual void MovePlayer(int timeInMilliseconds, double angle) = 0;
-	virtual void MoveRight(int timeInMilliseconds) = 0;;
-	virtual void MoveUp(int timeInMilliseconds) = 0;
-	virtual void MoveLeft(int timeInMilliseconds) = 0;
-	virtual void MoveDown(int timeInMilliseconds) = 0;
+	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle) = 0;
+	virtual void MoveRight(uint32_t timeInMilliseconds) = 0;;
+	virtual void MoveUp(uint32_t timeInMilliseconds) = 0;
+	virtual void MoveLeft(uint32_t timeInMilliseconds) = 0;
+	virtual void MoveDown(uint32_t timeInMilliseconds) = 0;
 	virtual void Use() = 0;
 	virtual void Pick(THUAI4::PropType propType) = 0;
-	virtual void Throw(int timeInMilliseconds, double angle) = 0;
-	virtual void Attack(int timeInMilliseconds, double angle) = 0;
+	virtual void Throw(uint32_t timeInMilliseconds, double angle) = 0;
+	virtual void Attack(uint32_t timeInMilliseconds, double angle) = 0;
 	virtual void Send(int toPlayerID, std::string message) = 0;
 
 	//选手可获取的信息
@@ -50,6 +44,8 @@ class AIBase {
 public:
 	virtual void play(GameApi& g) = 0;
 };
-using CreateAIFunc = AIBase * (*)();
+using CreateAIFunc = std::shared_ptr<AIBase>(*)();
 
 int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
+
+#endif // !BASE_H
