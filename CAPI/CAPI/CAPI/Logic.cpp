@@ -187,7 +187,6 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	}
 }
 
-
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
 	{
@@ -239,8 +238,9 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		}
 
-		for (int i = 0; i < (int)pBuffer->playerGUIDs.size(); i++) {
-			for (int j = 0; j < (int)pBuffer->playerGUIDs[i].size(); j++) {
+		for (int i = 0; i < pM2C->playerguids_size() && pBuffer->playerGUIDs.size(); i++) {
+			auto temp = pM2C->playerguids(i);
+			for (int j = 0; j < temp.teammateguids_size() && pBuffer->playerGUIDs[i].size(); j++) {
 				pBuffer->playerGUIDs[i][j] = static_cast<int32_t>(pM2C->playerguids(i).teammateguids(j));
 			}
 		}
