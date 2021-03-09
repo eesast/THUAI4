@@ -7,6 +7,7 @@ using System.Text;
 
 namespace THUnity2D
 {
+	// 队伍类。此类并发不安全，须谨慎使用（需要并发安全须额外加锁）
 	public class Team
 	{
 		private static long currentMaxTeamID = 0;
@@ -43,6 +44,12 @@ namespace THUnity2D
 				}
 			}
 			return null;
+		}
+
+		//并发不安全，请谨慎使用此方法，目前此方法仅由 Map 的 GetGameObject 调用，其余地方不要调用
+		public ArrayList GetPlayerListForUnsafe()
+		{
+			return playerList;
 		}
 
 		public void AddPlayer(Character player)
