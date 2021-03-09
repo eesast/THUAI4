@@ -162,6 +162,7 @@
     <ClInclude Include="API.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="CAPI.h" />
+    <ClInclude Include="concurrent_queue.hpp" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Logic.h" />
     <ClInclude Include="proto\Message2Client.pb.h" />

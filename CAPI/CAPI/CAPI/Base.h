@@ -1,14 +1,16 @@
+#pragma once
+
 #ifndef BASE_H
 
 #define BASE_H
 
-#include<cstdint>
-#include<string>
-#include<vector>
-#include<functional>
-#include"Structures.h"
-#include"Constants.h"
-#include"proto/Message2Server.pb.h"
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <functional>
+#include "Structures.h"
+#include "Constants.h"
+#include "proto/Message2Server.pb.h"
 
 struct State;
 

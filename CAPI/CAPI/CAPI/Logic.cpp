@@ -1,5 +1,5 @@
 #include "Logic.h"
-#include<fstream>
+#include <fstream>
 //#define _ALL_VISIBLE_
 
 Logic::Logic() :pState(storage), pBuffer(storage + 1),

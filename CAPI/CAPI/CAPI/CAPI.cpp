@@ -13,10 +13,10 @@ EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
 
 EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
 {
-	int32_t type = (int32_t)pData[0];
-	type |= ((int32_t)pData[1]) << 8;
-	type |= ((int32_t)pData[2]) << 16;
-	type |= ((int32_t)pData[3]) << 24;
+	uint32_t type = (uint32_t)pData[0];
+	type |= ((uint32_t)pData[1]) << 8;
+	type |= ((uint32_t)pData[2]) << 16;
+	type |= ((uint32_t)pData[3]) << 24;
 	//type = *((int32_t*)pData);
 
 	Pointer2Message p2m;
@@ -103,7 +103,7 @@ CAPI::CAPI(
 		return queue.try_pop(ptr);
 	}
 
-	bool CAPI::IsEmpty()
+	bool CAPI::IsEmpty() const
 	{
 		return queue.empty();
 	}
