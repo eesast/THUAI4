@@ -16,11 +16,3 @@ void AI::play(GameApi& g)
 		g.Attack(100, direction(e));
 	}
 }
-
-std::shared_ptr<AIBase> CreateAI() {
-	return std::make_shared<AI>();
-}
-
-int main(int argc, char** argv) {
-	return thuai4_main(argc, argv, CreateAI);
-}
