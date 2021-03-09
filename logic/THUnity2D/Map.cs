@@ -1020,7 +1020,10 @@ namespace THUnity2D
 		public ArrayList GetGameObject()
 		{
 			ArrayList gameObjList = new ArrayList();
-			playerListLock.EnterWriteLock(); gameObjList.AddRange(playerList); playerListLock.ExitWriteLock();
+			foreach (Team team in teamList)		// team 只有在开始游戏之前被修改，开始之后是只读的，因此不须加锁
+			{
+				gameObjList.AddRange(team.GetPlayerListForUnsafe());
+			}
 			objListLock.EnterWriteLock(); gameObjList.AddRange(objList); objListLock.ExitWriteLock();
 			unpickedPropListLock.EnterReadLock(); gameObjList.AddRange(unpickedPropList); unpickedPropListLock.ExitReadLock();
 			return gameObjList;
