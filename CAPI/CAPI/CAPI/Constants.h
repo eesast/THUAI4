@@ -22,17 +22,17 @@ namespace Constants
 		M_SCI std::uint64_t sightRadiusSquared = sightRadius * sightRadius;
 		M_SCI std::int32_t numOfGridPerCell = 1000;
 
-		[[nodiscard]] MF_SCI auto CellToGrid(int x, int y)
+		[[nodiscard]] MF_SCI auto CellToGrid(int x, int y) noexcept
 		{
 			return std::make_pair<std::int32_t, std::int32_t>(x * numOfGridPerCell + numOfGridPerCell / 2, y * numOfGridPerCell + numOfGridPerCell / 2);
 		}
 
-		[[nodiscard]] MF_SCI std::int32_t GridToCellX(XYPosition pos)
+		[[nodiscard]] MF_SCI std::int32_t GridToCellX(XYPosition pos) noexcept
 		{
 			return pos.first / numOfGridPerCell;
 		}
 
-		[[nodiscard]] MF_SCI std::int32_t GridToCellY(XYPosition pos)
+		[[nodiscard]] MF_SCI std::int32_t GridToCellY(XYPosition pos) noexcept
 		{
 			return pos.second / numOfGridPerCell;
 		}
