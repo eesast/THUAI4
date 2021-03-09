@@ -1,8 +1,8 @@
-#include"API.h"
+#include "API.h"
 
-#include<functional>
-#include<chrono>
-#include<ctime>
+#include <functional>
+#include <chrono>
+#include <ctime>
 
 
 const static double PI = 3.14159265358979323846;

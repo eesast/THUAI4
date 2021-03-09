@@ -1,17 +1,19 @@
+#pragma once
+
 #ifndef LOGIC_H
 
 #define LOGIC_H
 
-#include"proto/Message2Client.pb.h"
-#include<functional>
-#include<array>
-#include<thread>
-#include<mutex>
-#include<iostream>
-#include"Constants.h"
-#include"Base.h"
-#include"CAPI.h"
-#include"API.h"
+#include "proto/Message2Client.pb.h"
+#include <functional>
+#include <array>
+#include <thread>
+#include <mutex>
+#include <iostream>
+#include "Constants.h"
+#include "Base.h"
+#include "CAPI.h"
+#include "API.h"
 
 class Logic {
 private:

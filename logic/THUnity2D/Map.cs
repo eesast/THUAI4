@@ -5,6 +5,12 @@ using System;
 
 namespace THUnity2D
 {
+	// This class, Map, is a god class, which is a terrible design.
+	// Sincerely hope that you, the coder of THUAIX (X > 4) or other code readers,
+	// can divide it to many small classes to take different respoinsibilities to
+	// raise its maintainability, testablility and readability.
+	// I strongly recommend that you can use more design-patterns well to solve this problem.
+	// -- The coder of this logic of THUAI4.
 	public class Map
 	{
 		public static class Constant

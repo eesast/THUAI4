@@ -1,17 +1,19 @@
+#pragma once
+
 #ifndef API_H
 
 #define API_H
 
-#include<string>
-#include"proto/Message2Server.pb.h"
-#include<HPSocket/HPSocket.h>
-#include<HPSocket/SocketInterface.h>
-#include<functional>
-#include"Structures.h"
-#include<cstdint>
-#include"Base.h"
-#include"concurrent_queue.hpp"
-#include<unordered_map>
+#include <string>
+#include "proto/Message2Server.pb.h"
+#include <HPSocket/HPSocket.h>
+#include <HPSocket/SocketInterface.h>
+#include <functional>
+#include "Structures.h"
+#include <cstdint>
+#include "Base.h"
+#include "concurrent_queue.hpp"
+#include <unordered_map>
 
 #define _COLOR_MAP_BY_HASHING_
 
