@@ -144,13 +144,13 @@ uint32_t API::GetTeamScore() const
 {
 	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& API::GetPlayerGUIDs() const
+const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams>& API::GetPlayerGUIDs() const
 {
 	return pState->playerGUIDs;
 }
 THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 {
-	assert(CellX >= 0 && CellX < State::nCells&& CellY >= 0 && CellY < State::nCells);
+	assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
 	auto it = pState->cellColors.find((CellX << 16) + CellY);
 	if (it == pState->cellColors.end()) {
@@ -205,8 +205,8 @@ void DebugApi::Use()
 	SendMessageWrapper(message);
 }
 inline bool InSameCell(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2) {
-	return (x1 / Constants::numOfGridPerCell == x2 / Constants::numOfGridPerCell) ||
-		(y1 / Constants::numOfGridPerCell == y2 / Constants::numOfGridPerCell);
+	return (x1 / Constants::Map::numOfGridPerCell == x2 / Constants::Map::numOfGridPerCell) ||
+		(y1 / Constants::Map::numOfGridPerCell == y2 / Constants::Map::numOfGridPerCell);
 }
 bool DebugApi::CanPick(THUAI4::PropType propType)
 {
@@ -281,7 +281,7 @@ void DebugApi::Send(int toPlayerID, std::string message)
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	OutStream << "Call Send(" << toPlayerID << "," << message << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	if (ExamineValidity) {//应该没啥必要
-		if (toPlayerID < 0 || toPlayerID >= Constants::numOfPlayer) {
+		if (toPlayerID < 0 || toPlayerID >= StateConstant::nPlayers) {
 			OutStream << "[Warning: Illegal player ID.]" << std::endl;
 			return;
 		}
@@ -415,7 +415,7 @@ uint32_t DebugApi::GetTeamScore() const
 	OutStream << "Call GetTeamScore() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
 	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, State::nPlayers>, State::nTeams>& DebugApi::GetPlayerGUIDs() const
+const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams>& DebugApi::GetPlayerGUIDs() const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
@@ -426,7 +426,7 @@ THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
 {
 	std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "s" << std::endl;;
-	assert(CellX >= 0 && CellX < State::nCells&& CellY >= 0 && CellY < State::nCells);
+	assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
 	//非法直接就炸了，不用检查
 	if (ExamineValidity) {
 		if (!CellColorVisible(pState->self->x, pState->self->y, CellX, CellY)) {
