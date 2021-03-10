@@ -5,12 +5,18 @@ using System;
 
 namespace THUnity2D
 {
+	// This class, Map, is a god class, which is a terrible design.
+	// Sincerely hope that you, the coder of THUAIX (X > 4) or other code readers,
+	// can divide it to many small classes to take different respoinsibilities to
+	// raise its maintainability, testablility and readability.
+	// I strongly recommend that you can use more design-patterns well to solve this problem.
+	// -- The coder of this logic of THUAI4.
 	public class Map
 	{
 		public static class Constant
 		{
-			public const int numOfGridPerCell = 1000;   //每个的坐标单位数
-			public const int numOfStepPerSecond = 20;       //每秒行走的步数
+			public const int numOfGridPerCell = 1000;				//每个的坐标单位数
+			public const int numOfStepPerSecond = 20;				//每秒行走的步数
 			public const int addScoreWhenKillOnePlayer = 10;
 			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
 

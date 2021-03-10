@@ -1,16 +1,23 @@
+#pragma once
+
 #ifndef BASE_H
 
 #define BASE_H
 
-#include<cstdint>
-#include<string>
-#include<vector>
-#include<functional>
-#include"Structures.h"
-#include"Constants.h"
-#include"proto/Message2Server.pb.h"
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <functional>
+#include "Structures.h"
+#include "Constants.h"
+#include "proto/Message2Server.pb.h"
 
-struct State;
+struct StateConstant
+{
+	constexpr static inline uint32_t nTeams = 2;
+	constexpr static inline uint32_t nPlayers = 4;
+	constexpr static inline uint32_t nCells = 50;
+};
 
 class GameApi {
 public:
@@ -36,7 +43,7 @@ public:
 	virtual const THUAI4::Character& GetSelfInfo() const = 0;
 	virtual THUAI4::ColorType GetSelfTeamColor() const = 0;
 	virtual uint32_t GetTeamScore() const = 0;
-	virtual const std::array<std::array<uint32_t, Constants::numOfPlayer>, Constants::numOfTeam>& GetPlayerGUIDs() const = 0;
+	virtual const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams>& GetPlayerGUIDs() const = 0;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const = 0;
 };
 
