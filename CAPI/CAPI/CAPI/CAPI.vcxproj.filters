@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\proto">
+      <UniqueIdentifier>{5e3af8f2-ea5f-4728-8638-2cd897da10f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\proto">
+      <UniqueIdentifier>{73a47b3a-6d13-411e-a066-4466d09b1f64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h">
@@ -36,14 +42,17 @@
     <ClInclude Include="Base.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="proto\Message2Client.pb.h">
+    <ClInclude Include="concurrent_queue.hpp">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="proto\Message2Client.pb.h">
+      <Filter>头文件\proto</Filter>
     </ClInclude>
     <ClInclude Include="proto\Message2Server.pb.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\proto</Filter>
     </ClInclude>
     <ClInclude Include="proto\MessageType.pb.h">
-      <Filter>头文件</Filter>
+      <Filter>头文件\proto</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -59,17 +68,17 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="proto\Message2Client.pb.cc">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="proto\Message2Server.pb.cc">
+    <ClCompile Include="API.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="proto\MessageType.pb.cc">
-      <Filter>源文件</Filter>
+      <Filter>源文件\proto</Filter>
     </ClCompile>
-    <ClCompile Include="API.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="proto\Message2Client.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="proto\Message2Server.pb.cc">
+      <Filter>源文件\proto</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

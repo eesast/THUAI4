@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef CAPI_H
 
 #define CAPI_H
@@ -48,7 +50,7 @@ public:
 	void Send(const Protobuf::MessageToServer&);
 	void Stop();
 	bool TryPop(Pointer2Message&);
-	bool IsEmpty();
+	bool IsEmpty() const;
 };
 
 #endif //!CAPI_H

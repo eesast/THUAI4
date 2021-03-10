@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef AI_H
 
 #define AI_H
@@ -7,7 +9,7 @@
 class AI : public AIBase
 {
 public:
-	AI() :AIBase() {}
+	AI() : AIBase() {}
 	virtual void play(GameApi&) override;
 };
 

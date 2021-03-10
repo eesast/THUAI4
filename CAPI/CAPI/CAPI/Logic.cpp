@@ -1,5 +1,5 @@
 #include "Logic.h"
-#include<fstream>
+#include <fstream>
 //#define _ALL_VISIBLE_
 
 Logic::Logic() :pState(storage), pBuffer(storage + 1),
@@ -21,7 +21,7 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 	int64_t dx = x - g.x();
 	int64_t dy = y - g.y();
 	uint64_t distanceSquared = dx * dx + dy * dy;
-	return distanceSquared <= Constants::SightRadiusSquared;
+	return distanceSquared <= Constants::Map::sightRadiusSquared;
 
 }
 
@@ -245,8 +245,8 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			}
 		}
 
-		for (int i = 0; i < State::nCells; i++) {
-			for (int j = 0; j < State::nCells; j++) {
+		for (int i = 0; i < StateConstant::nCells; i++) {
+			for (int j = 0; j < StateConstant::nCells; j++) {
 				if (
 #ifdef _ALL_VISIBLE_
 					true
