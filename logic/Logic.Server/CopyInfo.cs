@@ -72,6 +72,7 @@ namespace Logic.Server
 
 			ret.PropType = ConvertTool.ToCommunicationPropType(prop.GetPropType());
 			ret.IsLaid = prop.Laid;
+			ret.TeamID = prop.Parent == null ? Team.invalidTeamID : prop.Parent.TeamID;
 
 			return ret;
 		}
