@@ -82,8 +82,10 @@ message GameObjInfo
     ShapeType shapeType = 9;	//形状
     int32 radius = 10;		//圆形物体的半径或正方形内切圆半径
     
+    //以下当gameObjType为Character、Prop和Bullet时才有效
+    int64 teamID = 11;		//人物所属队伍ID或子弹、道具的发射主人所属队伍ID，其他情况为无效ID
+
     //以下当gameObjType为Character和Bullet时才有效
-    int64 teamID = 11;		//人物所属队伍ID或子弹的发射主人所属队伍ID，其他情况为无效ID
     int32 ap = 12;			//攻击力
     BulletType bulletType = 13;	//子弹类型
     
@@ -112,7 +114,7 @@ message MessageToOneClient
     
     MessageType messageType = 3;
     int64 guid = 4;             //自己的guid
-    string message = 5;
+    string message = 5;         //如果 messageType 为 Send，则为要发送的消息
 }
 
 //发送全局信息时
