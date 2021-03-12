@@ -6,6 +6,8 @@ THUAI4 原电子系第22届队式程序设计大赛
 
 目标框架：C++11及以上
 
+(使用了variant，所以要c++17)
+
 #### 多线程设计
 
 - 通信线程：监听代理Agent推送的信息更新并发送信息
@@ -22,11 +24,21 @@ THUAI4 原电子系第22届队式程序设计大赛
 
 ## 开发进度（参考）
 
-**目前只能在windows系统上跑！！！**
+### windows:
 
-**各种游戏常数未定义！！！**
+VS2019工程文件 win10电脑上可以运行
 
-**没有设计debug接口！！！**
+### Linux: 
+
+makefile 在Ubuntu 18.04 X64服务器上可以运行
+
+### Mac:
+
+无
+
+## 静态/动态库
+
+有于它们（尤其静态库）比较大，放在了[清华云盘](https://cloud.tsinghua.edu.cn/library/362b57c2-33e0-49f7-b6b9-ded5ea1c0cac/THUAI4%E6%96%87%E4%BB%B6/)上。CAPI4Linux.rar是Linux上的工程（但rar不是linux的hhh），so.rar、a.rar、dll.rar、lib.rar分别是Linux/Windows所需动态库静态库。
 
 ### 最重要的是 - - - -
 
