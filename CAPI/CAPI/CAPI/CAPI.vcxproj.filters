@@ -42,9 +42,6 @@
     <ClInclude Include="Base.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="concurrent_queue.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="proto\Message2Client.pb.h">
       <Filter>头文件\proto</Filter>
     </ClInclude>

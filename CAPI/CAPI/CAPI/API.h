@@ -5,16 +5,17 @@
 #define API_H
 
 #include <string>
-#include "proto/Message2Server.pb.h"
 #include <HPSocket/HPSocket.h>
 #include <HPSocket/SocketInterface.h>
 #include <functional>
-#include "Structures.h"
 #include <cstdint>
-#include "Base.h"
-#include "concurrent_queue.hpp"
 #include <unordered_map>
+#include "concurrent_queue.hpp"
 
+#include "proto/Message2Server.pb.h"
+#include"Structures.h"
+#include "Constants.h"
+#include "Base.h"
 #define _COLOR_MAP_BY_HASHING_
 
 struct State

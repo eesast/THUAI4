@@ -1,5 +1,4 @@
 #include "CAPI.h"
-#include "Structures.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
