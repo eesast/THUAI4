@@ -1,6 +1,6 @@
 @ECHO OFF
 
-::START CMD /K Release\CAPI.exe -P 7777 -p 0 -t 0 -j 0 
+START CMD /K Release\CAPI.exe -P 7777 -p 0 -t 0 -j 0 
 
 START CMD /K Release\CAPI.exe -P 7777 -p 0 -t 1 -j 0 
 
