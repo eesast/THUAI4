@@ -1,6 +1,8 @@
 #include "CAPI.h"
 #include "Structures.h"
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 Listener::Listener(std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) :
 	Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
@@ -67,14 +69,14 @@ CAPI::CAPI(
 				std::cout << pclient->GetLastError() << std::endl;
 				return false;
 			}
-			Sleep(1000);
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 		return true;
 
 	}
 	void CAPI::Send(const Protobuf::MessageToServer& message)
 	{
-		byte data[maxlength];
+		unsigned char data[maxlength];
 		data[0] = MessageToServer & 0xff;
 		data[1] = (MessageToServer >> 8) & 0xff;
 		data[2] = (MessageToServer >> 16) & 0xff;
