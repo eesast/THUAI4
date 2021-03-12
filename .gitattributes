@@ -1,0 +1,2 @@
+libprotobufd.lib filter=lfs diff=lfs merge=lfs -text
+libprotobuf.a filter=lfs diff=lfs merge=lfs -text
