@@ -361,8 +361,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-./CAPI/CAPI/dll/*
-./CAPI/CAPI/lib/*
-./CAPI4Linux/a/*
-./CAPI4Linux/so/*
+/CAPI/CAPI/dll/*
+/CAPI/CAPI/lib/*
+/CAPI4Linux/a/*
+/CAPI4Linux/so/*
 
