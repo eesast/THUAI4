@@ -4,8 +4,6 @@
 
 #define CAPI_H
 
-#include "Constants.h"
-#include "Structures.h"
 #include "proto/Message2Client.pb.h"
 #include "proto/Message2Server.pb.h"
 #include "concurrent_queue.hpp"

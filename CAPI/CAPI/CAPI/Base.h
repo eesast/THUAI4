@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef BASE_H
 
 #define BASE_H
@@ -8,9 +6,8 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <memory>
 #include "Structures.h"
-#include "Constants.h"
-#include "proto/Message2Server.pb.h"
 
 struct StateConstant
 {
