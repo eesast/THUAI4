@@ -21,61 +21,64 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AI.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CAPI.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Constants.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Logic.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Structures.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="API.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Base.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="proto\Message2Client.pb.h">
-      <Filter>头文件\proto</Filter>
-    </ClInclude>
-    <ClInclude Include="proto\Message2Server.pb.h">
-      <Filter>头文件\proto</Filter>
-    </ClInclude>
-    <ClInclude Include="proto\MessageType.pb.h">
-      <Filter>头文件\proto</Filter>
-    </ClInclude>
+    <ClCompile Include="src\AI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\API.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CAPI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\proto\Message2Client.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="src\proto\Message2Server.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
+    <ClCompile Include="src\proto\MessageType.pb.cc">
+      <Filter>源文件\proto</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AI.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CAPI.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Logic.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="API.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="proto\MessageType.pb.cc">
-      <Filter>源文件\proto</Filter>
-    </ClCompile>
-    <ClCompile Include="proto\Message2Client.pb.cc">
-      <Filter>源文件\proto</Filter>
-    </ClCompile>
-    <ClCompile Include="proto\Message2Server.pb.cc">
-      <Filter>源文件\proto</Filter>
-    </ClCompile>
+    <ClInclude Include="src\AI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Base.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\API.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CAPI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Constants.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Structures.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\proto\Message2Client.pb.h">
+      <Filter>头文件\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="src\proto\Message2Server.pb.h">
+      <Filter>头文件\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="src\proto\MessageType.pb.h">
+      <Filter>头文件\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="src\concurrent_queue.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
