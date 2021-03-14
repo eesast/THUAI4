@@ -1,6 +1,7 @@
-#include<tclap/CmdLine.h>
-#include"Base.h"
-#include"Logic.h"
+#include <tclap/CmdLine.h>
+#include "Base.h"
+#include "Logic.h"
+#include "AI.h"
 
 Logic logic;
 
@@ -77,3 +78,12 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 	logic.Main(aIP.c_str(), aPort, pID, tID, jType, AIBuilder, level, filename);
 	return 0;
 }
+
+std::shared_ptr<AIBase> CreateAI() {
+	return std::make_shared<AI>();
+}
+
+int main(int argc, char* argv[]) {
+	return thuai4_main(argc, argv, CreateAI);
+}
+

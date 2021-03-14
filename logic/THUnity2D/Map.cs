@@ -5,12 +5,18 @@ using System;
 
 namespace THUnity2D
 {
+	// This class, Map, is a god class, which is a terrible design.
+	// Sincerely hope that you, the coder of THUAIX (X > 4) or other code readers,
+	// can divide it to many small classes to take different respoinsibilities to
+	// raise its maintainability, testablility and readability.
+	// I strongly recommend that you can use more design-patterns well to solve this problem.
+	// -- The coder of this logic of THUAI4.
 	public class Map
 	{
 		public static class Constant
 		{
-			public const int numOfGridPerCell = 1000;   //每个的坐标单位数
-			public const int numOfStepPerSecond = 20;       //每秒行走的步数
+			public const int numOfGridPerCell = 1000;				//每个的坐标单位数
+			public const int numOfStepPerSecond = 20;				//每秒行走的步数
 			public const int addScoreWhenKillOnePlayer = 10;
 			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
 
@@ -1020,7 +1026,10 @@ namespace THUnity2D
 		public ArrayList GetGameObject()
 		{
 			ArrayList gameObjList = new ArrayList();
-			playerListLock.EnterWriteLock(); gameObjList.AddRange(playerList); playerListLock.ExitWriteLock();
+			foreach (Team team in teamList)		// team 只有在开始游戏之前被修改，开始之后是只读的，因此不须加锁
+			{
+				gameObjList.AddRange(team.GetPlayerListForUnsafe());
+			}
 			objListLock.EnterWriteLock(); gameObjList.AddRange(objList); objListLock.ExitWriteLock();
 			unpickedPropListLock.EnterReadLock(); gameObjList.AddRange(unpickedPropList); unpickedPropListLock.ExitReadLock();
 			return gameObjList;
