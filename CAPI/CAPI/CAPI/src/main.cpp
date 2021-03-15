@@ -24,13 +24,13 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 		TCLAP::ValueArg<uint16_t> agentPort("P", "agentPort", "Port the agent listens to", true, 0, "USHORT");
 		cmd.add(agentPort);
 
-		std::vector<int> validPlayerIDs{ 0,1,2,3, };
+		std::vector<int> validPlayerIDs{ 0, 1, 2 , 3 };
 		TCLAP::ValuesConstraint<int> playerIdConstraint(validPlayerIDs);
 		TCLAP::ValueArg<int> playerID("p", "playerID", "Player ID 0,1,2,3 valid only"
 			, true, -1, &playerIdConstraint);
 		cmd.add(playerID);
 
-		std::vector<int> validTeamIDs{ 0,1 };
+		std::vector<int> validTeamIDs{ 0, 1 };
 		TCLAP::ValuesConstraint<int> temIdConstraint(validTeamIDs);
 		TCLAP::ValueArg<int> teamID("t", "teamID", "Team ID, which can only be 0 or 1"
 			, true, -1, &temIdConstraint);
@@ -38,7 +38,7 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 
 		std::string jobDesc = "Player`s job, represented by an integer from 0 to 6\nbalabala";
 
-		std::vector<int> validJobTypes{ 0,1,2,3,4,5,6 };
+		std::vector<int> validJobTypes{ 0, 1, 2, 3, 4, 5, 6 };
 		TCLAP::ValuesConstraint<int> jobTypeConstraint(validJobTypes);
 		TCLAP::ValueArg<int> jobType("j", "jobType", jobDesc
 			, true, 0, &jobTypeConstraint);

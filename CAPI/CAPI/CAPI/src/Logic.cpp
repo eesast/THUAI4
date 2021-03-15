@@ -126,7 +126,7 @@ std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& g
 	std::shared_ptr<THUAI4::BirthPoint> birthpoint = std::make_shared<THUAI4::BirthPoint>();
 	birthpoint->guid = goi.guid();
 	birthpoint->radius = goi.radius();
-	birthpoint->shapeType = (THUAI4::ShapeType) goi.shapetype();
+	birthpoint->shapeType = (THUAI4::ShapeType)goi.shapetype();
 	birthpoint->teamID = static_cast<uint16_t>(goi.teamid());
 	birthpoint->x = goi.x();
 	birthpoint->y = goi.y();

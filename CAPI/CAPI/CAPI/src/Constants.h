@@ -13,10 +13,10 @@
 
 namespace Constants
 {
-	using XYPosition = ::std::pair<std::int32_t, std::int32_t>;
-
+	
 	struct Map
 	{
+		using XYPosition = ::std::pair<std::int32_t, std::int32_t>;
 
 		M_SCI std::uint64_t sightRadius = 5000;
 		M_SCI std::uint64_t sightRadiusSquared = sightRadius * sightRadius;
@@ -78,7 +78,12 @@ namespace Constants
 		M_SCI std::int32_t divider = mineTimeInSeconds;
 	};
 
-	M_SCI int64_t invalidGUID = (std::numeric_limits<int64_t>::max)();
+	struct ID
+	{
+		M_SCI std::int64_t invalidGUID = std::numeric_limits<std::int64_t>::max();
+		M_SCI std::int64_t noneGUID = std::numeric_limits<std::int64_t>::min();
+	};
+
 }
 
 #undef MF_SCI

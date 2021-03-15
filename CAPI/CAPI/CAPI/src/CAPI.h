@@ -27,9 +27,9 @@ private:
 
 public:
 	Listener(std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);
-	virtual EnHandleResult OnConnect(ITcpClient *pSender, CONNID dwConnID);
-	virtual EnHandleResult OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE *pData, int iLength);
+	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
+	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
 };
 
 class CAPI
@@ -45,10 +45,10 @@ public:
 	static const int32_t MessageToServer = 1;
 
 	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
-	bool Connect(const char *address, uint16_t port);
-	void Send(const Protobuf::MessageToServer &);
+	bool Connect(const char* address, uint16_t port);
+	void Send(const Protobuf::MessageToServer&);
 	void Stop();
-	bool TryPop(Pointer2Message &);
+	bool TryPop(Pointer2Message&);
 	bool IsEmpty() const;
 };
 

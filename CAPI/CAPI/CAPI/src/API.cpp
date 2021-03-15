@@ -6,16 +6,16 @@
 
 const static double PI = 3.14159265358979323846;
 
-double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
+double TimeSinceStart(const std::chrono::system_clock::time_point& sp)
 {
 	std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
-	std::chrono::duration<double,std::milli> time_span = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tp - sp);
+	std::chrono::duration<double, std::milli> time_span = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tp - sp);
 	return time_span.count();
 }
 
-API::API(std::function<void(Protobuf::MessageToServer &)> sm,
-		 std::function<bool()> e, std::function<bool(std::string &)> tp,
-		 const State *&pS) : LogicInterface(sm, e, tp, pS) {}
+API::API(std::function<void(Protobuf::MessageToServer&)> sm,
+	std::function<bool()> e, std::function<bool(std::string&)> tp,
+	const State*& pS) : LogicInterface(sm, e, tp, pS) {}
 
 void API::Use()
 {
@@ -82,14 +82,14 @@ bool API::MessageAvailable()
 {
 	return !Empty();
 }
-bool API::TryGetMessage(std::string &str)
+bool API::TryGetMessage(std::string& str)
 {
 	return TryPop(str);
 }
 
-std::vector<const THUAI4::Character *> API::GetCharacters() const
+std::vector<const THUAI4::Character*> API::GetCharacters() const
 {
-	std::vector<const THUAI4::Character *> characters;
+	std::vector<const THUAI4::Character*> characters;
 
 	for (auto it : pState->characters)
 	{
@@ -97,18 +97,18 @@ std::vector<const THUAI4::Character *> API::GetCharacters() const
 	}
 	return characters;
 }
-std::vector<const THUAI4::Wall *> API::GetWalls() const
+std::vector<const THUAI4::Wall*> API::GetWalls() const
 {
-	std::vector<const THUAI4::Wall *> walls;
+	std::vector<const THUAI4::Wall*> walls;
 	for (auto it : pState->walls)
 	{
 		walls.push_back(it.get());
 	}
 	return walls;
 }
-std::vector<const THUAI4::Prop *> API::GetProps() const
+std::vector<const THUAI4::Prop*> API::GetProps() const
 {
-	std::vector<const THUAI4::Prop *> props;
+	std::vector<const THUAI4::Prop*> props;
 
 	for (auto it : pState->props)
 	{
@@ -116,9 +116,9 @@ std::vector<const THUAI4::Prop *> API::GetProps() const
 	}
 	return props;
 }
-std::vector<const THUAI4::Bullet *> API::GetBullets() const
+std::vector<const THUAI4::Bullet*> API::GetBullets() const
 {
-	std::vector<const THUAI4::Bullet *> bullets;
+	std::vector<const THUAI4::Bullet*> bullets;
 
 	for (auto it : pState->bullets)
 	{
@@ -126,16 +126,16 @@ std::vector<const THUAI4::Bullet *> API::GetBullets() const
 	}
 	return bullets;
 }
-std::vector<const THUAI4::BirthPoint *> API::GetBirthPoints() const
+std::vector<const THUAI4::BirthPoint*> API::GetBirthPoints() const
 {
-	std::vector<const THUAI4::BirthPoint *> birthpoints;
+	std::vector<const THUAI4::BirthPoint*> birthpoints;
 	for (auto it : pState->birthpoints)
 	{
 		birthpoints.push_back(it.get());
 	}
 	return birthpoints;
 }
-const THUAI4::Character &API::GetSelfInfo() const
+const THUAI4::Character& API::GetSelfInfo() const
 {
 	return *pState->self;
 }
@@ -147,13 +147,13 @@ uint32_t API::GetTeamScore() const
 {
 	return pState->teamScore;
 }
-const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &API::GetPlayerGUIDs() const
+const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& API::GetPlayerGUIDs() const
 {
 	return pState->playerGUIDs;
 }
 THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 {
-	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
+	assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
 	auto it = pState->cellColors.find((CellX << 16) + CellY);
 	if (it == pState->cellColors.end())
@@ -169,10 +169,10 @@ THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 //Debug API
 //目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
 
-DebugApi::DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
-				   std::function<bool()> e, std::function<bool(std::string &)> tp,
-				   const State *&pS,
-				   bool ev, std::ostream &out) : LogicInterface(sm, e, tp, pS), ExamineValidity(ev), OutStream(out) {}
+DebugApi::DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
+	std::function<bool()> e, std::function<bool(std::string&)> tp,
+	const State*& pS,
+	bool ev, std::ostream& out) : LogicInterface(sm, e, tp, pS), ExamineValidity(ev), OutStream(out) {}
 
 void DebugApi::StartTimer()
 {
@@ -211,7 +211,7 @@ void DebugApi::Use()
 inline bool InSameCell(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
 	return (x1 / Constants::Map::numOfGridPerCell == x2 / Constants::Map::numOfGridPerCell) ||
-		   (y1 / Constants::Map::numOfGridPerCell == y2 / Constants::Map::numOfGridPerCell);
+		(y1 / Constants::Map::numOfGridPerCell == y2 / Constants::Map::numOfGridPerCell);
 }
 bool DebugApi::CanPick(THUAI4::PropType propType)
 {
@@ -353,7 +353,7 @@ bool DebugApi::MessageAvailable()
 {
 	return !Empty();
 }
-bool DebugApi::TryGetMessage(std::string &str)
+bool DebugApi::TryGetMessage(std::string& str)
 {
 	OutStream << "Call TryGetMessage() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
@@ -368,11 +368,11 @@ bool DebugApi::TryGetMessage(std::string &str)
 	return res;
 }
 
-std::vector<const THUAI4::Character *> DebugApi::GetCharacters() const
+std::vector<const THUAI4::Character*> DebugApi::GetCharacters() const
 {
 	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
-	std::vector<const THUAI4::Character *> characters;
+	std::vector<const THUAI4::Character*> characters;
 
 	for (auto it : pState->characters)
 	{
@@ -380,51 +380,51 @@ std::vector<const THUAI4::Character *> DebugApi::GetCharacters() const
 	}
 	return characters;
 }
-std::vector<const THUAI4::Wall *> DebugApi::GetWalls() const
+std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
 {
 	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
-	std::vector<const THUAI4::Wall *> walls;
+	std::vector<const THUAI4::Wall*> walls;
 	for (auto it : pState->walls)
 	{
 		walls.push_back(it.get());
 	}
 	return walls;
 }
-std::vector<const THUAI4::Prop *> DebugApi::GetProps() const
+std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
 {
 	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
-	std::vector<const THUAI4::Prop *> props;
+	std::vector<const THUAI4::Prop*> props;
 	for (auto it : pState->props)
 	{
 		props.push_back(it.get());
 	}
 	return props;
 }
-std::vector<const THUAI4::Bullet *> DebugApi::GetBullets() const
+std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
 {
 	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
-	std::vector<const THUAI4::Bullet *> bullets;
+	std::vector<const THUAI4::Bullet*> bullets;
 	for (auto it : pState->bullets)
 	{
 		bullets.push_back(it.get());
 	}
 	return bullets;
 }
-std::vector<const THUAI4::BirthPoint *> DebugApi::GetBirthPoints() const
+std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
 {
 	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
-	std::vector<const THUAI4::BirthPoint *> birthpoints;
+	std::vector<const THUAI4::BirthPoint*> birthpoints;
 	for (auto it : pState->birthpoints)
 	{
 		birthpoints.push_back(it.get());
 	}
 	return birthpoints;
 }
-const THUAI4::Character &DebugApi::GetSelfInfo() const
+const THUAI4::Character& DebugApi::GetSelfInfo() const
 {
 	OutStream << "Call GetSelfInfo() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
@@ -442,7 +442,7 @@ uint32_t DebugApi::GetTeamScore() const
 	;
 	return pState->teamScore;
 }
-const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &DebugApi::GetPlayerGUIDs() const
+const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& DebugApi::GetPlayerGUIDs() const
 {
 	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
@@ -453,7 +453,7 @@ THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
 {
 	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
-	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
+	assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
 	//非法直接就炸了，不用检查
 	if (ExamineValidity)
 	{
