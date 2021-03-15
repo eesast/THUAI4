@@ -15,16 +15,16 @@ CAPI: $(objects)
 	-Wl,-rpath=./so -std=c++17 -pthread -O2 -Wall
 
 CAPI.o: $(CAPI_O_PREREQUISITES)
-	g++ -c ./src/CAPI.cpp -I./include -std=c++17 -O2 -Wall
+	g++ -c ./src/CAPI.cpp -I./include/linux -std=c++17 -O2 -Wall
 
 API.o: $(API_O_PREREQUISITES)
-	g++ -c ./src/API.cpp -I./include -std=c++17 -O2 -Wall
+	g++ -c ./src/API.cpp -I./include/linux -std=c++17 -O2 -Wall
 
 Logic.o: $(LOGIC_O_PREREQUISITES)
-	g++ -c ./src/Logic.cpp -I./include -pthread -std=c++17 -O2 -Wall
+	g++ -c ./src/Logic.cpp -I./include/linux -pthread -std=c++17 -O2 -Wall
 
 main.o: $(MAIN_O_PREREQUISITES)
-	g++ -c ./src/main.cpp -I./include -std=c++17 -O2 -Wall
+	g++ -c ./src/main.cpp -I./include/linux -std=c++17 -O2 -Wall
 
 AI.o: $(AI_O_PREREQUISITES)
 	g++ -c ./src/AI.cpp -std=c++17 -O2 -Wall
