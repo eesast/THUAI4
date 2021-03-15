@@ -27,7 +27,7 @@ struct State
 	std::vector<std::shared_ptr<THUAI4::Prop>> props;
 	std::vector<std::shared_ptr<THUAI4::Bullet>> bullets;
 	std::vector<std::shared_ptr<THUAI4::BirthPoint>> birthpoints;
-	std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams> playerGUIDs;
+	std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> playerGUIDs;
 	std::shared_ptr<THUAI4::Character> self;
 #ifdef _COLOR_MAP_BY_HASHING_
 	std::unordered_map<uint32_t, THUAI4::ColorType> cellColors;
@@ -85,7 +85,7 @@ public:
 	virtual const THUAI4::Character &GetSelfInfo() const;
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
-	virtual const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
+	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 
@@ -140,7 +140,7 @@ public:
 	virtual const THUAI4::Character &GetSelfInfo() const;
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
-	virtual const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
+	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)

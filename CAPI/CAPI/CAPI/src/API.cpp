@@ -147,7 +147,7 @@ uint32_t API::GetTeamScore() const
 {
 	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams> &API::GetPlayerGUIDs() const
+const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &API::GetPlayerGUIDs() const
 {
 	return pState->playerGUIDs;
 }
@@ -442,7 +442,7 @@ uint32_t DebugApi::GetTeamScore() const
 	;
 	return pState->teamScore;
 }
-const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams> &DebugApi::GetPlayerGUIDs() const
+const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &DebugApi::GetPlayerGUIDs() const
 {
 	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;

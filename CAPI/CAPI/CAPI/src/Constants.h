@@ -78,6 +78,7 @@ namespace Constants
 		M_SCI std::int32_t divider = mineTimeInSeconds;
 	};
 
+	M_SCI int64_t invalidGUID = (std::numeric_limits<int64_t>::max)();
 }
 
 #undef MF_SCI

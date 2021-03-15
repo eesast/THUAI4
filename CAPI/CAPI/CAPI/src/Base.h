@@ -44,7 +44,7 @@ public:
 	virtual const THUAI4::Character &GetSelfInfo() const = 0;
 	virtual THUAI4::ColorType GetSelfTeamColor() const = 0;
 	virtual uint32_t GetTeamScore() const = 0;
-	virtual const std::array<std::array<uint32_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const = 0;
+	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const = 0;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const = 0;
 };
 

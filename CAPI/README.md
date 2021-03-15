@@ -30,7 +30,9 @@ C++ 语言标准：C++17
 
 ### Windows:
 
-配置好 VS2019 工程文件 Release 和 Debug 均能成功生成
+配置好 VS2019 工程文件 Release/Debug模式均能成功生成
+
+（HPSocket x86 x64的库还不一样，目前云盘上传的只有win32）
 
 win10 电脑测试
 
@@ -39,6 +41,8 @@ win10 电脑测试
 提供了 makefile
 
 Ubuntu 18.04 X86_64 架构服务器上可以正常生成、运行
+
+（同上，云盘上的库是x64的）
 
 ### Mac:
 
@@ -50,18 +54,24 @@ Ubuntu 18.04 X86_64 架构服务器上可以正常生成、运行
 
 ### 目录结构
 
-- CAPI
-  - CAPI
-    - CAPI
-      - dll
-      - lib
-      - include
-      - ...
-  - CAPI4Linux
-    - a
-    - so
-    - include
-    - ...
+ - CAPI
+   - CAPI
+     - include
+       - win
+       - linux
+     - src
+     - lib (for Windows)
+     - dll (for Windows)
+     - CAPI.vcproj (for Windows)
+     - CAPI.vcproj.filters (for Windows)
+     - a (for Linux)
+     - so (for Linux)
+     - makefile (for Linux)
+   - CAPI.sln（for Windows）
+
+
+
+四个库目录没有在github上上传，需要从云盘上下载。VS工程文件和makefile视情况删除。
 
 ### 关于运行时动态库的位置
 
@@ -69,10 +79,6 @@ Ubuntu 18.04 X86_64 架构服务器上可以正常生成、运行
 - Linux 里 g++ 编译时传了 -Wl, -rpath=./so​，所以可执行文件要和 so 文件夹在同一个位置。
 
 
-
-**可能（一定）会有 BUG！！！**
-
-（热烈欢迎大家帮我 debug ）
 
 ## 开发组成员
 
