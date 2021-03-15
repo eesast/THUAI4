@@ -65,6 +65,8 @@ namespace Constants
 
 	public:
 
+		//道具效果持续时间
+
 		M_SCI std::int32_t bike = propTimeInSeconds;
 		M_SCI std::int32_t amplifier = propTimeInSeconds;
 		M_SCI std::int32_t jinKeLa = propTimeInSeconds;
@@ -72,16 +74,19 @@ namespace Constants
 		M_SCI std::int32_t shield = propTimeInSeconds;
 		M_SCI std::int32_t totem = propTimeInSeconds;
 		M_SCI std::int32_t spear = propTimeInSeconds;
+		M_SCI std::int32_t dirt = propTimeInSeconds;
+		M_SCI std::int32_t attenuator = propTimeInSeconds;
+		M_SCI std::int32_t divider = propTimeInSeconds;
 
-		M_SCI std::int32_t dirt = mineTimeInSeconds;
-		M_SCI std::int32_t attenuator = mineTimeInSeconds;
-		M_SCI std::int32_t divider = mineTimeInSeconds;
+		//地雷的埋藏时间
+
+		M_SCI std::int32_t mine = mineTimeInSeconds;
 	};
 
 	struct ID
 	{
-		M_SCI std::int64_t invalidGUID = std::numeric_limits<std::int64_t>::max();
-		M_SCI std::int64_t noneGUID = std::numeric_limits<std::int64_t>::min();
+		M_SCI std::int64_t invalidGUID = (std::numeric_limits<std::int64_t>::max)();
+		M_SCI std::int64_t noneGUID = (std::numeric_limits<std::int64_t>::min)();
 	};
 
 }
