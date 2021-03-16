@@ -39,15 +39,15 @@ struct State
 struct LogicInterface : public GameApi
 {
 protected:
-	const std::function<void(Protobuf::MessageToServer &)> SendMessageWrapper; //加入ID放到这个函数里了
+	const std::function<void(Protobuf::MessageToServer&)> SendMessageWrapper; //加入ID放到这个函数里了
 	const std::function<bool()> Empty;
-	const std::function<bool(std::string &)> TryPop;
-	const State *&pState;
+	const std::function<bool(std::string&)> TryPop;
+	const State*& pState;
 
 public:
-	LogicInterface(std::function<void(Protobuf::MessageToServer &)> sm,
-				   std::function<bool()> e, std::function<bool(std::string &)> tp,
-				   const State *&pS) : SendMessageWrapper(sm), Empty(e), TryPop(tp), pState(pS) {}
+	LogicInterface(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const State*& pS) : SendMessageWrapper(sm), Empty(e), TryPop(tp), pState(pS) {}
 	virtual void StartTimer() = 0;
 	virtual void EndTimer() = 0;
 };
@@ -59,9 +59,9 @@ private:
 	virtual void EndTimer() {}
 
 public:
-	API(std::function<void(Protobuf::MessageToServer &)> sm,
-		std::function<bool()> e, std::function<bool(std::string &)> tp,
-		const State *&pS);
+	API(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const State*& pS);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
 	virtual void MoveUp(uint32_t timeInMilliseconds);
@@ -75,17 +75,17 @@ public:
 
 	//Information the player can get
 	virtual bool MessageAvailable();
-	virtual bool TryGetMessage(std::string &);
+	virtual bool TryGetMessage(std::string&);
 
-	virtual std::vector<const THUAI4::Character *> GetCharacters() const;
-	virtual std::vector<const THUAI4::Wall *> GetWalls() const;
-	virtual std::vector<const THUAI4::Prop *> GetProps() const;
-	virtual std::vector<const THUAI4::Bullet *> GetBullets() const;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPoints() const;
-	virtual const THUAI4::Character &GetSelfInfo() const;
+	virtual std::vector<const THUAI4::Character*> GetCharacters() const;
+	virtual std::vector<const THUAI4::Wall*> GetWalls() const;
+	virtual std::vector<const THUAI4::Prop*> GetProps() const;
+	virtual std::vector<const THUAI4::Bullet*> GetBullets() const;
+	virtual std::vector<const THUAI4::BirthPoint*> GetBirthPoints() const;
+	virtual const THUAI4::Character& GetSelfInfo() const;
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
-	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
+	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 
@@ -93,7 +93,7 @@ class DebugApi final : public LogicInterface
 {
 private:
 	bool ExamineValidity;
-	std::ostream &OutStream;
+	std::ostream& OutStream;
 	std::chrono::system_clock::time_point StartPoint;
 	bool CanPick(THUAI4::PropType propType);
 	std::map<THUAI4::PropType, std::string> dict{
@@ -107,16 +107,16 @@ private:
 		{THUAI4::PropType::Null, "Null"},
 		{THUAI4::PropType::Phaser, "Phaser"},
 		{THUAI4::PropType::Rice, "Rice"},
-		{THUAI4::PropType::Totem, "Totem"}};
+		{THUAI4::PropType::Totem, "Totem"} };
 	virtual void StartTimer();
 	virtual void EndTimer();
 
 public:
-	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
-			 std::function<bool()> e, std::function<bool(std::string &)> tp,
-			 const State *&pS,
-			 bool ev = false,
-			 std::ostream &out = std::cout);
+	DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string&)> tp,
+		const State*& pS,
+		bool ev = false,
+		std::ostream& out = std::cout);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
 	virtual void MoveUp(uint32_t timeInMilliseconds);
@@ -130,17 +130,17 @@ public:
 
 	//Information the player can get
 	virtual bool MessageAvailable();
-	virtual bool TryGetMessage(std::string &);
+	virtual bool TryGetMessage(std::string&);
 
-	virtual std::vector<const THUAI4::Character *> GetCharacters() const;
-	virtual std::vector<const THUAI4::Wall *> GetWalls() const;
-	virtual std::vector<const THUAI4::Prop *> GetProps() const;
-	virtual std::vector<const THUAI4::Bullet *> GetBullets() const;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPoints() const;
-	virtual const THUAI4::Character &GetSelfInfo() const;
+	virtual std::vector<const THUAI4::Character*> GetCharacters() const;
+	virtual std::vector<const THUAI4::Wall*> GetWalls() const;
+	virtual std::vector<const THUAI4::Prop*> GetProps() const;
+	virtual std::vector<const THUAI4::Bullet*> GetBullets() const;
+	virtual std::vector<const THUAI4::BirthPoint*> GetBirthPoints() const;
+	virtual const THUAI4::Character& GetSelfInfo() const;
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
-	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
+	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)

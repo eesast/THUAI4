@@ -10,7 +10,7 @@
 namespace THUAI4
 {
 
-	enum class PropType : unsigned char    //µÀ¾ßÀàĞÍ
+	enum class PropType : unsigned char    //é“å…·ç±»å‹
 	{
 		Null = 0,
 		Bike = 1,
@@ -25,13 +25,13 @@ namespace THUAI4
 		Divider = 10
 	};
 
-	enum class ShapeType : unsigned char    //ÎïÌåĞÎ×´
+	enum class ShapeType : unsigned char    //ç‰©ä½“å½¢çŠ¶
 	{
 		Circle = 0,
 		Square = 1
 	};
 
-	enum class JobType : unsigned char    //Íæ¼ÒÖ°Òµ
+	enum class JobType : unsigned char    //ç©å®¶èŒä¸š
 	{
 		Job0 = 0,
 		Job1 = 1,
@@ -42,7 +42,7 @@ namespace THUAI4
 		Job6 = 6,
 	};
 
-	enum class BulletType : unsigned char    //×Óµ¯ÖÖÀà
+	enum class BulletType : unsigned char    //å­å¼¹ç§ç±»
 	{
 		Bullet0 = 0,
 		Bullet1 = 1,
@@ -53,7 +53,7 @@ namespace THUAI4
 		Bullet6 = 6
 	};
 
-	enum class ColorType : unsigned char    //ÑÕÉ«ÖÖÀà
+	enum class ColorType : unsigned char    //é¢œè‰²ç§ç±»
 	{
 		None = 0,
 		Color1 = 1,
@@ -65,74 +65,75 @@ namespace THUAI4
 
 	struct Character
 	{
-		bool isMoving;  //ÊÇ·ñÕıÔÚÒÆ¶¯
-		bool isDying;  //ÊÇ·ñÕıÔÚ¸´»îÖĞ
-		ShapeType shapeType : 2;  //ĞÎ×´£¨Ô²£©
-		BulletType bulletType : 4;  //×Óµ¯ÖÖÀà
-		PropType propType : 4;  //ËùÓµÓĞµÀ¾ßÀàĞÍ
-		JobType jobType : 4;  //Ö°ÒµÀàĞÍ
-		uint16_t lifeNum;  //µÚ¼¸ÌõÃü
-		uint16_t teamID;  //¶ÓÎéID
-		uint16_t radius;  //Ô²ĞÎÎïÌåµÄ°ë¾¶»òÕı·½ĞÎÄÚÇĞÔ²°ë¾¶
-		uint16_t maxBulletNum;  //µ¯¼Ğ×î´óÈİÁ¿
-		uint16_t bulletNum;  //µ±Ç°×Óµ¯ÊıÁ¿
+		bool isMoving;  //æ˜¯å¦æ­£åœ¨ç§»åŠ¨
+		bool isDying;  //æ˜¯å¦æ­£åœ¨å¤æ´»ä¸­
+		ShapeType shapeType : 2;  //å½¢çŠ¶ï¼ˆåœ†ï¼‰
+		BulletType bulletType : 4;  //å­å¼¹ç§ç±»
+		PropType propType : 4;  //æ‰€æ‹¥æœ‰é“å…·ç±»å‹
+		JobType jobType : 4;  //èŒä¸šç±»å‹
+		uint16_t lifeNum;  //ç¬¬å‡ æ¡å‘½
+		uint16_t teamID;  //é˜Ÿä¼ID
+		uint16_t radius;  //åœ†å½¢ç‰©ä½“çš„åŠå¾„æˆ–æ­£æ–¹å½¢å†…åˆ‡åœ†åŠå¾„
+		uint16_t maxBulletNum;  //å¼¹å¤¹æœ€å¤§å®¹é‡
+		uint16_t bulletNum;  //å½“å‰å­å¼¹æ•°é‡
 
-		uint32_t x;  //x×ø±ê
-		uint32_t y;  //y×ø±ê
-		uint32_t moveSpeed;  //ÒÆ¶¯ËÙ¶È
-		uint32_t ap;  //¹¥»÷Á¦
-		uint32_t maxHp;  //×î´óÉúÃüÖµ
-		uint32_t hp;  //µ±Ç°ÉùÃ÷Öµ
-		uint32_t CD;  //Éè¼ÆÀäÈ´Ê±¼ä
+		uint32_t x;  //xåæ ‡
+		uint32_t y;  //yåæ ‡
+		uint32_t moveSpeed;  //ç§»åŠ¨é€Ÿåº¦
+		uint32_t ap;  //æ”»å‡»åŠ›
+		uint32_t maxHp;  //æœ€å¤§ç”Ÿå‘½å€¼
+		uint32_t hp;  //å½“å‰å£°æ˜å€¼
+		uint32_t CD;  //è®¾è®¡å†·å´æ—¶é—´
 		int64_t guid;  //Global Unique Identifier
-		double facingDirection;  //ÒÆ¶¯³¯Ïò
+		double facingDirection;  //ç§»åŠ¨æœå‘
 	};
 
 	struct Wall
 	{
-		ShapeType shapeType : 2;  //ĞÎ×´£¨Õı·½ĞÎ£©
-		uint16_t radius;  //Ô²ĞÎÎïÌåµÄ°ë¾¶»òÕı·½ĞÎÄÚÇĞÔ²°ë¾¶
-		uint32_t x;  //x×ø±ê
-		uint32_t y;  //y×ø±ê
+		ShapeType shapeType : 2;  //å½¢çŠ¶ï¼ˆæ­£æ–¹å½¢ï¼‰
+		uint16_t radius;  //åœ†å½¢ç‰©ä½“çš„åŠå¾„æˆ–æ­£æ–¹å½¢å†…åˆ‡åœ†åŠå¾„
+		uint32_t x;  //xåæ ‡
+		uint32_t y;  //yåæ ‡
 		int64_t guid;  //Global Unique Identifier
 	};
 
 	struct Prop
 	{
-		bool isMoving;  //ÊÇ·ñÕıÔÚÒÆ¶¯
-		bool isLaid;  //ÊÇ·ñÒÑ±»·ÅÖÃ£¨Ñ¡ÊÖÄÜ¿´µ½µÄÒ»¶¨Ã»±»·ÅÖÃ£©
-		ShapeType shapeType : 2;  //ĞÎ×´
-		PropType propType : 4;  //µÀ¾ßÖÖÀà
-		uint16_t radius;  //Ô²ĞÎÎïÌåµÄ°ë¾¶»òÕı·½ĞÎÄÚÇĞÔ²°ë¾¶
-		uint32_t x;  //x×ø±ê
-		uint32_t y;  //y×ø±ê
-		uint32_t moveSpeed;  //ÒÆ¶¯ËÙ¶È
+		bool isMoving;  //æ˜¯å¦æ­£åœ¨ç§»åŠ¨
+		bool isLaid;  //æ˜¯å¦å·²è¢«æ”¾ç½®ï¼ˆé€‰æ‰‹èƒ½çœ‹åˆ°çš„ä¸€å®šæ²¡è¢«æ”¾ç½®ï¼‰
+		ShapeType shapeType : 2;  //å½¢çŠ¶
+		PropType propType : 4;  //é“å…·ç§ç±»
+		uint16_t radius;  //åœ†å½¢ç‰©ä½“çš„åŠå¾„æˆ–æ­£æ–¹å½¢å†…åˆ‡åœ†åŠå¾„
+		uint32_t x;  //xåæ ‡
+		uint32_t y;  //yåæ ‡
+		uint32_t moveSpeed;  //ç§»åŠ¨é€Ÿåº¦
 		int64_t guid;  //Global Unique Identifier
-		double facingDirection;  //ÒÆ¶¯³¯Ïò
+		double facingDirection;  //ç§»åŠ¨æœå‘
 	};
 
 	struct Bullet
 	{
-		bool isMoving;  //ÊÇ·ñÔÚÒÆ¶¯£¨ÊÇ£©
-		ShapeType shapeType : 2;  //ĞÎ×´£¨Ô²£©
-		BulletType bulletType : 4;  //×Óµ¯ÖÖÀà
-		uint16_t radius;  //Ô²ĞÎÎïÌåµÄ°ë¾¶»òÕı·½ĞÎÄÚÇĞÔ²°ë¾¶
-		uint16_t teamID;  //ËùÊô¶ÓÎé
-		uint32_t x;  //x×ø±ê
-		uint32_t y;  //y×ø±ê
-		uint32_t moveSpeed;  //ÒÆ¶¯ËÙ¶È
-		uint32_t ap;  //¹¥»÷Á¦
+		bool isMoving;  //æ˜¯å¦åœ¨ç§»åŠ¨ï¼ˆæ˜¯ï¼‰
+		ShapeType shapeType : 2;  //å½¢çŠ¶ï¼ˆåœ†ï¼‰
+		BulletType bulletType : 4;  //å­å¼¹ç§ç±»
+		uint16_t radius;  //åœ†å½¢ç‰©ä½“çš„åŠå¾„æˆ–æ­£æ–¹å½¢å†…åˆ‡åœ†åŠå¾„
+		uint16_t teamID;  //æ‰€å±é˜Ÿä¼
+		uint32_t x;  //xåæ ‡
+		uint32_t y;  //yåæ ‡
+		uint32_t moveSpeed;  //ç§»åŠ¨é€Ÿåº¦
+		uint32_t ap;  //æ”»å‡»åŠ›
 		int64_t guid;  //Global Unique Identifier
-		double facingDirection;  //ÒÆ¶¯³¯Ïò
+		double facingDirection;  //ç§»åŠ¨æœå‘
 	};
 
 	struct BirthPoint
 	{
-		ShapeType shapeType;  //ĞÎ×´£¨Ô²£©
-		uint16_t teamID;  //¶ÓÎéID
-		uint16_t radius;  //Ô²ĞÎÎïÌåµÄ°ë¾¶»òÕı·½ĞÎÄÚÇĞÔ²°ë¾¶
-		uint32_t x;  //x×ø±ê
-		uint32_t y;  //y×ø±ê
+		ShapeType shapeType;  //å½¢çŠ¶ï¼ˆåœ†ï¼‰
+		uint16_t teamID;  //é˜Ÿä¼ID
+		uint16_t radius;  //åœ†å½¢ç‰©ä½“çš„åŠå¾„æˆ–æ­£æ–¹å½¢å†…åˆ‡åœ†åŠå¾„
+		uint32_t x;  //xåæ ‡
+		uint32_t y;  //yåæ ‡
+
 		int64_t guid;  //Global Unique Identifier
 	};
 

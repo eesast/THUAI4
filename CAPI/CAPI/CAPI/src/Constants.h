@@ -13,10 +13,10 @@
 
 namespace Constants
 {
-	using XYPosition = ::std::pair<std::int32_t, std::int32_t>;
-
+	
 	struct Map
 	{
+		using XYPosition = ::std::pair<std::int32_t, std::int32_t>;
 
 		M_SCI std::uint64_t sightRadius = 5000;
 		M_SCI std::uint64_t sightRadiusSquared = sightRadius * sightRadius;
@@ -65,6 +65,8 @@ namespace Constants
 
 	public:
 
+		//道具效果持续时间
+
 		M_SCI std::int32_t bike = propTimeInSeconds;
 		M_SCI std::int32_t amplifier = propTimeInSeconds;
 		M_SCI std::int32_t jinKeLa = propTimeInSeconds;
@@ -72,13 +74,21 @@ namespace Constants
 		M_SCI std::int32_t shield = propTimeInSeconds;
 		M_SCI std::int32_t totem = propTimeInSeconds;
 		M_SCI std::int32_t spear = propTimeInSeconds;
+		M_SCI std::int32_t dirt = propTimeInSeconds;
+		M_SCI std::int32_t attenuator = propTimeInSeconds;
+		M_SCI std::int32_t divider = propTimeInSeconds;
 
-		M_SCI std::int32_t dirt = mineTimeInSeconds;
-		M_SCI std::int32_t attenuator = mineTimeInSeconds;
-		M_SCI std::int32_t divider = mineTimeInSeconds;
+		//地雷的埋藏时间
+
+		M_SCI std::int32_t mine = mineTimeInSeconds;
 	};
 
-	M_SCI int64_t invalidGUID = (std::numeric_limits<int64_t>::max)();
+	struct ID
+	{
+		M_SCI std::int64_t invalidGUID = (std::numeric_limits<std::int64_t>::max)();
+		M_SCI std::int64_t noneGUID = (std::numeric_limits<std::int64_t>::min)();
+	};
+
 }
 
 #undef MF_SCI
