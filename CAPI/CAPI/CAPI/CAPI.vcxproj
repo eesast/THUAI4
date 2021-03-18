@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AI.cpp" />
+    <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\API.cpp" />
     <ClCompile Include="src\CAPI.cpp" />
     <ClCompile Include="src\Logic.cpp" />

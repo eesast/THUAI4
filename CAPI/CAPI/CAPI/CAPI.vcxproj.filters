@@ -21,7 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\AI.cpp">
+    <ClCompile Include="src\player.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\API.cpp">
