@@ -5,7 +5,7 @@
 
 Logic logic;
 
-int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
+int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
 {
 	std::string aIP;
 	uint16_t aPort;
@@ -57,12 +57,13 @@ int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 		cmd.add(warning);
 
 		extern const THUAI4::JobType playerJob;		// Entern variable, actually defined in AI.cpp
+		ID::playerID = pID = playerID.getValue();
+		ID::teamID = tID = teamID.getValue();
 		jType = playerJob;
 		cmd.parse(argc, argv);
 		aIP = agentIP.getValue();
 		aPort = agentPort.getValue();
-		pID = playerID.getValue();
-		tID = teamID.getValue();
+		
 		bool d = debug.getValue();
 		bool w = warning.getValue();
 		if (d) {

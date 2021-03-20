@@ -15,7 +15,6 @@ namespace
 
 void AI::play(GameApi& g)
 {
-
 	g.MovePlayer(50, direction(e));
 	if (g.GetSelfInfo().bulletNum) {
 		g.Attack(100, direction(e));
