@@ -57,4 +57,17 @@ using CreateAIFunc = std::shared_ptr<AIBase>(*)();
 
 int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
 
+class ID
+{
+private:
+	static inline int playerID = 0;
+	static inline int teamID = 0;
+
+public:
+	static int GetPlayerID() { return playerID; }
+	static int GetTeamID() { return teamID; }
+
+	friend int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder);
+};
+
 #endif // !BASE_H
