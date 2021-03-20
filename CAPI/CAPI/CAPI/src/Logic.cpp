@@ -135,6 +135,7 @@ std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& g
 
 void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
+	if(pM2C->playerid()!=ID::GetPlayerID()||pM2C->teamid()!=ID::GetTeamID()) return ;//权宜之计
 	switch (pM2C->messagetype()) {
 	case Protobuf::MessageType::StartGame:
 		//首先load到buffer
