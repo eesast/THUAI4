@@ -83,10 +83,12 @@ namespace Constants
 		M_SCI std::int32_t mine = mineTimeInSeconds;
 	};
 
-	struct ID
+	struct Game
 	{
 		M_SCI std::int64_t invalidGUID = (std::numeric_limits<std::int64_t>::max)();
 		M_SCI std::int64_t noneGUID = (std::numeric_limits<std::int64_t>::min)();
+
+		M_SCI std::int64_t wearClothesTimeInSeconds = 60;
 	};
 
 }

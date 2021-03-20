@@ -22,7 +22,18 @@ namespace THUAI4
 		Phaser = 7,
 		Dirt = 8,
 		Attenuator = 9,
-		Divider = 10
+		Divider = 10,
+
+		SharedBike = Bike,
+		Horn = Amplifier,
+		SchoolBag = JinKeLa,
+		HappyHotPot = Rice,
+		Shield = NegativeFeedback,
+		Clothes = Totem,
+		Javelin = Phaser,
+		Puddle = Dirt,
+		MusicPlayer = Attenuator,
+		Mail = Divider
 	};
 
 	enum class ShapeType : unsigned char    //物体形状
@@ -40,6 +51,14 @@ namespace THUAI4
 		Job4 = 4,
 		Job5 = 5,
 		Job6 = 6,
+
+		OrdinaryJob = Job0,
+		HappyMan = Job1,
+		LazyGoat = Job2,
+		PurpleFish = Job3,
+		MonkeyDoctor = Job4,
+		EggMan = Job5,
+		PrincessIronFan = Job6
 	};
 
 	enum class BulletType : unsigned char    //子弹种类
@@ -50,7 +69,15 @@ namespace THUAI4
 		Bullet3 = 3,
 		Bullet4 = 4,
 		Bullet5 = 5,
-		Bullet6 = 6
+		Bullet6 = 6,
+
+		OrdinaryBullet = Bullet0,
+		HappyBullet = Bullet1,
+		ColoredRibbon = Bullet2,
+		Bucket = Bullet3,
+		Peach = Bullet4,
+		RollCircle = Bullet5,
+		PalmLeafMan = Bullet6
 	};
 
 	enum class ColorType : unsigned char    //颜色种类
