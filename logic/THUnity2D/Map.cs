@@ -46,6 +46,8 @@ namespace THUnity2D
 			public const int attenuatorAtkDebuff = amplifierAtkBuff;
 			public const double dividerCdDiscount = 4.0;
 
+			public const int deadRestoreTime = 60 * 1000;	//死亡恢复时间
+
 			public static XYPosition CellToGrid(int x, int y)   //求格子的中心坐标
 			{
 				XYPosition ret = new XYPosition(x * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2,
@@ -556,7 +558,7 @@ namespace THUnity2D
 							(() =>
 							{
 
-								Thread.Sleep(1000);
+								Thread.Sleep(Constant.deadRestoreTime);
 
 								playerListLock.EnterWriteLock();
 								{

@@ -469,7 +469,7 @@ namespace THUnity2D
 			case JobType.Job3:
 				cd = orgCD = basicCD * 2;
 				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp * 3 / 2;
+				hp = maxHp = basicHp / 2;
 				ap = orgAp = basicAp / 2;
 				holdProp = null;
 				bulletType = BulletType.Bullet3;
