@@ -3,7 +3,7 @@
 //#define _ALL_VISIBLE_
 
 Logic::Logic() :pState(storage), pBuffer(storage + 1),
-capi([this]() {OnConnect(); }, [this]() {OnClose(); }, [this]() {OnReceive(); })
+capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
 {
 	MessageStorage.clear();
 }
