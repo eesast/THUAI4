@@ -15,14 +15,14 @@ namespace test
 	{
 		static void Main(string[] args)
 		{
-			Map mp = new Map(Mapinfo.map, 1);
+			Map mp = new Map(MapInfo.map, 1);
 			long tmpID;
 			long[] player2ID = new long[2];
 
-			XYPosition player1Pos = mp.CellToGrid(1, 1);
-			XYPosition player2Pos = mp.CellToGrid(2, 2);
+			XYPosition player1Pos = Map.Constant.CellToGrid(1, 1);
+			XYPosition player2Pos = Map.Constant.CellToGrid(2, 2);
 
-			if ((tmpID = mp.AddPlayer(new Map.PlayerInitInfo(player1Pos, (JobType)0, 0))) == GameObject.invalidID)
+			if ((tmpID = mp.AddPlayer(new Map.PlayerInitInfo(0u, (JobType)0, 0))) == GameObject.invalidID)
 			{
 				Console.WriteLine("Add player failed!");
 			}
@@ -31,7 +31,7 @@ namespace test
 				player2ID[0] = (tmpID);
 			}
 
-			if (((tmpID) = mp.AddPlayer(new Map.PlayerInitInfo(player2Pos, (JobType)0, 0))) == GameObject.invalidID)
+			if (((tmpID) = mp.AddPlayer(new Map.PlayerInitInfo(1u, (JobType)0, 0))) == GameObject.invalidID)
 			{
 				Console.WriteLine("Add player failed!");
 			}
