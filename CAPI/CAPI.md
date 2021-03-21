@@ -1,57 +1,39 @@
 # CAPI简介
 
-
-
 ## 关于 AI.play() 调用时机的说明
 
+对于每一条 MessageToClient 对应的游戏状态，```AI.play()```**至多调用一次**。如果 ```play()``` 跑得快，一次调用结束后下一条消息还没有来，AI 线程会**阻塞**直到游戏状态更新。如果 ```play()``` 跑得慢，下一次调用 ```play()``` 时对应**最新的**游戏状态，**中间状态的信息不保存**。
 
-
-对于每一条 MessageToClient 对应的游戏状态，```AI.play() ```**至多调用一次**。如果 ```play()``` 跑得快，一次调用结束后下一条消息还没有来，AI 线程会**阻塞**直到游戏状态更新。如果 ```play()``` 跑得慢，下一次调用 ```play()``` 时对应**最新的**游戏状态，**中间状态的信息不保存**。
-
-
-
-## CAPI命令行参数
-
-
+## 选手接口命令行参数介绍
 
 Usage:
 
 ```bash
-CAPI  [-dhw] [--version] [-I <string>] [-f <string>] -P <USHORT> \
--j <0|1|2|3|4|5|6> -p <0|1|2|3> -t <0|1>
+<executable name>  [-dhw] [-I <string>] [-f <string>] -P <USHORT> -p <0|1|2|3> -t <0|1>
 ```
 
 - ```-I/--agentIP```: Agent的 IP 地址，默认值是127.0.0.1
 - ```-P/--agentPort```: Agent监听的端口号。
 - ```-p/--playerID```: 玩家 ID ，只能是0至3的整数。同一队伍中两人的ID不能相同。
 - ```-t/--teamID```: 队伍 ID ，只能是0或1。两队ID不能相同。
-- ```-j/--jobType```: 玩家职业，只能是0到6的整数，对应玩家不同职业。
 - ```-d/--debug```: 使用debug版本的 API（其实就是生成 log ）。Log 记录每次```AI.play()```调用所用时间和期间各 API 函数的调用情况。
 - ```-f/--filename```: 默认 log 输出到屏幕上，也可以通过该参数指定一个文件夹作为 log 的储存位置。该参数仅当```-d```被指定时有效。
 - ```-w/--warning```: 调用 API 函数时会检查一些比较明显的错误。仅当```-d```被指定时有效。
 - ```-h/--help```:  输出对命令行参数的解释。
 
-其中，```-p```、```-t```、```-j```、```-P```必须指定。
+其中，```-p```、```-t```、```-P```必须指定。
 
-举个例子：
+举个例子，你在VS中编译出的可执行文件叫 CAPI.exe ，你想连接在本机7777端口监听的 Agent ，玩家 ID 与队伍 ID 都是0。那么你应该在命令行中输入：
 
 ```bash
-./CAPI.exe -I 127.0.0.1 -P 7777 -p 0 -t 0 -j 0
+./CAPI.exe -P 7777 -p 0 -t 0
 ```
 
-即连接在本机7777端口监听的 Agent ，玩家 ID 与队伍 ID 都是0，游戏中的职业为职业0。
-
-
-
 ## API介绍
-
-
 
 ### 选手主动行为
 
 除发消息以外，所有主动行为只有角色存活时才能进行。
-
-
 
 #### 移动
 
@@ -63,8 +45,6 @@ void MovePlayer(uint32_t timeInMilliseconds, double angle);
 
 ---
 
-
-
 ```c++
 void MoveRight(uint32_t timeInMilliseconds);
 ```
@@ -72,8 +52,6 @@ void MoveRight(uint32_t timeInMilliseconds);
 向右移动，即向$y$轴正方向移动。参数是移动时间，以毫秒为单位。下同。
 
 ---
-
-
 
 ```c++
 void MoveUp(uint32_t timeInMilliseconds);
@@ -83,9 +61,6 @@ void MoveUp(uint32_t timeInMilliseconds);
 
 ---
 
-
-
-
 ```c++
 void MoveLeft(uint32_t timeInMilliseconds);
 ```
@@ -94,16 +69,11 @@ void MoveLeft(uint32_t timeInMilliseconds);
 
 ---
 
-
-
-
 ```c++
 void MoveDown(uint32_t timeInMilliseconds);
 ```
 
 向下移动，即向$x$轴正方向移动。
-
-
 
 #### 道具操作
 
@@ -115,8 +85,6 @@ void Use();
 
 ---
 
-
-
 ```c++
 void Pick(THUAI4::PropType propType);
 ```
@@ -125,15 +93,11 @@ void Pick(THUAI4::PropType propType);
 
 ---
 
-
-
 ```c++
 void Throw(uint32_t timeInMilliseconds, double angle);
 ```
 
 扔道具。第一个参数是道具飞行的时间，以毫秒为单位。第二个参数是投掷的方位角。仅当人物手中有道具时有效。
-
-
 
 #### 攻击
 
@@ -143,8 +107,6 @@ void Attack(uint32_t timeInMilliseconds, double angle);
 
 射出子弹。第一个参数是投掷时间（毫秒计），只对某些职业有效。第二个参数是射击的方位角。仅当弹夹不为空时有效。
 
-
-
 #### 发送消息
 
 ```c++
@@ -153,15 +115,9 @@ void Send(int toPlayerID, std::string message);
 
 给队友发送消息。第一个参数是队友ID，第二个参数是要发送的消息。
 
-
-
 ### 选手可获得信息
 
-
-
-**注意！！！**接口中返回的指针或引用指向的内存只保证在**本次```AI.play()```调用期间**是不变的。请不要试图保存这些地址并在其他时间访问。
-
-
+**注意！！！**返回的指针或引用指向的内存只保证在**本次```AI.play()```调用期间**是不变的。请不要试图保存这些地址并在其他时间访问。
 
 #### 个人信息
 
@@ -169,22 +125,29 @@ void Send(int toPlayerID, std::string message);
 const THUAI4::Character& GetSelfInfo() const;
 ```
 
-返回一个```Character```结构体的常引用，其中包含了选手对应角色的各种信息。
+返回一个```Character```结构体的常引用，其中包含了选手控制角色的各种信息。
 
+```c++
+int ID::GetPlayerID();
+```
 
+返回自己的选手ID。
+
+```c++
+int ID::GetTeamID();
+```
+
+返回自己所在队伍ID。
 
 #### 本队信息
-
-
 
 ```c++
 THUAI4::ColorType GetSelfTeamColor() const;
 ```
+
 返回本队颜色。
 
 ---
-
-
 
 ```c++
 uint32_t GetTeamScore() const;
@@ -192,56 +155,45 @@ uint32_t GetTeamScore() const;
 
 返回本队当前分数。
 
-
-
 #### 玩家GUID信息
-
-
 
 ```c++
 const std::array<std::array<uint64_t, 4>, 2>& GetPlayerGUIDs() const;
 ```
 
-返回一个$2\times4$的array的引用（当成二维数组就好），两个维度分别对应队伍 ID 和玩家 ID ，元素是玩家的GUID。如果游戏玩家数少于$2\times4$，会存在对应玩家不存在的情况。此时GUID为Constants中定义的invalidGUID。
-
-
+返回一个$2\times4$的 array 的常引用（当成二维数组就好），两个维度分别对应队伍 ID 和玩家 ID ，元素是玩家的 GUID 。如果游戏玩家数少于$2\times4$，会存在对应玩家不存在的情况。此时 GUID 为 Constants 中定义的 invalidGUID 。
 
 #### 可见物体信息
-
-
 
 ```c++
 std::vector<const THUAI4::Character*> GetCharacters() const;
 ```
+
 获得**视野范围内**所有玩家的信息。
 
-返回值：元素为指向```Character```的常指针的vector。可能为空，顺序无意义。
+返回值：元素为指向```Character```的常指针的 vector 。可能为空，顺序无意义。
 
 ---
-
-
 
 ```c++
 std::vector<const THUAI4::Wall*> GetWalls() const;
 ```
+
 获得**视野范围内**所有墙体的信息。
 
-返回值：元素为指向```Wall```的常指针的vector。可能为空，顺序无意义。
+返回值：元素为指向```Wall```的常指针的 vector 。可能为空，顺序无意义。
 
 ---
-
-
 
 ```c++
 std::vector<const THUAI4::Prop*> GetProps() const;
 ```
+
 获得**视野范围内**所有**可见**道具的信息。
 
-返回值：元素为指向```Prop```的常指针的vector。可能为空，顺序无意义。
+返回值：元素为指向```Prop```的常指针的 vector 。可能为空，顺序无意义。
 
 ---
-
-
 
 ```c++
 std::vector<const THUAI4::Bullet*> GetBullets() const;
@@ -249,42 +201,29 @@ std::vector<const THUAI4::Bullet*> GetBullets() const;
 
 获得**视野范围内**所有子弹的信息。
 
-返回值：元素为指向```Bullet```的常指针的vector。可能为空，顺序无意义。
+返回值：元素为指向```Bullet```的常指针的 vector 。可能为空，顺序无意义。
 
 ---
-
-
 
 ```c++
 std::vector<const THUAI4::BirthPoint*> GetBirthPoints() const;
 ```
+
 获得**视野范围内**所有出生点的信息。
 
-返回值：元素为指向```BirthPoint```的常指针的vector。可能为空，顺序无意义。
-
-
+返回值：元素为指向```BirthPoint```的常指针的 vector 。可能为空，顺序无意义。
 
 #### 地图颜色信息
-
-
 
 ```c++
 THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 ```
 
-获得$(CellX,CellY)$格的颜色，返回一个```THUAI4::ColorType```枚举型。、。如果在视野范围之外，会返回```THUAI4::ColorType::Invisible```。
-
-
-
-
+获得$(CellX,CellY)$格的颜色，返回一个```THUAI4::ColorType```枚举型。如果在视野范围之外，会返回```THUAI4::ColorType::Invisible```。
 
 #### 队友发来消息
 
-
-
 注：底层实现是队列，所以收到多条消息不会覆盖而是按接收顺序保存。
-
-
 
 ```c++
 bool MessageAvailable();
@@ -292,16 +231,11 @@ bool MessageAvailable();
 
 返回是否有未处理的消息。即消息队列为空时返回0，否则返回1。
 
-
-
 ```c++
 bool TryGetMessage(std::string& buffer);
 ```
 
-试图从消息队列队首pop出一条消息。如果成功返回1，队首消息覆盖buffer。失败返回0，buffer内容未定义。
-
-
-
+试图从消息队列队首 pop 出一条消息。如果成功返回1，队首消息覆盖 buffer 。失败返回0， buffer 内容未定义。
 
 ## 数据结构
 
@@ -321,7 +255,18 @@ namespace THUAI4
 		Phaser = 7,
 		Dirt = 8,
 		Attenuator = 9,
-		Divider = 10
+		Divider = 10,
+
+		SharedBike = Bike,
+		Horn = Amplifier,
+		SchoolBag = JinKeLa,
+		HappyHotPot = Rice,
+		Shield = NegativeFeedback,
+		Clothes = Totem,
+		Javelin = Phaser,
+		Puddle = Dirt,
+		MusicPlayer = Attenuator,
+		Mail = Divider
 	};
 
 	enum class ShapeType : unsigned char    //物体形状
@@ -339,6 +284,14 @@ namespace THUAI4
 		Job4 = 4,
 		Job5 = 5,
 		Job6 = 6,
+
+		OrdinaryJob = Job0,
+		HappyMan = Job1,
+		LazyGoat = Job2,
+		PurpleFish = Job3,
+		MonkeyDoctor = Job4,
+		EggMan = Job5,
+		PrincessIronFan = Job6
 	};
 
 	enum class BulletType : unsigned char    //子弹种类
@@ -349,17 +302,25 @@ namespace THUAI4
 		Bullet3 = 3,
 		Bullet4 = 4,
 		Bullet5 = 5,
-		Bullet6 = 6
+		Bullet6 = 6,
+
+		OrdinaryBullet = Bullet0,
+		HappyBullet = Bullet1,
+		ColoredRibbon = Bullet2,
+		Bucket = Bullet3,
+		Peach = Bullet4,
+		RollCircle = Bullet5,
+		PalmLeafMan = Bullet6
 	};
 
 	enum class ColorType : unsigned char    //颜色种类
 	{
-		None = 0,
+		None = 0, //未涂色
 		Color1 = 1,
 		Color2 = 2,
 		Color3 = 3,
 		Color4 = 4,
-		Invisible = 5
+		Invisible = 5  //不可见
 	};
 
 	struct Character
@@ -488,7 +449,7 @@ namespace Constants
 		M_SCI std::int32_t bullet6 = basicBulletMoveSpeed;
 	};
 
-	struct PropTimeInSeconds  //道具buff持续时间，以秒计（然而需要选手自己计时hhh）
+	struct PropTimeInSeconds  //道具buff持续时间，以秒计（然而需要选手自己计时）
 	{
 
 	private:
@@ -516,4 +477,3 @@ namespace Constants
 #undef MF_SCI
 #undef M_SCI
 ```
-
