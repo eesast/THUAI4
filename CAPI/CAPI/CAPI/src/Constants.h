@@ -110,6 +110,8 @@ namespace Constants
 		M_SCI std::int64_t noneGUID = (std::numeric_limits<std::int64_t>::min)();			// 无 GUID，正常情况下不会出现，作为保留 GUID 使用
 
 		M_SCI std::int64_t wearClothesTimeInSeconds = 60;									// 人物下场换衣服需要的时间
+
+		M_SCI std::int32_t thrownPropMoveSpeed = Map::numOfGridPerCell * 8;					// 扔出的道具的移动速度
 	};
 
 }
