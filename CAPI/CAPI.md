@@ -17,15 +17,13 @@
 Usage:
 
 ```bash
-CAPI  [-dhw] [--version] [-I <string>] [-f <string>] -P <USHORT> \
--j <0|1|2|3|4|5|6> -p <0|1|2|3> -t <0|1>
+CAPI  [-dhw] [--version] [-I <string>] [-f <string>] -P <USHORT> -p <0|1|2|3> -t <0|1>
 ```
 
 - ```-I/--agentIP```: Agent的 IP 地址，默认值是127.0.0.1
 - ```-P/--agentPort```: Agent监听的端口号。
 - ```-p/--playerID```: 玩家 ID ，只能是0至3的整数。同一队伍中两人的ID不能相同。
 - ```-t/--teamID```: 队伍 ID ，只能是0或1。两队ID不能相同。
-- ```-j/--jobType```: 玩家职业，只能是0到6的整数，对应玩家不同职业。
 - ```-d/--debug```: 使用debug版本的 API（其实就是生成 log ）。Log 记录每次```AI.play()```调用所用时间和期间各 API 函数的调用情况。
 - ```-f/--filename```: 默认 log 输出到屏幕上，也可以通过该参数指定一个文件夹作为 log 的储存位置。该参数仅当```-d```被指定时有效。
 - ```-w/--warning```: 调用 API 函数时会检查一些比较明显的错误。仅当```-d```被指定时有效。
@@ -36,7 +34,7 @@ CAPI  [-dhw] [--version] [-I <string>] [-f <string>] -P <USHORT> \
 举个例子：
 
 ```bash
-./CAPI.exe -I 127.0.0.1 -P 7777 -p 0 -t 0 -j 0
+./CAPI.exe -I 127.0.0.1 -P 7777 -p 0 -t 0
 ```
 
 即连接在本机7777端口监听的 Agent ，玩家 ID 与队伍 ID 都是0，游戏中的职业为职业0。
