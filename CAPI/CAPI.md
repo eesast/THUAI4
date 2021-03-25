@@ -10,6 +10,7 @@ Usage:
 
 ```bash
 <executable name>  [-dhw] [-I <string>] [-f <string>] -P <USHORT> -p <0|1|2|3> -t <0|1>
+=======
 ```
 
 - ```-I/--agentIP```: Agent的 IP 地址，默认值是127.0.0.1
@@ -27,6 +28,8 @@ Usage:
 
 ```bash
 ./CAPI.exe -P 7777 -p 0 -t 0
+=======
+./CAPI.exe -I 127.0.0.1 -P 7777 -p 0 -t 0
 ```
 
 ## API介绍

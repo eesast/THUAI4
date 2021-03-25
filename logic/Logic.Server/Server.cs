@@ -12,8 +12,8 @@ namespace Logic.Server
 	{
 		public const int SendMessageToClientIntervalInMilliseconds = 50;	//每隔xx毫秒向客户端发送信息
 
-		private Map game;
-		private ArgumentOptions options;
+		private readonly Map game;
+		private readonly ArgumentOptions options;
 		private uint GetBirthPointIdx(long teamID, long playerID)		//获取出生点位置
 		{
 			return (uint)(teamID * options.PlayerCountPerTeam + playerID);
@@ -26,7 +26,7 @@ namespace Logic.Server
 			return teamID >= 0 && teamID < options.TeamCount && playerID >= 0 && playerID < options.PlayerCountPerTeam;
 		}
 
-		private Communication.CommServer.CommServer serverCommunicator;
+		private readonly Communication.CommServer.CommServer serverCommunicator;
 
 		public Server(ArgumentOptions options)
 		{
