@@ -35,27 +35,37 @@ public:
 
 	//选手可获取的信息
 	virtual bool MessageAvailable() = 0;
-	virtual bool TryGetMessage(std::string&) = 0;
-	virtual std::vector<const THUAI4::Character*> GetCharacters() const = 0;
-	virtual std::vector<const THUAI4::Wall*> GetWalls() const = 0;
-	virtual std::vector<const THUAI4::Prop*> GetProps() const = 0;
-	virtual std::vector<const THUAI4::Bullet*> GetBullets() const = 0;
-	virtual std::vector<const THUAI4::BirthPoint*> GetBirthPoints() const = 0;
-	virtual const THUAI4::Character& GetSelfInfo() const = 0;
+	virtual bool TryGetMessage(std::string &) = 0;
+
+	virtual std::vector<const THUAI4::Character *> GetCharacterPtrs() const = 0;
+	virtual std::vector<const THUAI4::Wall *> GetWallPtrs() const = 0;
+	virtual std::vector<const THUAI4::Prop *> GetPropPtrs() const = 0;
+	virtual std::vector<const THUAI4::Bullet *> GetBulletPtrs() const = 0;
+	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPointPtrs() const = 0;
+	virtual const THUAI4::Character &GetSelfInfoRef() const = 0;
+
+	virtual std::vector<THUAI4::Character> GetCharacters() const = 0;
+	virtual std::vector<THUAI4::Wall> GetWalls() const = 0;
+	virtual std::vector<THUAI4::Prop> GetProps() const = 0;
+	virtual std::vector<THUAI4::Bullet> GetBullets() const = 0;
+	virtual std::vector<THUAI4::BirthPoint> GetBirthPoints() const = 0;
+	virtual THUAI4::Character GetSelfInfo() const = 0;
+
 	virtual THUAI4::ColorType GetSelfTeamColor() const = 0;
 	virtual uint32_t GetTeamScore() const = 0;
-	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& GetPlayerGUIDs() const = 0;
+	//GetPlayerGUIDS() 底层是 array 而且一局游戏内不变 so就这样
+	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const = 0;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const = 0;
 };
 
 class AIBase
 {
 public:
-	virtual void play(GameApi& g) = 0;
+	virtual void play(GameApi &g) = 0;
 };
-using CreateAIFunc = std::shared_ptr<AIBase>(*)();
+using CreateAIFunc = std::shared_ptr<AIBase> (*)();
 
-int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
+int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder);
 
 class ID
 {
