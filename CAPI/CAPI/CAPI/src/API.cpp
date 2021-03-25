@@ -17,7 +17,7 @@ double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
 template <bool asyn>
 API<asyn>::API(std::function<void(Protobuf::MessageToServer &)> sm,
 			   std::function<bool()> e, std::function<bool(std::string &)> tp,
-			   const State *&pS, std::mutex &mtx_game) : LogicInterface(sm, e, tp, pS), mtx(mtx_game)
+			   const State *&pS, std::mutex &mtx_game, std::function<void()> tu) : LogicInterface(sm, e, tp, pS), mtx_state(mtx_game), TryUpDate(tu)
 {
 }
 
@@ -108,11 +108,12 @@ std::vector<const THUAI4::Character *> API<asyn>::GetCharacterPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<const THUAI4::Character *> characters;
 
-	for (const auto & it : pState->characters)
+	for (const auto &it : pState->characters)
 	{
 		characters.push_back(it.get());
 	}
@@ -123,7 +124,8 @@ std::vector<const THUAI4::Wall *> API<asyn>::GetWallPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<const THUAI4::Wall *> walls;
 	for (const auto &it : pState->walls)
@@ -137,7 +139,8 @@ std::vector<const THUAI4::Prop *> API<asyn>::GetPropPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<const THUAI4::Prop *> props;
 
@@ -152,7 +155,8 @@ std::vector<const THUAI4::Bullet *> API<asyn>::GetBulletPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<const THUAI4::Bullet *> bullets;
 
@@ -167,7 +171,8 @@ std::vector<const THUAI4::BirthPoint *> API<asyn>::GetBirthPointPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<const THUAI4::BirthPoint *> birthpoints;
 	for (const auto &it : pState->birthpoints)
@@ -181,7 +186,8 @@ const THUAI4::Character &API<asyn>::GetSelfInfoRef() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	return *pState->self;
 }
@@ -191,11 +197,12 @@ std::vector<THUAI4::Character> API<asyn>::GetCharacters() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<THUAI4::Character> characters;
 
-	for (const auto& it : pState->characters)
+	for (const auto &it : pState->characters)
 	{
 		characters.push_back(*it.get());
 	}
@@ -206,7 +213,8 @@ std::vector<THUAI4::Wall> API<asyn>::GetWalls() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<THUAI4::Wall> walls;
 
@@ -221,7 +229,8 @@ std::vector<THUAI4::Prop> API<asyn>::GetProps() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<THUAI4::Prop> props;
 
@@ -236,7 +245,8 @@ std::vector<THUAI4::Bullet> API<asyn>::GetBullets() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<THUAI4::Bullet> bullets;
 
@@ -251,7 +261,8 @@ std::vector<THUAI4::BirthPoint> API<asyn>::GetBirthPoints() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	std::vector<THUAI4::BirthPoint> birthpoints;
 
@@ -266,7 +277,8 @@ THUAI4::Character API<asyn>::GetSelfInfo() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	return *pState->self;
 }
@@ -276,7 +288,8 @@ THUAI4::ColorType API<asyn>::GetSelfTeamColor() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	return pState->selfTeamColor;
 }
@@ -285,7 +298,8 @@ uint32_t API<asyn>::GetTeamScore() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	return pState->teamScore;
 }
@@ -294,7 +308,8 @@ const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nT
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	return pState->playerGUIDs;
 }
@@ -303,7 +318,8 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
@@ -326,8 +342,9 @@ template class API<false>;
 template <bool asyn>
 DebugApi<asyn>::DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
 						 std::function<bool()> e, std::function<bool(std::string &)> tp,
-						 const State *&pS, std::mutex &mtx_game, bool ev,
-						 std::ostream &out) : LogicInterface(sm, e, tp, pS), ExamineValidity(ev), OutStream(out), mtx(mtx_game)
+						 const State *&pS, std::mutex &mtx_game, std::function<void()> tu, bool ev,
+						 std::ostream &out) : LogicInterface(sm, e, tp, pS), ExamineValidity(ev),
+											  OutStream(out), mtx_state(mtx_game), TryUpDate(tu)
 {
 }
 
@@ -543,7 +560,8 @@ std::vector<const THUAI4::Character *> DebugApi<asyn>::GetCharacterPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetCharacterPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<const THUAI4::Character *> characters;
@@ -559,7 +577,8 @@ std::vector<const THUAI4::Wall *> DebugApi<asyn>::GetWallPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetWallPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 
@@ -575,7 +594,8 @@ std::vector<const THUAI4::Prop *> DebugApi<asyn>::GetPropPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetPropPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 
@@ -591,7 +611,8 @@ std::vector<const THUAI4::Bullet *> DebugApi<asyn>::GetBulletPtrs() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetBulletPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<const THUAI4::Bullet *> bullets;
@@ -606,7 +627,8 @@ std::vector<const THUAI4::BirthPoint *> DebugApi<asyn>::GetBirthPointPtrs() cons
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetBirthPointPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<const THUAI4::BirthPoint *> birthpoints;
@@ -621,7 +643,8 @@ const THUAI4::Character &DebugApi<asyn>::GetSelfInfoRef() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetSelfInfoRef() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return *pState->self;
@@ -632,7 +655,8 @@ std::vector<THUAI4::Character> DebugApi<asyn>::GetCharacters() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<THUAI4::Character> characters;
@@ -648,7 +672,8 @@ std::vector<THUAI4::Wall> DebugApi<asyn>::GetWalls() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<THUAI4::Wall> walls;
@@ -664,7 +689,8 @@ std::vector<THUAI4::Prop> DebugApi<asyn>::GetProps() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<THUAI4::Prop> props;
@@ -680,7 +706,8 @@ std::vector<THUAI4::Bullet> DebugApi<asyn>::GetBullets() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<THUAI4::Bullet> bullets;
@@ -696,7 +723,8 @@ std::vector<THUAI4::BirthPoint> DebugApi<asyn>::GetBirthPoints() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<THUAI4::BirthPoint> birthpoints;
@@ -712,19 +740,20 @@ THUAI4::Character DebugApi<asyn>::GetSelfInfo() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetSelfInfo() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return *pState->self;
 }
-
 
 template <bool asyn>
 THUAI4::ColorType DebugApi<asyn>::GetSelfTeamColor() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetSelfTeamColor() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return pState->selfTeamColor;
@@ -734,7 +763,8 @@ uint32_t DebugApi<asyn>::GetTeamScore() const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetTeamScore() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return pState->teamScore;
@@ -744,7 +774,8 @@ const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nT
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return pState->playerGUIDs;
@@ -754,7 +785,8 @@ THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
 {
 	if constexpr (asyn)
 	{
-		std::lock_guard<std::mutex> lck(mtx);
+		std::lock_guard<std::mutex> lck(mtx_state);
+		TryUpDate();
 	}
 	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);

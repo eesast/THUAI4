@@ -59,12 +59,13 @@ class API final : public LogicInterface
 private:
 	virtual void StartTimer() {}
 	virtual void EndTimer() {}
-	std::mutex &mtx; //并不总是需要，但……忍了吧
+	std::mutex &mtx_state; //并不总是需要，但……忍了吧
+	std::function<void()> TryUpDate;
 
 public:
 	API(std::function<void(Protobuf::MessageToServer &)> sm,
 		std::function<bool()> e, std::function<bool(std::string &)> tp,
-		const State *&pS, std::mutex &mtx_game);
+		const State *&pS, std::mutex &mtx_game, std::function<void()>);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
 	virtual void MoveUp(uint32_t timeInMilliseconds);
@@ -122,12 +123,13 @@ private:
 		{THUAI4::PropType::Totem, "Totem"}};
 	virtual void StartTimer();
 	virtual void EndTimer();
-	std::mutex &mtx;
+	std::mutex &mtx_state;
+	std::function<void()> TryUpDate;
 
 public:
 	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
 			 std::function<bool()> e, std::function<bool(std::string &)> tp,
-			 const State *&pS, std::mutex &mtx_game, bool ev = false,
+			 const State *&pS, std::mutex &mtx_game, std::function<void()>, bool ev = false,
 			 std::ostream &out = std::cout);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
