@@ -544,7 +544,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		}
 
 		std::cout << "游戏开始" << std::endl;
-		std::thread tAI(&Logic::PlayerWrapper, this);
+		std::thread tAI(asynchronous?&Logic::PlayerWrapperAsyn:&Logic::PlayerWrapper, this);
 
 		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
 			cv_game.wait(lck);

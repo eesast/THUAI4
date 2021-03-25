@@ -47,13 +47,13 @@ int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
 		TCLAP::SwitchArg warning("w", "warning", "Warn of some obviously invalid operations (only when \"-d\" is set).");
 		cmd.add(warning);
 
+		cmd.parse(argc, argv);
 		extern const THUAI4::JobType playerJob; // Entern variable, actually defined in AI.cpp
 		pID = playerID.getValue();
 		tID = teamID.getValue();
 		ID::playerID=pID;
 		ID::teamID=tID;
 		jType = playerJob;
-		cmd.parse(argc, argv);
 		aIP = agentIP.getValue();
 		aPort = agentPort.getValue();
 
