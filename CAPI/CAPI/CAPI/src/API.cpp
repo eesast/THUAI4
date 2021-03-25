@@ -104,7 +104,7 @@ bool API<asyn>::TryGetMessage(std::string &str)
 }
 
 template <bool asyn>
-std::vector<const THUAI4::Character *> API<asyn>::GetCharacters() const
+std::vector<const THUAI4::Character *> API<asyn>::GetCharacterPtrs() const
 {
 	if constexpr (asyn)
 	{
@@ -112,28 +112,28 @@ std::vector<const THUAI4::Character *> API<asyn>::GetCharacters() const
 	}
 	std::vector<const THUAI4::Character *> characters;
 
-	for (auto it : pState->characters)
+	for (const auto & it : pState->characters)
 	{
 		characters.push_back(it.get());
 	}
 	return std::move(characters);
 }
 template <bool asyn>
-std::vector<const THUAI4::Wall *> API<asyn>::GetWalls() const
+std::vector<const THUAI4::Wall *> API<asyn>::GetWallPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
 	std::vector<const THUAI4::Wall *> walls;
-	for (auto it : pState->walls)
+	for (const auto &it : pState->walls)
 	{
 		walls.push_back(it.get());
 	}
 	return std::move(walls);
 }
 template <bool asyn>
-std::vector<const THUAI4::Prop *> API<asyn>::GetProps() const
+std::vector<const THUAI4::Prop *> API<asyn>::GetPropPtrs() const
 {
 	if constexpr (asyn)
 	{
@@ -141,14 +141,14 @@ std::vector<const THUAI4::Prop *> API<asyn>::GetProps() const
 	}
 	std::vector<const THUAI4::Prop *> props;
 
-	for (auto it : pState->props)
+	for (const auto &it : pState->props)
 	{
 		props.push_back(it.get());
 	}
 	return std::move(props);
 }
 template <bool asyn>
-std::vector<const THUAI4::Bullet *> API<asyn>::GetBullets() const
+std::vector<const THUAI4::Bullet *> API<asyn>::GetBulletPtrs() const
 {
 	if constexpr (asyn)
 	{
@@ -156,28 +156,28 @@ std::vector<const THUAI4::Bullet *> API<asyn>::GetBullets() const
 	}
 	std::vector<const THUAI4::Bullet *> bullets;
 
-	for (auto it : pState->bullets)
+	for (const auto &it : pState->bullets)
 	{
 		bullets.push_back(it.get());
 	}
 	return std::move(bullets);
 }
 template <bool asyn>
-std::vector<const THUAI4::BirthPoint *> API<asyn>::GetBirthPoints() const
+std::vector<const THUAI4::BirthPoint *> API<asyn>::GetBirthPointPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
 	std::vector<const THUAI4::BirthPoint *> birthpoints;
-	for (auto it : pState->birthpoints)
+	for (const auto &it : pState->birthpoints)
 	{
 		birthpoints.push_back(it.get());
 	}
 	return std::move(birthpoints);
 }
 template <bool asyn>
-const THUAI4::Character &API<asyn>::GetSelfInfo() const
+const THUAI4::Character &API<asyn>::GetSelfInfoRef() const
 {
 	if constexpr (asyn)
 	{
@@ -185,6 +185,92 @@ const THUAI4::Character &API<asyn>::GetSelfInfo() const
 	}
 	return *pState->self;
 }
+
+template <bool asyn>
+std::vector<THUAI4::Character> API<asyn>::GetCharacters() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	std::vector<THUAI4::Character> characters;
+
+	for (const auto& it : pState->characters)
+	{
+		characters.push_back(*it.get());
+	}
+	return std::move(characters);
+}
+template <bool asyn>
+std::vector<THUAI4::Wall> API<asyn>::GetWalls() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	std::vector<THUAI4::Wall> walls;
+
+	for (const auto &it : pState->walls)
+	{
+		walls.push_back(*it.get());
+	}
+	return std::move(walls);
+}
+template <bool asyn>
+std::vector<THUAI4::Prop> API<asyn>::GetProps() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	std::vector<THUAI4::Prop> props;
+
+	for (const auto &it : pState->props)
+	{
+		props.push_back(*it.get());
+	}
+	return std::move(props);
+}
+template <bool asyn>
+std::vector<THUAI4::Bullet> API<asyn>::GetBullets() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	std::vector<THUAI4::Bullet> bullets;
+
+	for (const auto &it : pState->bullets)
+	{
+		bullets.push_back(*it.get());
+	}
+	return std::move(bullets);
+}
+template <bool asyn>
+std::vector<THUAI4::BirthPoint> API<asyn>::GetBirthPoints() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	std::vector<THUAI4::BirthPoint> birthpoints;
+
+	for (const auto &it : pState->birthpoints)
+	{
+		birthpoints.push_back(*it.get());
+	}
+	return std::move(birthpoints);
+}
+template <bool asyn>
+THUAI4::Character API<asyn>::GetSelfInfo() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	return *pState->self;
+}
+
 template <bool asyn>
 THUAI4::ColorType API<asyn>::GetSelfTeamColor() const
 {
@@ -250,7 +336,7 @@ void DebugApi<asyn>::StartTimer()
 {
 	StartPoint = std::chrono::system_clock::now();
 	std::time_t t = std::chrono::system_clock::to_time_t(StartPoint);
-	OutStream << "===New State===" << std::endl;
+	OutStream << "=== AI.play() ===" << std::endl;
 	OutStream << "Current time: " << ctime(&t);
 }
 template <bool asyn>
@@ -453,85 +539,176 @@ bool DebugApi<asyn>::TryGetMessage(std::string &str)
 }
 
 template <bool asyn>
-std::vector<const THUAI4::Character *> DebugApi<asyn>::GetCharacters() const
+std::vector<const THUAI4::Character *> DebugApi<asyn>::GetCharacterPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
-	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	OutStream << "Call GetCharacterPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<const THUAI4::Character *> characters;
 
-	for (auto it : pState->characters)
+	for (const auto &it : pState->characters)
 	{
 		characters.push_back(it.get());
 	}
 	return std::move(characters);
 }
 template <bool asyn>
-std::vector<const THUAI4::Wall *> DebugApi<asyn>::GetWalls() const
+std::vector<const THUAI4::Wall *> DebugApi<asyn>::GetWallPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
-	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	OutStream << "Call GetWallPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 
 	std::vector<const THUAI4::Wall *> walls;
-	for (auto it : pState->walls)
+	for (const auto &it : pState->walls)
 	{
 		walls.push_back(it.get());
 	}
 	return std::move(walls);
 }
 template <bool asyn>
-std::vector<const THUAI4::Prop *> DebugApi<asyn>::GetProps() const
+std::vector<const THUAI4::Prop *> DebugApi<asyn>::GetPropPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
-	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	OutStream << "Call GetPropPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 
 	std::vector<const THUAI4::Prop *> props;
-	for (auto it : pState->props)
+	for (const auto &it : pState->props)
 	{
 		props.push_back(it.get());
 	}
 	return std::move(props);
 }
 template <bool asyn>
-std::vector<const THUAI4::Bullet *> DebugApi<asyn>::GetBullets() const
+std::vector<const THUAI4::Bullet *> DebugApi<asyn>::GetBulletPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
-	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	OutStream << "Call GetBulletPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<const THUAI4::Bullet *> bullets;
-	for (auto it : pState->bullets)
+	for (const auto &it : pState->bullets)
 	{
 		bullets.push_back(it.get());
 	}
 	return std::move(bullets);
 }
 template <bool asyn>
-std::vector<const THUAI4::BirthPoint *> DebugApi<asyn>::GetBirthPoints() const
+std::vector<const THUAI4::BirthPoint *> DebugApi<asyn>::GetBirthPointPtrs() const
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(mtx);
 	}
-	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	OutStream << "Call GetBirthPointPtrs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	std::vector<const THUAI4::BirthPoint *> birthpoints;
-	for (auto it : pState->birthpoints)
+	for (const auto &it : pState->birthpoints)
 	{
 		birthpoints.push_back(it.get());
 	}
 	return std::move(birthpoints);
 }
 template <bool asyn>
-const THUAI4::Character &DebugApi<asyn>::GetSelfInfo() const
+const THUAI4::Character &DebugApi<asyn>::GetSelfInfoRef() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	OutStream << "Call GetSelfInfoRef() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	return *pState->self;
+}
+
+template <bool asyn>
+std::vector<THUAI4::Character> DebugApi<asyn>::GetCharacters() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	std::vector<THUAI4::Character> characters;
+
+	for (const auto &it : pState->characters)
+	{
+		characters.push_back(*it.get());
+	}
+	return std::move(characters);
+}
+template <bool asyn>
+std::vector<THUAI4::Wall> DebugApi<asyn>::GetWalls() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	std::vector<THUAI4::Wall> walls;
+
+	for (const auto &it : pState->walls)
+	{
+		walls.push_back(*it.get());
+	}
+	return std::move(walls);
+}
+template <bool asyn>
+std::vector<THUAI4::Prop> DebugApi<asyn>::GetProps() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	std::vector<THUAI4::Prop> props;
+
+	for (const auto &it : pState->props)
+	{
+		props.push_back(*it.get());
+	}
+	return std::move(props);
+}
+template <bool asyn>
+std::vector<THUAI4::Bullet> DebugApi<asyn>::GetBullets() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	std::vector<THUAI4::Bullet> bullets;
+
+	for (const auto &it : pState->bullets)
+	{
+		bullets.push_back(*it.get());
+	}
+	return std::move(bullets);
+}
+template <bool asyn>
+std::vector<THUAI4::BirthPoint> DebugApi<asyn>::GetBirthPoints() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(mtx);
+	}
+	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	std::vector<THUAI4::BirthPoint> birthpoints;
+
+	for (const auto &it : pState->birthpoints)
+	{
+		birthpoints.push_back(*it.get());
+	}
+	return std::move(birthpoints);
+}
+template <bool asyn>
+THUAI4::Character DebugApi<asyn>::GetSelfInfo() const
 {
 	if constexpr (asyn)
 	{
@@ -540,6 +717,8 @@ const THUAI4::Character &DebugApi<asyn>::GetSelfInfo() const
 	OutStream << "Call GetSelfInfo() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return *pState->self;
 }
+
+
 template <bool asyn>
 THUAI4::ColorType DebugApi<asyn>::GetSelfTeamColor() const
 {
