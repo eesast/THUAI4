@@ -78,6 +78,7 @@ private:
 
 	void ProcessMessage();
 	void PlayerWrapper();
+	void PlayerWrapperAsyn();
 
 public:
 	Logic();
