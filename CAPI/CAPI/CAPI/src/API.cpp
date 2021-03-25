@@ -3,6 +3,7 @@
 #include <functional>
 #include <chrono>
 #include <ctime>
+#include <utility>
 
 const static double PI = 3.14159265358979323846;
 
@@ -95,7 +96,7 @@ std::vector<const THUAI4::Character*> API::GetCharacters() const
 	{
 		characters.push_back(it.get());
 	}
-	return characters;
+	return std::move(characters);
 }
 std::vector<const THUAI4::Wall*> API::GetWalls() const
 {
@@ -104,7 +105,7 @@ std::vector<const THUAI4::Wall*> API::GetWalls() const
 	{
 		walls.push_back(it.get());
 	}
-	return walls;
+	return std::move(walls);
 }
 std::vector<const THUAI4::Prop*> API::GetProps() const
 {
@@ -114,7 +115,7 @@ std::vector<const THUAI4::Prop*> API::GetProps() const
 	{
 		props.push_back(it.get());
 	}
-	return props;
+	return std::move(props);
 }
 std::vector<const THUAI4::Bullet*> API::GetBullets() const
 {
@@ -124,7 +125,7 @@ std::vector<const THUAI4::Bullet*> API::GetBullets() const
 	{
 		bullets.push_back(it.get());
 	}
-	return bullets;
+	return std::move(bullets);
 }
 std::vector<const THUAI4::BirthPoint*> API::GetBirthPoints() const
 {
@@ -133,7 +134,7 @@ std::vector<const THUAI4::BirthPoint*> API::GetBirthPoints() const
 	{
 		birthpoints.push_back(it.get());
 	}
-	return birthpoints;
+	return std::move(birthpoints);
 }
 const THUAI4::Character& API::GetSelfInfo() const
 {
@@ -378,7 +379,7 @@ std::vector<const THUAI4::Character*> DebugApi::GetCharacters() const
 	{
 		characters.push_back(it.get());
 	}
-	return characters;
+	return std::move(characters);
 }
 std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
 {
@@ -389,7 +390,7 @@ std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
 	{
 		walls.push_back(it.get());
 	}
-	return walls;
+	return std::move(walls);
 }
 std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
 {
@@ -400,7 +401,7 @@ std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
 	{
 		props.push_back(it.get());
 	}
-	return props;
+	return std::move(props);
 }
 std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
 {
@@ -411,7 +412,7 @@ std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
 	{
 		bullets.push_back(it.get());
 	}
-	return bullets;
+	return std::move(bullets);
 }
 std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
 {
@@ -422,7 +423,7 @@ std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
 	{
 		birthpoints.push_back(it.get());
 	}
-	return birthpoints;
+	return std::move(birthpoints);
 }
 const THUAI4::Character& DebugApi::GetSelfInfo() const
 {
