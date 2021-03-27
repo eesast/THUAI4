@@ -75,9 +75,9 @@ int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
 	return 0;
 }
 
-std::shared_ptr<AIBase> CreateAI()
+std::unique_ptr<AIBase> CreateAI()
 {
-	return std::make_shared<AI>();
+	return std::make_unique<AI>();
 }
 
 int main(int argc, char *argv[])

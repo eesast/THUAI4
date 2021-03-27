@@ -423,7 +423,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 	{
 		if (!debuglevel)
 		{
-			this->pApi = std::make_shared<API<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_unique<API<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 													 [this]() { return MessageStorage.empty(); },
 													 [this](std::string &s) { return MessageStorage.try_pop(s); },
 													 (const State *&)pState, mtx_state, [this]() {
@@ -441,7 +441,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		{
 			if (filename == "")
 			{
-				this->pApi = std::make_shared<DebugApi<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 															  [this]() { return MessageStorage.empty(); },
 															  [this](std::string &s) { return MessageStorage.try_pop(s); },
 															  (const State *&)pState, mtx_state, [this]() {
@@ -463,7 +463,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 					std::cout << "Failed to open the file " << filename << std::endl;
 					return;
 				}
-				this->pApi = std::make_shared<DebugApi<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 															  [this]() { return MessageStorage.empty(); },
 															  [this](std::string &s) { return MessageStorage.try_pop(s); },
 															  (const State *&)pState, mtx_state, [this]() {
@@ -483,7 +483,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 	{
 		if (!debuglevel)
 		{
-			this->pApi = std::make_shared<API<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 													  [this]() { return MessageStorage.empty(); },
 													  [this](std::string &s) { return MessageStorage.try_pop(s); },
 													  (const State *&)pState, mtx_state, [this]() {
@@ -501,7 +501,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		{
 			if (filename == "")
 			{
-				this->pApi = std::make_shared<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 															   [this]() { return MessageStorage.empty(); },
 															   [this](std::string &s) { return MessageStorage.try_pop(s); },
 															   (const State *&)pState, mtx_state, [this]() {
@@ -523,7 +523,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 					std::cout << "Failed to open the file " << filename << std::endl;
 					return;
 				}
-				this->pApi = std::make_shared<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 															   [this]() { return MessageStorage.empty(); },
 															   [this](std::string &s) { return MessageStorage.try_pop(s); },
 															   (const State *&)pState, mtx_state, [this]() {
