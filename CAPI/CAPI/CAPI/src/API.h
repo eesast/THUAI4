@@ -81,19 +81,12 @@ public:
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string &);
 
-	virtual std::vector<const THUAI4::Character *> GetCharacterPtrs() const;
-	virtual std::vector<const THUAI4::Wall *> GetWallPtrs() const;
-	virtual std::vector<const THUAI4::Prop *> GetPropPtrs() const;
-	virtual std::vector<const THUAI4::Bullet *> GetBulletPtrs() const;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPointPtrs() const;
-	virtual const THUAI4::Character &GetSelfInfoRef() const;
-
-	virtual std::vector<THUAI4::Character> GetCharacters() const;
-	virtual std::vector<THUAI4::Wall> GetWalls() const;
-	virtual std::vector<THUAI4::Prop> GetProps() const;
-	virtual std::vector<THUAI4::Bullet> GetBullets() const;
-	virtual std::vector<THUAI4::BirthPoint> GetBirthPoints() const;
-	virtual THUAI4::Character GetSelfInfo() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Prop>> GetProps() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Bullet>> GetBullets() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::BirthPoint>> GetBirthPoints() const;
+	virtual std::shared_ptr<const THUAI4::Character> GetSelfInfo() const;
 
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
@@ -146,19 +139,12 @@ public:
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string &);
 
-	virtual std::vector<const THUAI4::Character *> GetCharacterPtrs() const;
-	virtual std::vector<const THUAI4::Wall *> GetWallPtrs() const;
-	virtual std::vector<const THUAI4::Prop *> GetPropPtrs() const;
-	virtual std::vector<const THUAI4::Bullet *> GetBulletPtrs() const;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPointPtrs() const;
-	virtual const THUAI4::Character &GetSelfInfoRef() const;
-
-	virtual std::vector<THUAI4::Character> GetCharacters() const;
-	virtual std::vector<THUAI4::Wall> GetWalls() const;
-	virtual std::vector<THUAI4::Prop> GetProps() const;
-	virtual std::vector<THUAI4::Bullet> GetBullets() const;
-	virtual std::vector<THUAI4::BirthPoint> GetBirthPoints() const;
-	virtual THUAI4::Character GetSelfInfo() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Prop>> GetProps() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Bullet>> GetBullets() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::BirthPoint>> GetBirthPoints() const;
+	virtual std::shared_ptr<const THUAI4::Character> GetSelfInfo() const;
 
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;

@@ -23,7 +23,6 @@ class GameApi
 public:
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle) = 0;
 	virtual void MoveRight(uint32_t timeInMilliseconds) = 0;
-	;
 	virtual void MoveUp(uint32_t timeInMilliseconds) = 0;
 	virtual void MoveLeft(uint32_t timeInMilliseconds) = 0;
 	virtual void MoveDown(uint32_t timeInMilliseconds) = 0;
@@ -37,19 +36,12 @@ public:
 	virtual bool MessageAvailable() = 0;
 	virtual bool TryGetMessage(std::string &) = 0;
 
-	virtual std::vector<const THUAI4::Character *> GetCharacterPtrs() const = 0;
-	virtual std::vector<const THUAI4::Wall *> GetWallPtrs() const = 0;
-	virtual std::vector<const THUAI4::Prop *> GetPropPtrs() const = 0;
-	virtual std::vector<const THUAI4::Bullet *> GetBulletPtrs() const = 0;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPointPtrs() const = 0;
-	virtual const THUAI4::Character &GetSelfInfoRef() const = 0;
-
-	virtual std::vector<THUAI4::Character> GetCharacters() const = 0;
-	virtual std::vector<THUAI4::Wall> GetWalls() const = 0;
-	virtual std::vector<THUAI4::Prop> GetProps() const = 0;
-	virtual std::vector<THUAI4::Bullet> GetBullets() const = 0;
-	virtual std::vector<THUAI4::BirthPoint> GetBirthPoints() const = 0;
-	virtual THUAI4::Character GetSelfInfo() const = 0;
+	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const = 0;
+	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const = 0;
+	virtual std::vector<std::shared_ptr<const THUAI4::Prop>> GetProps() const = 0;
+	virtual std::vector<std::shared_ptr<const THUAI4::Bullet>> GetBullets() const = 0;
+	virtual std::vector<std::shared_ptr<const THUAI4::BirthPoint>> GetBirthPoints() const = 0;
+	virtual std::shared_ptr<const THUAI4::Character> GetSelfInfo() const = 0;
 
 	virtual THUAI4::ColorType GetSelfTeamColor() const = 0;
 	virtual uint32_t GetTeamScore() const = 0;
@@ -63,7 +55,7 @@ class AIBase
 public:
 	virtual void play(GameApi &g) = 0;
 };
-using CreateAIFunc = std::shared_ptr<AIBase> (*)();
+using CreateAIFunc = std::unique_ptr<AIBase> (*)();
 
 int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder);
 

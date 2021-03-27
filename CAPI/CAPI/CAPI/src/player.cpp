@@ -21,12 +21,12 @@ void AI::play(GameApi &g)
 {
 	while (true)
 	{
-		auto self = g.GetSelfInfoRef();
-		if (self.bulletNum)
+		auto self = g.GetSelfInfo();
+		if (self->bulletNum)
 		{
 			g.Attack(100, direction(e));
 		}
 		g.MovePlayer(50, direction(e));
-		std::cout << "I`m at (" << self.x << "," << self.y << ")." << std::endl;
+		std::cout << "I`m at (" << self->x << "," << self->y << ")." << std::endl;
 	}
 }
