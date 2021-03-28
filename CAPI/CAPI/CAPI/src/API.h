@@ -65,7 +65,7 @@ private:
 public:
 	API(std::function<void(Protobuf::MessageToServer &)> sm,
 		std::function<bool()> e, std::function<bool(std::string &)> tp,
-		const State *&pS, std::mutex &mtx_game, std::function<void()>);
+		const State *&pS, std::mutex &mtx_state, std::function<void()>);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
 	virtual void MoveUp(uint32_t timeInMilliseconds);
@@ -122,7 +122,7 @@ private:
 public:
 	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
 			 std::function<bool()> e, std::function<bool(std::string &)> tp,
-			 const State *&pS, std::mutex &mtx_game, std::function<void()>, bool ev = false,
+			 const State *&pS, std::mutex &mtx_state, std::function<void()>, bool ev = false,
 			 std::ostream &out = std::cout);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);

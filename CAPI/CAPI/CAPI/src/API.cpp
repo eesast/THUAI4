@@ -17,7 +17,7 @@ double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
 template <bool asyn>
 API<asyn>::API(std::function<void(Protobuf::MessageToServer &)> sm,
 			   std::function<bool()> e, std::function<bool(std::string &)> tp,
-			   const State *&pS, std::mutex &mtx_game, std::function<void()> tu) : LogicInterface(sm, e, tp, pS), mtx_state(mtx_game), TryUpDate(tu)
+			   const State *&pS, std::mutex &mtx_state, std::function<void()> tu) : LogicInterface(sm, e, tp, pS), mtx_state(mtx_state), TryUpDate(tu)
 {
 }
 
@@ -233,9 +233,9 @@ template class API<false>;
 template <bool asyn>
 DebugApi<asyn>::DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
 						 std::function<bool()> e, std::function<bool(std::string &)> tp,
-						 const State *&pS, std::mutex &mtx_game, std::function<void()> tu, bool ev,
+						 const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
 						 std::ostream &out) : LogicInterface(sm, e, tp, pS), ExamineValidity(ev),
-											  OutStream(out), mtx_state(mtx_game), TryUpDate(tu)
+											  OutStream(out), mtx_state(mtx_state), TryUpDate(tu)
 {
 }
 

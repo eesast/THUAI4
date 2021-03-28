@@ -19,9 +19,9 @@ class Logic
 {
 private:
 	//Logic control
-	bool UnexpectedlyClosed = false;
-	bool BufferUpdated = false;
-	bool CurrentStateAccessed = false;
+	std::atomic_bool UnexpectedlyClosed = false;
+	std::atomic_bool BufferUpdated = false;
+	std::atomic_bool CurrentStateAccessed = false;
 
 	enum class GamePhase : unsigned char
 	{
@@ -29,7 +29,7 @@ private:
 		Gaming = 1,
 		GameOver = 2,
 	};
-	GamePhase gamePhase = GamePhase::Uninitialized;
+	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized;
 
 	enum class Validity : unsigned char
 	{
@@ -38,15 +38,13 @@ private:
 		Valid = 1,
 		Invalid = 2
 	};
-	Validity validity = Validity::Unknown;
+	std::atomic<Validity> validity = Validity::Unknown;
 
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
-	std::mutex mtx_game;
-	std::condition_variable cv_game;
 
 	//Game data
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
@@ -74,7 +72,7 @@ private:
 	void OnClose();
 	void OnReceive();
 	void OnConnect();
-	void load(std::shared_ptr<Protobuf::MessageToClient>); //降收到的M2C加载到buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>); //将最新状态信息加载到buffer
 
 	void ProcessMessage();
 	void PlayerWrapper();

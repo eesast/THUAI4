@@ -30,11 +30,11 @@ void Logic::OnReceive()
 }
 void Logic::OnClose()
 {
-	{
-		std::lock_guard<std::mutex> lck(mtx_game);
-		UnexpectedlyClosed = true;
-	}
-	cv_game.notify_one();
+	std::cout << "Connection was unexpectedly closed.\n";
+	UnexpectedlyClosed = true;
+	//消息处理和state要更新时buffer还没更新都要等，意外断线线程都不能自行退出
+	cvOnReceive.notify_one();
+	cv_buffer.notify_one();
 }
 void Logic::OnConnect()
 {
@@ -131,25 +131,26 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	switch (pM2C->messagetype())
 	{
 	case Protobuf::MessageType::StartGame:
+	{
 		//首先load到buffer
 		load(pM2C); //第一帧AI线程还没开始 加载到buffer然后交换指针
-		{
-			std::lock_guard<std::mutex> lck(mtx_game);
-			gamePhase = GamePhase::Gaming;
-		}
-		cv_game.notify_one();
+		gamePhase = GamePhase::Gaming;
+		std::cout << "游戏开始" << std::endl;
+		std::thread tAI(asynchronous ? &Logic::PlayerWrapperAsyn : &Logic::PlayerWrapper, this);
+		tAI.detach();
 		break;
+	}
 	case Protobuf::MessageType::Gaming:
 		load(pM2C);
 		break;
 
 	case Protobuf::MessageType::EndGame:
 	{
-		std::lock_guard<std::mutex> lck(mtx_game);
 		gamePhase = GamePhase::GameOver;
-	}
-		cv_game.notify_one();
+		std::cout << "Game ends\n";
+		cv_buffer.notify_one();
 		break;
+	}
 
 	default:
 		std::cout << "Invalid MessageType wrt M2C" << std::endl;
@@ -161,18 +162,12 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	switch (pM2OC->messagetype())
 	{
 	case Protobuf::MessageType::ValidPlayer:
-	{
-		std::lock_guard<std::mutex> lck(mtx_game);
 		validity = Validity::Valid;
-	}
-		cv_game.notify_one();
+		std::cout << "Valid player." << std::endl;
 		break;
 	case Protobuf::MessageType::InvalidPlayer:
-	{
-		std::lock_guard<std::mutex> lck(mtx_game);
 		validity = Validity::Invalid;
-	}
-		cv_game.notify_one();
+		std::cout << "Invalid player!" << std::endl;
 		break;
 	case Protobuf::MessageType::Send:
 		MessageStorage.push(pM2OC->message());
@@ -289,30 +284,22 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 void Logic::ProcessMessage()
 {
-	std::unique_lock<std::mutex> lock_game(mtx_game);
 	Pointer2Message p2M;
 	while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed && validity != Validity::Invalid)
 	{
-		lock_game.unlock();
-
 		//无消息处理时停下来少占资源
-
 		{
 			std::unique_lock<std::mutex> lck(mtxOnReceive); //OnReceive里往队列里Push时也锁了
-			lock_game.lock();
 			while (capi.IsEmpty() && !UnexpectedlyClosed)
 			{ //否则在这断线就会锁住
-				lock_game.unlock();
 				cvOnReceive.wait(lck);
-				lock_game.lock();
 			}
-			lock_game.unlock();
 		}
-		//std::cout << "ProcessMessage有消息处理" << std::endl;
+
 		if (!capi.TryPop(p2M))
 		{
 			std::cout << "Failed to pop the message\n";
-			lock_game.lock();
+			//lock_game.lock(); 用atomic去掉不必要的锁时见到这个，一时想不起这里是要干什么 或许可以删？
 			continue;
 		}
 
@@ -328,22 +315,14 @@ void Logic::ProcessMessage()
 		default:
 			std::cout << "std::variant_nops\n";
 		}
-
-		lock_game.lock();
 	}
-	lock_game.unlock();
 	std::cout << "PM thread terminates" << std::endl;
 }
 
 void Logic::PlayerWrapper()
 {
-	//while判断时保证gamePhase和UnexpectedlyClosed不被其他线程访问
-	std::unique_lock<std::mutex> lock_game(mtx_game);
-
 	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed)
 	{
-		lock_game.unlock();
-
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed)
 		{
@@ -369,15 +348,10 @@ void Logic::PlayerWrapper()
 			{ //如果当前state已经接触过且buffer没更新，那就等到buffer更新
 
 				//意外断线这里也会锁住
-				lock_game.lock();
 				while (!BufferUpdated && !UnexpectedlyClosed && gamePhase != GamePhase::GameOver)
 				{
-					lock_game.unlock();
 					cv_buffer.wait(lck_buffer);
-					lock_game.lock();
 				}
-				lock_game.unlock();
-
 				State *temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
@@ -385,28 +359,19 @@ void Logic::PlayerWrapper()
 				BufferUpdated = false;
 			}
 		}
-
-		lock_game.lock();
 	}
-	lock_game.unlock();
 	std::cout << "AI thread terminates" << std::endl;
 }
 
 void Logic::PlayerWrapperAsyn()
 {
-	std::unique_lock<std::mutex> lock_game(mtx_game);
 	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed)
 	{
-		lock_game.unlock();
-
 		//异步似乎反而逻辑变简洁了
 		pApi->StartTimer();
 		pAI->play(*pApi);
 		pApi->EndTimer();
-
-		lock_game.lock();
 	}
-	lock_game.unlock();
 	std::cout << "AI thread terminates" << std::endl;
 }
 
@@ -419,6 +384,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 
 	std::ofstream OutFile;
 
+	//又臭又长
 	if (asynchronous)
 	{
 		if (!debuglevel)
@@ -549,76 +515,13 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		return;
 	}
 	std::cout << "成功连接到Agent" << std::endl;
+	//一连接就会给Server发 playerID teamID jobType
 
-	{
-		//OnConnect() 一连上CAPI就发AddPlayer
-		//等待Server发 ValidPlayer GameStart
-		//饼：InvalidPlayer补救一下
-		std::unique_lock<std::mutex> lck(mtx_game);
+	std::thread tPM(&Logic::ProcessMessage, this); //单线程处理收到的消息
+	tPM.detach();
 
-		std::thread tPM(&Logic::ProcessMessage, this);
-
-		while (validity == Validity::Unknown && !UnexpectedlyClosed)
-			cv_game.wait(lck);
-
-		if (UnexpectedlyClosed)
-		{
-			std::cout << "Connection was unexpectedly closed.\n";
-			lck.unlock();
-			cvOnReceive.notify_one(); //否则PM线程会一直等
-			tPM.join();
-			OutFile.close();
-			return;
-		}
-		if (validity == Validity::Valid)
-		{
-			std::cout << "Valid player." << std::endl;
-		}
-		else
-		{
-			std::cout << "Invalid player!" << std::endl;
-			lck.unlock();
-			cvOnReceive.notify_one();
-			tPM.join();
-			OutFile.close();
-			return;
-		}
-
-		while (gamePhase == GamePhase::Uninitialized && !UnexpectedlyClosed)
-			cv_game.wait(lck);
-
-		if (UnexpectedlyClosed)
-		{
-			std::cout << "Connection was unexpectedly closed.\n";
-			lck.unlock();
-			cvOnReceive.notify_one();
-			tPM.join();
-			OutFile.close();
-			return;
-		}
-
-		std::cout << "游戏开始" << std::endl;
-		std::thread tAI(asynchronous ? &Logic::PlayerWrapperAsyn : &Logic::PlayerWrapper, this);
-
-		while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed)
-			cv_game.wait(lck);
-		if (UnexpectedlyClosed)
-		{
-			std::cout << "Connection was unexpectedly closed.\n";
-			lck.unlock();
-			cvOnReceive.notify_one();
-			cv_buffer.notify_one();
-			tPM.join();
-			tAI.join();
-			OutFile.close();
-			return;
-		}
-		std::cout << "Game ends\n";
-
-		lck.unlock();
-		cv_buffer.notify_one();
-		tPM.join();
-		tAI.join();
-		OutFile.close();
-	}
+	//线程内，收到Valid/Invalid 后者线程终结
+	//若为Valid，PM线程接着听
+	//GameStart启动AI线程
+	//GameEnd游戏结束
 }
