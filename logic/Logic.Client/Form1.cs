@@ -9,6 +9,16 @@ namespace Logic.Client
 {
     public partial class Form1 : Form
     {
+        //字体大小
+        static int fontforinfo = 20;  
+        static int fontforexample = 13;
+        static int fontforegnum = 15;
+        static int fontforegpic = 14;
+        static int fontforpic = 14;
+        static int fontfornum = 13;
+        static int fontforword = 15;
+        static int fontforobjinfo = 15;
+        HelpForm help = new HelpForm();
         public Form1(Int64 teamID, Int64 playerID, int bulletspeed, JobType job)  //窗体构造时的初始化
         {
             this.teamid = teamID;
@@ -48,7 +58,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 50 * MapcellWidth + 2, Interval / 2),
                     Text = "Examples",
                     TextAlign = ContentAlignment.MiddleLeft,
-                    Font = new Font("等线", 17),
+                    Font = new Font("等线", fontforinfo,GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -65,7 +75,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 52 * MapcellWidth - 4, Interval + MapcellHeight * 2 + 6),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "出生点",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -82,7 +92,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 57 * MapcellWidth + 1, Interval + MapcellHeight * 2 + 6),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "墙体",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -116,7 +126,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 58 * MapcellWidth - 20, Interval * 3 + MapcellHeight * 3 + 1),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "各队染色区域",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -132,7 +142,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 61 * MapcellWidth + 4, Interval + MapcellHeight * 2 + 6),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "未染色区域",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -142,7 +152,7 @@ namespace Logic.Client
                     Text = "1",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 50 * MapcellWidth + 7, 96),
                     BackColor = Color.SteelBlue
                 };
@@ -152,7 +162,7 @@ namespace Logic.Client
                     Text = "2",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 52 * MapcellWidth + 1, 96),
                     BackColor = Color.Green
                 };
@@ -162,7 +172,7 @@ namespace Logic.Client
                     Text = "3",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 54 * MapcellWidth - 5, 96),
                     BackColor = Color.Blue
                 };
@@ -172,7 +182,7 @@ namespace Logic.Client
                     Text = "4",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 56 * MapcellWidth - 11, 96),
                     BackColor = Color.Pink
                 };
@@ -182,7 +192,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 58 * MapcellWidth - 20, 96),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "各队玩家",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -192,7 +202,7 @@ namespace Logic.Client
                     Text = "🏃",
                     ForeColor = Color.Red,
                     TextAlign = ContentAlignment.TopLeft,
-                    Font = new Font("Times New Roman", 11),
+                    Font = new Font("Times New Roman", fontforegpic, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 50 * MapcellWidth + 7, 122),
                     BackColor = Color.Yellow
                 };
@@ -202,7 +212,7 @@ namespace Logic.Client
                     Text = "❤",
                     ForeColor = Color.Red,
                     TextAlign = ContentAlignment.TopLeft,
-                    Font = new Font("Times New Roman", 11),
+                    Font = new Font("Times New Roman", fontforegpic, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 52 * MapcellWidth + 1, 122),
                     BackColor = Color.Yellow
                 };
@@ -212,7 +222,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 54 * MapcellWidth - 5, 122),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "各类道具",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -237,7 +247,7 @@ namespace Logic.Client
             MapInfoWord.Location = new Point(710, 243);
             MapInfoWord.Text = "未被指定";
             MapInfoWord.TextAlign = ContentAlignment.MiddleLeft;
-            MapInfoWord.Font = new Font("等线", 13);
+            MapInfoWord.Font = new Font("等线", fontforword, GraphicsUnit.Pixel);
             MapInfoWord.BackColor = Color.White;
             MapInfoWord.ForeColor = Color.Black;
             this.Controls.Add(MapInfoWord);
@@ -246,7 +256,7 @@ namespace Logic.Client
             MapInfo.Location = new Point(672, 185);
             MapInfo.Text = "Map Info";
             MapInfo.TextAlign = ContentAlignment.MiddleLeft;
-            MapInfo.Font = new Font("等线", 17);
+            MapInfo.Font = new Font("等线", fontforinfo, GraphicsUnit.Pixel);
             MapInfo.BackColor = Color.White;
             MapInfo.ForeColor = Color.Black;
             this.Controls.Add(MapInfo);
@@ -262,11 +272,11 @@ namespace Logic.Client
             ObjectInfoWord[0].Size = new Size(MapcellWidth * 10, MapcellHeight * 2);
             ObjectInfoWord[0].Location = new Point(672, 328);
             ObjectInfoWord[0].Text = "Object Info";
-            ObjectInfoWord[0].Font = new Font("等线", 17);
+            ObjectInfoWord[0].Font = new Font("等线", fontforinfo, GraphicsUnit.Pixel);
             for (int i = 1; i < 10; i++)
             {
                 ObjectInfoWord[i].Location = new Point(672, 340 + i * 2 * MapcellHeight);
-                ObjectInfoWord[i].Font = new Font("等线", 10);
+                ObjectInfoWord[i].Font = new Font("等线", fontforobjinfo, GraphicsUnit.Pixel);
                 ObjectInfoWord[i].Size = new Size(MapcellWidth * 16, MapcellHeight + 3);
             }
             ObjectInfoWord[9].Size = new Size(MapcellWidth * 16, 3 * MapcellHeight);
@@ -355,7 +365,7 @@ namespace Logic.Client
                     label.label.Text = Convert.ToString(player.playernum);
                     label.label.ForeColor = Color.White;
                     label.label.TextAlign = ContentAlignment.TopRight;
-                    label.label.Font = new Font("Times New Roman", 8);
+                    label.label.Font = new Font("Times New Roman", fontfornum, GraphicsUnit.Pixel);
                     label.label.Click += delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
                     switch (player.teamnum)
                     {
@@ -431,7 +441,7 @@ namespace Logic.Client
                     label.label.Size = new Size(MapcellWidth, MapcellHeight);
                     label.label.ForeColor = Color.Red;
                     label.label.TextAlign = ContentAlignment.TopCenter;
-                    label.label.Font = new Font("Times New Roman", 9);
+                    label.label.Font = new Font("Times New Roman", fontforpic, GraphicsUnit.Pixel);
                     label.label.BackColor = Color.Yellow;
                     switch (item.type)
                     {
@@ -469,6 +479,15 @@ namespace Logic.Client
                     label.label.BringToFront();
                     ItemLabelSet.Add(item.id, label);
                 }
+            }));
+        }
+        public void changeform(Int64 teamID,Int64 playerID,JobType jobType)
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.Text = "Client--- TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(jobType);
+                this.playerid = playerID;
+                this.teamid = teamID;
             }));
         }
         private void LabelClick(object sender, EventArgs e)  //标签单击事件处理
@@ -535,7 +554,6 @@ namespace Logic.Client
                 msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
                 //TO DO:向server发移动指令消息
                 Program.clientCommunicator.SendMessage(msg);
-
             }
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
@@ -685,10 +703,6 @@ namespace Logic.Client
                     //TO DO:发消息
                     Program.clientCommunicator.SendMessage(msg4);
                     break;
-                case 'a':
-                case 'A':
-                    Application.Exit();
-                    break;
                 default: break;
             }
         }
@@ -775,6 +789,13 @@ namespace Logic.Client
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void Form1_HelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            help = new HelpForm();
+            help.Show();
+            this.WindowState = FormWindowState.Minimized;
         }
     }
 }
