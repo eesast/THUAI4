@@ -53,14 +53,29 @@ public:
 	virtual void EndTimer() = 0;
 };
 
+template <bool>
+struct Members
+{
+public:
+	Members(std::mutex &mtx_state, std::function<void()>) {}
+};
+
+template <>
+struct Members<true>
+{
+public:
+	Members(std::mutex &mtx_state, std::function<void()> f): mtx_state(mtx_state),TryUpDate(f) {}
+protected:
+	std::mutex &mtx_state;
+	std::function<void()> TryUpDate;
+};
+
 template <bool asyn> //如果为真，仅API函数调用与state更新互斥 否则play()函数调用期间state更新都阻塞
-class API final : public LogicInterface
+class API final : public LogicInterface, Members<asyn>
 {
 private:
 	virtual void StartTimer() {}
 	virtual void EndTimer() {}
-	std::mutex &mtx_state; //并不总是需要，但……忍了吧
-	std::function<void()> TryUpDate;
 
 public:
 	API(std::function<void(Protobuf::MessageToServer &)> sm,
@@ -95,7 +110,7 @@ public:
 };
 
 template <bool asyn>
-class DebugApi final : public LogicInterface
+class DebugApi final : public LogicInterface, Members<asyn>
 {
 private:
 	bool ExamineValidity;
@@ -116,8 +131,6 @@ private:
 		{THUAI4::PropType::Totem, "Totem"}};
 	virtual void StartTimer();
 	virtual void EndTimer();
-	std::mutex &mtx_state;
-	std::function<void()> TryUpDate;
 
 public:
 	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,

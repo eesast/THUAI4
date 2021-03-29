@@ -26,14 +26,27 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo &g)
 
 void Logic::OnReceive()
 {
+	{
+		std::lock_guard<std::mutex> lck(mtxOnReceive);
+		FlagProcessMessage=true;
+	}
 	cvOnReceive.notify_one();
 }
 void Logic::OnClose()
 {
 	std::cout << "Connection was unexpectedly closed.\n";
-	UnexpectedlyClosed = true;
-	//消息处理和state要更新时buffer还没更新都要等，意外断线线程都不能自行退出
+	gamePhase=GamePhase::GameOver;
+
+	//消息处理和state要更新时buffer还没更新都要等，意外断线线程得notify一下
+	{
+		std::lock_guard<std::mutex> lck(mtxOnReceive);
+		FlagProcessMessage=true;
+	}
 	cvOnReceive.notify_one();
+	{
+		std::lock_guard<std::mutex> lck(mtx_buffer); 
+		FlagBufferUpdated = true;
+	}
 	cv_buffer.notify_one();
 }
 void Logic::OnConnect()
@@ -162,11 +175,10 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 	switch (pM2OC->messagetype())
 	{
 	case Protobuf::MessageType::ValidPlayer:
-		validity = Validity::Valid;
 		std::cout << "Valid player." << std::endl;
 		break;
 	case Protobuf::MessageType::InvalidPlayer:
-		validity = Validity::Invalid;
+		gamePhase=GamePhase::GameOver;
 		std::cout << "Invalid player!" << std::endl;
 		break;
 	case Protobuf::MessageType::Send:
@@ -266,7 +278,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			}
 		}
 
-		BufferUpdated = true;
+		FlagBufferUpdated = true;
 
 		//如果这时候state还没被player访问，就把buffer转到state
 		if (mtx_state.try_lock())
@@ -274,7 +286,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			State *temp = pState;
 			pState = pBuffer;
 			pBuffer = temp;
-			BufferUpdated = false;
+			FlagBufferUpdated = false;
 			CurrentStateAccessed = false;
 			mtx_state.unlock();
 		}
@@ -285,15 +297,13 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 void Logic::ProcessMessage()
 {
 	Pointer2Message p2M;
-	while (gamePhase != GamePhase::GameOver && !UnexpectedlyClosed && validity != Validity::Invalid)
+	while (gamePhase != GamePhase::GameOver)
 	{
 		//无消息处理时停下来少占资源
 		{
 			std::unique_lock<std::mutex> lck(mtxOnReceive); //OnReceive里往队列里Push时也锁了
-			while (capi.IsEmpty() && !UnexpectedlyClosed)
-			{ //否则在这断线就会锁住
-				cvOnReceive.wait(lck);
-			}
+			cvOnReceive.wait(lck,[this](){return FlagProcessMessage;});
+			FlagProcessMessage=!capi.IsEmpty();
 		}
 
 		if (!capi.TryPop(p2M))
@@ -321,7 +331,7 @@ void Logic::ProcessMessage()
 
 void Logic::PlayerWrapper()
 {
-	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed)
+	while (gamePhase == GamePhase::Gaming)
 	{
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed)
@@ -336,42 +346,48 @@ void Logic::PlayerWrapper()
 			//否则看buffer是否有更新，更新的前提是buffer没被占用
 			//所以这里堵塞是可以接受的
 			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
-			if (BufferUpdated)
+			if (FlagBufferUpdated)
 			{
 				State *temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
 				CurrentStateAccessed = false;
-				BufferUpdated = false;
+				FlagBufferUpdated = false;
 			}
 			else
 			{ //如果当前state已经接触过且buffer没更新，那就等到buffer更新
-
 				//意外断线这里也会锁住
-				while (!BufferUpdated && !UnexpectedlyClosed && gamePhase != GamePhase::GameOver)
-				{
-					cv_buffer.wait(lck_buffer);
-				}
+				cv_buffer.wait(lck_buffer,[this](){return FlagBufferUpdated;});
 				State *temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
 				CurrentStateAccessed = false;
-				BufferUpdated = false;
+				FlagBufferUpdated = false;
 			}
 		}
 	}
+	{
+		std::lock_guard<std::mutex> lock_ai(mtx_ai);
+		AiTerminated = true;
+	}
+	cv_ai.notify_one();
 	std::cout << "AI thread terminates" << std::endl;
 }
 
 void Logic::PlayerWrapperAsyn()
 {
-	while (gamePhase == GamePhase::Gaming && !UnexpectedlyClosed)
+	while (gamePhase == GamePhase::Gaming)
 	{
 		//异步似乎反而逻辑变简洁了
 		pApi->StartTimer();
 		pAI->play(*pApi);
 		pApi->EndTimer();
 	}
+	{
+		std::lock_guard<std::mutex> lock_ai(mtx_ai);
+		AiTerminated = true;
+	}
+	cv_ai.notify_one();
 	std::cout << "AI thread terminates" << std::endl;
 }
 
@@ -394,11 +410,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 													 [this](std::string &s) { return MessageStorage.try_pop(s); },
 													 (const State *&)pState, mtx_state, [this]() {
 														 if(mtx_buffer.try_lock()){
-															 if(BufferUpdated){
+															 if(FlagBufferUpdated){
 																 State* temp=pState;
 																 pState=pBuffer;
 																 pBuffer=temp;
-																 BufferUpdated=false;
+																 FlagBufferUpdated=false;
 															 }
 															 mtx_buffer.unlock();
 														 } });
@@ -412,11 +428,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 															  [this](std::string &s) { return MessageStorage.try_pop(s); },
 															  (const State *&)pState, mtx_state, [this]() {
 														 if(mtx_buffer.try_lock()){
-															 if(BufferUpdated){
+															 if(FlagBufferUpdated){
 																 State* temp=pState;
 																 pState=pBuffer;
 																 pBuffer=temp;
-																 BufferUpdated=false;
+																 FlagBufferUpdated=false;
 															 }
 															 mtx_buffer.unlock();
 														 } }, debuglevel != 1);
@@ -434,11 +450,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 															  [this](std::string &s) { return MessageStorage.try_pop(s); },
 															  (const State *&)pState, mtx_state, [this]() {
 														 if(mtx_buffer.try_lock()){
-															 if(BufferUpdated){
+															 if(FlagBufferUpdated){
 																 State* temp=pState;
 																 pState=pBuffer;
 																 pBuffer=temp;
-																 BufferUpdated=false;
+																 FlagBufferUpdated=false;
 															 }
 															 mtx_buffer.unlock();
 														 } }, debuglevel != 1, OutFile);
@@ -454,11 +470,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 													  [this](std::string &s) { return MessageStorage.try_pop(s); },
 													  (const State *&)pState, mtx_state, [this]() {
 														 if(mtx_buffer.try_lock()){
-															 if(BufferUpdated){
+															 if(FlagBufferUpdated){
 																 State* temp=pState;
 																 pState=pBuffer;
 																 pBuffer=temp;
-																 BufferUpdated=false;
+																 FlagBufferUpdated=false;
 															 }
 															 mtx_buffer.unlock();
 														 } });
@@ -472,11 +488,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 															   [this](std::string &s) { return MessageStorage.try_pop(s); },
 															   (const State *&)pState, mtx_state, [this]() {
 														 if(mtx_buffer.try_lock()){
-															 if(BufferUpdated){
+															 if(FlagBufferUpdated){
 																 State* temp=pState;
 																 pState=pBuffer;
 																 pBuffer=temp;
-																 BufferUpdated=false;
+																 FlagBufferUpdated=false;
 															 }
 															 mtx_buffer.unlock();
 														 } }, debuglevel != 1);
@@ -494,11 +510,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 															   [this](std::string &s) { return MessageStorage.try_pop(s); },
 															   (const State *&)pState, mtx_state, [this]() {
 														 if(mtx_buffer.try_lock()){
-															 if(BufferUpdated){
+															 if(FlagBufferUpdated){
 																 State* temp=pState;
 																 pState=pBuffer;
 																 pBuffer=temp;
-																 BufferUpdated=false;
+																 FlagBufferUpdated=false;
 															 }
 															 mtx_buffer.unlock();
 														 } }, debuglevel != 1, OutFile);
@@ -518,7 +534,12 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 	//一连接就会给Server发 playerID teamID jobType
 
 	std::thread tPM(&Logic::ProcessMessage, this); //单线程处理收到的消息
-	tPM.detach();
+	tPM.join();
+	{
+		std::unique_lock<std::mutex> lock(mtx_ai);
+		cv_ai.wait(lock,[this](){return AiTerminated;});
+	}
+	OutFile.close();
 
 	//线程内，收到Valid/Invalid 后者线程终结
 	//若为Valid，PM线程接着听

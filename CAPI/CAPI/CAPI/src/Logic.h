@@ -19,9 +19,10 @@ class Logic
 {
 private:
 	//Logic control
-	std::atomic_bool UnexpectedlyClosed = false;
-	std::atomic_bool BufferUpdated = false;
-	std::atomic_bool CurrentStateAccessed = false;
+	bool FlagProcessMessage=false;
+	bool FlagBufferUpdated = false;
+	bool CurrentStateAccessed = false;
+	bool AiTerminated=false;//改架構后 AI 綫程 detach 了，主函數還要等......
 
 	enum class GamePhase : unsigned char
 	{
@@ -29,22 +30,16 @@ private:
 		Gaming = 1,
 		GameOver = 2,
 	};
-	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized;
-
-	enum class Validity : unsigned char
-	{
-
-		Unknown = 0,
-		Valid = 1,
-		Invalid = 2
-	};
-	std::atomic<Validity> validity = Validity::Unknown;
+	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized;//仅用于循环条件判断，atomic即可
 
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
+
+	std::mutex mtx_ai;
+	std::condition_variable cv_ai;
 
 	//Game data
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
