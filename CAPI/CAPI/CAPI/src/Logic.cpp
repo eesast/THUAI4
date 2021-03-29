@@ -25,7 +25,7 @@ bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo &g)
 }
 
 void Logic::OnReceive()
-{
+{	
 	{
 		std::lock_guard<std::mutex> lck(mtxOnReceive);
 		FlagProcessMessage=true;
@@ -34,7 +34,7 @@ void Logic::OnReceive()
 }
 void Logic::OnClose()
 {
-	std::cout << "Connection was unexpectedly closed.\n";
+	std::cout << "Connection was closed.\n";
 	gamePhase=GamePhase::GameOver;
 
 	//消息处理和state要更新时buffer还没更新都要等，意外断线线程得notify一下
@@ -151,6 +151,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		std::cout << "游戏开始" << std::endl;
 		std::thread tAI(asynchronous ? &Logic::PlayerWrapperAsyn : &Logic::PlayerWrapper, this);
 		tAI.detach();
+		
 		break;
 	}
 	case Protobuf::MessageType::Gaming:
@@ -302,8 +303,8 @@ void Logic::ProcessMessage()
 		//无消息处理时停下来少占资源
 		{
 			std::unique_lock<std::mutex> lck(mtxOnReceive); //OnReceive里往队列里Push时也锁了
-			cvOnReceive.wait(lck,[this](){return FlagProcessMessage;});
-			FlagProcessMessage=!capi.IsEmpty();
+			
+			cvOnReceive.wait(lck,[this](){FlagProcessMessage = !capi.IsEmpty(); return FlagProcessMessage;});
 		}
 
 		if (!capi.TryPop(p2M))
@@ -331,6 +332,10 @@ void Logic::ProcessMessage()
 
 void Logic::PlayerWrapper()
 {
+	{
+		std::lock_guard<std::mutex> lock_ai(mtx_ai);
+		AiTerminated = false;
+	}
 	while (gamePhase == GamePhase::Gaming)
 	{
 		std::lock_guard<std::mutex> lck_state(mtx_state);
@@ -376,6 +381,10 @@ void Logic::PlayerWrapper()
 
 void Logic::PlayerWrapperAsyn()
 {
+	{
+		std::lock_guard<std::mutex> lock_ai(mtx_ai);
+		AiTerminated = false;
+	}
 	while (gamePhase == GamePhase::Gaming)
 	{
 		//异步似乎反而逻辑变简洁了
@@ -535,6 +544,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 
 	std::thread tPM(&Logic::ProcessMessage, this); //单线程处理收到的消息
 	tPM.join();
+	{
+		std::lock_guard<std::mutex> lck(mtx_buffer);
+		FlagBufferUpdated = true;
+	}
+	cv_buffer.notify_one();
 	{
 		std::unique_lock<std::mutex> lock(mtx_ai);
 		cv_ai.wait(lock,[this](){return AiTerminated;});

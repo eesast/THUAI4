@@ -22,7 +22,7 @@ private:
 	bool FlagProcessMessage=false;
 	bool FlagBufferUpdated = false;
 	bool CurrentStateAccessed = false;
-	bool AiTerminated=false;//改架構后 AI 綫程 detach 了，主函數還要等......
+	bool AiTerminated=true;//改架構后 AI 綫程 detach 了，主函數還要等......
 
 	enum class GamePhase : unsigned char
 	{
