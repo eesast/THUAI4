@@ -5,13 +5,13 @@
 
 Listener::Listener(std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) : Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
 
-EnHandleResult Listener::OnConnect(ITcpClient* pSender, CONNID dwConnID)
+EnHandleResult Listener::OnConnect(ITcpClient *pSender, CONNID dwConnID)
 {
 	OnConnectL();
 	return HR_OK;
 }
 
-EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength)
+EnHandleResult Listener::OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE *pData, int iLength)
 {
 	uint32_t type = (uint32_t)pData[0];
 	type |= ((uint32_t)pData[1]) << 8;
@@ -41,7 +41,7 @@ EnHandleResult Listener::OnReceive(ITcpClient* pSender, CONNID dwConnID, const B
 	return HR_OK;
 }
 
-EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult Listener::OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
 	OnCloseL();
 	return HR_OK;
@@ -50,68 +50,68 @@ EnHandleResult Listener::OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketO
 CAPI::CAPI(
 	std::function<void()> onconnect,
 	std::function<void()> onclose, std::function<void()> onreceive) : OnReceive(onreceive),
-	listener([this](Pointer2Message p2M) {
+																	  listener([this](Pointer2Message p2M) {
 	queue.push(p2M);
 	OnReceive(); },
-		onconnect,
-		onclose),
-	pclient(&listener)
+																			   onconnect,
+																			   onclose),
+																	  pclient(&listener)
 {
 	queue.clear();
 }
 
-	bool CAPI::Connect(const char* address, uint16_t port)
+bool CAPI::Connect(const char *address, uint16_t port)
+{
+	std::cout << "Connecting......" << std::endl;
+	while (!pclient->IsConnected())
 	{
-		std::cout << "Connecting......" << std::endl;
-		while (!pclient->IsConnected())
+		if (!pclient->Start(address, port))
 		{
-			if (!pclient->Start(address, port))
-			{
-				std::cout << "Failed to connect with the agent. Error code:";
-				std::cout << pclient->GetLastError() << std::endl;
-				return false;
-			}
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-		}
-		return true;
-	}
-	void CAPI::Send(const Protobuf::MessageToServer& message)
-	{
-		unsigned char data[maxlength];
-		data[0] = MessageToServer & 0xff;
-		data[1] = (MessageToServer >> 8) & 0xff;
-		data[2] = (MessageToServer >> 16) & 0xff;
-		data[3] = (MessageToServer >> 24) & 0xff;
-		int msgSize = message.ByteSizeLong();
-		message.SerializeToArray(data + 4, msgSize);
-		if (pclient->Send(data, 4 + msgSize))
-			;
-		else
-		{
-			std::cout << "Failed to send. Error code:";
+			std::cout << "Failed to connect with the agent. Error code:";
 			std::cout << pclient->GetLastError() << std::endl;
-		}
-	}
-
-	void CAPI::Stop()
-	{
-		if (pclient->Stop())
-			;
-		else
-		{
-			std::cout << "The client wasn`t stopped. Error code:";
-			std::cout << pclient->GetLastError() << std::endl;
-		}
-	}
-
-	bool CAPI::TryPop(Pointer2Message& ptr)
-	{
-		if (queue.empty())
 			return false;
-		return queue.try_pop(ptr);
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
-
-	bool CAPI::IsEmpty() const
+	return true;
+}
+void CAPI::Send(const Protobuf::MessageToServer &message)
+{
+	unsigned char data[maxlength];
+	data[0] = MessageToServer & 0xff;
+	data[1] = (MessageToServer >> 8) & 0xff;
+	data[2] = (MessageToServer >> 16) & 0xff;
+	data[3] = (MessageToServer >> 24) & 0xff;
+	int msgSize = message.ByteSizeLong();
+	message.SerializeToArray(data + 4, msgSize);
+	if (pclient->Send(data, 4 + msgSize))
+		;
+	else
 	{
-		return queue.empty();
+		std::cout << "Failed to send. Error code:";
+		std::cout << pclient->GetLastError() << std::endl;
 	}
+}
+
+void CAPI::Stop()
+{
+	if (pclient->Stop())
+		;
+	else
+	{
+		std::cout << "The client wasn`t stopped. Error code:";
+		std::cout << pclient->GetLastError() << std::endl;
+	}
+}
+
+bool CAPI::TryPop(Pointer2Message &ptr)
+{
+	if (queue.empty())
+		return false;
+	return queue.try_pop(ptr);
+}
+
+bool CAPI::IsEmpty() const
+{
+	return queue.empty();
+}
