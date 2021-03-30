@@ -67,7 +67,7 @@ public:
 	Members(std::mutex &mtx_state, std::function<void()> f): mtx_state(mtx_state),TryUpDate(f) {}
 protected:
 	std::mutex &mtx_state;
-	std::function<void()> TryUpDate;
+	const std::function<void()> TryUpDate;
 };
 
 template <bool asyn> //如果为真，仅API函数调用与state更新互斥 否则play()函数调用期间state更新都阻塞
