@@ -437,8 +437,9 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		}
 		else
 		{
-			bool flag=filename=="";
-			if(!flag){
+			bool flag = filename == "";
+			if (!flag)
+			{
 				OutFile.open(filename);
 				if (OutFile.fail())
 				{
@@ -450,7 +451,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 														  [this]() { return MessageStorage.empty(); },
 														  [this](std::string &s) { return MessageStorage.try_pop(s); },
 														  (const State *&)pState, mtx_state, tu, debuglevel != 1,
-														  flag?std::cout:OutFile);
+														  flag ? std::cout : OutFile);
 		}
 	}
 	else
@@ -475,10 +476,10 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 				}
 			}
 			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
-														  [this]() { return MessageStorage.empty(); },
-														  [this](std::string &s) { return MessageStorage.try_pop(s); },
-														  (const State *&)pState, mtx_state, tu, debuglevel != 1,
-														  flag ? std::cout : OutFile);
+														   [this]() { return MessageStorage.empty(); },
+														   [this](std::string &s) { return MessageStorage.try_pop(s); },
+														   (const State *&)pState, mtx_state, tu, debuglevel != 1,
+														   flag ? std::cout : OutFile);
 		}
 	}
 

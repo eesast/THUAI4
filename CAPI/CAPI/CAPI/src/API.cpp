@@ -206,14 +206,13 @@ const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nT
 	return State::playerGUIDs;
 }
 template <bool asyn>
-THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
+THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const 
 {
 	if constexpr (asyn)
 	{
 		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
 		Members<asyn>::TryUpDate();
 	}
-	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
 	auto it = pState->cellColors.find((CellX << 16) + CellY);
 	if (it == pState->cellColors.end())
