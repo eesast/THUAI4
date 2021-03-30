@@ -47,18 +47,9 @@ EnHandleResult Listener::OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketO
 	return HR_OK;
 }
 
-CAPI::CAPI(
-	std::function<void()> onconnect,
-	std::function<void()> onclose, std::function<void()> onreceive) : OnReceive(onreceive),
-																	  listener([this](Pointer2Message p2M) {
-	queue.push(p2M);
-	OnReceive(); },
-																			   onconnect,
-																			   onclose),
-																	  pclient(&listener)
-{
-	queue.clear();
-}
+CAPI::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void()> onreceive) : 
+OnReceive(onreceive),listener([this](Pointer2Message p2M) {queue.push(p2M);OnReceive(); },onconnect,onclose),
+pclient(&listener){queue.clear();}
 
 bool CAPI::Connect(const char *address, uint16_t port)
 {
@@ -95,10 +86,7 @@ void CAPI::Send(const Protobuf::MessageToServer &message)
 
 void CAPI::Stop()
 {
-	if (pclient->Stop())
-		;
-	else
-	{
+	if (!pclient->Stop()){
 		std::cout << "The client wasn`t stopped. Error code:";
 		std::cout << pclient->GetLastError() << std::endl;
 	}

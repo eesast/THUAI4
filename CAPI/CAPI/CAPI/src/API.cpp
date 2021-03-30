@@ -5,6 +5,7 @@
 #include <ctime>
 #include <utility>
 
+std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> State::playerGUIDs;
 const static double PI = 3.14159265358979323846;
 
 double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
@@ -202,7 +203,7 @@ const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nT
 		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
 		Members<asyn>::TryUpDate();
 	}
-	return pState->playerGUIDs;
+	return State::playerGUIDs;
 }
 template <bool asyn>
 THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
@@ -370,7 +371,7 @@ void DebugApi<asyn>::Send(int toPlayerID, std::string message)
 			OutStream << "[Warning: Illegal player ID.]" << std::endl;
 			return;
 		}
-		if (pState->playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid)
+		if (State::playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid)
 		{
 			OutStream << "[Warning: You are sending a message to yourself.]" << std::endl;
 			return;
@@ -550,7 +551,7 @@ const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nT
 		Members<asyn>::TryUpDate();
 	}
 	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	return pState->playerGUIDs;
+	return State::playerGUIDs;
 }
 template <bool asyn>
 THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const

@@ -16,14 +16,14 @@ using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>,
 //index: 0 message2client 1 message2oneclient
 
 class CAPI;
-class Listener : public CTcpClientListener
+class Listener: public CTcpClientListener
 {
 private:
 	static const int32_t MessageToClient = 0;
 	static const int32_t MessageToOneClient = 2;
 	const std::function<void(Pointer2Message)> Push; //不仅push还调用cvOnReceive.notify_one()
-	const std::function<void()> OnCloseL;
 	const std::function<void()> OnConnectL;
+	const std::function<void()> OnCloseL;
 
 public:
 	Listener(std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);

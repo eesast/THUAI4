@@ -28,7 +28,7 @@ struct State
 	std::vector<std::shared_ptr<THUAI4::Prop>> props;
 	std::vector<std::shared_ptr<THUAI4::Bullet>> bullets;
 	std::vector<std::shared_ptr<THUAI4::BirthPoint>> birthpoints;
-	std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> playerGUIDs;
+	static std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> playerGUIDs;
 	std::shared_ptr<THUAI4::Character> self;
 #ifdef _COLOR_MAP_BY_HASHING_
 	std::unordered_map<uint32_t, THUAI4::ColorType> cellColors;
