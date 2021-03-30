@@ -5,10 +5,8 @@
 extern const bool asynchronous;
 
 Logic::Logic() : pState(storage), pBuffer(storage + 1),
-				 capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
-{
-	MessageStorage.clear();
-}
+capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
+{}
 
 Logic::~Logic() {}
 
@@ -171,6 +169,10 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	{
 		gamePhase = GamePhase::GameOver;
 		std::cout << "Game ends\n";
+		{
+			std::lock_guard<std::mutex> lck(mtx_buffer);
+			FlagBufferUpdated = true;
+		}
 		cv_buffer.notify_one();
 		break;
 	}

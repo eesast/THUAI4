@@ -15,41 +15,29 @@ using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>,
 
 //index: 0 message2client 1 message2oneclient
 
-class CAPI;
-class Listener: public CTcpClientListener
-{
-private:
-	static const int32_t MessageToClient = 0;
-	static const int32_t MessageToOneClient = 2;
-	const std::function<void(Pointer2Message)> Push; //不仅push还调用cvOnReceive.notify_one()
-	const std::function<void()> OnConnectL;
-	const std::function<void()> OnCloseL;
-
-public:
-	Listener(std::function<void(Pointer2Message)>, std::function<void()>, std::function<void()>);
-	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
-	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
-};
-
-class CAPI
+class CAPI : public CTcpClientListener
 {
 private:
 	static const int maxlength = 1000;
-	const std::function<void()> OnReceive; //调用cvOnReceive.notify_one()
+	static const int32_t MessageToClient = 0;
+	static const int32_t MessageToServer = 1;
+	static const int32_t MessageToOneClient = 2;
+	const std::function<void()> __OnConnect;
+	const std::function<void()> __OnReceive;
+	const std::function<void()> __OnClose;
 	concurrency::concurrent_queue<Pointer2Message> queue;
-	Listener listener;
 	CTcpPackClientPtr pclient;
 
 public:
-	static const int32_t MessageToServer = 1;
-
 	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
 	bool Connect(const char* address, uint16_t port);
 	void Send(const Protobuf::MessageToServer&);
 	void Stop();
 	bool TryPop(Pointer2Message&);
 	bool IsEmpty() const;
+	virtual EnHandleResult OnConnect(ITcpClient *pSender, CONNID dwConnID);
+	virtual EnHandleResult OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE *pData, int iLength);
 };
 
 #endif //!CAPI_H
