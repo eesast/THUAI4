@@ -2,7 +2,7 @@
 #include "Constants.h"
 
 //为假则play()调用期间游戏状态更新阻塞，为真则只保证当前游戏状态不会被状态更新函数与GameApi的方法同时访问
-extern const bool asynchronous = true;
+extern const bool asynchronous = false;
 
 #include <random>
 #include <iostream>
@@ -19,14 +19,11 @@ namespace
 
 void AI::play(GameApi &g)
 {
-	while (true)
+	auto self = g.GetSelfInfo();
+	if (self->bulletNum)
 	{
-		auto self = g.GetSelfInfoRef();
-		if (self.bulletNum)
-		{
-			g.Attack(100, direction(e));
-		}
-		g.MovePlayer(50, direction(e));
-		std::cout << "I`m at (" << self.x << "," << self.y << ")." << std::endl;
+		g.Attack(100, direction(e));
 	}
+	g.MovePlayer(50, direction(e));
+	std::cout << "I`m at (" << self->x << "," << self->y << ")." << std::endl;
 }

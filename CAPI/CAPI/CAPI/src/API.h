@@ -53,19 +53,34 @@ public:
 	virtual void EndTimer() = 0;
 };
 
+template <bool>
+struct Members
+{
+public:
+	Members(std::mutex &mtx_state, std::function<void()>) {}
+};
+
+template <>
+struct Members<true>
+{
+public:
+	Members(std::mutex &mtx_state, std::function<void()> f): mtx_state(mtx_state),TryUpDate(f) {}
+protected:
+	std::mutex &mtx_state;
+	std::function<void()> TryUpDate;
+};
+
 template <bool asyn> //如果为真，仅API函数调用与state更新互斥 否则play()函数调用期间state更新都阻塞
-class API final : public LogicInterface
+class API final : public LogicInterface, Members<asyn>
 {
 private:
 	virtual void StartTimer() {}
 	virtual void EndTimer() {}
-	std::mutex &mtx_state; //并不总是需要，但……忍了吧
-	std::function<void()> TryUpDate;
 
 public:
 	API(std::function<void(Protobuf::MessageToServer &)> sm,
 		std::function<bool()> e, std::function<bool(std::string &)> tp,
-		const State *&pS, std::mutex &mtx_game, std::function<void()>);
+		const State *&pS, std::mutex &mtx_state, std::function<void()>);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
 	virtual void MoveUp(uint32_t timeInMilliseconds);
@@ -81,19 +96,12 @@ public:
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string &);
 
-	virtual std::vector<const THUAI4::Character *> GetCharacterPtrs() const;
-	virtual std::vector<const THUAI4::Wall *> GetWallPtrs() const;
-	virtual std::vector<const THUAI4::Prop *> GetPropPtrs() const;
-	virtual std::vector<const THUAI4::Bullet *> GetBulletPtrs() const;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPointPtrs() const;
-	virtual const THUAI4::Character &GetSelfInfoRef() const;
-
-	virtual std::vector<THUAI4::Character> GetCharacters() const;
-	virtual std::vector<THUAI4::Wall> GetWalls() const;
-	virtual std::vector<THUAI4::Prop> GetProps() const;
-	virtual std::vector<THUAI4::Bullet> GetBullets() const;
-	virtual std::vector<THUAI4::BirthPoint> GetBirthPoints() const;
-	virtual THUAI4::Character GetSelfInfo() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Prop>> GetProps() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Bullet>> GetBullets() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::BirthPoint>> GetBirthPoints() const;
+	virtual std::shared_ptr<const THUAI4::Character> GetSelfInfo() const;
 
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
@@ -102,7 +110,7 @@ public:
 };
 
 template <bool asyn>
-class DebugApi final : public LogicInterface
+class DebugApi final : public LogicInterface, Members<asyn>
 {
 private:
 	bool ExamineValidity;
@@ -123,13 +131,11 @@ private:
 		{THUAI4::PropType::Totem, "Totem"}};
 	virtual void StartTimer();
 	virtual void EndTimer();
-	std::mutex &mtx_state;
-	std::function<void()> TryUpDate;
 
 public:
 	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
 			 std::function<bool()> e, std::function<bool(std::string &)> tp,
-			 const State *&pS, std::mutex &mtx_game, std::function<void()>, bool ev = false,
+			 const State *&pS, std::mutex &mtx_state, std::function<void()>, bool ev = false,
 			 std::ostream &out = std::cout);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
@@ -146,19 +152,12 @@ public:
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string &);
 
-	virtual std::vector<const THUAI4::Character *> GetCharacterPtrs() const;
-	virtual std::vector<const THUAI4::Wall *> GetWallPtrs() const;
-	virtual std::vector<const THUAI4::Prop *> GetPropPtrs() const;
-	virtual std::vector<const THUAI4::Bullet *> GetBulletPtrs() const;
-	virtual std::vector<const THUAI4::BirthPoint *> GetBirthPointPtrs() const;
-	virtual const THUAI4::Character &GetSelfInfoRef() const;
-
-	virtual std::vector<THUAI4::Character> GetCharacters() const;
-	virtual std::vector<THUAI4::Wall> GetWalls() const;
-	virtual std::vector<THUAI4::Prop> GetProps() const;
-	virtual std::vector<THUAI4::Bullet> GetBullets() const;
-	virtual std::vector<THUAI4::BirthPoint> GetBirthPoints() const;
-	virtual THUAI4::Character GetSelfInfo() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Prop>> GetProps() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::Bullet>> GetBullets() const;
+	virtual std::vector<std::shared_ptr<const THUAI4::BirthPoint>> GetBirthPoints() const;
+	virtual std::shared_ptr<const THUAI4::Character> GetSelfInfo() const;
 
 	virtual THUAI4::ColorType GetSelfTeamColor() const;
 	virtual uint32_t GetTeamScore() const;
