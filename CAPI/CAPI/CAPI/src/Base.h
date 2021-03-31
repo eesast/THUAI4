@@ -13,9 +13,9 @@
 
 struct StateConstant
 {
-	constexpr static inline uint32_t nTeams = 2;
-	constexpr static inline uint32_t nPlayers = 4;
-	constexpr static inline uint32_t nCells = 50;
+	constexpr static inline int nTeams = 2;
+	constexpr static inline int nPlayers = 4;
+	constexpr static inline int nCells = 50;
 };
 
 class GameApi
@@ -45,10 +45,9 @@ public:
 
 	[[nodiscard]] virtual THUAI4::ColorType GetSelfTeamColor() const = 0;
 	[[nodiscard]] virtual uint32_t GetTeamScore() const = 0;
-
-	//GetPlayerGUIDS() 底层是 array 而且一局游戏内不变 so就这样
-	[[nodiscard]] virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& GetPlayerGUIDs() const = 0;
+	[[nodiscard]] virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const = 0;
 	[[nodiscard]] virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const = 0;
+
 };
 
 class AIBase

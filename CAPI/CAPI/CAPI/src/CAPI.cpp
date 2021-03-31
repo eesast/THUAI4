@@ -3,15 +3,16 @@
 #include <thread>
 #include <chrono>
 
-Listener::Listener(std::function<void(Pointer2Message)> push, std::function<void()> onconnect, std::function<void()> onclose) : Push(push), OnConnectL(onconnect), OnCloseL(onclose) {}
+CAPI::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void()> onreceive) : 
+__OnConnect(onconnect),__OnReceive(onreceive),__OnClose(onclose),pclient(this){}
 
-EnHandleResult Listener::OnConnect(ITcpClient *pSender, CONNID dwConnID)
+EnHandleResult CAPI::OnConnect(ITcpClient *pSender, CONNID dwConnID)
 {
-	OnConnectL();
+	__OnConnect();
 	return HR_OK;
 }
 
-EnHandleResult Listener::OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE *pData, int iLength)
+EnHandleResult CAPI::OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE *pData, int iLength)
 {
 	uint32_t type = (uint32_t)pData[0];
 	type |= ((uint32_t)pData[1]) << 8;
@@ -37,27 +38,15 @@ EnHandleResult Listener::OnReceive(ITcpClient *pSender, CONNID dwConnID, const B
 		std::cout << "Unknown type of message!!!" << std::endl;
 		return HR_ERROR;
 	}
-	Push(p2m);
+	queue.push(p2m);
+	__OnReceive();
 	return HR_OK;
 }
 
-EnHandleResult Listener::OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
+EnHandleResult CAPI::OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode)
 {
-	OnCloseL();
+	__OnClose();
 	return HR_OK;
-}
-
-CAPI::CAPI(
-	std::function<void()> onconnect,
-	std::function<void()> onclose, std::function<void()> onreceive) : OnReceive(onreceive),
-																	  listener([this](Pointer2Message p2M) {
-	queue.push(p2M);
-	OnReceive(); },
-																			   onconnect,
-																			   onclose),
-																	  pclient(&listener)
-{
-	queue.clear();
 }
 
 bool CAPI::Connect(const char *address, uint16_t port)
@@ -95,10 +84,7 @@ void CAPI::Send(const Protobuf::MessageToServer &message)
 
 void CAPI::Stop()
 {
-	if (pclient->Stop())
-		;
-	else
-	{
+	if (!pclient->Stop()){
 		std::cout << "The client wasn`t stopped. Error code:";
 		std::cout << pclient->GetLastError() << std::endl;
 	}

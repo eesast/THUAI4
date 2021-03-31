@@ -5,10 +5,8 @@
 extern const bool asynchronous;
 
 Logic::Logic() : pState(storage), pBuffer(storage + 1),
-				 capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
-{
-	MessageStorage.clear();
-}
+capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
+{}
 
 Logic::~Logic() {}
 
@@ -147,6 +145,15 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	{
 		//首先load到buffer
 		load(pM2C); //第一帧AI线程还没开始 加载到buffer然后交换指针
+		//playerGuid只在这里记录
+		for (int i = 0; i < pM2C->playerguids_size() && pBuffer->playerGUIDs.size(); i++)
+		{
+			auto temp = pM2C->playerguids(i);
+			for (int j = 0; j < temp.teammateguids_size() && pBuffer->playerGUIDs[i].size(); j++)
+			{
+				State::playerGUIDs[i][j] = static_cast<int64_t>(pM2C->playerguids(i).teammateguids(j));
+			}
+		}
 		gamePhase = GamePhase::Gaming;
 		std::cout << "游戏开始" << std::endl;
 		std::thread tAI(asynchronous ? &Logic::PlayerWrapperAsyn : &Logic::PlayerWrapper, this);
@@ -162,6 +169,10 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	{
 		gamePhase = GamePhase::GameOver;
 		std::cout << "Game ends\n";
+		{
+			std::lock_guard<std::mutex> lck(mtx_buffer);
+			FlagBufferUpdated = true;
+		}
 		cv_buffer.notify_one();
 		break;
 	}
@@ -239,15 +250,6 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 				default:
 					std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
 				}
-			}
-		}
-
-		for (int i = 0; i < pM2C->playerguids_size() && pBuffer->playerGUIDs.size(); i++)
-		{
-			auto temp = pM2C->playerguids(i);
-			for (int j = 0; j < temp.teammateguids_size() && pBuffer->playerGUIDs[i].size(); j++)
-			{
-				pBuffer->playerGUIDs[i][j] = static_cast<int32_t>(pM2C->playerguids(i).teammateguids(j));
 			}
 		}
 
