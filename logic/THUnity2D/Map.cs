@@ -46,7 +46,8 @@ namespace THUnity2D
 			public const int attenuatorAtkDebuff = amplifierAtkBuff;
 			public const double dividerCdDiscount = 4.0;
 
-			public const int deadRestoreTime = 60 * 1000;	//死亡恢复时间
+			public const int deadRestoreTime = 60 * 1000;   //死亡恢复时间
+			public const int shieldTimeAtBirth = 5 * 1000;  //出生时的盾牌时间
 
 			public static XYPosition CellToGrid(int x, int y)   //求格子的中心坐标
 			{
@@ -193,6 +194,7 @@ namespace THUnity2D
 				foreach (Character player in playerList)
 				{
 					player.CanMove = true;
+					player.AddShield(Constant.shieldTimeAtBirth);		//出生时附加盾牌
 				}
 			}
 			playerListLock.ExitReadLock();
@@ -559,6 +561,8 @@ namespace THUnity2D
 							{
 
 								Thread.Sleep(Constant.deadRestoreTime);
+
+								playerBeingShot.AddShield(Constant.shieldTimeAtBirth);	//复活加个盾
 
 								playerListLock.EnterWriteLock();
 								{
