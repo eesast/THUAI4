@@ -16,10 +16,21 @@ double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
 }
 
 template <bool asyn>
-API<asyn>::API(std::function<void(Protobuf::MessageToServer &)> sm,
+template <bool a>
+API<asyn>::API(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer &)>> sm,
+			   std::function<bool()> e, std::function<bool(std::string &)> tp,
+			   const State *&pS) : LogicInterface(sm, e, tp, pS)
+{
+	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
+}
+
+template <bool asyn>
+template <bool a>
+API<asyn>::API(std::enable_if_t<a, std::function<void(Protobuf::MessageToServer &)>> sm,
 			   std::function<bool()> e, std::function<bool(std::string &)> tp,
 			   const State *&pS, std::mutex &mtx_state, std::function<void()> tu) : LogicInterface(sm, e, tp, pS), Members<asyn>(mtx_state, tu)
 {
+	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
 }
 
 template <bool asyn>
@@ -213,7 +224,6 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
 		Members<asyn>::TryUpDate();
 	}
-	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
 	auto it = pState->cellColors.find((CellX << 16) + CellY);
 	if (it == pState->cellColors.end())
@@ -228,16 +238,36 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 
 template class API<true>;
 template class API<false>;
+template API<false>::API<false>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
+								std::function<bool()> e, std::function<bool(std::string &)> tp,
+								const State *&pS);
 
+template API<true>::API<true>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
+							  std::function<bool()> e, std::function<bool(std::string &)> tp,
+							  const State *&pS, std::mutex &mtx_state, std::function<void()> tu);
 //Debug API
 //目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
+
 template <bool asyn>
-DebugApi<asyn>::DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
+template <bool a>
+DebugApi<asyn>::DebugApi(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer &)>> sm,
+						 std::function<bool()> e, std::function<bool(std::string &)> tp,
+						 const State *&pS, bool ev,
+						 std::ostream &out) : LogicInterface(sm, e, tp, pS),
+											  ExamineValidity(ev), OutStream(out)
+{
+	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
+}
+
+template <bool asyn>
+template <bool a>
+DebugApi<asyn>::DebugApi(std::enable_if_t<a, std::function<void(Protobuf::MessageToServer &)>> sm,
 						 std::function<bool()> e, std::function<bool(std::string &)> tp,
 						 const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
 						 std::ostream &out) : LogicInterface(sm, e, tp, pS), Members<asyn>(mtx_state, tu),
 											  ExamineValidity(ev), OutStream(out)
 {
+	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
 }
 
 template <bool asyn>
@@ -586,3 +616,13 @@ THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
 
 template class DebugApi<true>;
 template class DebugApi<false>;
+
+template DebugApi<false>::DebugApi<false>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
+						 std::function<bool()> e, std::function<bool(std::string &)> tp,
+						 const State *&pS, bool ev,
+						 std::ostream &out);
+
+template DebugApi<true>::DebugApi<true>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
+						 std::function<bool()> e, std::function<bool(std::string &)> tp,
+						 const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
+						 std::ostream &out);
