@@ -461,7 +461,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 													  [this]() { return MessageStorage.empty(); },
 													  [this](std::string &s) { return MessageStorage.try_pop(s); },
-													  (const State *&)pState, mtx_state, tu);
+													  (const State *&)pState);
 		}
 		else
 		{
@@ -472,13 +472,13 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 				if (OutFile.fail())
 				{
 					std::cout << "Failed to open the file " << filename << std::endl;
-					flag=true;
+					flag = true;
 				}
 			}
 			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 														   [this]() { return MessageStorage.empty(); },
 														   [this](std::string &s) { return MessageStorage.try_pop(s); },
-														   (const State *&)pState, mtx_state, tu, debuglevel != 1,
+														   (const State *&)pState, debuglevel != 1,
 														   flag ? std::cout : OutFile);
 		}
 	}
