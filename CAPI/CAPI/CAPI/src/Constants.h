@@ -56,13 +56,150 @@ namespace Constants
 		M_SCI std::int32_t bullet5 = basicBulletMoveSpeed;
 		M_SCI std::int32_t bullet6 = basicBulletMoveSpeed;
 
-		M_SCI std::int32_t ordinaryBullet = bullet0;
-		M_SCI std::int32_t happyBullet = bullet1;
-		M_SCI std::int32_t coloredRibbon = bullet2;
-		M_SCI std::int32_t bucket = bullet3;
-		M_SCI std::int32_t peach = bullet4;
-		M_SCI std::int32_t rollCircle = bullet5;
-		M_SCI std::int32_t palmLeafMan = bullet6;
+		M_SCI std::int32_t ordinaryBullet = bullet0;	// 6 * 1000
+		M_SCI std::int32_t happyBullet = bullet1;		// 12 * 1000
+		M_SCI std::int32_t coloredRibbon = bullet2;		// 3 * 1000
+		M_SCI std::int32_t bucket = bullet3;			// 3 * 1000
+		M_SCI std::int32_t peach = bullet4;				// 24 * 1000
+		M_SCI std::int32_t rollCircle = bullet5;		// 6 * 1000
+		M_SCI std::int32_t palmLeafMan = bullet6;		// 6 * 1000
+	};
+
+	// 人物的移动速度（每秒移动的坐标数）
+
+	struct Character
+	{
+		struct MoveSpeed
+		{
+		private:
+
+			M_SCI std::int32_t basicPlayerMoveSpeed = Map::numOfGridPerCell * 4;
+
+		public:
+
+			M_SCI std::int32_t job0 = basicPlayerMoveSpeed;
+			M_SCI std::int32_t job1 = basicPlayerMoveSpeed;
+			M_SCI std::int32_t job2 = basicPlayerMoveSpeed * 2 / 3;
+			M_SCI std::int32_t job3 = basicPlayerMoveSpeed * 3 / 2;
+			M_SCI std::int32_t job4 = basicPlayerMoveSpeed * 2;
+			M_SCI std::int32_t job5 = basicPlayerMoveSpeed * 2;
+			M_SCI std::int32_t job6 = basicPlayerMoveSpeed * 3 / 4;
+
+			M_SCI std::int32_t OrdinaryJob = job0;		// 4000
+			M_SCI std::int32_t HappyMan = job1;			// 4000
+			M_SCI std::int32_t LazyGoat = job2;			// 2666
+			M_SCI std::int32_t PurpleFish = job3;		// 6000
+			M_SCI std::int32_t MonkeyDoctor = job4;		// 8000
+			M_SCI std::int32_t EggMan = job5;			// 8000
+			M_SCI std::int32_t PrincessIronFan = job6;	// 3000
+		};
+
+		// 耐污值
+
+		struct Hp
+		{
+		private:
+			M_SCI std::int32_t basicHP = 5000;
+
+		public:
+
+			M_SCI std::int32_t job0 = basicHP;
+			M_SCI std::int32_t job1 = basicHP;
+			M_SCI std::int32_t job2 = basicHP;
+			M_SCI std::int32_t job3 = basicHP / 2;
+			M_SCI std::int32_t job4 = basicHP * 2 / 3;
+			M_SCI std::int32_t job5 = basicHP * 2 / 3;
+			M_SCI std::int32_t job6 = basicHP * 3;
+
+			M_SCI std::int32_t OrdinaryJob = job0;		// 5000
+			M_SCI std::int32_t HappyMan = job1;			// 5000
+			M_SCI std::int32_t LazyGoat = job2;			// 5000
+			M_SCI std::int32_t PurpleFish = job3;		// 2500
+			M_SCI std::int32_t MonkeyDoctor = job4;		// 3333
+			M_SCI std::int32_t EggMan = job5;			// 3333
+			M_SCI std::int32_t PrincessIronFan = job6;	// 15000
+		};
+
+		// 初始对衣物的浸染力（攻击力）
+
+		struct AP
+		{
+		private:
+
+			M_SCI std::int32_t basicAP = 1000;
+
+		public:
+
+			M_SCI std::int32_t job0 = basicAP;
+			M_SCI std::int32_t job1 = basicAP;
+			M_SCI std::int32_t job2 = basicAP * 2;
+			M_SCI std::int32_t job3 = basicAP / 2;
+			M_SCI std::int32_t job4 = basicAP * 3;
+			M_SCI std::int32_t job5 = basicAP * 3;
+			M_SCI std::int32_t job6 = basicAP;
+
+			M_SCI std::int32_t OrdinaryJob = job0;			// 1000
+			M_SCI std::int32_t HappyMan = job1;				// 1000
+			M_SCI std::int32_t LazyGoat = job2;				// 2000
+			M_SCI std::int32_t PurpleFish = job3;			// 500
+			M_SCI std::int32_t MonkeyDoctor = job4;			// 3000
+			M_SCI std::int32_t EggMan = job5;				// 3000
+			M_SCI std::int32_t PrincessIronFan = job6;		// 1000
+		};
+
+		// 在自己队伍颜色的格子内回复一颗子弹所需要的时间（毫秒）
+
+		struct CDInSeconds
+		{
+		private:
+
+			M_SCI std::int32_t basicCD = 2;
+
+		public:
+
+			M_SCI std::int32_t job0 = basicCD;
+			M_SCI std::int32_t job1 = basicCD;
+			M_SCI std::int32_t job2 = basicCD * 2;
+			M_SCI std::int32_t job3 = basicCD * 2;
+			M_SCI std::int32_t job4 = basicCD * 2;
+			M_SCI std::int32_t job5 = basicCD * 2;
+			M_SCI std::int32_t job6 = basicCD;
+
+			M_SCI std::int32_t OrdinaryJob = job0;			// 2
+			M_SCI std::int32_t HappyMan = job1;				// 2
+			M_SCI std::int32_t LazyGoat = job2;				// 4
+			M_SCI std::int32_t PurpleFish = job3;			// 4
+			M_SCI std::int32_t MonkeyDoctor = job4;			// 4
+			M_SCI std::int32_t EggMan = job5;				// 4
+			M_SCI std::int32_t PrincessIronFan = job6;		// 2
+		};
+
+		// 最大子弹数
+
+		struct BulletNum
+		{
+		private:
+
+			M_SCI std::int32_t basicBulletNum = 15;
+
+		public:
+
+			M_SCI std::int32_t job0 = basicBulletNum;
+			M_SCI std::int32_t job1 = basicBulletNum;
+			M_SCI std::int32_t job2 = basicBulletNum;
+			M_SCI std::int32_t job3 = basicBulletNum / 2;
+			M_SCI std::int32_t job4 = basicBulletNum / 3;
+			M_SCI std::int32_t job5 = basicBulletNum / 3;
+			M_SCI std::int32_t job6 = basicBulletNum;
+
+			M_SCI std::int32_t OrdinaryJob = job0;			// 15
+			M_SCI std::int32_t HappyMan = job1;				// 15
+			M_SCI std::int32_t LazyGoat = job2;				// 15
+			M_SCI std::int32_t PurpleFish = job3;			// 7
+			M_SCI std::int32_t MonkeyDoctor = job4;			// 5
+			M_SCI std::int32_t EggMan = job5;				// 5
+			M_SCI std::int32_t PrincessIronFan = job6;		// 5
+		};
 	};
 
 	struct PropTimeInSeconds
@@ -75,7 +212,7 @@ namespace Constants
 
 	public:
 
-		//道具效果持续时间
+		//道具效果持续时间，目前均为 30 秒
 
 		M_SCI std::int32_t bike = propTimeInSeconds;
 		M_SCI std::int32_t amplifier = propTimeInSeconds;
@@ -99,9 +236,13 @@ namespace Constants
 		M_SCI std::int32_t musicPlayer = attenuator;
 		M_SCI std::int32_t mail = divider;
 
+		// 游戏刚开始 / 人物复活时盾的持续时间，目前为 5 秒
+
+		M_SCI std::int32_t birthShieldTime = 5;
+
 		//地雷从埋藏到消失的时间
 
-		M_SCI std::int32_t mine = mineTimeInSeconds;
+		M_SCI std::int32_t mine = mineTimeInSeconds;	// 目前为 60 秒
 	};
 
 	struct Game

@@ -468,7 +468,7 @@ namespace THUnity2D
 				break;
 			case JobType.Job3:
 				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum;
+				bulletNum = maxBulletNum = basicBulletNum / 2;
 				hp = maxHp = basicHp / 2;
 				ap = orgAp = basicAp / 2;
 				holdProp = null;
@@ -477,30 +477,30 @@ namespace THUnity2D
 				break;
 			case JobType.Job4:
 				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum;
+				bulletNum = maxBulletNum = basicBulletNum / 3;
 				hp = maxHp = basicHp * 2 / 3;
-				ap = orgAp = basicAp * 4;
+				ap = orgAp = basicAp * 3;
 				holdProp = null;
 				bulletType = BulletType.Bullet4;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 4;
+				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
 				break;
 			case JobType.Job5:
 				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum;
+				bulletNum = maxBulletNum = basicBulletNum / 3;
 				hp = maxHp = basicHp * 2 / 3;
-				ap = orgAp = basicAp * 4;
+				ap = orgAp = basicAp * 3;
 				holdProp = null;
 				bulletType = BulletType.Bullet5;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 4;
+				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
 				break;
 			case JobType.Job6:
 				cd = orgCD = basicCD;
 				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp * 3 / 2;
+				hp = maxHp = basicHp * 3;
 				ap = orgAp = basicAp;
 				holdProp = null;
 				bulletType = BulletType.Bullet6;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed / 2;
+				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3 / 4;
 				break;
 			}
 

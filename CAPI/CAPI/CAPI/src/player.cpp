@@ -13,8 +13,8 @@ extern const THUAI4::JobType playerJob = THUAI4::JobType::Job0; //选手职业�
 
 namespace
 {
-	std::uniform_real_distribution<double> direction(0, 2 * 3.1415926);
-	std::default_random_engine e;
+	[[maybe_unused]] std::uniform_real_distribution<double> direction(0, 2 * 3.1415926);
+	[[maybe_unused]] std::default_random_engine e{ std::random_device{}() };
 }
 
 void AI::play(GameApi &g)
