@@ -18,7 +18,7 @@ namespace THUnity2D
 			public const int numOfGridPerCell = 1000;				//每个的坐标单位数
 			public const int numOfStepPerSecond = 20;				//每秒行走的步数
 			public const int addScoreWhenKillOnePlayer = 0;			//击杀一名玩家后的加分
-			public const int producePropTimeInterval = 20 * 1000;	//产生道具时间间隔（毫秒）
+			public const int producePropTimeInterval = 10 * 1000;	//产生道具时间间隔（毫秒）
 
 			public const int basicPlayerMoveSpeed = numOfGridPerCell * 4;
 			public const int basicBulletMoveSpeed = numOfGridPerCell * 6;
@@ -31,23 +31,23 @@ namespace THUnity2D
 			public const int bulletRadius = objMaxRadius / 2;
 			public const int unpickedPropRadius = objMaxRadius;
 
-			public const int buffPropTime = 30 * 1000;      //buff道具持续时间（毫秒）
+			public const int buffPropTime = 30 * 1000;			//buff道具持续时间（毫秒）
 			public const int shieldTime = buffPropTime;
 			public const int totemTime = buffPropTime;
 			public const int spearTime = buffPropTime;
 
-			public const int bikeMoveSpeedBuff = numOfGridPerCell;
-			public const int amplifierAtkBuff = Character.basicAp * 2;
+			public const double bikeMoveSpeedBuff = 1.5;		//道具效果
+			public const double amplifierAtkBuff = 2.0;
 			public const double jinKeLaCdDiscount = 0.25;
 			public const int riceHpAdd = Character.basicHp / 2;
 
-			public const int mineTime = 60 * 1000;      //地雷埋藏的持续时间
-			public const int dirtMoveSpeedDebuff = numOfGridPerCell;
-			public const int attenuatorAtkDebuff = amplifierAtkBuff;
+			public const int mineTime = 60 * 1000;				//地雷埋藏的持续时间
+			public const double dirtMoveSpeedDebuff = 1.0 / bikeMoveSpeedBuff;
+			public const double attenuatorAtkDebuff = 1.0 / amplifierAtkBuff;
 			public const double dividerCdDiscount = 4.0;
 
-			public const int deadRestoreTime = 60 * 1000;   //死亡恢复时间
-			public const int shieldTimeAtBirth = 5 * 1000;  //出生时的盾牌时间
+			public const int deadRestoreTime = 30 * 1000;		//死亡恢复时间
+			public const int shieldTimeAtBirth = 5 * 1000;		//出生时的盾牌时间
 
 			public static XYPosition CellToGrid(int x, int y)   //求格子的中心坐标
 			{
@@ -1002,10 +1002,10 @@ namespace THUnity2D
 			switch (mine.GetPropType())
 			{
 			case PropType.Dirt:
-				player.AddMoveSpeed(-Constant.dirtMoveSpeedDebuff, Constant.buffPropTime);
+				player.AddMoveSpeed(Constant.dirtMoveSpeedDebuff, Constant.buffPropTime);
 				break;
 			case PropType.Attenuator:
-				player.AddAP(-Constant.attenuatorAtkDebuff, Constant.buffPropTime);
+				player.AddAP(Constant.attenuatorAtkDebuff, Constant.buffPropTime);
 				break;
 			case PropType.Divider:
 				player.ChangeCD(Constant.dividerCdDiscount, Constant.buffPropTime);

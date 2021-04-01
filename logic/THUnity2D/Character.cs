@@ -309,38 +309,34 @@ namespace THUnity2D
 			{ IsBackground = true }.Start();
 		}
 
-		public void AddMoveSpeed(int add, int buffTime)
+		public void AddMoveSpeed(double add, int buffTime)
 		{
 			AddBuff(new BuffValue(add), buffTime, BuffType.MoveSpeed, ReCalculateMoveSpeed);
 		}
-		private void ReCalculateMoveSpeed()
+		private int ReCalculateFloatBuff(BuffType buffType, int orgVal, int maxVal, int minVal)
 		{
-			int res = OrgMoveSpeed;
-			lock (buffListLock[(uint)BuffType.MoveSpeed])
+			double times = 1.0;
+			lock (buffListLock[(uint)buffType])
 			{
-				foreach (var add in buffList[(uint)BuffType.MoveSpeed])
+				foreach (var add in buffList[(uint)buffType])
 				{
-					res += add.iValue;
+					times *= add.lfValue;
 				}
 			}
-			MoveSpeed = Math.Max(Math.Min(res, MaxSpeed), MinSpeed);
+			return Math.Max(Math.Min((int)Math.Round(orgVal * times), maxVal), minVal);
+		}
+		private void ReCalculateMoveSpeed()
+		{
+			MoveSpeed = ReCalculateFloatBuff(BuffType.MoveSpeed, OrgMoveSpeed, MaxSpeed, MinSpeed);
 		}
 
-		public void AddAP(int add, int buffTime)
+		public void AddAP(double add, int buffTime)
 		{
 			AddBuff(new BuffValue(add), buffTime, BuffType.AP, ReCalculateAP);
 		}
 		private void ReCalculateAP()
 		{
-			int res = orgAp;
-			lock (buffListLock[(uint)BuffType.AP])
-			{
-				foreach (var bf in buffList[(uint)BuffType.AP])
-				{
-					res += bf.iValue;
-				}
-			}
-			AP = Math.Max(Math.Min(res, MaxAP), MinAP);
+			AP = ReCalculateFloatBuff(BuffType.AP, orgAp, MaxAP, MinAP);
 		}
 
 		public void ChangeCD(double discount, int buffTime)
@@ -349,15 +345,7 @@ namespace THUnity2D
 		}
 		private void ReCalculateCD()
 		{
-			double times = 1.0;
-			lock (buffListLock[(uint)BuffType.CD])
-			{
-				foreach (var bf in buffList[(uint)BuffType.CD])
-				{
-					times *= bf.lfValue;
-				}
-			}
-			CD = Math.Max((int)(orgCD * times), 1);
+			CD = ReCalculateFloatBuff(BuffType.CD, orgCD, int.MaxValue, 1);
 		}
 
 		public void AddShield(int shieldTime)
