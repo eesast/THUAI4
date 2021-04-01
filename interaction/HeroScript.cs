@@ -62,9 +62,7 @@ public class HeroScript : MonoBehaviour
 
     void Rotate()
     {
-        //smart rotate
-        Vector3 desiredForward = Vector3.RotateTowards(transform.forward, direction, turnSpeed * Time.deltaTime, 0f);
-        transform.rotation = Quaternion.LookRotation(desiredForward);
+        transform.rotation = Quaternion.Euler(Vector3.up * direction.x);
     }
 
     void SetAnimator()
@@ -76,8 +74,9 @@ public class HeroScript : MonoBehaviour
     {
         position.x = (float)obj.X/500;
         position.z = (float)obj.Y/500;
-        direction.x = (float)(90 - obj.FacingDirection * 360 / 3.14);
-        isMoving = !obj.IsMoving;
+        direction.x = (float)(90 - obj.FacingDirection * 180 / 3.14);
+        Debug.Log(obj.FacingDirection.ToString());
+        isMoving = obj.IsMoving;
         moveSpeed = obj.MoveSpeed;
         isDying = obj.IsDying;
     }

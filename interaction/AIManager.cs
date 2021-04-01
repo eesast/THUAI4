@@ -14,7 +14,8 @@ using System;
 public class AIManager : MonoBehaviour
 {
     public GameObject _powderBag;
-    
+    public GameObject floor;
+
     private bool isGameStarted;
     private ushort port = 7777;
     public int teamId = -1;
@@ -34,7 +35,7 @@ public class AIManager : MonoBehaviour
     private MessageToServer messageToServer;
     public static long receiveCount = 0;
     public static int[,] mapColor = new int [50, 50];
-    private static int[,] cellColor = new int [50, 50];
+    public int[,] cellColor = new int [50, 50];
     private bool isReady;
     private double myAngle;
     private PropManager propManager;
@@ -42,24 +43,29 @@ public class AIManager : MonoBehaviour
     private BulletManager bulletManager;
     public Color[] brushColors = null;
     public Texture brush;
+    private int jobN;
 
     void Start()
     {
         Debug.Log("开始初始化参数");
-        propManager = this.GetComponent<PropManager>();
-        heroManager = this.GetComponent<HeroManager>();
-        bulletManager = this.GetComponent<BulletManager>();
+        propManager = GetComponent<PropManager>();
+        heroManager = GetComponent<HeroManager>();
+        bulletManager = GetComponent<BulletManager>();
+        Debug.Log(Application.dataPath);
+        string str = File.ReadAllText(Application.streamingAssetsPath + "/JobTest.txt");
+        /*TextAsset txt = Resources.Load("JobTest") as TextAsset;
+        string[] s = txt.text.Split(' ');*/
+        string[] s = str.Split(' ');
+        port = (ushort)float.Parse(s[0]);
+        teamId = (int)float.Parse(s[1]);
+        playerId = (int)float.Parse(s[2]);
+        jobN = (int)float.Parse(s[3]);
         // TO DO:初始化通信
         messageToServer = new MessageToServer();
         csharpClient = new CSharpClient();
         csharpClient.OnReceive += delegate ()
         {
-            Debug.Log("Message Received.");
-            //Debug.Log(csharpClient.ToString());
-            //IMsg iMsg=csharpClient.Take();
-            //Debug.Log(iMsg.ToString());
-            //csharpClient.TryTake(out IMsg iMsg);
-            //Debug.Log(iMsg.ToString());
+            //Debug.Log("Message Received.");
             if (csharpClient.TryTake(out IMsg iMsg))
             {
                 switch (iMsg.PacketType)
@@ -67,7 +73,7 @@ public class AIManager : MonoBehaviour
                     case PacketType.MessageToClient:
                         {
                             MessageToClient msg = iMsg.Content as MessageToClient;
-                            Debug.Log("msg received");
+                            //Debug.Log("msg received");
                             switch (msg.MessageType)
                             {
                                 case MessageType.StartGame:
@@ -83,7 +89,7 @@ public class AIManager : MonoBehaviour
                     case PacketType.MessageToOneClient:
                         {
                             MessageToOneClient msg = iMsg.Content as MessageToOneClient;
-                            Debug.Log("msg received");
+                            //Debug.Log("msg received");
                             switch (msg.MessageType)
                             {
                                 case MessageType.ValidPlayer:
@@ -116,12 +122,19 @@ public class AIManager : MonoBehaviour
             Debug.Log("连接Agent失败.");
             Application.Quit();
         }
-        teamId = 0;
-        playerId = 0;
         messageToServer.MessageType = MessageType.AddPlayer;
         messageToServer.TeamID = teamId;
         messageToServer.PlayerID = playerId;
-        messageToServer.JobType = JobType.Job0;
+        switch(jobN)
+        {
+            case 0: messageToServer.JobType = JobType.Job0; break;
+            case 1: messageToServer.JobType = JobType.Job1; break;
+            case 2: messageToServer.JobType = JobType.Job2; break;
+            case 3: messageToServer.JobType = JobType.Job3; break;
+            case 4: messageToServer.JobType = JobType.Job4; break;
+            case 5: messageToServer.JobType = JobType.Job5; break;
+            case 6: messageToServer.JobType = JobType.Job6; break;
+        }
 
         csharpClient.SendMessage(messageToServer);
         //WebClient 
@@ -130,6 +143,7 @@ public class AIManager : MonoBehaviour
         bullets = new ConcurrentDictionary<long, BulletScript>();
         isCharactersExisted = new ConcurrentDictionary<long, bool>();
         isPropsExisted = new ConcurrentDictionary<long, bool>();
+        isBulletsExisted = new ConcurrentDictionary<long, bool>();
         laidList = new ConcurrentDictionary<long, bool>();
         TaskQueue = new ConcurrentQueue<KeyValuePair<long, GameObjInfo>>();
         LaidQueue = new ConcurrentQueue<GameObjInfo>();
@@ -141,6 +155,7 @@ public class AIManager : MonoBehaviour
             for(int j = 0; j < 50; j++)
             {
                 mapColor[i, j] = 0;
+                cellColor[i, j] = 0;
             }
         }
         Debug.Log("参数初始化完成");
@@ -148,6 +163,7 @@ public class AIManager : MonoBehaviour
 
     void Update()
     {
+        cellColor[25, 25] = 1;
         for (int i = 0; i < 50; i++)
         {
             for (int j = 0; j < 50; j++)
@@ -157,14 +173,14 @@ public class AIManager : MonoBehaviour
                     mapColor[i, j] = cellColor[i, j];
                     if(mapColor[i, j] == 1)
                     {
-                        GetComponent<SomewherePainter>().brush = new Brush(brush, 0.02f, brushColors[0]);
+                        floor.GetComponent<SomewherePainter>().brush = new Brush(brush, 0.03f, brushColors[0]);
                     }
                     else
                     {
-                        GetComponent<SomewherePainter>().brush = new Brush(brush, 0.02f, brushColors[1]);
+                        floor.GetComponent<SomewherePainter>().brush = new Brush(brush, 0.03f, brushColors[1]);
                     }
-                    Vector3 pos = new Vector3((float)(2 * i), 0f, (float)(2 * i));
-                    GetComponent<SomewherePainter>().PointPaint(pos);
+                    Vector3 pos = new Vector3((2 * i), 0f, (2 * j));
+                    floor.GetComponent<SomewherePainter>().PointPaint(pos);
                 }
             }
         }
@@ -189,7 +205,7 @@ public class AIManager : MonoBehaviour
                 messageToServer.TeamID = teamId;
                 messageToServer.PlayerID = playerId;
                 csharpClient.SendMessage(messageToServer);
-                Debug.Log("msg send");
+                //Debug.Log("msg send");
             }
         }
     }
@@ -201,9 +217,8 @@ public class AIManager : MonoBehaviour
         {
             isNewMessageToServer = true;
             messageToServer.MessageType = MessageType.Attack;
-            messageToServer.TimeInMilliseconds = 100;
+            messageToServer.TimeInMilliseconds = 1000;
             messageToServer.Angle = angle;
-            Debug.Log("Attack!!!!!!!");
             attack = false;
         }
         else if (isMoving)
@@ -236,12 +251,12 @@ public class AIManager : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             angle = 3.1415926;
-            Debug.Log("moving");
+            //Debug.Log("moving");
         }
         else if(Input.GetKey(KeyCode.S))
         {
             angle = 0;
-            Debug.Log("moving");
+            //Debug.Log("moving");
         }
         else if(Input.GetKey(KeyCode.A))
         {
@@ -321,19 +336,19 @@ public class AIManager : MonoBehaviour
                 }
                 case GameObjType.Bullet:
                 {
-                    if(bullets.ContainsKey(obj.Guid))
-                    {
-                        bullets[obj.Guid].Renew(obj); 
-                    }
-                    else
-                    {
-                        if(!isBulletsExisted.ContainsKey(obj.Guid))
+                        if (bullets.ContainsKey(obj.Guid))
                         {
-                            isBulletsExisted.TryAdd(obj.Guid, true);
-                            TaskQueue.Enqueue(new KeyValuePair<long, GameObjInfo>(obj.Guid, obj)); 
+                            bullets[obj.Guid].Renew(obj);
                         }
-                    }
-                    break;
+                        else
+                        {
+                            if (!isBulletsExisted.ContainsKey(obj.Guid))
+                            {
+                                isBulletsExisted.TryAdd(obj.Guid, true);
+                                TaskQueue.Enqueue(new KeyValuePair<long, GameObjInfo>(obj.Guid, obj));
+                            }
+                        }
+                        break;
                 }
                 default: break;
             }
@@ -368,7 +383,6 @@ public class AIManager : MonoBehaviour
     {
         while(!TaskQueue.IsEmpty)
         {
-            Debug.Log("FlushTask!!!!");
             bool isGood = TaskQueue.TryDequeue(out KeyValuePair<long, GameObjInfo> res);
             if(isGood)
             {
@@ -420,7 +434,7 @@ public class AIManager : MonoBehaviour
             if (isGood)
             {
                 var i = Instantiate(_powderBag);
-                //i.getComponent<PropScript>().teamId = 
+                //i.GetComponent<PropScript>().teamId = res.TeamID;
                 break;
             }
         }
