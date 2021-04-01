@@ -56,18 +56,17 @@ public:
 template <bool>
 struct Members
 {
-public:
-	Members(std::mutex &mtx_state, std::function<void()>) {}
 };
 
 template <>
 struct Members<true>
 {
 public:
-	Members(std::mutex &mtx_state, std::function<void()> f): mtx_state(mtx_state),TryUpDate(f) {}
+	Members(std::mutex &mtx_state, std::function<void()> f) : mtx_state(mtx_state), TryUpDate(f) {}
+
 protected:
 	std::mutex &mtx_state;
-	std::function<void()> TryUpDate;
+	const std::function<void()> TryUpDate;
 };
 
 template <bool asyn> //如果为真，仅API函数调用与state更新互斥 否则play()函数调用期间state更新都阻塞
@@ -78,7 +77,12 @@ private:
 	virtual void EndTimer() {}
 
 public:
-	API(std::function<void(Protobuf::MessageToServer &)> sm,
+	template <bool a = asyn>
+	API(std::enable_if_t<!a,std::function<void(Protobuf::MessageToServer &)>> sm,
+		std::function<bool()> e, std::function<bool(std::string &)> tp,
+		const State *&pS);
+	template <bool a = asyn>
+	API(std::enable_if_t<a,std::function<void(Protobuf::MessageToServer &)>> sm,
 		std::function<bool()> e, std::function<bool(std::string &)> tp,
 		const State *&pS, std::mutex &mtx_state, std::function<void()>);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
@@ -133,7 +137,13 @@ private:
 	virtual void EndTimer();
 
 public:
-	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
+	template <bool a = asyn>
+	DebugApi(std::enable_if_t<!a,std::function<void(Protobuf::MessageToServer &)>> sm,
+			 std::function<bool()> e, std::function<bool(std::string &)> tp,
+			 const State *&pS, bool ev = false,
+			 std::ostream &out = std::cout);
+	template <bool a = asyn>
+	DebugApi(std::enable_if_t<a,std::function<void(Protobuf::MessageToServer &)>> sm,
 			 std::function<bool()> e, std::function<bool(std::string &)> tp,
 			 const State *&pS, std::mutex &mtx_state, std::function<void()>, bool ev = false,
 			 std::ostream &out = std::cout);
