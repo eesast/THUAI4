@@ -19,9 +19,10 @@ class Logic
 {
 private:
 	//Logic control
-	bool UnexpectedlyClosed = false;
-	bool BufferUpdated = false;
+	bool FlagProcessMessage=false;
+	bool FlagBufferUpdated = false;
 	bool CurrentStateAccessed = false;
+	bool AiTerminated=true;//改架構后 AI 綫程 detach 了，主函數還要等......
 
 	enum class GamePhase : unsigned char
 	{
@@ -29,24 +30,16 @@ private:
 		Gaming = 1,
 		GameOver = 2,
 	};
-	GamePhase gamePhase = GamePhase::Uninitialized;
-
-	enum class Validity : unsigned char
-	{
-
-		Unknown = 0,
-		Valid = 1,
-		Invalid = 2
-	};
-	Validity validity = Validity::Unknown;
+	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized;//仅用于循环条件判断，atomic即可
 
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
-	std::mutex mtx_game;
-	std::condition_variable cv_game;
+
+	std::mutex mtx_ai;
+	std::condition_variable cv_ai;
 
 	//Game data
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
@@ -59,8 +52,8 @@ private:
 	concurrency::concurrent_queue<std::string> MessageStorage;
 
 	CAPI capi;
-	std::shared_ptr<LogicInterface> pApi;
-	std::shared_ptr<AIBase> pAI;
+	std::unique_ptr<LogicInterface> pApi;
+	std::unique_ptr<AIBase> pAI;
 
 	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
 	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
@@ -74,10 +67,11 @@ private:
 	void OnClose();
 	void OnReceive();
 	void OnConnect();
-	void load(std::shared_ptr<Protobuf::MessageToClient>); //降收到的M2C加载到buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>); //将最新状态信息加载到buffer
 
 	void ProcessMessage();
 	void PlayerWrapper();
+	void PlayerWrapperAsyn();
 
 public:
 	Logic();

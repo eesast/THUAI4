@@ -138,6 +138,15 @@ namespace Logic.Server
 
 			serverCommunicator.SendMessage(msg2Send);
 
+			if (isValid)
+			{
+				Console.WriteLine("A new player with teamID {0} and playerID {1} joined the game.", msgRecv.TeamID, msgRecv.PlayerID);
+			}
+			else
+			{
+				Console.WriteLine("The request of a player declaring to have teamID {0} and playerID {1} to join the game has been rejected.", msgRecv.TeamID, msgRecv.PlayerID);
+			}
+
 			lock (addPlayerLock)
 			{
 				CheckStart();       //检查是否该开始游戏了

@@ -3,34 +3,42 @@
 #include <functional>
 #include <chrono>
 #include <ctime>
+#include <utility>
 
+std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> State::playerGUIDs;
 const static double PI = 3.14159265358979323846;
 
-double TimeSinceStart(const std::chrono::system_clock::time_point& sp)
+double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
 {
 	std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
 	std::chrono::duration<double, std::milli> time_span = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(tp - sp);
 	return time_span.count();
 }
 
-API::API(std::function<void(Protobuf::MessageToServer&)> sm,
-	std::function<bool()> e, std::function<bool(std::string&)> tp,
-	const State*& pS) : LogicInterface(sm, e, tp, pS) {}
+template <bool asyn>
+API<asyn>::API(std::function<void(Protobuf::MessageToServer &)> sm,
+			   std::function<bool()> e, std::function<bool(std::string &)> tp,
+			   const State *&pS, std::mutex &mtx_state, std::function<void()> tu) : LogicInterface(sm, e, tp, pS), Members<asyn>(mtx_state, tu)
+{
+}
 
-void API::Use()
+template <bool asyn>
+void API<asyn>::Use()
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Use);
 	SendMessageWrapper(message);
 }
-void API::Pick(THUAI4::PropType propType)
+template <bool asyn>
+void API<asyn>::Pick(THUAI4::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
 	message.set_proptype(Protobuf::PropType(propType));
 	SendMessageWrapper(message);
 }
-void API::Throw(uint32_t timeInMilliseconds, double angle)
+template <bool asyn>
+void API<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Throw);
@@ -38,7 +46,8 @@ void API::Throw(uint32_t timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessageWrapper(message);
 }
-void API::Attack(uint32_t timeInMilliseconds, double angle)
+template <bool asyn>
+void API<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Attack);
@@ -46,7 +55,8 @@ void API::Attack(uint32_t timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessageWrapper(message);
 }
-void API::Send(int toPlayerID, std::string message)
+template <bool asyn>
+void API<asyn>::Send(int toPlayerID, std::string message)
 {
 	Protobuf::MessageToServer msg;
 	msg.set_messagetype(Protobuf::MessageType::Send);
@@ -54,7 +64,8 @@ void API::Send(int toPlayerID, std::string message)
 	msg.set_message(message);
 	SendMessageWrapper(msg);
 }
-void API::MovePlayer(uint32_t timeInMilliseconds, double angle)
+template <bool asyn>
+void API<asyn>::MovePlayer(uint32_t timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);
@@ -62,98 +73,147 @@ void API::MovePlayer(uint32_t timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessageWrapper(message);
 }
-void API::MoveRight(uint32_t timeInMilliseconds)
+template <bool asyn>
+void API<asyn>::MoveRight(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 0.5);
 }
-void API::MoveUp(uint32_t timeInMilliseconds)
+template <bool asyn>
+void API<asyn>::MoveUp(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI);
 }
-void API::MoveLeft(uint32_t timeInMilliseconds)
+template <bool asyn>
+void API<asyn>::MoveLeft(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 1.5);
 }
-void API::MoveDown(uint32_t timeInMilliseconds)
+template <bool asyn>
+void API<asyn>::MoveDown(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
 }
-bool API::MessageAvailable()
+template <bool asyn>
+bool API<asyn>::MessageAvailable()
 {
 	return !Empty();
 }
-bool API::TryGetMessage(std::string& str)
+template <bool asyn>
+bool API<asyn>::TryGetMessage(std::string &str)
 {
 	return TryPop(str);
 }
 
-std::vector<const THUAI4::Character*> API::GetCharacters() const
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Character>> API<asyn>::GetCharacters() const
 {
-	std::vector<const THUAI4::Character*> characters;
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	std::vector<std::shared_ptr<const THUAI4::Character>> temp;
+	temp.assign(pState->characters.begin(), pState->characters.end());
+	return std::move(temp);
+}
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Wall>> API<asyn>::GetWalls() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	std::vector<std::shared_ptr<const THUAI4::Wall>> temp;
+	temp.assign(pState->walls.begin(), pState->walls.end());
+	return std::move(temp);
+}
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Prop>> API<asyn>::GetProps() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	std::vector<std::shared_ptr<const THUAI4::Prop>> temp;
+	temp.assign(pState->props.begin(), pState->props.end());
+	return std::move(temp);
+}
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Bullet>> API<asyn>::GetBullets() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	std::vector<std::shared_ptr<const THUAI4::Bullet>> temp;
+	temp.assign(pState->bullets.begin(), pState->bullets.end());
+	return std::move(temp);
+}
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::BirthPoint>> API<asyn>::GetBirthPoints() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	std::vector<std::shared_ptr<const THUAI4::BirthPoint>> temp;
+	temp.assign(pState->birthpoints.begin(), pState->birthpoints.end());
+	return std::move(temp);
+}
+template <bool asyn>
+std::shared_ptr<const THUAI4::Character> API<asyn>::GetSelfInfo() const
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	return pState->self;
+}
 
-	for (auto it : pState->characters)
+template <bool asyn>
+THUAI4::ColorType API<asyn>::GetSelfTeamColor() const
+{
+	if constexpr (asyn)
 	{
-		characters.push_back(it.get());
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
 	}
-	return characters;
-}
-std::vector<const THUAI4::Wall*> API::GetWalls() const
-{
-	std::vector<const THUAI4::Wall*> walls;
-	for (auto it : pState->walls)
-	{
-		walls.push_back(it.get());
-	}
-	return walls;
-}
-std::vector<const THUAI4::Prop*> API::GetProps() const
-{
-	std::vector<const THUAI4::Prop*> props;
-
-	for (auto it : pState->props)
-	{
-		props.push_back(it.get());
-	}
-	return props;
-}
-std::vector<const THUAI4::Bullet*> API::GetBullets() const
-{
-	std::vector<const THUAI4::Bullet*> bullets;
-
-	for (auto it : pState->bullets)
-	{
-		bullets.push_back(it.get());
-	}
-	return bullets;
-}
-std::vector<const THUAI4::BirthPoint*> API::GetBirthPoints() const
-{
-	std::vector<const THUAI4::BirthPoint*> birthpoints;
-	for (auto it : pState->birthpoints)
-	{
-		birthpoints.push_back(it.get());
-	}
-	return birthpoints;
-}
-const THUAI4::Character& API::GetSelfInfo() const
-{
-	return *pState->self;
-}
-THUAI4::ColorType API::GetSelfTeamColor() const
-{
 	return pState->selfTeamColor;
 }
-uint32_t API::GetTeamScore() const
+template <bool asyn>
+uint32_t API<asyn>::GetTeamScore() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	return pState->teamScore;
 }
-const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& API::GetPlayerGUIDs() const
+template <bool asyn>
+const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &API<asyn>::GetPlayerGUIDs() const
 {
-	return pState->playerGUIDs;
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	return State::playerGUIDs;
 }
-THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
+template <bool asyn>
+THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 {
-	assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
 #ifdef _COLOR_MAP_BY_HASHING_
 	auto it = pState->cellColors.find((CellX << 16) + CellY);
 	if (it == pState->cellColors.end())
@@ -166,29 +226,36 @@ THUAI4::ColorType API::GetCellColor(int CellX, int CellY) const
 #endif // _COLOR_MAP_BY_HASHING_
 }
 
+template class API<true>;
+template class API<false>;
+
 //Debug API
 //目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
+template <bool asyn>
+DebugApi<asyn>::DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
+						 std::function<bool()> e, std::function<bool(std::string &)> tp,
+						 const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
+						 std::ostream &out) : LogicInterface(sm, e, tp, pS), Members<asyn>(mtx_state, tu),
+											  ExamineValidity(ev), OutStream(out)
+{
+}
 
-DebugApi::DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
-	std::function<bool()> e, std::function<bool(std::string&)> tp,
-	const State*& pS,
-	bool ev, std::ostream& out) : LogicInterface(sm, e, tp, pS), ExamineValidity(ev), OutStream(out) {}
-
-void DebugApi::StartTimer()
+template <bool asyn>
+void DebugApi<asyn>::StartTimer()
 {
 	StartPoint = std::chrono::system_clock::now();
 	std::time_t t = std::chrono::system_clock::to_time_t(StartPoint);
-	OutStream << "===New State===" << std::endl;
+	OutStream << "=== AI.play() ===" << std::endl;
 	OutStream << "Current time: " << ctime(&t);
 }
-
-void DebugApi::EndTimer()
+template <bool asyn>
+void DebugApi<asyn>::EndTimer()
 {
 	OutStream << "Time elapsed: " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	OutStream << std::endl;
 }
-
-void DebugApi::Use()
+template <bool asyn>
+void DebugApi<asyn>::Use()
 {
 	OutStream << "Call Use() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	if (ExamineValidity)
@@ -211,9 +278,10 @@ void DebugApi::Use()
 inline bool InSameCell(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
 	return (x1 / Constants::Map::numOfGridPerCell == x2 / Constants::Map::numOfGridPerCell) ||
-		(y1 / Constants::Map::numOfGridPerCell == y2 / Constants::Map::numOfGridPerCell);
+		   (y1 / Constants::Map::numOfGridPerCell == y2 / Constants::Map::numOfGridPerCell);
 }
-bool DebugApi::CanPick(THUAI4::PropType propType)
+template <bool asyn>
+bool DebugApi<asyn>::CanPick(THUAI4::PropType propType)
 {
 	for (auto it : pState->props)
 	{
@@ -224,10 +292,10 @@ bool DebugApi::CanPick(THUAI4::PropType propType)
 	}
 	return false;
 }
-void DebugApi::Pick(THUAI4::PropType propType)
+template <bool asyn>
+void DebugApi<asyn>::Pick(THUAI4::PropType propType)
 {
 	OutStream << "Call Pick(" << dict[propType] << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	if (ExamineValidity)
 	{
 		if (pState->self->isDying)
@@ -246,10 +314,10 @@ void DebugApi::Pick(THUAI4::PropType propType)
 	message.set_proptype(Protobuf::PropType(propType));
 	SendMessageWrapper(message);
 }
-void DebugApi::Throw(uint32_t timeInMilliseconds, double angle)
+template <bool asyn>
+void DebugApi<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
 {
 	OutStream << "Call Throw(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	if (ExamineValidity)
 	{
 		if (pState->self->isDying)
@@ -269,10 +337,10 @@ void DebugApi::Throw(uint32_t timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessageWrapper(message);
 }
-void DebugApi::Attack(uint32_t timeInMilliseconds, double angle)
+template <bool asyn>
+void DebugApi<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
 {
 	OutStream << "Call Attack(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	if (ExamineValidity)
 	{
 		if (pState->self->isDying)
@@ -292,10 +360,10 @@ void DebugApi::Attack(uint32_t timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessageWrapper(message);
 }
-void DebugApi::Send(int toPlayerID, std::string message)
+template <bool asyn>
+void DebugApi<asyn>::Send(int toPlayerID, std::string message)
 {
 	OutStream << "Call Send(" << toPlayerID << "," << message << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	if (ExamineValidity)
 	{ //应该没啥必要
 		if (toPlayerID < 0 || toPlayerID >= StateConstant::nPlayers)
@@ -303,7 +371,7 @@ void DebugApi::Send(int toPlayerID, std::string message)
 			OutStream << "[Warning: Illegal player ID.]" << std::endl;
 			return;
 		}
-		if (pState->playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid)
+		if (State::playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid)
 		{
 			OutStream << "[Warning: You are sending a message to yourself.]" << std::endl;
 			return;
@@ -315,7 +383,8 @@ void DebugApi::Send(int toPlayerID, std::string message)
 	msg.set_message(message);
 	SendMessageWrapper(msg);
 }
-void DebugApi::MovePlayer(uint32_t timeInMilliseconds, double angle)
+template <bool asyn>
+void DebugApi<asyn>::MovePlayer(uint32_t timeInMilliseconds, double angle)
 {
 	OutStream << "Call MovePlayer(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	;
@@ -333,30 +402,36 @@ void DebugApi::MovePlayer(uint32_t timeInMilliseconds, double angle)
 	message.set_angle(angle);
 	SendMessageWrapper(message);
 }
-void DebugApi::MoveRight(uint32_t timeInMilliseconds)
+template <bool asyn>
+void DebugApi<asyn>::MoveRight(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 0.5);
 }
-void DebugApi::MoveUp(uint32_t timeInMilliseconds)
+template <bool asyn>
+void DebugApi<asyn>::MoveUp(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI);
 }
-void DebugApi::MoveLeft(uint32_t timeInMilliseconds)
+template <bool asyn>
+void DebugApi<asyn>::MoveLeft(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, PI * 1.5);
 }
-void DebugApi::MoveDown(uint32_t timeInMilliseconds)
+template <bool asyn>
+void DebugApi<asyn>::MoveDown(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
 }
-bool DebugApi::MessageAvailable()
+template <bool asyn>
+bool DebugApi<asyn>::MessageAvailable()
 {
+	OutStream << "Call MessageAvailable() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	return !Empty();
 }
-bool DebugApi::TryGetMessage(std::string& str)
+template <bool asyn>
+bool DebugApi<asyn>::TryGetMessage(std::string &str)
 {
 	OutStream << "Call TryGetMessage() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	bool res = TryPop(str);
 	if (ExamineValidity)
 	{
@@ -368,92 +443,126 @@ bool DebugApi::TryGetMessage(std::string& str)
 	return res;
 }
 
-std::vector<const THUAI4::Character*> DebugApi::GetCharacters() const
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Character>> DebugApi<asyn>::GetCharacters() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	std::vector<const THUAI4::Character*> characters;
-
-	for (auto it : pState->characters)
-	{
-		characters.push_back(it.get());
-	}
-	return characters;
+	std::vector<std::shared_ptr<const THUAI4::Character>> temp;
+	temp.assign(pState->characters.begin(), pState->characters.end());
+	return std::move(temp);
 }
-std::vector<const THUAI4::Wall*> DebugApi::GetWalls() const
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Wall>> DebugApi<asyn>::GetWalls() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	std::vector<const THUAI4::Wall*> walls;
-	for (auto it : pState->walls)
-	{
-		walls.push_back(it.get());
-	}
-	return walls;
+	std::vector<std::shared_ptr<const THUAI4::Wall>> temp;
+	temp.assign(pState->walls.begin(), pState->walls.end());
+	return std::move(temp);
 }
-std::vector<const THUAI4::Prop*> DebugApi::GetProps() const
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Prop>> DebugApi<asyn>::GetProps() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	std::vector<const THUAI4::Prop*> props;
-	for (auto it : pState->props)
-	{
-		props.push_back(it.get());
-	}
-	return props;
+	std::vector<std::shared_ptr<const THUAI4::Prop>> temp;
+	temp.assign(pState->props.begin(), pState->props.end());
+	return std::move(temp);
 }
-std::vector<const THUAI4::Bullet*> DebugApi::GetBullets() const
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::Bullet>> DebugApi<asyn>::GetBullets() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	std::vector<const THUAI4::Bullet*> bullets;
-	for (auto it : pState->bullets)
-	{
-		bullets.push_back(it.get());
-	}
-	return bullets;
+	std::vector<std::shared_ptr<const THUAI4::Bullet>> temp;
+	temp.assign(pState->bullets.begin(), pState->bullets.end());
+	return std::move(temp);
 }
-std::vector<const THUAI4::BirthPoint*> DebugApi::GetBirthPoints() const
+template <bool asyn>
+std::vector<std::shared_ptr<const THUAI4::BirthPoint>> DebugApi<asyn>::GetBirthPoints() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	std::vector<const THUAI4::BirthPoint*> birthpoints;
-	for (auto it : pState->birthpoints)
+	std::vector<std::shared_ptr<const THUAI4::BirthPoint>> temp;
+	temp.assign(pState->birthpoints.begin(), pState->birthpoints.end());
+	return std::move(temp);
+}
+template <bool asyn>
+std::shared_ptr<const THUAI4::Character> DebugApi<asyn>::GetSelfInfo() const
+{
+	if constexpr (asyn)
 	{
-		birthpoints.push_back(it.get());
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
 	}
-	return birthpoints;
-}
-const THUAI4::Character& DebugApi::GetSelfInfo() const
-{
 	OutStream << "Call GetSelfInfo() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	return *pState->self;
+	return pState->self;
 }
-THUAI4::ColorType DebugApi::GetSelfTeamColor() const
+
+template <bool asyn>
+THUAI4::ColorType DebugApi<asyn>::GetSelfTeamColor() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetSelfTeamColor() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	return pState->selfTeamColor;
 }
-uint32_t DebugApi::GetTeamScore() const
+template <bool asyn>
+uint32_t DebugApi<asyn>::GetTeamScore() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetTeamScore() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
 	return pState->teamScore;
 }
-const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& DebugApi::GetPlayerGUIDs() const
+template <bool asyn>
+const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &DebugApi<asyn>::GetPlayerGUIDs() const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	return pState->playerGUIDs;
+	return State::playerGUIDs;
 }
-
-THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
+template <bool asyn>
+THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
 {
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
 	OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
-	assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
+	assert(CellX >= 0 && CellX < StateConstant::nCells && CellY >= 0 && CellY < StateConstant::nCells);
 	//非法直接就炸了，不用检查
 	if (ExamineValidity)
 	{
@@ -474,3 +583,6 @@ THUAI4::ColorType DebugApi::GetCellColor(int CellX, int CellY) const
 	return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
 }
+
+template class DebugApi<true>;
+template class DebugApi<false>;

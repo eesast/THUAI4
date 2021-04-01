@@ -258,18 +258,24 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             std::wostringstream wsout;
 
             wsout.imbue(std::locale("chs"));
+
+            auto generatePlayerInfoStr = [&wsout](THUnity2D::Character^ hPlayer, long long id)
+            {
+                wsout << L"玩家" << std::to_wstring(id) << L"：\n生命：" << hPlayer->HP << L"\n剩余子弹数：" << hPlayer->BulletNum << L"\n分数：" << hPlayer->Score << L"\n";
+                wsout << L"移动速度：" << hPlayer->MoveSpeed << L"\n";
+                wsout << L"攻击力：" << hPlayer->AP << L"\n";
+                wsout << L"拥有盾牌：" << (hPlayer->HasShield ? L"是" : L"否") << L"\n";
+                wsout << L"拥有标枪：" << (hPlayer->HasSpear ? L"是" : L"否") << L"\n";
+                wsout << L"拥有衣服：" << (hPlayer->HasTotem ? L"是" : L"否") << L"\n";
+                wsout << '\n';
+            };
+
             wsout << L"队伍1：分数：" << pMW->map->GetTeamScore(0) << '\n';
             auto hPlayer1 = pMW->map->GetPlayerFromTeam(player1ID), hPlayer2 = pMW->map->GetPlayerFromTeam(player2ID);
-            wsout << L"玩家1：\n生命：" << hPlayer1->HP << L"\n剩余子弹数：" << hPlayer1->BulletNum << L"\n分数：" << hPlayer1->Score << L"\n";
-            wsout << L"移动速度：" << hPlayer1->MoveSpeed << "\n";
-            wsout << L"攻击力：" << hPlayer1->AP << "\n";
-            wsout << '\n';
+            generatePlayerInfoStr(hPlayer1, 1);
 
             wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
-            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->Score << L"\n";
-            wsout << L"移动速度：" << hPlayer2->MoveSpeed << "\n";
-            wsout << L"攻击力：" << hPlayer2->AP << "\n";
-            wsout << '\n';
+            generatePlayerInfoStr(hPlayer2, 2);
 
             DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &RECT({ width - appendCx + 20, 20, width, height }), 0);
 
@@ -330,17 +336,20 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::Character)
                 {
-                    int rad = gameObj->Radius;
-                    auto [x, y] = gameObj->Position;
-                    SelectObject(hdcMem, hbrPlayer);
-                    Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
-                    int centerX = y * (width - appendCx) / colAllGrid, centerY = x * (height - appendCy) / rowAllGrid;
-                    double angle = gameObj->FacingDirection;
-                    int paintRadius = rad * (width - appendCx) / colAllGrid;
-                    MoveToEx(hdcMem, centerX, centerY, NULL);
-                    SelectObject(hdcMem, hPenPlayerDirect);
-                    LineTo(hdcMem, centerX + (int)(paintRadius * System::Math::Sin(angle)), centerY + (int)(paintRadius * System::Math::Cos(angle)));
-                    SelectObject(hdcMem, hPenNull);
+                    if (!static_cast<THUnity2D::Character^>(gameObj)->IsResetting)
+                    {
+                        int rad = gameObj->Radius;
+                        auto [x, y] = gameObj->Position;
+                        SelectObject(hdcMem, hbrPlayer);
+                        Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
+                        int centerX = y * (width - appendCx) / colAllGrid, centerY = x * (height - appendCy) / rowAllGrid;
+                        double angle = gameObj->FacingDirection;
+                        int paintRadius = rad * (width - appendCx) / colAllGrid;
+                        MoveToEx(hdcMem, centerX, centerY, NULL);
+                        SelectObject(hdcMem, hPenPlayerDirect);
+                        LineTo(hdcMem, centerX + (int)(paintRadius * System::Math::Sin(angle)), centerY + (int)(paintRadius * System::Math::Cos(angle)));
+                        SelectObject(hdcMem, hPenNull);
+                    }
                 }
                 else
                 {
