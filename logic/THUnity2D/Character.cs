@@ -308,11 +308,6 @@ namespace THUnity2D
 				)
 			{ IsBackground = true }.Start();
 		}
-
-		public void AddMoveSpeed(double add, int buffTime)
-		{
-			AddBuff(new BuffValue(add), buffTime, BuffType.MoveSpeed, ReCalculateMoveSpeed);
-		}
 		private int ReCalculateFloatBuff(BuffType buffType, int orgVal, int maxVal, int minVal)
 		{
 			double times = 1.0;
@@ -324,6 +319,11 @@ namespace THUnity2D
 				}
 			}
 			return Math.Max(Math.Min((int)Math.Round(orgVal * times), maxVal), minVal);
+		}
+
+		public void AddMoveSpeed(double add, int buffTime)
+		{
+			AddBuff(new BuffValue(add), buffTime, BuffType.MoveSpeed, ReCalculateMoveSpeed);
 		}
 		private void ReCalculateMoveSpeed()
 		{
