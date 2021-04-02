@@ -202,47 +202,64 @@ namespace Constants
 		};
 	};
 
-	struct PropTimeInSeconds
+	struct Prop
 	{
+		struct TimeInSeconds
+		{
 
-	private:
+		private:
 
-		M_SCI std::int32_t propTimeInSeconds = 30;
-		M_SCI std::int32_t mineTimeInSeconds = 60;
+			M_SCI std::int32_t propTimeInSeconds = 30;
+			M_SCI std::int32_t mineTimeInSeconds = 60;
 
-	public:
+		public:
 
-		//道具效果持续时间，目前均为 30 秒
+			//道具效果持续时间，目前均为 30 秒
 
-		M_SCI std::int32_t bike = propTimeInSeconds;
-		M_SCI std::int32_t amplifier = propTimeInSeconds;
-		M_SCI std::int32_t jinKeLa = propTimeInSeconds;
-		M_SCI std::int32_t rice = propTimeInSeconds;
-		M_SCI std::int32_t negativeFeedback = propTimeInSeconds;
-		M_SCI std::int32_t totem = propTimeInSeconds;
-		M_SCI std::int32_t spear = propTimeInSeconds;
-		M_SCI std::int32_t dirt = propTimeInSeconds;
-		M_SCI std::int32_t attenuator = propTimeInSeconds;
-		M_SCI std::int32_t divider = propTimeInSeconds;
+			M_SCI std::int32_t bike = propTimeInSeconds;
+			M_SCI std::int32_t amplifier = propTimeInSeconds;
+			M_SCI std::int32_t jinKeLa = propTimeInSeconds;
+			M_SCI std::int32_t rice = propTimeInSeconds;
+			M_SCI std::int32_t negativeFeedback = propTimeInSeconds;
+			M_SCI std::int32_t totem = propTimeInSeconds;
+			M_SCI std::int32_t spear = propTimeInSeconds;
+			M_SCI std::int32_t dirt = propTimeInSeconds;
+			M_SCI std::int32_t attenuator = propTimeInSeconds;
+			M_SCI std::int32_t divider = propTimeInSeconds;
 
-		M_SCI std::int32_t sharedBike = bike;
-		M_SCI std::int32_t horn = amplifier;
-		M_SCI std::int32_t schoolBag = jinKeLa;
-		M_SCI std::int32_t happyHotPot = rice;
-		M_SCI std::int32_t shield = negativeFeedback;
-		M_SCI std::int32_t clothes = totem;
-		M_SCI std::int32_t javelin = spear;
-		M_SCI std::int32_t puddle = dirt;
-		M_SCI std::int32_t musicPlayer = attenuator;
-		M_SCI std::int32_t mail = divider;
+			M_SCI std::int32_t sharedBike = bike;
+			M_SCI std::int32_t horn = amplifier;
+			M_SCI std::int32_t schoolBag = jinKeLa;
+			M_SCI std::int32_t happyHotPot = rice;
+			M_SCI std::int32_t shield = negativeFeedback;
+			M_SCI std::int32_t clothes = totem;
+			M_SCI std::int32_t javelin = spear;
+			M_SCI std::int32_t puddle = dirt;
+			M_SCI std::int32_t musicPlayer = attenuator;
+			M_SCI std::int32_t mail = divider;
 
-		// 游戏刚开始 / 人物复活时盾的持续时间，目前为 5 秒
+			// 游戏刚开始 / 人物复活时盾的持续时间，目前为 5 秒
 
-		M_SCI std::int32_t birthShieldTime = 5;
+			M_SCI std::int32_t birthShieldTime = 5;
 
-		//地雷从埋藏到消失的时间
+			//地雷从埋藏到消失的时间
 
-		M_SCI std::int32_t mine = mineTimeInSeconds;	// 目前为 60 秒
+			M_SCI std::int32_t mine = mineTimeInSeconds;	// 目前为 60 秒
+		};
+
+		// 道具效果
+
+		struct Effect
+		{
+			M_SCI double sharedBike = 1.5;		// 使人物移动速度增加为原来的 1.5 倍
+			M_SCI double horn = 2.0;			// 使一定时间内彩粉对其他人物衣服的浸染力（即攻击力）增加为原来的 2.0 倍
+			M_SCI double schoolBag = 0.25;		// 使在自己颜色的格子里回复子弹所需时间变为原来的 0.25 倍
+			M_SCI std::int32_t happyHotPot = 2500;	// 回复 HP 2500 点
+
+			M_SCI double puddle = 1.0 / 1.5;	// 同 sharedBike（除数值不同外。下同）
+			M_SCI double musicPlayer = 0.5;		// 同 horn
+			M_SCI double mail = 4.0;			// 同 schoolBag
+		};
 	};
 
 	struct Game
@@ -250,8 +267,8 @@ namespace Constants
 		M_SCI std::int64_t invalidGUID = (std::numeric_limits<std::int64_t>::max)();		// 无效的 GUID
 		M_SCI std::int64_t noneGUID = (std::numeric_limits<std::int64_t>::min)();			// 无 GUID，正常情况下不会出现，作为保留 GUID 使用
 
-		M_SCI std::int64_t wearClothesTimeInSeconds = 60;									// 人物下场换衣服需要的时间
-
+		M_SCI std::int64_t wearClothesTimeInSeconds = 30;									// 人物下场换衣服需要的时间
+		M_SCI std::int64_t produceOnePropTimeInSeconds = 10;								// 游戏每产生两个道具之间的时间间隔
 		M_SCI std::int32_t thrownPropMoveSpeed = Map::numOfGridPerCell * 8;					// 扔出的道具的移动速度
 	};
 
