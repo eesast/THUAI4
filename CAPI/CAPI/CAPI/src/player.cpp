@@ -14,16 +14,10 @@ extern const THUAI4::JobType playerJob = THUAI4::JobType::Job0; //选手职业�
 namespace
 {
 	[[maybe_unused]] std::uniform_real_distribution<double> direction(0, 2 * 3.1415926);
-	[[maybe_unused]] std::default_random_engine e{ std::random_device{}() };
+	[[maybe_unused]] std::default_random_engine e{std::random_device{}()};
 }
 
 void AI::play(GameApi &g)
 {
-	auto self = g.GetSelfInfo();
-	if (self->bulletNum)
-	{
-		g.Attack(100, direction(e));
-	}
-	g.MovePlayer(50, direction(e));
-	std::cout << "I`m at (" << self->x << "," << self->y << ")." << std::endl;
+	
 }

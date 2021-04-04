@@ -18,8 +18,8 @@ double TimeSinceStart(const std::chrono::system_clock::time_point &sp)
 template <bool asyn>
 template <bool a>
 API<asyn>::API(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer &)>> sm,
-			   std::function<bool()> e, std::function<bool(std::string &)> tp,
-			   const State *&pS) : LogicInterface(sm, e, tp, pS)
+			   std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+			   const State *&pS) : LogicInterface(sm, e, tp, gc, pS)
 {
 	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
 }
@@ -27,8 +27,8 @@ API<asyn>::API(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer
 template <bool asyn>
 template <bool a>
 API<asyn>::API(std::enable_if_t<a, std::function<void(Protobuf::MessageToServer &)>> sm,
-			   std::function<bool()> e, std::function<bool(std::string &)> tp,
-			   const State *&pS, std::mutex &mtx_state, std::function<void()> tu) : LogicInterface(sm, e, tp, pS), Members<asyn>(mtx_state, tu)
+			   std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+			   const State *&pS, std::mutex &mtx_state, std::function<void()> tu) : LogicInterface(sm, e, tp, gc, pS), Members<asyn>(mtx_state, tu)
 {
 	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
 }
@@ -104,6 +104,18 @@ void API<asyn>::MoveDown(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
 }
+
+template <bool asyn>
+int API<asyn>::GetCounterOfFrames()
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	return GetCounter();
+}
+
 template <bool asyn>
 bool API<asyn>::MessageAvailable()
 {
@@ -239,11 +251,11 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 template class API<true>;
 template class API<false>;
 template API<false>::API<false>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
-								std::function<bool()> e, std::function<bool(std::string &)> tp,
+								std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 								const State *&pS);
 
 template API<true>::API<true>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
-							  std::function<bool()> e, std::function<bool(std::string &)> tp,
+							  std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 							  const State *&pS, std::mutex &mtx_state, std::function<void()> tu);
 //Debug API
 //目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
@@ -251,9 +263,9 @@ template API<true>::API<true>(std::enable_if_t<true, std::function<void(Protobuf
 template <bool asyn>
 template <bool a>
 DebugApi<asyn>::DebugApi(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer &)>> sm,
-						 std::function<bool()> e, std::function<bool(std::string &)> tp,
+						 std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 						 const State *&pS, bool ev,
-						 std::ostream &out) : LogicInterface(sm, e, tp, pS),
+						 std::ostream &out) : LogicInterface(sm, e, tp, gc, pS),
 											  ExamineValidity(ev), OutStream(out)
 {
 	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
@@ -262,9 +274,9 @@ DebugApi<asyn>::DebugApi(std::enable_if_t<!a, std::function<void(Protobuf::Messa
 template <bool asyn>
 template <bool a>
 DebugApi<asyn>::DebugApi(std::enable_if_t<a, std::function<void(Protobuf::MessageToServer &)>> sm,
-						 std::function<bool()> e, std::function<bool(std::string &)> tp,
+						 std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 						 const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
-						 std::ostream &out) : LogicInterface(sm, e, tp, pS), Members<asyn>(mtx_state, tu),
+						 std::ostream &out) : LogicInterface(sm, e, tp, gc, pS), Members<asyn>(mtx_state, tu),
 											  ExamineValidity(ev), OutStream(out)
 {
 	static_assert(asyn == a, "請不要亂改（雖然我還沒發現怎麽改）");
@@ -452,6 +464,18 @@ void DebugApi<asyn>::MoveDown(uint32_t timeInMilliseconds)
 {
 	MovePlayer(timeInMilliseconds, 0);
 }
+
+template <bool asyn>
+int DebugApi<asyn>::GetCounterOfFrames()
+{
+	if constexpr (asyn)
+	{
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		Members<asyn>::TryUpDate();
+	}
+	OutStream << "Call GetCounterOfFrames() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	return GetCounter();
+}
 template <bool asyn>
 bool DebugApi<asyn>::MessageAvailable()
 {
@@ -618,11 +642,11 @@ template class DebugApi<true>;
 template class DebugApi<false>;
 
 template DebugApi<false>::DebugApi<false>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
-						 std::function<bool()> e, std::function<bool(std::string &)> tp,
-						 const State *&pS, bool ev,
-						 std::ostream &out);
+										  std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+										  const State *&pS, bool ev,
+										  std::ostream &out);
 
 template DebugApi<true>::DebugApi<true>(std::enable_if_t<true, std::function<void(Protobuf::MessageToServer &)>> sm,
-						 std::function<bool()> e, std::function<bool(std::string &)> tp,
-						 const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
-						 std::ostream &out);
+										std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+										const State *&pS, std::mutex &mtx_state, std::function<void()> tu, bool ev,
+										std::ostream &out);
