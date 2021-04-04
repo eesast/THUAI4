@@ -173,6 +173,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		{
 			std::lock_guard<std::mutex> lck(mtx_buffer);
 			FlagBufferUpdated = true;
+			std::cout << counter_buffer << std::endl;
 			counter_buffer = -1;
 		}
 		cv_buffer.notify_one();

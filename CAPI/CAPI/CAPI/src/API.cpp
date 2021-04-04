@@ -345,7 +345,7 @@ void DebugApi<asyn>::Pick(THUAI4::PropType propType)
 			OutStream << "[Warning: You have been slained.]" << std::endl;
 			return;
 		}
-		if (CanPick(propType))
+		if (!CanPick(propType))
 		{
 			OutStream << "[Warning: No such property to pick within the cell.]" << std::endl;
 			return;
