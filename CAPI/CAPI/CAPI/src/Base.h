@@ -33,6 +33,7 @@ public:
 	virtual void Send(int toPlayerID, std::string message) = 0;
 
 	//选手可获取的信息
+	[[nodiscard]] virtual int GetCounterOfFrames() =0;//约定-1表示游戏结束
 	[[nodiscard]] virtual bool MessageAvailable() = 0;
 	[[nodiscard]] virtual bool TryGetMessage(std::string&) = 0;
 

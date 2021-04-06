@@ -27,6 +27,7 @@ private:
 	const std::function<void()> __OnClose;
 	concurrency::concurrent_queue<Pointer2Message> queue;
 	CTcpPackClientPtr pclient;
+	int counter=0;
 
 public:
 	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
