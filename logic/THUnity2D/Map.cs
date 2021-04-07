@@ -1,7 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using System;
+using FrameRateTask;
 
 namespace THUnity2D
 {
@@ -677,88 +678,95 @@ namespace THUnity2D
 		{
 			new Thread
 				(
+					() =>
+					{
+						lock (obj.moveLock)
+						{
+							if (!obj.IsAvailable) return;
+							obj.IsMoving = true;     //开始移动
+						}
+
+						GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
+						double deltaLen = 0.0;      //储存行走的误差
+						Vector moveVec = new Vector(moveDirection, 0.0);
+						//先转向
+						if (isGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
+						GameObject? collisionObj = null;
+
+						bool isDestroyed = false;
+						new FrameRateTaskExecutor<int>
+						(
+							() => isGaming && obj.CanMove && !obj.IsResetting,
 							() =>
 							{
-								lock (obj.moveLock)
+								moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
+								deltaLen = 0;
+
+								//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
+								//缺陷：半径为0的物体检测不到越界
+								//改进：如果越界，则与越界方块碰撞
+
+								while (true)
 								{
-									if (!obj.IsAvailable) return;
-									obj.IsMoving = true;     //开始移动
-								}
-
-								var moveBeginTime = Environment.TickCount64;
-								var moveEndTime = moveBeginTime + moveTime;
-								var timeShouldBe = moveBeginTime;
-
-								GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
-								double deltaLen = 0.0;      //储存行走的误差
-								Vector moveVec = new Vector(moveDirection, 0.0);
-								//先转向
-								if (isGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
-								GameObject? collisionObj = null;
-								while (isGaming && timeShouldBe < moveEndTime && obj.CanMove && !obj.IsResetting)
-								{
-									
-									moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
-									deltaLen = 0;
-
-									//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
-									//缺陷：半径为0的物体检测不到越界
-									//改进：如果越界，则与越界方块碰撞
-									
-									while (true)
+									collisionObj = CheckCollision(obj, moveVec);
+									if (collisionObj == null) break;
+									if (collisionObj is Mine)       //CheckCollision保证只有不同组的人物会和地雷碰撞
 									{
-										collisionObj = CheckCollision(obj, moveVec);
-										if (collisionObj == null) break;
-										if (collisionObj is Mine)		//CheckCollision保证只有不同组的人物会和地雷碰撞
-										{
-											ActivateMine((Character)obj, (Mine)collisionObj);
-										}
-										else
-										{
-											if (OnCollision(obj, collisionObj, moveVec))
-											{
-												//已经被销毁
-
-												GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
-
-												return;
-											}
-											if (obj.IsRigid && obj is Character) moveVec.length = 0;
-											break;
-										}
-									}
-
-									////else
-									{
-										deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
-									}
-
-									timeShouldBe += 1000 / Constant.numOfStepPerSecond;
-									var nowTime = Environment.TickCount64;
-									
-									if (timeShouldBe >= nowTime)
-									{
-										Thread.Sleep((int)(timeShouldBe - nowTime));
+										ActivateMine((Character)obj, (Mine)collisionObj);
 									}
 									else
 									{
-										Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!! Time should be: {0} but nowTime is {1}!", timeShouldBe, nowTime);
+										if (OnCollision(obj, collisionObj, moveVec))
+										{
+											//已经被销毁
+
+											GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+											isDestroyed = true;
+											return false;
+										}
+										if (obj.IsRigid && obj is Character) moveVec.length = 0;
+										break;
 									}
 								}
-								moveVec.length = deltaLen;
-								if ((collisionObj = CheckCollision(obj, moveVec)) == null)
+
 								{
-									obj.Move(moveVec);
+									deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
 								}
-								else
+
+								return true;
+							},
+							1000 / Constant.numOfStepPerSecond,
+							() =>
+							{
+								if (!isDestroyed)
 								{
-									OnCollision(obj, collisionObj, moveVec);
+									moveVec.length = deltaLen;
+									if ((collisionObj = CheckCollision(obj, moveVec)) == null)
+									{
+										obj.Move(moveVec);
+									}
+									else
+									{
+										OnCollision(obj, collisionObj, moveVec);
+									}
+									obj.IsMoving = false;        //结束移动
+									GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
+									if (obj is Bullet) BulletBomb((Bullet)obj, null);
 								}
-								obj.IsMoving = false;        //结束移动
-								GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
-								if (obj is Bullet) BulletBomb((Bullet)obj, null);
-							}
+								return 0;
+							},
+							maxTotalDuration: moveTime
 						)
+						{
+							AllowTimeExceed = true,
+							MaxTolerantTimeExceedCount = ulong.MaxValue,
+							TimeExceedAction = b =>
+							{
+								Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!!");
+							}
+						}.Start();
+					}
+				)
 			{ IsBackground = true }.Start();
 		}
 

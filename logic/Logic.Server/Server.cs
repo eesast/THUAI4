@@ -5,6 +5,7 @@ using THUnity2D;
 using Communication.Proto;
 using System.Threading.Tasks;
 using System.Threading;
+using FrameRateTask;
 
 namespace Logic.Server
 {
@@ -223,12 +224,46 @@ namespace Logic.Server
 				(
 					() =>
 					{
-						while (!game.IsGaming) Thread.Sleep(1);	//游戏未开始，等待
-						while (game.IsGaming)
+						while (!game.IsGaming) Thread.Sleep(1); //游戏未开始，等待
+
+						var frt = new FrameRateTaskExecutor<int>
+						(
+							() => game.IsGaming,
+							() => SendMessageToAllClients(MessageType.Gaming),
+							SendMessageToClientIntervalInMilliseconds,
+							() => 0
+						)
 						{
-							SendMessageToAllClients(MessageType.Gaming);
-							Thread.Sleep(SendMessageToClientIntervalInMilliseconds);
-						}
+							AllowTimeExceed = true,
+							MaxTolerantTimeExceedCount = 5,
+							TimeExceedAction = overExceed =>
+							{
+								if (overExceed)
+								{
+									Console.WriteLine("Fetal error: your compyter runs too slow that server connot send message at a frame rate of 20!!!");
+								}
+#if DEBUG
+								else
+								{
+									Console.WriteLine("Debug info: Send message to clients time exceed for once.");
+								}
+#endif
+							}
+						};
+#if DEBUG
+						Task.Run
+						(
+							() =>
+							{
+								while (!frt.Finished)
+								{
+									Console.WriteLine($"Send message to clients frame rate: {frt.FrameRate}");
+									Thread.Sleep(1000);
+								}
+							}
+						);
+#endif
+						frt.Start();
 					}
 				);
 		}
