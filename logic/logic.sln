@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0113AB68-3F36-4E25-8E0B-C99A4E8A4DC4}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		publish\publishall.cmd = publish\publishall.cmd
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic.Server", "Logic.Server\Logic.Server.csproj", "{5A50A261-2EF7-46AB-9B4B-1186F204A872}"
@@ -27,6 +28,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proto", "..\communication\communication_csharp\Proto\Proto.csproj", "{2DF93236-3CAB-4887-810A-FFCB99A90429}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agent", "..\communication\communication_csharp\Agent\Agent.csproj", "{94797874-20D1-4357-858F-CA9DEDB10A32}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrameRateTask", "FrameRateTask\FrameRateTask.csproj", "{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -156,6 +159,18 @@ Global
 		{94797874-20D1-4357-858F-CA9DEDB10A32}.Release|x64.Build.0 = Release|Any CPU
 		{94797874-20D1-4357-858F-CA9DEDB10A32}.Release|x86.ActiveCfg = Release|Any CPU
 		{94797874-20D1-4357-858F-CA9DEDB10A32}.Release|x86.Build.0 = Release|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Debug|x64.Build.0 = Debug|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Debug|x86.Build.0 = Debug|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Release|x64.ActiveCfg = Release|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Release|x64.Build.0 = Release|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Release|x86.ActiveCfg = Release|Any CPU
+		{BB675B7F-590C-48A5-B33E-E7D24F20C5CB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
