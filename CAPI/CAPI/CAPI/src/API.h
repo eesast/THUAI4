@@ -57,6 +57,8 @@ public:
 template <bool>
 struct Members
 {
+public:
+	Members(std::mutex& mtx_state, std::function<void()> f){}
 };
 
 template <>
@@ -78,12 +80,7 @@ private:
 	virtual void EndTimer() {}
 
 public:
-	template <bool a = asyn>
-	API(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer &)>> sm,
-		std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
-		const State *&pS);
-	template <bool a = asyn>
-	API(std::enable_if_t<a, std::function<void(Protobuf::MessageToServer &)>> sm,
+	API(std::function<void(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 		const State *&pS, std::mutex &mtx_state, std::function<void()>);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
@@ -139,13 +136,7 @@ private:
 	virtual void EndTimer();
 
 public:
-	template <bool a = asyn>
-	DebugApi(std::enable_if_t<!a, std::function<void(Protobuf::MessageToServer &)>> sm,
-			 std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
-			 const State *&pS, bool ev = false,
-			 std::ostream &out = std::cout);
-	template <bool a = asyn>
-	DebugApi(std::enable_if_t<a, std::function<void(Protobuf::MessageToServer &)>> sm,
+	DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
 			 std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 			 const State *&pS, std::mutex &mtx_state, std::function<void()>, bool ev = false,
 			 std::ostream &out = std::cout);
