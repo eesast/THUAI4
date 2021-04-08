@@ -12,7 +12,7 @@ namespace
     value class MapWrapper
     {
     public:
-        THUnity2D::Map^ map;
+        GameEngine::Map^ map;
     };
 
     MapWrapper* pMW = nullptr;
@@ -21,7 +21,7 @@ namespace
     void GetPMW()
     {
         MapWrapper mp;
-        mp.map = gcnew THUnity2D::Map(THUnity2D::MapInfo::map, 2);
+        mp.map = gcnew GameEngine::Map(GameEngine::MapInfo::defaultMap, 2);
         pMW = &mp;
         finishGcNew = true;
         while (true) { std::this_thread::sleep_for(std::chrono::seconds(10)); }
@@ -98,8 +98,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (job2 < 0 || job2 >= 7) job2 = 0;
         }
 
-        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
-        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
+        player1ID = pMW->map->AddPlayer(GameEngine::Map::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
+        player2ID = pMW->map->AddPlayer(GameEngine::Map::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -217,10 +217,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     switch (cellColor[i, j])
                     {
-                    case THUnity2D::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
-                    case THUnity2D::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
-                    case THUnity2D::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
-                    case THUnity2D::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
+                    case GameEngine::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
+                    case GameEngine::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
+                    case GameEngine::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
+                    case GameEngine::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
                     default: continue;
                     }
                     Rectangle(hdcMem, leftPos, topPos, leftPos + pixelPerCell.x, topPos + pixelPerCell.y);
@@ -330,8 +330,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HPEN hPenPlayerDirect = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 
             auto gameObjList = pMW->map->GetGameObject();
-            int rowAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Rows;
-            int colAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Cols;
+            int rowAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pMW->map->Rows;
+            int colAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pMW->map->Cols;
             for each (THUnity2D::GameObject^ gameObj in gameObjList)
             {
                 if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::Character)

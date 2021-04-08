@@ -1,11 +1,10 @@
 ﻿using System;
 
-//这个类是个常量，不改
-namespace THUnity2D
+namespace GameEngine
 {
 	public static class MapInfo
 	{
-		public enum MapInfoObjType : uint      //储存特定数字代表那种地图物件
+		public enum MapInfoObjType : uint
 		{
 			Blank = 0,
 			Wall = 1,
@@ -33,9 +32,9 @@ namespace THUnity2D
 			return birthPointIdx >= 0 && birthPointIdx < numOfBirthPoint;
 		}
 
-		//地图,50*50,中间全是空的
+		//地图, 50 * 50
 		//1为墙
-		public static uint[,] map = new uint[,]
+		public static uint[,] defaultMap = new uint[,]
 		{
 			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 			{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},

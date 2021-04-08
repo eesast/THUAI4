@@ -1,5 +1,6 @@
 ﻿using System;
 using THUnity2D;
+using GameEngine;
 using System.Threading;
 using System.Collections;
 using System.Runtime.InteropServices;
@@ -15,7 +16,7 @@ namespace test
 	{
 		static void Main(string[] args)
 		{
-			Map mp = new Map(MapInfo.map, 1);
+			Map mp = new Map(MapInfo.defaultMap, 1);
 			long tmpID;
 			long[] player2ID = new long[2];
 

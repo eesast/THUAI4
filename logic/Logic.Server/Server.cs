@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using THUnity2D;
+using GameEngine;
 using Communication.Proto;
 using System.Threading.Tasks;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace Logic.Server
 			if (options.PlayerCountPerTeam < 1) options.PlayerCountPerTeam = 1;
 
 			this.options = options;
-			game = new Map(MapInfo.map, options.TeamCount);
+			game = new Map(MapInfo.defaultMap, options.TeamCount);
 			communicationToGameID = new long[options.TeamCount, options.PlayerCountPerTeam];
 			for (int i = 0; i < communicationToGameID.GetLength(0); ++i)
 			{

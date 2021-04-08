@@ -55,9 +55,9 @@ namespace THUnity2D
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
 
 		protected ShapeType shape;
-		public ShapeType Shape { get => shape; }		//形状
+		public ShapeType Shape => shape;				//形状
 
-		private int moveSpeed;
+		protected int moveSpeed;
 		public int MoveSpeed
         {
 			get => moveSpeed;
@@ -119,7 +119,7 @@ namespace THUnity2D
 			}
 		}
 
-		public bool IsAvailable { get => !IsMoving && CanMove && !IsResetting; }    //是否能接收指令
+		public bool IsAvailable => !IsMoving && CanMove && !IsResetting;    //是否能接收指令
 
 
 		//移动，改变坐标，反馈实际走的长度的平方
@@ -138,10 +138,7 @@ namespace THUnity2D
 
 		//圆或内切圆半径
 		private int radius;
-		public int Radius
-		{
-			get => radius;
-		}
+		public int Radius => radius;
 
 		public virtual void Reset()
 		{
