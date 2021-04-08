@@ -73,16 +73,10 @@ namespace GameEngine
 			get => cellColor.GetLength(1);
 		}
 
-		private bool OutOfBound(GameObject obj)
-			=> obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
-					|| obj.Position.x >= Constant.numOfGridPerCell* Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell* Cols - obj.Radius;
-
 		private ArrayList objList;              //游戏对象（除了玩家外）的列表
 		private ReaderWriterLockSlim objListLock;		//读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的ArrayList）
 		private ArrayList playerList;			//玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList）
 		private ReaderWriterLockSlim playerListLock;
-
-		private Tuple<ArrayList, ReaderWriterLockSlim>[] allObjectLists;
 
 		private LinkedList<Prop> unpickedPropList;		//尚未捡起的道具列表
 		private ReaderWriterLockSlim unpickedPropListLock = new ReaderWriterLockSlim();
@@ -275,7 +269,7 @@ namespace GameEngine
 
 				XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
 
-				uint maxLen = CollisionChecker.FindMax(obj, nextPos, moveVec, allObjectLists);
+				uint maxLen = collisionChecker.FindMax(obj, nextPos, moveVec);
 
 				maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Constant.numOfStepPerSecond));
 				obj.Move(new Vector(moveVec.angle, maxLen));
@@ -511,7 +505,7 @@ namespace GameEngine
 
 								while (true)
 								{
-									collisionObj = CollisionChecker.CheckCollision(obj, moveVec, OutOfBound, allObjectLists);
+									collisionObj = collisionChecker.CheckCollision(obj, moveVec);
 									if (collisionObj == null) break;
 									if (collisionObj is Mine)       //CheckCollision保证只有不同组的人物会和地雷碰撞
 									{
@@ -544,7 +538,7 @@ namespace GameEngine
 								if (!isDestroyed)
 								{
 									moveVec.length = deltaLen;
-									if ((collisionObj = CollisionChecker.CheckCollision(obj, moveVec, OutOfBound, allObjectLists)) == null)
+									if ((collisionObj = collisionChecker.CheckCollision(obj, moveVec)) == null)
 									{
 										obj.Move(moveVec);
 									}
@@ -905,6 +899,9 @@ namespace GameEngine
 			}
 			return score;
 		}
+
+		CollisionChecker collisionChecker;
+
 		public Map(uint[,] mapResource, int numOfTeam)
 		{
 			if (numOfTeam > maxTeamNum) throw new Exception("Number of teams overflows!");
@@ -933,11 +930,16 @@ namespace GameEngine
 			objListLock = new ReaderWriterLockSlim();
 			playerListLock = new ReaderWriterLockSlim();
 
-			allObjectLists = new Tuple<ArrayList, ReaderWriterLockSlim>[]
-			{
-				new Tuple<ArrayList, ReaderWriterLockSlim>(playerList, playerListLock),
-				new Tuple<ArrayList, ReaderWriterLockSlim>(objList, objListLock)
-			};
+			collisionChecker = new CollisionChecker
+			(
+				obj => obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
+					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius,
+				new Tuple<ArrayList, ReaderWriterLockSlim>[]
+				{
+					new Tuple<ArrayList, ReaderWriterLockSlim>(playerList, playerListLock),
+					new Tuple<ArrayList, ReaderWriterLockSlim>(objList, objListLock)
+				}
+			);
 
 			unpickedPropList = new LinkedList<Prop>();
 			birthPointList = new Dictionary<uint, BirthPoint>(MapInfo.numOfBirthPoint);

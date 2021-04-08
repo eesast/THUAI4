@@ -5,10 +5,19 @@ using THUnity2D;
 
 namespace GameEngine
 {
-	internal static class CollisionChecker
+	internal class CollisionChecker
 	{
+		private Func<GameObject, bool> outOfBound;
+		private Tuple<ArrayList, ReaderWriterLockSlim>[] lists;
+
+		public CollisionChecker(Func<GameObject, bool> outOfBoundFunc, Tuple<ArrayList, ReaderWriterLockSlim>[] gameObjLists)
+		{
+			outOfBound = outOfBoundFunc;
+			lists = gameObjLists;
+		}
+
 		//检查obj下一步位于nextPos时是否会与listObj碰撞
-		private static bool WillCollide(GameObject obj, GameObject listObj, XYPosition nextPos)
+		private bool WillCollide(GameObject obj, GameObject listObj, XYPosition nextPos)
 		{
 			if (!listObj.IsRigid || listObj.ID == obj.ID) return false; //不检查自己和非刚体
 
@@ -48,7 +57,7 @@ namespace GameEngine
 
 
 		//碰撞检测，如果这样行走是否会与之碰撞，返回与之碰撞的物体
-		public static GameObject? CheckCollision(GameObject obj, Vector moveVec, Func<GameObject, bool> outOfBound, Tuple<ArrayList, ReaderWriterLockSlim>[] lists)
+		public GameObject? CheckCollision(GameObject obj, Vector moveVec)
 		{
 			XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
 
@@ -92,7 +101,7 @@ namespace GameEngine
 
 		// 寻找最大可能移动距离
 
-		public static uint FindMax(GameObject obj, XYPosition nextPos, Vector moveVec, Tuple<ArrayList, ReaderWriterLockSlim>[] lists)
+		public uint FindMax(GameObject obj, XYPosition nextPos, Vector moveVec)
 		{
 			uint maxLen = uint.MaxValue;
 			uint tmpMax;
