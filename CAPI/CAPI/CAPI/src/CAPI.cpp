@@ -3,8 +3,7 @@
 #include <thread>
 #include <chrono>
 
-CAPI::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void()> onreceive) : 
-__OnConnect(onconnect),__OnReceive(onreceive),__OnClose(onclose),pclient(this){}
+CAPI::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void()> onreceive) : __OnConnect(onconnect), __OnReceive(onreceive), __OnClose(onclose), pclient(this) {}
 
 EnHandleResult CAPI::OnConnect(ITcpClient *pSender, CONNID dwConnID)
 {
@@ -84,7 +83,8 @@ void CAPI::Send(const Protobuf::MessageToServer &message)
 
 void CAPI::Stop()
 {
-	if (!pclient->Stop()){
+	if (!pclient->Stop())
+	{
 		std::cout << "The client wasn`t stopped. Error code:";
 		std::cout << pclient->GetLastError() << std::endl;
 	}

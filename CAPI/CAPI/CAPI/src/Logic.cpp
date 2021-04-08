@@ -173,6 +173,8 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		{
 			std::lock_guard<std::mutex> lck(mtx_buffer);
 			FlagBufferUpdated = true;
+			std::cout << counter_buffer << std::endl;
+			counter_buffer = -1;
 		}
 		cv_buffer.notify_one();
 		break;
@@ -283,6 +285,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		}
 
 		FlagBufferUpdated = true;
+		counter_buffer += 1;
 
 		//如果这时候state还没被player访问，就把buffer转到state
 		if (mtx_state.try_lock())
@@ -291,6 +294,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			pState = pBuffer;
 			pBuffer = temp;
 			FlagBufferUpdated = false;
+			counter_state = counter_buffer;
 			CurrentStateAccessed = false;
 			mtx_state.unlock();
 		}
@@ -306,8 +310,8 @@ void Logic::ProcessMessage()
 		//无消息处理时停下来少占资源
 		{
 			std::unique_lock<std::mutex> lck(mtxOnReceive); //OnReceive里往队列里Push时也锁了
-
-			cvOnReceive.wait(lck, [this]() {FlagProcessMessage = !capi.IsEmpty(); return FlagProcessMessage; });
+			FlagProcessMessage = !capi.IsEmpty();
+			cvOnReceive.wait(lck, [this]() { return FlagProcessMessage; });
 		}
 
 		if (!capi.TryPop(p2M))
@@ -359,6 +363,7 @@ void Logic::PlayerWrapper()
 				State *temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
+				counter_state = counter_buffer;
 				CurrentStateAccessed = false;
 				FlagBufferUpdated = false;
 			}
@@ -369,6 +374,7 @@ void Logic::PlayerWrapper()
 				State *temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
+				counter_state = counter_buffer;
 				CurrentStateAccessed = false;
 				FlagBufferUpdated = false;
 			}
@@ -422,6 +428,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 					State *temp = pState;
 					pState = pBuffer;
 					pBuffer = temp;
+					counter_state=counter_buffer;
 					FlagBufferUpdated = false;
 				}
 				mtx_buffer.unlock();
@@ -432,7 +439,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		{
 			this->pApi = std::make_unique<API<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 													 [this]() { return MessageStorage.empty(); },
-													 [this](std::string &s) { return MessageStorage.try_pop(s); },
+													 [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 													 (const State *&)pState, mtx_state, tu);
 		}
 		else
@@ -449,7 +456,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 			}
 			this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 														  [this]() { return MessageStorage.empty(); },
-														  [this](std::string &s) { return MessageStorage.try_pop(s); },
+														  [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 														  (const State *&)pState, mtx_state, tu, debuglevel != 1,
 														  flag ? std::cout : OutFile);
 		}
@@ -460,7 +467,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 		{
 			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 													  [this]() { return MessageStorage.empty(); },
-													  [this](std::string &s) { return MessageStorage.try_pop(s); },
+													  [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 													  (const State *&)pState);
 		}
 		else
@@ -477,7 +484,7 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 			}
 			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
 														   [this]() { return MessageStorage.empty(); },
-														   [this](std::string &s) { return MessageStorage.try_pop(s); },
+														   [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 														   (const State *&)pState, debuglevel != 1,
 														   flag ? std::cout : OutFile);
 		}
