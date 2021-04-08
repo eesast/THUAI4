@@ -1,5 +1,6 @@
 ﻿using System;
 using THUnity2D;
+using Gaming;
 using GameEngine;
 using Communication.Proto;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace Logic.Server
 	{
 		public const int SendMessageToClientIntervalInMilliseconds = 50;	//每隔xx毫秒向客户端发送信息
 
-		private readonly Map game;
+		private readonly Game game;
 		private readonly ArgumentOptions options;
 		private uint GetBirthPointIdx(long teamID, long playerID)		//获取出生点位置
 		{
@@ -37,7 +38,7 @@ namespace Logic.Server
 			if (options.PlayerCountPerTeam < 1) options.PlayerCountPerTeam = 1;
 
 			this.options = options;
-			game = new Map(MapInfo.defaultMap, options.TeamCount);
+			game = new Game(MapInfo.defaultMap, options.TeamCount);
 			communicationToGameID = new long[options.TeamCount, options.PlayerCountPerTeam];
 			for (int i = 0; i < communicationToGameID.GetLength(0); ++i)
 			{
@@ -155,7 +156,7 @@ namespace Logic.Server
 
 		private bool AddPlayer(MessageToServer msg)
 		{
-			if (game.IsGaming)		//如果正在游戏，不能加入角色
+			if (game.GameMap.Timer.IsGaming)		//如果正在游戏，不能加入角色
 			{
 				return false;
 			}
@@ -173,7 +174,7 @@ namespace Logic.Server
 					return false;
 				}
 
-				Map.PlayerInitInfo playerInitInfo = new Map.PlayerInitInfo(GetBirthPointIdx(msg.TeamID, msg.PlayerID), ConvertTool.ToGameJobType(msg.JobType), msg.TeamID);
+				Game.PlayerInitInfo playerInitInfo = new Game.PlayerInitInfo(GetBirthPointIdx(msg.TeamID, msg.PlayerID), ConvertTool.ToGameJobType(msg.JobType), msg.TeamID);
 				if (playerInitInfo.jobType == THUnity2D.JobType.InvalidJobType) return false;       //非法职业
 
 				bool legalJob = false;
@@ -198,7 +199,7 @@ namespace Logic.Server
 		private void CheckStart()           //检查是否满员，该开始游戏了
 		{
 
-			if (game.IsGaming) return;
+			if (game.GameMap.Timer.IsGaming) return;
 
 			foreach (var id in communicationToGameID)
 			{
@@ -223,11 +224,11 @@ namespace Logic.Server
 				(
 					() =>
 					{
-						while (!game.IsGaming) Thread.Sleep(1); //游戏未开始，等待
+						while (!game.GameMap.Timer.IsGaming) Thread.Sleep(1); //游戏未开始，等待
 
 						var frt = new FrameRateTaskExecutor<int>
 						(
-							() => game.IsGaming,
+							() => game.GameMap.Timer.IsGaming,
 							() => SendMessageToAllClients(MessageType.Gaming),
 							SendMessageToClientIntervalInMilliseconds,
 							() => 0
@@ -283,10 +284,10 @@ namespace Logic.Server
 		private void SendMessageToAllClients(MessageType msgType)		//向所有的客户端发送消息
 		{
 			var gameObjList = game.GetGameObject();
-			var cellColor = game.CellColor;
+			var cellColor = game.GameMap.CellColor;
 
-			var rows = game.Rows;
-			var cols = game.Cols;
+			var rows = game.GameMap.Cols;
+			var cols = game.GameMap.Cols;
 
 			//记录颜色信息，避免重复构造颜色信息
 			Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneDimVec> msgCellColors = new Google.Protobuf.Collections.RepeatedField<MessageToClient.Types.OneDimVec>();

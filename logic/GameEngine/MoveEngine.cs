@@ -7,27 +7,8 @@ using Timothy.FrameRateTask;
 
 namespace GameEngine
 {
-	internal class MoveEngine
+	public class MoveEngine
 	{
-		private Func<GameObject, bool> outOfBound;
-		private Tuple<ArrayList, ReaderWriterLockSlim>[] lists;
-		private Func<bool> IsGaming;
-		private Func<GameObject, GameObject, Vector, bool> OnCollision;
-		private Action<GameObject> EndMove;
-
-		public MoveEngine(Func<GameObject, bool> outOfBoundFunc,
-			Tuple<ArrayList, ReaderWriterLockSlim>[] gameObjLists,
-			Func<bool> IsGaming,
-			Func<GameObject, GameObject, Vector, bool> OnCollision,
-			Action<GameObject> EndMove
-			)
-		{
-			outOfBound = outOfBoundFunc;
-			lists = gameObjLists;
-			this.IsGaming = IsGaming;
-			this.OnCollision = OnCollision;
-			this.EndMove = EndMove;
-		}
 
 		//检查obj下一步位于nextPos时是否会与listObj碰撞
 		private bool WillCollide(GameObject obj, GameObject listObj, XYPosition nextPos)
@@ -94,7 +75,7 @@ namespace GameEngine
 					finally { listLock.ExitReadLock(); }
 
 					//如果越界，则与越界方块碰撞
-					if (collisionObj == null && outOfBound(obj))
+					if (collisionObj == null && gameMap.OutOfBound(obj))
 					{
 						collisionObj = new OutOfBoundBlock(nextPos);
 					}
@@ -232,13 +213,13 @@ namespace GameEngine
 					double deltaLen = 0.0;      //储存行走的误差
 					Vector moveVec = new Vector(moveDirection, 0.0);
 					//先转向
-					if (IsGaming() && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
+					if (gameMap.Timer.IsGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
 					GameObject? collisionObj = null;
 
 					bool isDestroyed = false;
 					new FrameRateTaskExecutor<int>
 					(
-						() => IsGaming() && obj.CanMove && !obj.IsResetting,
+						() => gameMap.Timer.IsGaming && obj.CanMove && !obj.IsResetting,
 						() =>
 						{
 							moveVec.length = obj.MoveSpeed / Map.Constant.numOfStepPerSecond + deltaLen;
@@ -272,9 +253,7 @@ namespace GameEngine
 								}
 							}
 
-							{
-								deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
-							}
+							deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
 
 							return true;
 						},
@@ -293,7 +272,6 @@ namespace GameEngine
 									OnCollision(obj, collisionObj, moveVec);
 								}
 								obj.IsMoving = false;        //结束移动
-								GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 								EndMove(obj);
 							}
 							return 0;
@@ -310,6 +288,26 @@ namespace GameEngine
 					}.Start();
 				}
 			);
+		}
+
+		private Map gameMap;
+		private Tuple<ArrayList, ReaderWriterLockSlim>[] lists;
+		private Func<GameObject, GameObject, Vector, bool> OnCollision;
+		private Action<GameObject> EndMove;
+
+		public MoveEngine(Map gameMap,
+			Func<GameObject, GameObject, Vector, bool> OnCollision,
+			Action<GameObject> EndMove
+			)
+		{
+			this.gameMap = gameMap;
+			lists = new Tuple<ArrayList, ReaderWriterLockSlim>[]
+			{
+				new Tuple<ArrayList, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
+				new Tuple<ArrayList, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
+			};
+			this.OnCollision = OnCollision;
+			this.EndMove = EndMove;
 		}
 	}
 }

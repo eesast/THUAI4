@@ -10,20 +10,20 @@
 
 namespace
 {
-    value class MapWrapper
+    value class GameWrapper
     {
     public:
-        GameEngine::Map^ map;
+        Gaming::Game^ game;
     };
 
-    MapWrapper* pMW = nullptr;
+    GameWrapper* pGM = nullptr;
     std::atomic<bool> finishGcNew = false;
 
-    void GetPMW()
+    void GetPGM()
     {
-        MapWrapper mp;
-        mp.map = gcnew GameEngine::Map(GameEngine::MapInfo::defaultMap, 2);
-        pMW = &mp;
+        GameWrapper mp;
+        mp.game = gcnew Gaming::Game(GameEngine::MapInfo::defaultMap, 2);
+        pGM = &mp;
         finishGcNew = true;
         while (true) { std::this_thread::sleep_for(std::chrono::seconds(10)); }
     }
@@ -72,7 +72,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         (
             []()
             {
-                GetPMW();
+                GetPGM();
             }
         );
         
@@ -81,8 +81,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         while (!finishGcNew);
 
         int basicSize = 600;
-        int rows = pMW->map->Rows;
-        int cols = pMW->map->Cols;
+        int rows = pGM->game->GameMap->Rows;
+        int cols = pGM->game->GameMap->Cols;
 
         width = (pixelPerCell.x = basicSize / cols) * cols;
         width += appendCx = width / 2;
@@ -99,8 +99,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (job2 < 0 || job2 >= 7) job2 = 0;
         }
 
-        player1ID = pMW->map->AddPlayer(GameEngine::Map::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
-        player2ID = pMW->map->AddPlayer(GameEngine::Map::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
+        player1ID = pGM->game->AddPlayer(Gaming::Game::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
+        player2ID = pGM->game->AddPlayer(Gaming::Game::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -113,9 +113,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         std::thread([hWnd]() 
             {
-                pMW->map->StartGame(1000 * 60 * 10);
-                int score1 = pMW->map->GetTeamScore(0LL);
-                int score2 = pMW->map->GetTeamScore(1LL);
+                pGM->game->StartGame(1000 * 60 * 10);
+                int score1 = pGM->game->GetTeamScore(0LL);
+                int score2 = pGM->game->GetTeamScore(1LL);
                 std::_tostringstream sout;
                 if constexpr (!std::is_same_v<decltype(sout), std::ostringstream>) sout.imbue(std::locale("chs"));
                 sout << TEXT("游戏结束！队伍一分数：") << score1 << TEXT("；队伍二分数：") << score2;
@@ -172,25 +172,25 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     for (int i = THUnity2D::Prop::MinPropTypeNum; i <= THUnity2D::Prop::MaxPropTypeNum; ++i)
                     {
-                        if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
+                        if (pGM->game->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
                     }
                 }
                 else if (UPress)
                 {
-                    pMW->map->Use(playerID);
+                    pGM->game->Use(playerID);
                 }
                 else if (JPress)
                 {
                     if (key && 
-                        pMW->map->Attack(playerID, time[key] * 20, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                        pGM->game->Attack(playerID, time[key] * 20, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 }
                 else if (TPress)
                 {
-                    if (key) pMW->map->Throw(playerID, time[key] * 50, direct[key]);
+                    if (key) pGM->game->Throw(playerID, time[key] * 50, direct[key]);
                 }
                 else if (key)
                 {
-                    pMW->map->MovePlayer(playerID, time[key], direct[key]);
+                    pGM->game->MovePlayer(playerID, time[key], direct[key]);
                 }
             }
         };
@@ -220,8 +220,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HBRUSH hbrColor3 = CreateSolidBrush(RGB(0, 0, 100));
             HBRUSH hbrColor4 = CreateSolidBrush(RGB(100, 100, 0));
 
-            auto cellColor = pMW->map->CellColor;
-            int rows = pMW->map->Rows, cols = pMW->map->Cols;
+            auto cellColor = pGM->game->GameMap->CellColor;
+            int rows = pGM->game->GameMap->Rows, cols = pGM->game->GameMap->Cols;
             for (int i = 0, topPos = 0; i < rows; ++i, topPos += pixelPerCell.y)
             {
                 for (int j = 0, leftPos = 0; j < cols; ++j, leftPos += pixelPerCell.x)
@@ -281,11 +281,11 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 wsout << '\n';
             };
 
-            wsout << L"队伍1：分数：" << pMW->map->GetTeamScore(0) << '\n';
-            auto hPlayer1 = pMW->map->GetPlayerFromTeam(player1ID), hPlayer2 = pMW->map->GetPlayerFromTeam(player2ID);
+            wsout << L"队伍1：分数：" << pGM->game->GetTeamScore(0) << '\n';
+            auto hPlayer1 = pGM->game->GetPlayerFromTeam(player1ID), hPlayer2 = pGM->game->GetPlayerFromTeam(player2ID);
             generatePlayerInfoStr(hPlayer1, 1);
 
-            wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
+            wsout << L"队伍2：分数：" << pGM->game->GetTeamScore(1) << '\n';
             generatePlayerInfoStr(hPlayer2, 2);
 
             DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &RECT({ width - appendCx + 20, 20, width, height }), 0);
@@ -340,9 +340,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             HPEN hPenPlayerDirect = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 
-            auto gameObjList = pMW->map->GetGameObject();
-            int rowAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pMW->map->Rows;
-            int colAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pMW->map->Cols;
+            auto gameObjList = pGM->game->GetGameObject();
+            int rowAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pGM->game->GameMap->Rows;
+            int colAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pGM->game->GameMap->Cols;
             for each (THUnity2D::GameObject^ gameObj in gameObjList)
             {
                 if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::Character)
