@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 /// <summary>
 /// 人物类
@@ -38,7 +39,6 @@ namespace THUnity2D
 			get => teamID;
 			set
 			{
-				//Operations.Add
 				lock (gameObjLock)
 				{
 					teamID = value;
@@ -79,10 +79,10 @@ namespace THUnity2D
 		public readonly int orgCD;
 
 		private int maxBulletNum;               //人物最大子弹数
-		public int MaxBulletNum { get => maxBulletNum; }
+		public int MaxBulletNum => maxBulletNum;
 
 		private int bulletNum;                  //目前持有的子弹数
-		public int BulletNum { get => bulletNum; }
+		public int BulletNum => bulletNum;
 		private bool TrySubBulletNum()              //尝试将子弹数量减1
 		{
 			//Operations.Add
@@ -106,10 +106,10 @@ namespace THUnity2D
 		}
 
 		private readonly int maxHp;				//最大血量
-		public int MaxHp { get => maxHp; }
+		public int MaxHp => maxHp;
 
 		private int hp;							//当前血量
-		public int HP { get => hp; }
+		public int HP => hp;
 		public void AddHp(int add)				//加血
 		{
 			//Operations.Add
@@ -130,7 +130,7 @@ namespace THUnity2D
 		}
 
 		private int lifeNum = 0;				//自己的第几条命，记录死亡次数
-		public int LifeNum { get => lifeNum; }
+		public int LifeNum => lifeNum;
 		private void AddLifeNum()
 		{
 			lock (gameObjLock)
@@ -204,7 +204,7 @@ namespace THUnity2D
 		}
 
 		private int score;						//当前分数
-		public int Score { get => score; }
+		public int Score => score;
 		public void AddScore(int add)
 		{
 			//Operations.Add
@@ -216,7 +216,6 @@ namespace THUnity2D
 		}
 		public void SubScore(int sub)
 		{
-			//Operations.Add
 			lock (gameObjLock)
 			{
 				score -= sub;
@@ -232,13 +231,7 @@ namespace THUnity2D
 			ap = orgAp;
 			holdProp = null;
 			bulletNum = maxBulletNum;
-			for (int i = 0; i < BuffTypeNum; ++i)
-			{
-				lock (buffListLock[i])
-				{
-					buffList[i].Clear();
-				}
-			}
+			buffManeger.ClearAll();
 		}
 
 		private string message = "THUAI4";
@@ -254,153 +247,34 @@ namespace THUnity2D
 			}
 		}
 
-		#region 用于实现各种Buff道具的效果
+		#region 各种Buff道具效果的接口
 
-		private enum BuffType : uint		//有哪些加成
-		{
-			MoveSpeed = 0u,
-			AP = 1u,
-			CD = 2u,
-			Shield = 3u,
-			Totem = 4u,
-			Spear = 5u
-		}
-		private const uint BuffTypeNum = 6u;		//加成的种类个数，即enum BuffType的成员个数
+		private BuffManeger buffManeger;
+
+		public void AddMoveSpeed(double add, int buffTime) => buffManeger.AddMoveSpeed(add, buffTime, newVal => { MoveSpeed = newVal; }, OrgMoveSpeed);
+
+		public void AddAP(double add, int buffTime) => buffManeger.AddAP(add, buffTime, newVal => { AP = newVal; }, orgAp);
+
+		public void ChangeCD(double discount, int buffTime) => buffManeger.ChangeCD(discount, buffTime, newVal => { CD = newVal; }, orgCD);
+
+		public void AddShield(int shieldTime) => buffManeger.AddShield(shieldTime);
+
+		public bool HasShield => buffManeger.HasShield;
+
+		public void AddTotem(int totemTime) => buffManeger.AddTotem(totemTime);
 		
-		[StructLayout(LayoutKind.Explicit, Size = 8)]
-		private struct BuffValue					//加成参数联合体类型，可能是int或double
-		{
-			[FieldOffset(0)]
-			public int iValue;
-			[FieldOffset(0)]
-			public double lfValue;
-			
-			public BuffValue(int intValue) { this.lfValue = 0.0; this.iValue = intValue; }
-			public BuffValue(double longFloatValue) { this.iValue = 0; this.lfValue = longFloatValue; }
-		}
 
-		private LinkedList<BuffValue>[] buffList;
-		private object[] buffListLock;
+		public bool HasTotem => buffManeger.HasTotem;
 
-		private void AddBuff(BuffValue bf, int buffTime, BuffType buffType, Action ReCalculateFunc)
-		{
-			new Thread
-				(
-					() =>
-					{
-						LinkedListNode<BuffValue> buffNode;
-						lock (buffListLock[(uint)buffType])
-						{
-							buffNode = buffList[(uint)buffType].AddLast(bf);
-						}
-						ReCalculateFunc();
-						Thread.Sleep(buffTime);
-						try
-						{
-							lock (buffListLock[(uint)buffType])
-							{
-								buffList[(uint)buffType].Remove(buffNode);
-							}
-						}
-						catch { }
-						ReCalculateFunc();
-					}
-				)
-			{ IsBackground = true }.Start();
-		}
-		private int ReCalculateFloatBuff(BuffType buffType, int orgVal, int maxVal, int minVal)
-		{
-			double times = 1.0;
-			lock (buffListLock[(uint)buffType])
-			{
-				foreach (var add in buffList[(uint)buffType])
-				{
-					times *= add.lfValue;
-				}
-			}
-			return Math.Max(Math.Min((int)Math.Round(orgVal * times), maxVal), minVal);
-		}
+		public void AddSpear(int spearTime) => buffManeger.AddSpear(spearTime);
 
-		public void AddMoveSpeed(double add, int buffTime)
-		{
-			AddBuff(new BuffValue(add), buffTime, BuffType.MoveSpeed, ReCalculateMoveSpeed);
-		}
-		private void ReCalculateMoveSpeed()
-		{
-			MoveSpeed = ReCalculateFloatBuff(BuffType.MoveSpeed, OrgMoveSpeed, MaxSpeed, MinSpeed);
-		}
+		public bool HasSpear => buffManeger.HasSpear;
 
-		public void AddAP(double add, int buffTime)
-		{
-			AddBuff(new BuffValue(add), buffTime, BuffType.AP, ReCalculateAP);
-		}
-		private void ReCalculateAP()
-		{
-			AP = ReCalculateFloatBuff(BuffType.AP, orgAp, MaxAP, MinAP);
-		}
-
-		public void ChangeCD(double discount, int buffTime)
-		{
-			AddBuff(new BuffValue(discount), buffTime, BuffType.CD, ReCalculateCD);
-		}
-		private void ReCalculateCD()
-		{
-			CD = ReCalculateFloatBuff(BuffType.CD, orgCD, int.MaxValue, 1);
-		}
-
-		public void AddShield(int shieldTime)
-		{
-			AddBuff(new BuffValue(), shieldTime, BuffType.Shield, () => { });
-		}
-		public bool HasShield
-		{
-			get
-			{
-				lock (buffListLock[(uint)BuffType.Shield])
-				{
-					return buffList[(uint)BuffType.Shield].Count != 0;
-				}
-			}
-		}
-
-		public void AddTotem(int totemTime)
-		{
-			AddBuff(new BuffValue(), totemTime, BuffType.Totem, () => { });
-		}
-		public bool HasTotem
-		{
-			get
-			{
-				lock (buffListLock[(uint)BuffType.Totem])
-				{
-					return buffList[(uint)BuffType.Totem].Count != 0;
-				}
-			}
-		}
 		private void TryActivatingTotem()
 		{
-			if (HasTotem)
+			if (buffManeger.TryActivatingTotem())
 			{
 				hp = maxHp;
-				lock (buffListLock[(uint)BuffType.Totem])
-				{
-					buffList[(uint)BuffType.Totem].Clear();
-				}
-			}
-		}
-
-		public void AddSpear(int spearTime)
-		{
-			AddBuff(new BuffValue(), spearTime, BuffType.Spear, () => { });
-		}
-		public bool HasSpear
-		{
-			get
-			{
-				lock (buffListLock[(uint)BuffType.Spear])
-				{
-					return buffList[(uint)BuffType.Spear].Count != 0;
-				}
 			}
 		}
 
@@ -408,18 +282,7 @@ namespace THUnity2D
 
 		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed, ShapeType.Circle)
 		{
-
-			buffList = new LinkedList<BuffValue>[BuffTypeNum];
-			for (int i = 0; i < buffList.Length; ++i)
-			{
-				buffList[i] = new LinkedList<BuffValue>();
-			}
-
-			buffListLock = new object[buffList.Length];
-			for (int i = 0; i < buffListLock.Length; ++i)
-			{
-				buffListLock[i] = new object();
-			}
+			buffManeger = new BuffManeger();
 
 			score = 0;
 			this.jobType = jobType;
@@ -495,5 +358,161 @@ namespace THUnity2D
 			Debug(this, " constructed!");
 		}
 
+
+		// Buff 管理类
+
+		private class BuffManeger
+		{
+
+			private enum BuffType : uint        //有哪些加成
+			{
+				MoveSpeed = 0u,
+				AP = 1u,
+				CD = 2u,
+				Shield = 3u,
+				Totem = 4u,
+				Spear = 5u
+			}
+			private const uint BuffTypeNum = 6u;        //加成的种类个数，即enum BuffType的成员个数
+
+			[StructLayout(LayoutKind.Explicit, Size = 8)]
+			private struct BuffValue                    //加成参数联合体类型，可能是int或double
+			{
+				[FieldOffset(0)]
+				public int iValue;
+				[FieldOffset(0)]
+				public double lfValue;
+
+				public BuffValue(int intValue) { this.lfValue = 0.0; this.iValue = intValue; }
+				public BuffValue(double longFloatValue) { this.iValue = 0; this.lfValue = longFloatValue; }
+			}
+
+			private LinkedList<BuffValue>[] buffList;
+			private object[] buffListLock;
+
+			private void AddBuff(BuffValue bf, int buffTime, BuffType buffType, Action ReCalculateFunc)
+			{
+				Task.Run
+					(
+						() =>
+						{
+							LinkedListNode<BuffValue> buffNode;
+							lock (buffListLock[(uint)buffType])
+							{
+								buffNode = buffList[(uint)buffType].AddLast(bf);
+							}
+							ReCalculateFunc();
+							Thread.Sleep(buffTime);
+							try
+							{
+								lock (buffListLock[(uint)buffType])
+								{
+									buffList[(uint)buffType].Remove(buffNode);
+								}
+							}
+							catch { }
+							ReCalculateFunc();
+						}
+					);
+			}
+
+			private int ReCalculateFloatBuff(BuffType buffType, int orgVal, int maxVal, int minVal)
+			{
+				double times = 1.0;
+				lock (buffListLock[(uint)buffType])
+				{
+					foreach (var add in buffList[(uint)buffType])
+					{
+						times *= add.lfValue;
+					}
+				}
+				return Math.Max(Math.Min((int)Math.Round(orgVal * times), maxVal), minVal);
+			}
+
+			public void AddMoveSpeed(double add, int buffTime, Action<int> SetNewMoveSpeed, int orgMoveSpeed)
+				=> AddBuff(new BuffValue(add), buffTime, BuffType.MoveSpeed, () => SetNewMoveSpeed(ReCalculateFloatBuff(BuffType.MoveSpeed, orgMoveSpeed, MaxSpeed, MinSpeed)));
+
+			public void AddAP(double add, int buffTime, Action<int> SetNewAp, int orgAp)
+				=> AddBuff(new BuffValue(add), buffTime, BuffType.AP, () => SetNewAp(ReCalculateFloatBuff(BuffType.AP, orgAp, MaxAP, MinAP)));
+
+			public void ChangeCD(double discount, int buffTime, Action<int> SetNewCD, int orgCD)
+				=> AddBuff(new BuffValue(discount), buffTime, BuffType.CD, () => SetNewCD(ReCalculateFloatBuff(BuffType.CD, orgCD, int.MaxValue, 1)));
+
+			public void AddShield(int shieldTime) => AddBuff(new BuffValue(), shieldTime, BuffType.Shield, () => { });
+			public bool HasShield
+			{
+				get
+				{
+					lock (buffListLock[(uint)BuffType.Shield])
+					{
+						return buffList[(uint)BuffType.Shield].Count != 0;
+					}
+				}
+			}
+
+			public void AddTotem(int totemTime) => AddBuff(new BuffValue(), totemTime, BuffType.Totem, () => { });
+			public bool HasTotem
+			{
+				get
+				{
+					lock (buffListLock[(uint)BuffType.Totem])
+					{
+						return buffList[(uint)BuffType.Totem].Count != 0;
+					}
+				}
+			}
+			public bool TryActivatingTotem()
+			{
+				if (HasTotem)
+				{
+					lock (buffListLock[(uint)BuffType.Totem])
+					{
+						buffList[(uint)BuffType.Totem].Clear();
+					}
+					return true;
+				}
+				return false;
+			}
+
+			public void AddSpear(int spearTime) => AddBuff(new BuffValue(), spearTime, BuffType.Spear, () => { });
+			public bool HasSpear
+			{
+				get
+				{
+					lock (buffListLock[(uint)BuffType.Spear])
+					{
+						return buffList[(uint)BuffType.Spear].Count != 0;
+					}
+				}
+			}
+
+			public void ClearAll()
+			{
+				for (int i = 0; i < BuffTypeNum; ++i)
+				{
+					lock (buffListLock[i])
+					{
+						buffList[i].Clear();
+					}
+				}
+			}
+
+			public BuffManeger()
+			{
+
+				buffList = new LinkedList<BuffValue>[BuffTypeNum];
+				for (int i = 0; i < buffList.Length; ++i)
+				{
+					buffList[i] = new LinkedList<BuffValue>();
+				}
+
+				buffListLock = new object[buffList.Length];
+				for (int i = 0; i < buffListLock.Length; ++i)
+				{
+					buffListLock[i] = new object();
+				}
+
+			}
+		}
 	}
 }

@@ -148,6 +148,9 @@
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GameEngine\GameEngine.csproj">
+      <Project>{827409b2-b4b6-45d1-ad2d-556e269ca5cc}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\THUnity2D\THUnity2D.csproj">
       <Project>{08e3c3d1-b0fb-422f-8754-4b4fcaffc052}</Project>
     </ProjectReference>

@@ -29,7 +29,7 @@ namespace THUnity2D
 		public const int MaxPropTypeNum = 10;
 
 		protected bool laid = false;		//道具是否已放置
-		public bool Laid { get => laid; }
+		public bool Laid => laid;
 
 		public abstract PropType GetPropType();
 

@@ -11,12 +11,9 @@ namespace THUnity2D
 	public class Team
 	{
 		private static long currentMaxTeamID = 0;
-		public static long CurrentMaxTeamID
-		{
-			get => currentMaxTeamID;
-		}
+		public static long CurrentMaxTeamID => currentMaxTeamID;
 		private readonly long teamID;
-		public long TeamID { get => teamID; }
+		public long TeamID => teamID;
 		public const long invalidTeamID = long.MaxValue;
 		public const long noneTeamID = long.MinValue;
 		public int Score
