@@ -148,20 +148,20 @@
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GameEngine\GameEngine.csproj">
-      <Project>{827409b2-b4b6-45d1-ad2d-556e269ca5cc}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\THUnity2D\THUnity2D.csproj">
-      <Project>{08e3c3d1-b0fb-422f-8754-4b4fcaffc052}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="BasicWindow.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Win32Basic.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GameEngine\GameEngine.csproj">
+      <Project>{827409b2-b4b6-45d1-ad2d-556e269ca5cc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\THUnity2D\THUnity2D.csproj">
+      <Project>{08e3c3d1-b0fb-422f-8754-4b4fcaffc052}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

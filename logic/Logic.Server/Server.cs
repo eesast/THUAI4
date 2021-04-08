@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using THUnity2D;
 using GameEngine;
 using Communication.Proto;

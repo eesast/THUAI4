@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <utility>
+#include <type_traits>
 
 namespace
 {
@@ -110,7 +111,17 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         SetTimer(hWnd, paintTimerID, 50, NULL);
 
-        std::thread([]() {pMW->map->StartGame(1000 * 60 * 10); }).detach();
+        std::thread([hWnd]() 
+            {
+                pMW->map->StartGame(1000 * 60 * 10);
+                int score1 = pMW->map->GetTeamScore(0LL);
+                int score2 = pMW->map->GetTeamScore(1LL);
+                std::_tostringstream sout;
+                if constexpr (!std::is_same_v<decltype(sout), std::ostringstream>) sout.imbue(std::locale("chs"));
+                sout << TEXT("游戏结束！队伍一分数：") << score1 << TEXT("；队伍二分数：") << score2;
+                MessageBox(hWnd, sout.str().c_str(), TEXT("游戏结束！"), MB_OK);
+                SendMessage(hWnd, WM_CLOSE, 0, 0);
+            }).detach();
 
         auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk, int pick, int use, int throwprop)
         {

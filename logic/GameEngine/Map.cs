@@ -68,21 +68,19 @@ namespace GameEngine
 		{
 			get => cellColor.GetLength(0);
 		}
-		public int Cols                         //列数
+		public int Cols                         // 列数
 		{
 			get => cellColor.GetLength(1);
 		}
 
-		private ArrayList objList;              //游戏对象（除了玩家外）的列表
-		private ReaderWriterLockSlim objListLock;		//读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的ArrayList）
-		private ArrayList playerList;			//玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList）
+		private ArrayList objList;              // 游戏对象（除了玩家外）的列表
+		private ReaderWriterLockSlim objListLock;		// 读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的ArrayList）
+		private ArrayList playerList;			// 玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList）
 		private ReaderWriterLockSlim playerListLock;
 
-		private LinkedList<Prop> unpickedPropList;		//尚未捡起的道具列表
-		private ReaderWriterLockSlim unpickedPropListLock = new ReaderWriterLockSlim();
-		private ArrayList teamList;             //队伍列表
-		//private object teamListLock = new object();
-		private readonly Dictionary<uint, BirthPoint> birthPointList;	//出生点列表
+		private ArrayList teamList;						// 队伍列表
+		//private object teamListLock = new object();	// 队伍暂时不需要锁
+		private readonly Dictionary<uint, BirthPoint> birthPointList;	// 出生点列表
 
 		private readonly int numOfTeam;
 
@@ -155,97 +153,29 @@ namespace GameEngine
 
 			//开始产生道具
 
-			Task.Run
-				(
-					() =>
-					{
-						while (!IsGaming) Thread.Sleep(1000);
-						while (IsGaming)
-						{
-							var beginTime = Environment.TickCount64;
-							ProduceOneProp();
-							var endTime = Environment.TickCount64;
-							var deltaTime = endTime - beginTime;
-							if (deltaTime <= Constant.producePropTimeInterval)
-							{
-								Thread.Sleep(Constant.producePropTimeInterval - (int)deltaTime);
-							}
-							else
-							{
-								Console.WriteLine("In Function StartGame: The computer runs too slow that it cannot produce one prop in the given time!");
-							}
-						}
-					}
-				);
+			propManager.StartProducing();
 
 			isGaming = true;
 			Thread.Sleep(milliSeconds);
 			isGaming = false;
-			playerListLock.EnterReadLock();
+
+			playerListLock.EnterWriteLock();
 			try
 			{
 				foreach (Character player in playerList)
 				{
 					player.CanMove = false;
 				}
+				playerList.Clear();
 			}
-			finally { playerListLock.ExitReadLock(); }
+			finally { playerListLock.ExitWriteLock(); }
+			objListLock.EnterWriteLock();
+			try
+			{
+				objList.Clear();
+			}
+			finally { objListLock.ExitWriteLock(); }
 			return true;
-		}
-
-		private void ProduceOneProp()
-		{
-			Random r = new Random((int)Environment.TickCount64);
-			XYPosition newPropPos = new XYPosition();
-			while (true)
-			{
-				newPropPos.x = r.Next(0, Rows * Constant.numOfGridPerCell);
-				newPropPos.y = r.Next(0, Cols * Constant.numOfGridPerCell);
-				int cellX = Constant.GridToCellX(newPropPos), cellY = Constant.GridToCellY(newPropPos);
-				bool canLayProp = true;
-				objListLock.EnterReadLock();
-				try
-				{
-					foreach (GameObject obj in objList)
-					{
-						if (cellX == Constant.GridToCellX(obj.Position) && cellY == Constant.GridToCellY(obj.Position) && (obj is Wall || obj is BirthPoint))
-						{
-							canLayProp = false;
-							break;
-						}
-					}
-				}
-				finally { objListLock.ExitReadLock(); }
-				if (canLayProp)
-				{
-					newPropPos = Constant.CellToGrid(cellX, cellY);
-					break;
-				}
-			}
-
-			PropType propType = (PropType)r.Next(Prop.MinPropTypeNum, Prop.MaxPropTypeNum + 1);
-
-			Prop? newProp = null;
-			switch (propType)
-			{
-			case PropType.Bike: newProp = new Bike(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Amplifier: newProp = new Amplifier(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.JinKeLa: newProp = new JinKeLa(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Rice: newProp = new Rice(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Shield: newProp = new Shield(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Totem: newProp = new Totem(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Spear: newProp = new Spear(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Dirt: newProp = new Dirt(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Attenuator: newProp = new Attenuator(newPropPos, Constant.unpickedPropRadius); break;
-			case PropType.Divider: newProp = new Divider(newPropPos, Constant.unpickedPropRadius); break;
-			}
-			if (newProp != null)
-			{
-				unpickedPropListLock.EnterWriteLock();
-				try { unpickedPropList.AddLast(newProp); }
-				finally { unpickedPropListLock.ExitWriteLock(); }
-				newProp.CanMove = true;
-			}
 		}
 
 		//人物移动
@@ -290,9 +220,7 @@ namespace GameEngine
 				if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
 					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius)
 				{
-					unpickedPropListLock.EnterWriteLock();
-					try { unpickedPropList.Remove((Prop)obj); }
-					finally { unpickedPropListLock.ExitWriteLock(); }
+					propManager.RemoveProp((Prop)obj);
 					return true;
 				}
 				return false;
@@ -366,7 +294,6 @@ namespace GameEngine
 							}
 							)
 						{ IsBackground = true }.Start();
-
 					}
 				}
 			};
@@ -579,52 +506,8 @@ namespace GameEngine
 			if (!IsGaming) return false;
 			Character? player = FindPlayerFromPlayerList(playerID);
 			if (player == null) return false;
-			if (!player.IsAvailable) return false;
-
-			lock (player.propLock)
-			{
-				while (player.IsModifyingProp) Thread.Sleep(1);
-				player.IsModifyingProp = true;
-			}
-
-			int cellX = Constant.GridToCellX(player.Position), cellY = Constant.GridToCellY(player.Position);
-
-#if DEBUG
-			Console.WriteLine("Try picking: {0} {1} Type: {2}", cellX, cellY, (int)propType);
-#endif
-
-			Prop? prop = null;
-			unpickedPropListLock.EnterWriteLock();
-			try
-			{
-				for (LinkedListNode<Prop>? propNode = unpickedPropList.First; propNode != null; propNode = propNode.Next)
-				{
-#if DEBUG
-					Console.WriteLine("Picking: Now check type: {0}", (int)propNode.Value.GetPropType());
-#endif
-
-					if (propNode.Value.GetPropType() != propType || propNode.Value.IsMoving) continue;
-					int cellXTmp = Constant.GridToCellX(propNode.Value.Position), cellYTmp = Constant.GridToCellY(propNode.Value.Position);
-
-#if DEBUG
-					Console.WriteLine("Ready to pick: {0} {1}, {2} {3}", cellX, cellY, cellXTmp, cellYTmp);
-#endif
-
-					if (cellXTmp == cellX && cellYTmp == cellY)
-					{
-						prop = propNode.Value;
-						unpickedPropList.Remove(propNode);
-						break;
-					}
-				}
-			}
-			finally { unpickedPropListLock.ExitWriteLock(); }
-
-			if (prop != null)
-			{
-				player.HoldProp = prop;
-				prop.Parent = player;
-			}
+			
+			Prop? prop = propManager.PickProp(player, propType);
 
 			player.IsModifyingProp = false;
 			return prop != null;
@@ -636,74 +519,7 @@ namespace GameEngine
 			Character? player = FindPlayerFromPlayerList(playerID);
 			if (player == null) return;
 
-			if (!player.IsAvailable) return;
-
-			lock (player.propLock)
-			{
-				while (player.IsModifyingProp) Thread.Sleep(1);
-				player.IsModifyingProp = true;
-			}
-
-			Prop? prop = player.HoldProp;
-			player.HoldProp = null;
-
-			player.IsModifyingProp = false;
-
-			if (prop != null)
-			{
-				if (prop is Buff)
-				{
-					switch (prop.GetPropType())
-					{
-					case PropType.Bike:
-						player.AddMoveSpeed(Constant.bikeMoveSpeedBuff, Constant.buffPropTime);
-						break;
-					case PropType.Amplifier:
-						player.AddAP(Constant.amplifierAtkBuff, Constant.buffPropTime);
-						break;
-					case PropType.JinKeLa:
-						player.ChangeCD(Constant.jinKeLaCdDiscount, Constant.buffPropTime);
-						break;
-					case PropType.Rice:
-						player.AddHp(Constant.riceHpAdd);
-						break;
-					case PropType.Shield:
-						player.AddShield(Constant.shieldTime);
-						break;
-					case PropType.Totem:
-						player.AddTotem(Constant.totemTime);
-						break;
-					case PropType.Spear:
-						player.AddSpear(Constant.spearTime);
-						break;
-					}
-				}
-				else if (prop is Mine)
-				{
-					Mine mine = (Mine)prop;
-					mine.SetLaid(player.Position);
-					new Thread
-						(
-							() =>
-							{
-								objListLock.EnterWriteLock();
-								try
-								{
-									objList.Add(mine);
-								}
-								finally { objListLock.ExitWriteLock(); }
-
-								Thread.Sleep(Constant.mineTime);
-
-								objListLock.EnterWriteLock();
-								try { objList.Remove(mine); }
-								catch { }
-								finally { objListLock.ExitWriteLock(); }
-							}
-						)
-					{ IsBackground = true }.Start();
-				}
-			}
+			propManager.UseProp(player);
 		}
 
 		private void ActivateMine(Character player, Mine mine)
@@ -751,7 +567,7 @@ namespace GameEngine
 				gameObjList.AddRange(team.GetPlayerListForUnsafe());
 			}
 			objListLock.EnterWriteLock(); try { gameObjList.AddRange(objList); } finally { objListLock.ExitWriteLock(); }
-			unpickedPropListLock.EnterReadLock(); try { gameObjList.AddRange(unpickedPropList); } finally { unpickedPropListLock.ExitReadLock(); }
+			propManager.UnpickedPropListLock.EnterReadLock(); try { gameObjList.AddRange(propManager.UnpickedPropList); } finally { propManager.UnpickedPropListLock.ExitReadLock(); }
 			return gameObjList;
 		}
 
@@ -774,15 +590,7 @@ namespace GameEngine
 		{
 			Character? player = FindPlayerFromPlayerList(playerID);
 			if (player == null) return;
-			if (!player.IsAvailable) return;
-			Prop? oldProp = player.UseProp();
-			if (oldProp == null) return;
-			oldProp.ResetPosition(player.Position);
-			oldProp.ResetMoveSpeed(Constant.thrownPropMoveSpeed);
-			moveMagager.MoveObj(oldProp, moveTimeInMilliseconds, angle);
-			unpickedPropListLock.EnterWriteLock();
-			try { unpickedPropList.AddLast(oldProp); }
-			finally { unpickedPropListLock.ExitWriteLock(); }
+			propManager.ThrowProp(player, moveTimeInMilliseconds, angle);
 		}
 
 		public int GetTeamScore(long teamID)
@@ -840,7 +648,8 @@ namespace GameEngine
 				EndMove: obj => { if (obj is Bullet) BulletBomb((Bullet)obj, null); }
 			);
 
-			unpickedPropList = new LinkedList<Prop>();
+			propManager = new PropManager(this);
+
 			birthPointList = new Dictionary<uint, BirthPoint>(MapInfo.numOfBirthPoint);
 
 			//将墙等游戏对象插入到游戏中
@@ -864,8 +673,6 @@ namespace GameEngine
 					}
 				}
 			}
-
 		}
-
 	}
 }
