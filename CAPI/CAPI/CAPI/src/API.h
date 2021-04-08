@@ -33,7 +33,7 @@ struct State
 #ifdef _COLOR_MAP_BY_HASHING_
 	std::unordered_map<uint32_t, THUAI4::ColorType> cellColors;
 #else
-	std::array<std::array<ColorType, nCells>, nCells> cellColors;
+	std::array<std::array<THUAI4::ColorType, StateConstant::nCells>, StateConstant::nCells> cellColors;
 #endif
 };
 
