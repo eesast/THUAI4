@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using FrameRateTask;
+using Timothy.FrameRateTask;
 using THUnity2D;
 
 namespace GameEngine
@@ -155,7 +155,7 @@ namespace GameEngine
 
 			//开始产生道具
 
-			new Thread
+			Task.Run
 				(
 					() =>
 					{
@@ -176,8 +176,7 @@ namespace GameEngine
 							}
 						}
 					}
-				)
-			{ IsBackground = true }.Start();
+				);
 
 			isGaming = true;
 			Thread.Sleep(milliSeconds);
@@ -254,25 +253,19 @@ namespace GameEngine
 		{
 			if (!isGaming) return;
 			Character? playerToMove = FindPlayerFromPlayerList(playerID);
-			if (playerToMove != null) MoveObj(playerToMove, moveTimeInMilliseconds, moveDirection);
+			if (playerToMove != null) moveMagager.MoveObj(playerToMove, moveTimeInMilliseconds, moveDirection);
 		}
 
 		//碰撞后处理，返回是否已经销毁该对象
 		private bool OnCollision(GameObject obj, GameObject collisionObj, Vector moveVec)
 		{
-			if (obj is Character)		//如果是人主动碰撞
+			if (collisionObj is Mine)
 			{
-
-				/*由于四周是墙，所以人物永远不可能与越界方块碰撞*/
-
-				Vector2 objMoveUnitVector = new Vector2(1.0 * Math.Cos(obj.FacingDirection), 1.0 * Math.Sin(obj.FacingDirection));
-
-				XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
-
-				uint maxLen = collisionChecker.FindMax(obj, nextPos, moveVec);
-
-				maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Constant.numOfStepPerSecond));
-				obj.Move(new Vector(moveVec.angle, maxLen));
+				ActivateMine((Character)obj, (Mine)collisionObj);
+				return false;
+			}
+			else if (obj is Character)		//如果是人主动碰撞
+			{
 				return false;
 			}
 			else if (obj is Bullet)
@@ -470,103 +463,6 @@ namespace GameEngine
 			willBeAttacked.Clear();
 		}
 
-		//物体移动
-		private void MoveObj(GameObject obj, int moveTime, double moveDirection)
-		{
-			new Thread
-				(
-					() =>
-					{
-						lock (obj.moveLock)
-						{
-							if (!obj.IsAvailable) return;
-							obj.IsMoving = true;     //开始移动
-						}
-
-						GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
-						double deltaLen = 0.0;      //储存行走的误差
-						Vector moveVec = new Vector(moveDirection, 0.0);
-						//先转向
-						if (isGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
-						GameObject? collisionObj = null;
-
-						bool isDestroyed = false;
-						new FrameRateTaskExecutor<int>
-						(
-							() => isGaming && obj.CanMove && !obj.IsResetting,
-							() =>
-							{
-								moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
-								deltaLen = 0;
-
-								//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
-								//缺陷：半径为0的物体检测不到越界
-								//改进：如果越界，则与越界方块碰撞
-
-								while (true)
-								{
-									collisionObj = collisionChecker.CheckCollision(obj, moveVec);
-									if (collisionObj == null) break;
-									if (collisionObj is Mine)       //CheckCollision保证只有不同组的人物会和地雷碰撞
-									{
-										ActivateMine((Character)obj, (Mine)collisionObj);
-									}
-									else
-									{
-										if (OnCollision(obj, collisionObj, moveVec))
-										{
-											//已经被销毁
-
-											GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
-											isDestroyed = true;
-											return false;
-										}
-										if (obj.IsRigid && obj is Character) moveVec.length = 0;
-										break;
-									}
-								}
-
-								{
-									deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
-								}
-
-								return true;
-							},
-							1000 / Constant.numOfStepPerSecond,
-							() =>
-							{
-								if (!isDestroyed)
-								{
-									moveVec.length = deltaLen;
-									if ((collisionObj = collisionChecker.CheckCollision(obj, moveVec)) == null)
-									{
-										obj.Move(moveVec);
-									}
-									else
-									{
-										OnCollision(obj, collisionObj, moveVec);
-									}
-									obj.IsMoving = false;        //结束移动
-									GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
-									if (obj is Bullet) BulletBomb((Bullet)obj, null);
-								}
-								return 0;
-							},
-							maxTotalDuration: moveTime
-						)
-						{
-							AllowTimeExceed = true,
-							MaxTolerantTimeExceedCount = ulong.MaxValue,
-							TimeExceedAction = b =>
-							{
-								Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!!");
-							}
-						}.Start();
-					}
-				)
-			{ IsBackground = true }.Start();
-		}
-
 		private Character? FindPlayerFromPlayerList(long playerID)
 		{
 			Character? player = null;
@@ -669,7 +565,7 @@ namespace GameEngine
 					objListLock.EnterWriteLock(); try { objList.Add(newBullet); } finally { objListLock.ExitWriteLock(); }
 
 					newBullet.CanMove = true;
-					MoveObj(newBullet, timeInMilliseconds, angle);
+					moveMagager.MoveObj(newBullet, timeInMilliseconds, angle);
 					return true;
 				}
 			}
@@ -883,7 +779,7 @@ namespace GameEngine
 			if (oldProp == null) return;
 			oldProp.ResetPosition(player.Position);
 			oldProp.ResetMoveSpeed(Constant.thrownPropMoveSpeed);
-			MoveObj(oldProp, moveTimeInMilliseconds, angle);
+			moveMagager.MoveObj(oldProp, moveTimeInMilliseconds, angle);
 			unpickedPropListLock.EnterWriteLock();
 			try { unpickedPropList.AddLast(oldProp); }
 			finally { unpickedPropListLock.ExitWriteLock(); }
@@ -900,7 +796,7 @@ namespace GameEngine
 			return score;
 		}
 
-		CollisionChecker collisionChecker;
+		MoveEngine moveMagager;
 
 		public Map(uint[,] mapResource, int numOfTeam)
 		{
@@ -930,15 +826,18 @@ namespace GameEngine
 			objListLock = new ReaderWriterLockSlim();
 			playerListLock = new ReaderWriterLockSlim();
 
-			collisionChecker = new CollisionChecker
+			moveMagager = new MoveEngine
 			(
-				obj => obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
+				outOfBoundFunc: obj => obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
 					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius,
-				new Tuple<ArrayList, ReaderWriterLockSlim>[]
+				gameObjLists: new Tuple<ArrayList, ReaderWriterLockSlim>[]
 				{
 					new Tuple<ArrayList, ReaderWriterLockSlim>(playerList, playerListLock),
 					new Tuple<ArrayList, ReaderWriterLockSlim>(objList, objListLock)
-				}
+				},
+				IsGaming: () => isGaming,
+				OnCollision: OnCollision,
+				EndMove: obj => { if (obj is Bullet) BulletBomb((Bullet)obj, null); }
 			);
 
 			unpickedPropList = new LinkedList<Prop>();

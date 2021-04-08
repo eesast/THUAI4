@@ -6,7 +6,7 @@ using GameEngine;
 using Communication.Proto;
 using System.Threading.Tasks;
 using System.Threading;
-using FrameRateTask;
+using Timothy.FrameRateTask;
 
 namespace Logic.Server
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FrameRateTask
+namespace Timothy.FrameRateTask
 {
 	/// <summary>
 	/// This exception will be throwed when the task hasn't finished but is asked to get the return value.
