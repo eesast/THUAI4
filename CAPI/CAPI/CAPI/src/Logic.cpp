@@ -5,13 +5,13 @@
 extern const bool asynchronous;
 
 Logic::Logic() : pState(storage), pBuffer(storage + 1),
-				 capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
+capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
 {
 }
 
 Logic::~Logic() {}
 
-bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo &g)
+bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
 	Protobuf::PropType pT = g.proptype();
 	if (g.islaid() && (pT == Protobuf::PropType::Attenuator || pT == Protobuf::PropType::Dirt || pT == Protobuf::PropType::Divider))
@@ -58,7 +58,7 @@ void Logic::OnConnect()
 	capi.Send(message);
 }
 
-std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo &goi)
+std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Character> character = std::make_shared<THUAI4::Character>();
 	character->ap = goi.ap();
@@ -83,7 +83,7 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo &goi
 	character->y = goi.y();
 	return character;
 }
-std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo &goi)
+std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Wall> wall = std::make_shared<THUAI4::Wall>();
 	wall->guid = goi.guid();
@@ -93,7 +93,7 @@ std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo &goi)
 	wall->y = goi.y();
 	return wall;
 }
-std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo &goi)
+std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Prop> prop = std::make_shared<THUAI4::Prop>();
 	prop->facingDirection = goi.facingdirection();
@@ -108,7 +108,7 @@ std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo &goi)
 	prop->y = goi.y();
 	return prop;
 }
-std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo &goi)
+std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Bullet> bullet = std::make_shared<THUAI4::Bullet>();
 	bullet->ap = goi.ap();
@@ -124,7 +124,7 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo &goi)
 	bullet->y = goi.y();
 	return bullet;
 }
-std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo &goi)
+std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::BirthPoint> birthpoint = std::make_shared<THUAI4::BirthPoint>();
 	birthpoint->guid = goi.guid();
@@ -231,7 +231,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 #else
 				visible(selfX, selfY, it)
 #endif // _ALL_VISIBLE_
-			)
+				)
 			{
 				switch (it.gameobjtype())
 				{
@@ -266,7 +266,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 #else
 					CellColorVisible(selfX, selfY, i, j)
 #endif
-				)
+					)
 				{
 #ifdef _COLOR_MAP_BY_HASHING_
 					pBuffer->cellColors.insert(std::pair((i << 16) + j, (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j)));
@@ -290,7 +290,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		//如果这时候state还没被player访问，就把buffer转到state
 		if (mtx_state.try_lock())
 		{
-			State *temp = pState;
+			State* temp = pState;
 			pState = pBuffer;
 			pBuffer = temp;
 			FlagBufferUpdated = false;
@@ -360,7 +360,7 @@ void Logic::PlayerWrapper()
 			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
 			if (FlagBufferUpdated)
 			{
-				State *temp = pState;
+				State* temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
 				counter_state = counter_buffer;
@@ -371,7 +371,7 @@ void Logic::PlayerWrapper()
 			{ //如果当前state已经接触过且buffer没更新，那就等到buffer更新
 				//意外断线这里也会锁住
 				cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
-				State *temp = pState;
+				State* temp = pState;
 				pState = pBuffer;
 				pBuffer = temp;
 				counter_state = counter_buffer;
@@ -409,7 +409,7 @@ void Logic::PlayerWrapperAsyn()
 	std::cout << "AI thread terminates" << std::endl;
 }
 
-void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename)
+void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename)
 {
 	this->playerID = playerID;
 	this->teamID = teamID;
@@ -425,22 +425,22 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 			{
 				if (FlagBufferUpdated)
 				{
-					State *temp = pState;
-					pState = pBuffer;
-					pBuffer = temp;
-					counter_state=counter_buffer;
-					FlagBufferUpdated = false;
+					State* temp = pState;
+						pState = pBuffer;
+						pBuffer = temp;
+						counter_state = counter_buffer;
+						FlagBufferUpdated = false;
 				}
 				mtx_buffer.unlock();
 			} };
-		asynchronous)
+	asynchronous)
 	{
 		if (!debuglevel)
 		{
-			this->pApi = std::make_unique<API<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
-													 [this]() { return MessageStorage.empty(); },
-													 [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-													 (const State *&)pState, mtx_state, tu);
+			this->pApi = std::make_unique<API<true>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				[this]() { return MessageStorage.empty(); },
+				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+				(const State*&)pState, mtx_state, tu);
 		}
 		else
 		{
@@ -454,21 +454,21 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 					flag = true;
 				}
 			}
-			this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
-														  [this]() { return MessageStorage.empty(); },
-														  [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-														  (const State *&)pState, mtx_state, tu, debuglevel != 1,
-														  flag ? std::cout : OutFile);
+			this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				[this]() { return MessageStorage.empty(); },
+				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+				(const State*&)pState, mtx_state, tu, debuglevel != 1,
+				flag ? std::cout : OutFile);
 		}
 	}
 	else
 	{
 		if (!debuglevel)
 		{
-			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
-													  [this]() { return MessageStorage.empty(); },
-													  [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-													  (const State *&)pState);
+			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				[this]() { return MessageStorage.empty(); },
+				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+				(const State*&)pState, mtx_state, tu);
 		}
 		else
 		{
@@ -482,11 +482,11 @@ void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t t
 					flag = true;
 				}
 			}
-			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer &M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
-														   [this]() { return MessageStorage.empty(); },
-														   [this](std::string &s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-														   (const State *&)pState, debuglevel != 1,
-														   flag ? std::cout : OutFile);
+			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+				[this]() { return MessageStorage.empty(); },
+				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+				(const State*&)pState, mtx_state, tu, debuglevel != 1,
+				flag ? std::cout : OutFile);
 		}
 	}
 
