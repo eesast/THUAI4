@@ -513,7 +513,7 @@ namespace Gaming
 
 		public int GetTeamScore(long teamID)
 		{
-			if (!Team.teamExists(teamID)) throw new Exception("GetTeamScore error: No this team!");
+			if (!Team.teamExists(teamID)) throw new Exception("");
 			return gameMap.GetColorArea(TeamToColor(teamID));
 		}
 
@@ -522,7 +522,7 @@ namespace Gaming
 		public Map GameMap => gameMap;
 		public Game(uint[,] mapResource, int numOfTeam)
 		{
-			if (numOfTeam > maxTeamNum) throw new Exception("Number of teams overflows!");
+			if (numOfTeam > maxTeamNum) throw new TeamNumOverFlowException();
 
 			gameMap = new Map(mapResource);
 
@@ -548,8 +548,13 @@ namespace Gaming
 		}
 	}
 
-	public class TeamNumOverFlow : Exception
+	public class TeamNumOverFlowException : Exception
 	{
 		public override string Message => "Number of teams overflows!";
+	}
+
+	public class TeamNotExistException : Exception
+	{
+		public override string Message => "The team sprcified by the teamID not exists!";
 	}
 }
