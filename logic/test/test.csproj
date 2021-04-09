@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
+    <ProjectReference Include="..\Gaming\Gaming.csproj" />
     <ProjectReference Include="..\THUnity2D\THUnity2D.csproj" />
   </ItemGroup>
 

@@ -38,7 +38,8 @@ namespace Logic.Server
 			ret.Ap = player.AP;
 			ret.BulletType = ConvertTool.ToCommunicationBulletType(player.bulletType);
 
-			ret.PropType = player.HoldProp == null ? Communication.Proto.PropType.Null : ConvertTool.ToCommunicationPropType(player.HoldProp.GetPropType());
+			Prop holdProp = player.HoldProp;		// 防止判断后被突然置null
+			ret.PropType = holdProp == null ? Communication.Proto.PropType.Null : ConvertTool.ToCommunicationPropType(holdProp.GetPropType());
 
 			ret.IsDying = player.IsResetting;
 			ret.JobType = ConvertTool.ToCommunicationJobType(player.jobType);

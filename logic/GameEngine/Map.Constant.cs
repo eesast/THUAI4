@@ -42,17 +42,17 @@ namespace GameEngine
 
 			public static XYPosition CellToGrid(int x, int y)   //求格子的中心坐标
 			{
-				XYPosition ret = new XYPosition(x * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2,
-					y * Constant.numOfGridPerCell + Constant.numOfGridPerCell / 2);
+				XYPosition ret = new XYPosition(x * numOfGridPerCell + numOfGridPerCell / 2,
+					y * numOfGridPerCell + numOfGridPerCell / 2);
 				return ret;
 			}
 			public static int GridToCellX(XYPosition pos)       //求坐标所在的格子的x坐标
 			{
-				return pos.x / Constant.numOfGridPerCell;
+				return pos.x / numOfGridPerCell;
 			}
 			public static int GridToCellY(XYPosition pos)      //求坐标所在的格子的y坐标
 			{
-				return pos.y / Constant.numOfGridPerCell;
+				return pos.y / numOfGridPerCell;
 			}
 		}
 	}

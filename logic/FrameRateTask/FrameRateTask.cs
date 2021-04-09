@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace FrameRateTask
+namespace Timothy.FrameRateTask
 {
 	/// <summary>
 	/// The class intends to execute a task that need to be executed repeatedly every less than one second and need to be accurate.
