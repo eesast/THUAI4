@@ -341,7 +341,7 @@ namespace Logic.Server
 						msg.PlayerGUIDs.Add(playerGUIDs[k]);
 					}
 
-					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(game.TeamToColor(i));
+					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(Map.TeamToColor(i));
 
 					foreach (var infos in msgGameObjs)
 					{

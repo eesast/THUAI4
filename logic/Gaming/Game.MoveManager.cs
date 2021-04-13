@@ -54,12 +54,26 @@ namespace Gaming
 						if (collisionObj is Mine)
 						{
 							ActivateMine((Character)obj, (Mine)collisionObj);
+							return MoveEngine.AfterCollision.ContinueCheck;
 						}
-						return false;
+						return MoveEngine.AfterCollision.MoveMax;
 					},
 					EndMove: obj =>
 					{
 						GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
+					},
+					IgnoreCollision: (obj, collisionObj) =>
+					{
+						if (collisionObj is BirthPoint)			// 自己的出生点可以忽略碰撞
+						{
+							if (object.ReferenceEquals(((BirthPoint)collisionObj).Parent, obj)) return true;
+							return false;
+						}
+						else if (collisionObj is Mine)			// 自己队的炸弹忽略碰撞
+						{
+							if (((Mine)collisionObj).Parent.TeamID == ((Character)obj).TeamID) return true;
+						}
+						return false;
 					}
 				);
 			}

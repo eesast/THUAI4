@@ -116,7 +116,12 @@ namespace Gaming
 			return true;
 		}
 
-		//人物移动
+		/// <summary>
+		/// 人物移动
+		/// </summary>
+		/// <param name="playerID">人物的ID</param>
+		/// <param name="moveTimeInMilliseconds">移动时间，毫秒</param>
+		/// <param name="moveDirection">移动方向，弧度</param>
 		public void MovePlayer(long playerID, int moveTimeInMilliseconds, double moveDirection)
 		{
 			if (!gameMap.Timer.IsGaming) return;
@@ -124,6 +129,13 @@ namespace Gaming
 			if (playerToMove != null) moveManager.MovePlayer(playerToMove, moveTimeInMilliseconds, moveDirection);
 		}
 
+		/// <summary>
+		/// 攻击
+		/// </summary>
+		/// <param name="playerID">人物ID</param>
+		/// <param name="timeInMilliseconds">子弹飞行时间，毫秒</param>
+		/// <param name="angle">子弹飞行角度，弧度</param>
+		/// <returns>是否攻击成功</returns>
 		public bool Attack(long playerID, int timeInMilliseconds, double angle)
 		{
 			if (!gameMap.Timer.IsGaming) return false;
@@ -131,7 +143,12 @@ namespace Gaming
 			return playerWillAttack == null ? false : attackManager.Attack(playerWillAttack, timeInMilliseconds, angle);
 		}
 
-		//捡道具，是否是前面的那一格（true则是面向的那一格；false则是所在的那一格），以及要捡的道具类型
+		/// <summary>
+		/// 捡道具
+		/// </summary>
+		/// <param name="playerID">捡道具的人物ID</param>
+		/// <param name="propType">要捡的道具类型</param>
+		/// <returns>是否捡道具成功</returns>
 		public bool Pick(long playerID, PropType propType)
 		{
 			if (!gameMap.Timer.IsGaming) return false;
@@ -144,6 +161,10 @@ namespace Gaming
 			return prop != null;
 		}
 
+		/// <summary>
+		/// 使用道具
+		/// </summary>
+		/// <param name="playerID">捡道具的人物ID</param>
 		public void Use(long playerID)
 		{
 			if (!gameMap.Timer.IsGaming) return;
@@ -153,6 +174,9 @@ namespace Gaming
 			propManager.UseProp(player);
 		}
 
+		/// <summary>
+		/// 发送消息
+		/// </summary>
 		public void SendMessage(long fromID, long toID, string message)
 		{
 			if (message.Length > 64) return;
@@ -169,6 +193,9 @@ namespace Gaming
 			to.Message = message;
 		}
 
+		/// <summary>
+		/// 获取当前场上的对象，和已经下场的玩家
+		/// </summary>
 		public ArrayList GetGameObject()
 		{
 			ArrayList gameObjList = new ArrayList();
@@ -181,6 +208,9 @@ namespace Gaming
 			return gameObjList;
 		}
 
+		/// <summary>
+		/// 获取玩家，可以获取已经下场的玩家
+		/// </summary>
 		public Character GetPlayerFromTeam(long playerID)   //从队伍中寻找玩家，要求一定要找到
 		{
 			foreach (Team team in teamList)
@@ -196,6 +226,9 @@ namespace Gaming
 			return ((Team)teamList[(int)teamID]).GetPlayerIDs();
 		}
 
+		/// <summary>
+		/// 扔道具
+		/// </summary>
 		public void Throw(long playerID, int moveTimeInMilliseconds, double angle)
 		{
 			Character? player = gameMap.FindPlayer(playerID);

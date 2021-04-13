@@ -14,8 +14,6 @@ namespace Gaming
 
 		class AttackManager
 		{
-
-			//攻击
 			public bool Attack(Character playerWillAttack, int timeInMilliseconds, double angle)
 			{
 				if (!playerWillAttack.IsAvailable) return false;
@@ -91,7 +89,7 @@ namespace Gaming
 					}
 
 					gameMap.ObjListLock.EnterWriteLock(); try { gameMap.ObjList.Add(newBullet); } finally { gameMap.ObjListLock.ExitWriteLock(); }
-
+					
 					newBullet.CanMove = true;
 					moveEngine.MoveObj(newBullet, timeInMilliseconds, angle);
 					return true;
@@ -99,7 +97,11 @@ namespace Gaming
 				return false;
 			}
 
-			//攻击一个玩家函数
+			/// <summary>
+			/// 攻击一个玩家
+			/// </summary>
+			/// <param name="bullet">攻击的子弹</param>
+			/// <param name="playerBeingShot">被打到的玩家</param>
 			private void BombOnePlayer(Bullet bullet, Character playerBeingShot)
 			{
 				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
@@ -147,6 +149,11 @@ namespace Gaming
 				}
 			}
 
+			/// <summary>
+			/// 爆掉子弹
+			/// </summary>
+			/// <param name="bullet">要爆炸的子弹</param>
+			/// <param name="objBeingShot">子弹打到的物体，如果为null，则未打到物体便爆炸，例如越界或被其他子弹引爆</param>
 			private void BulletBomb(Bullet bullet, GameObject? objBeingShot)
 			{
 				GameObject.Debug(bullet, " bombed!");
@@ -272,24 +279,18 @@ namespace Gaming
 						gameMap: gameMap,
 						OnCollision: (obj, collisionObj, moveVec) =>
 						{
-							//如果越界，爆炸
-							if (collisionObj is OutOfBoundBlock)
-							{
-								BulletBomb((Bullet)obj, null);
-								return true;
-							}
-
-							if (obj.IsRigid)        //CheckCollision保证了collisionObj不可能是BirthPoint
-							{
-								BulletBomb((Bullet)obj, collisionObj); return true;
-							}
-
-							return false;
+							BulletBomb((Bullet)obj, collisionObj);
+							return MoveEngine.AfterCollision.Destroyed;
 						},
 						EndMove: obj =>
 						{
 							GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 							BulletBomb((Bullet)obj, null);
+						},
+						IgnoreCollision: (obj, collisionObj) =>
+						{
+							if (collisionObj is BirthPoint || collisionObj is Mine) return true;    // 子弹不和出生点与地雷碰撞
+							return false;
 						}
 					);
 			}

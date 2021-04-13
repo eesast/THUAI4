@@ -278,19 +278,15 @@ namespace Gaming
 					gameMap: gameMap,
 					OnCollision: (obj, collisionObj, moveVec) =>
 					{
-						//如果越界，清除出游戏
-						if (obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
-							|| obj.Position.x >= Map.Constant.numOfGridPerCell * gameMap.Rows - obj.Radius || obj.Position.y >= Map.Constant.numOfGridPerCell * gameMap.Cols - obj.Radius)
-						{
-							RemoveProp((Prop)obj);
-							return true;
-						}
-						return false;
+						//越界，清除出游戏
+						RemoveProp((Prop)obj);
+						return MoveEngine.AfterCollision.Destroyed;
 					},
 					EndMove: obj =>
 					{
 						GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
-					}
+					},
+					IgnoreCollision: (obj, collisionObj) => true		// 道具行动，一切皆忽略
 				);
 				unpickedPropList = new LinkedList<Prop>();
 				unpickedPropListLock = new ReaderWriterLockSlim();
