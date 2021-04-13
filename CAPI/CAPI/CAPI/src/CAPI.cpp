@@ -3,7 +3,7 @@
 #include <thread>
 #include <chrono>
 
-CAPI::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void()> onreceive) : __OnConnect(onconnect), __OnReceive(onreceive), __OnClose(onclose), pclient(this) {}
+CAPI::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void(Pointer2Message)> onreceive) : __OnConnect(onconnect), __OnReceive(onreceive), __OnClose(onclose), pclient(this) {}
 
 EnHandleResult CAPI::OnConnect(ITcpClient *pSender, CONNID dwConnID)
 {
@@ -37,8 +37,7 @@ EnHandleResult CAPI::OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE 
 		std::cout << "Unknown type of message!!!" << std::endl;
 		return HR_ERROR;
 	}
-	queue.push(p2m);
-	__OnReceive();
+	__OnReceive(std::move(p2m));
 	return HR_OK;
 }
 
@@ -88,16 +87,4 @@ void CAPI::Stop()
 		std::cout << "The client wasn`t stopped. Error code:";
 		std::cout << pclient->GetLastError() << std::endl;
 	}
-}
-
-bool CAPI::TryPop(Pointer2Message &ptr)
-{
-	if (queue.empty())
-		return false;
-	return queue.try_pop(ptr);
-}
-
-bool CAPI::IsEmpty() const
-{
-	return queue.empty();
 }

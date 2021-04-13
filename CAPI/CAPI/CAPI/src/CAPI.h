@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef CAPI_H
 
@@ -23,22 +23,32 @@ private:
 	static const int32_t MessageToServer = 1;
 	static const int32_t MessageToOneClient = 2;
 	const std::function<void()> __OnConnect;
-	const std::function<void()> __OnReceive;
+	const std::function<void(Pointer2Message)> __OnReceive;
 	const std::function<void()> __OnClose;
-	concurrency::concurrent_queue<Pointer2Message> queue;
 	CTcpPackClientPtr pclient;
-	int counter=0;
 
 public:
-	CAPI(std::function<void()>, std::function<void()>, std::function<void()>);
+	// CAPI构造函数
+	//onconnect: OnConnect 触发时调用的回调函数
+	//onclose: OnClose 触发时调用的回调函数
+	//onreceive: OnReceive 触发时调用的回调函数
+	CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void(Pointer2Message)> onreceive);
+	
+	//连接Agent 成功返回真，否则返回假
+	//address: Agent IP
+	//port: Agent 监听的端口号
 	bool Connect(const char* address, uint16_t port);
+
+	//发送消息
 	void Send(const Protobuf::MessageToServer&);
+
+	//停止client
 	void Stop();
-	bool TryPop(Pointer2Message&);
-	bool IsEmpty() const;
-	virtual EnHandleResult OnConnect(ITcpClient *pSender, CONNID dwConnID);
-	virtual EnHandleResult OnClose(ITcpClient *pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
-	virtual EnHandleResult OnReceive(ITcpClient *pSender, CONNID dwConnID, const BYTE *pData, int iLength);
+
+	//HPSocket提供的回调函数接口
+	virtual EnHandleResult OnConnect(ITcpClient* pSender, CONNID dwConnID);
+	virtual EnHandleResult OnClose(ITcpClient* pSender, CONNID dwConnID, EnSocketOperation enOperation, int iErrorCode);
+	virtual EnHandleResult OnReceive(ITcpClient* pSender, CONNID dwConnID, const BYTE* pData, int iLength);
 };
 
 #endif //!CAPI_H

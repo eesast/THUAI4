@@ -30,5 +30,6 @@ void AI::play(GameApi &g)
 			g.GetCellColor(i, j);
 		}
 	}
+	std::cout << g.GetCounterOfFrames() << std::endl;
 	std::cout << "I`m at (" << self->x << "," << self->y << ")." << std::endl;
 }
