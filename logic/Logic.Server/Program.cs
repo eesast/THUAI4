@@ -17,7 +17,23 @@ namespace Logic.Server
 
             Console.WriteLine("Server begin to run: " + options.ServerPort.ToString());
 
-            Server server = new Server(options);
+            ServerBase server = null;
+
+            if (options.PlayBack)
+            {
+                server = new PlayBackServer(options);
+
+            }
+            else { server = new GameServer(options); }
+
+            Console.WriteLine($"Final score: ");
+            for (int i = 0; i < server.TeamCount; ++i)
+			{
+                Console.WriteLine($"Team {i}: {server.GetTeamScore(i)}");
+			}
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
             
             return 0;
         }

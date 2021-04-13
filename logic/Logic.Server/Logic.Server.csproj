@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\communication\communication_csharp\CommServer\CommServer.csproj" />
     <ProjectReference Include="..\..\communication\communication_csharp\Proto\Proto.csproj" />
+    <ProjectReference Include="..\..\playback\playback\playback.csproj" />
     <ProjectReference Include="..\FrameRateTask\FrameRateTask.csproj" />
     <ProjectReference Include="..\Gaming\Gaming.csproj" />
   </ItemGroup>

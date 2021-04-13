@@ -18,5 +18,11 @@ namespace Logic.Server
 
 		[Option('g', "gameTimeInSecond", Required = false, HelpText = "The time of the game in second, 10 minutes by default")]
 		public uint GameTimeInSecond { get; set; } = 10 * 60;
+
+		[Option('f', "fileName", Required = false, HelpText = "The file to store playback file or to read file.")]
+		public string FileName { get; set; } = "";
+
+		[Option('b', "playBack", Required = false, HelpText = "Whether open the server in a playback mode.")]
+		public bool PlayBack { get; set; } = false;
 	}
 }

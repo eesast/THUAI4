@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrameRateTask", "FrameRateT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine", "GameEngine\GameEngine.csproj", "{827409B2-B4B6-45D1-AD2D-556E269CA5CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gaming", "Gaming\Gaming.csproj", "{4E04FB03-C819-42DA-B467-33DB7C1445DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gaming", "Gaming\Gaming.csproj", "{4E04FB03-C819-42DA-B467-33DB7C1445DE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "playback", "..\playback\playback\playback.csproj", "{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -199,6 +201,18 @@ Global
 		{4E04FB03-C819-42DA-B467-33DB7C1445DE}.Release|x64.Build.0 = Release|Any CPU
 		{4E04FB03-C819-42DA-B467-33DB7C1445DE}.Release|x86.ActiveCfg = Release|Any CPU
 		{4E04FB03-C819-42DA-B467-33DB7C1445DE}.Release|x86.Build.0 = Release|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Debug|x64.Build.0 = Debug|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Debug|x86.Build.0 = Debug|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x64.ActiveCfg = Release|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x64.Build.0 = Release|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x86.ActiveCfg = Release|Any CPU
+		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
