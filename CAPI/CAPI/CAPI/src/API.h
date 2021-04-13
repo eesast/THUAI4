@@ -112,6 +112,10 @@ public:
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 
+
+template class API<true>;
+template class API<false>;
+
 template <bool asyn>
 class DebugApi final : public LogicInterface, Members<asyn>
 {
@@ -168,6 +172,10 @@ public:
 	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
+
+template class DebugApi<true>;
+template class DebugApi<false>;
+
 inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 {
 	int32_t centerX = CellX * Constants::Map::numOfGridPerCell + (Constants::Map::numOfGridPerCell >> 1);
@@ -177,5 +185,6 @@ inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 	int32_t D = (Constants::Map::numOfGridPerCell >> 1) + Constants::Map::sightRadius;
 	return dx <= D && dy <= D;
 }
+
 
 #endif // !API_H

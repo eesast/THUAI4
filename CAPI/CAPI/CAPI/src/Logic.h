@@ -18,6 +18,8 @@
 class Logic
 {
 private:
+	using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>>;
+
 	//Logic control
 	bool FlagProcessMessage = false;
 	bool FlagBufferUpdated = false;
@@ -54,7 +56,7 @@ private:
 	concurrency::concurrent_queue<std::string> MessageStorage;
 	concurrency::concurrent_queue<Pointer2Message> queue;
 
-	CAPI capi;
+	CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2> capi;
 	std::unique_ptr<LogicInterface> pApi;
 	std::unique_ptr<AIBase> pAI;
 
