@@ -291,13 +291,9 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 
 }
 
-template class API<true>;
-template class API<false>;
 
 //Debug API
 //目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
-
-
 template <bool asyn>
 DebugApi<asyn>::DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
@@ -747,6 +743,3 @@ THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
 	}
 
 }
-
-template class DebugApi<true>;
-template class DebugApi<false>;

@@ -4,61 +4,8 @@
 
 extern const bool asynchronous;
 
-Logic::Logic() : pState(storage), pBuffer(storage + 1),
-capi([this]() { OnConnect(); }, [this]() { OnClose(); }, [this]() { OnReceive(); })
-{
-}
-
-Logic::~Logic() {}
-
-bool Logic::visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
-{
-	Protobuf::PropType pT = g.proptype();
-	if (g.islaid() && (pT == Protobuf::PropType::Attenuator || pT == Protobuf::PropType::Dirt || pT == Protobuf::PropType::Divider))
-		return false;
-
-	int64_t dx = x - g.x();
-	int64_t dy = y - g.y();
-	uint64_t distanceSquared = dx * dx + dy * dy;
-	return distanceSquared <= Constants::Map::sightRadiusSquared;
-}
-
-void Logic::OnReceive()
-{
-	{
-		std::lock_guard<std::mutex> lck(mtxOnReceive);
-		FlagProcessMessage = true;
-	}
-	cvOnReceive.notify_one();
-}
-void Logic::OnClose()
-{
-	std::cout << "Connection was closed.\n";
-	gamePhase = GamePhase::GameOver;
-
-	//消息处理和state要更新时buffer还没更新都要等，意外断线线程得notify一下
-	{
-		std::lock_guard<std::mutex> lck(mtxOnReceive);
-		FlagProcessMessage = true;
-	}
-	cvOnReceive.notify_one();
-	{
-		std::lock_guard<std::mutex> lck(mtx_buffer);
-		FlagBufferUpdated = true;
-	}
-	cv_buffer.notify_one();
-}
-void Logic::OnConnect()
-{
-	Protobuf::MessageToServer message;
-	message.set_messagetype(Protobuf::MessageType::AddPlayer);
-	message.set_playerid(playerID);
-	message.set_teamid(teamID);
-	message.set_jobtype((Protobuf::JobType)jobType);
-	capi.Send(message);
-}
-
-std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi)
+//辅助函数
+std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Character> character = std::make_shared<THUAI4::Character>();
 	character->ap = goi.ap();
@@ -83,7 +30,7 @@ std::shared_ptr<THUAI4::Character> Logic::obj2C(const Protobuf::GameObjInfo& goi
 	character->y = goi.y();
 	return character;
 }
-std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Wall> wall = std::make_shared<THUAI4::Wall>();
 	wall->guid = goi.guid();
@@ -93,7 +40,7 @@ std::shared_ptr<THUAI4::Wall> Logic::obj2W(const Protobuf::GameObjInfo& goi)
 	wall->y = goi.y();
 	return wall;
 }
-std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Prop> prop = std::make_shared<THUAI4::Prop>();
 	prop->facingDirection = goi.facingdirection();
@@ -108,7 +55,7 @@ std::shared_ptr<THUAI4::Prop> Logic::obj2P(const Protobuf::GameObjInfo& goi)
 	prop->y = goi.y();
 	return prop;
 }
-std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::Bullet> bullet = std::make_shared<THUAI4::Bullet>();
 	bullet->ap = goi.ap();
@@ -124,7 +71,7 @@ std::shared_ptr<THUAI4::Bullet> Logic::obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->y = goi.y();
 	return bullet;
 }
-std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi)
 {
 	std::shared_ptr<THUAI4::BirthPoint> birthpoint = std::make_shared<THUAI4::BirthPoint>();
 	birthpoint->guid = goi.guid();
@@ -135,6 +82,17 @@ std::shared_ptr<THUAI4::BirthPoint> Logic::obj2Bp(const Protobuf::GameObjInfo& g
 	birthpoint->y = goi.y();
 	return birthpoint;
 }
+bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
+{
+	Protobuf::PropType pT = g.proptype();
+	if (g.islaid() && (pT == Protobuf::PropType::Attenuator || pT == Protobuf::PropType::Dirt || pT == Protobuf::PropType::Divider))
+		return false;
+
+	int64_t dx = x - g.x();
+	int64_t dy = y - g.y();
+	uint64_t distanceSquared = dx * dx + dy * dy;
+	return distanceSquared <= Constants::Map::sightRadiusSquared;
+}
 
 void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
@@ -144,8 +102,8 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	{
 	case Protobuf::MessageType::StartGame:
 	{
-		//首先load到buffer
-		load(pM2C); //第一帧AI线程还没开始 加载到buffer然后交换指针
+		load(pM2C);
+
 		//playerGuid只在这里记录
 		for (int i = 0; i < pM2C->playerguids_size() && pBuffer->playerGUIDs.size(); i++)
 		{
@@ -155,11 +113,11 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 				State::playerGUIDs[i][j] = static_cast<int64_t>(pM2C->playerguids(i).teammateguids(j));
 			}
 		}
+
 		gamePhase = GamePhase::Gaming;
 		std::cout << "游戏开始" << std::endl;
 		std::thread tAI(asynchronous ? &Logic::PlayerWrapperAsyn : &Logic::PlayerWrapper, this);
-		tAI.detach();
-
+		tAI.detach();//虽在这里detach了，还是要在Main末尾同步
 		break;
 	}
 	case Protobuf::MessageType::Gaming:
@@ -173,7 +131,6 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		{
 			std::lock_guard<std::mutex> lck(mtx_buffer);
 			FlagBufferUpdated = true;
-			std::cout << counter_buffer << std::endl;
 			counter_buffer = -1;
 		}
 		cv_buffer.notify_one();
@@ -302,6 +259,23 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	cv_buffer.notify_one();
 }
 
+void Logic::UnBlockMtxOnReceive()
+{
+	{
+		std::lock_guard<std::mutex> lck(mtxOnReceive);
+		FlagProcessMessage = true;
+	}
+	cvOnReceive.notify_one();
+}
+void Logic::UnBlockMtxBufferUpdated()
+{
+	{
+		std::lock_guard<std::mutex> lck(mtx_buffer);
+		FlagBufferUpdated = true;
+	}
+	cv_buffer.notify_one();
+}
+
 void Logic::ProcessMessage()
 {
 	Pointer2Message p2M;
@@ -310,14 +284,13 @@ void Logic::ProcessMessage()
 		//无消息处理时停下来少占资源
 		{
 			std::unique_lock<std::mutex> lck(mtxOnReceive); //OnReceive里往队列里Push时也锁了
-			FlagProcessMessage = !capi.IsEmpty();
+			FlagProcessMessage = !queue.empty();
 			cvOnReceive.wait(lck, [this]() { return FlagProcessMessage; });
 		}
 
-		if (!capi.TryPop(p2M))
+		if (!queue.try_pop(p2M))
 		{
-			std::cout << "Failed to pop the message\n";
-			//lock_game.lock(); 用atomic去掉不必要的锁时见到这个，一时想不起这里是要干什么 或许可以删？
+			if (gamePhase != GamePhase::GameOver) std::cout << "Failed to pop the message\n";
 			continue;
 		}
 
@@ -336,6 +309,7 @@ void Logic::ProcessMessage()
 	}
 	std::cout << "PM thread terminates" << std::endl;
 }
+
 
 void Logic::PlayerWrapper()
 {
@@ -490,32 +464,50 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		}
 	}
 
-	//CAPI先连接Agent
+	std::thread tPM(&Logic::ProcessMessage, this); //单线程处理收到的消息
 	if (!capi.Connect(address, port))
 	{
 		std::cout << "无法连接到Agent" << std::endl;
 		capi.Stop();
 		OutFile.close();
+		tPM.join();
 		return;
 	}
 	std::cout << "成功连接到Agent" << std::endl;
-	//一连接就会给Server发 playerID teamID jobType
 
-	std::thread tPM(&Logic::ProcessMessage, this); //单线程处理收到的消息
 	tPM.join();
-	{
-		std::lock_guard<std::mutex> lck(mtx_buffer);
-		FlagBufferUpdated = true;
-	}
-	cv_buffer.notify_one();
+
+	UnBlockMtxBufferUpdated();//PlayerWrapper还可能在那卡着
 	{
 		std::unique_lock<std::mutex> lock(mtx_ai);
 		cv_ai.wait(lock, [this]() { return AiTerminated; });
 	}
 	OutFile.close();
+	capi.Stop();
+}
 
-	//线程内，收到Valid/Invalid 后者线程终结
-	//若为Valid，PM线程接着听
-	//GameStart启动AI线程
-	//GameEnd游戏结束
+Logic::Logic() : pState(storage), pBuffer(storage + 1),
+capi(
+	[this]()
+	{
+		Protobuf::MessageToServer message;
+		message.set_messagetype(Protobuf::MessageType::AddPlayer);
+		message.set_playerid(playerID);
+		message.set_teamid(teamID);
+		message.set_jobtype((Protobuf::JobType)jobType);
+		capi.Send(message);
+	},
+	[this]()
+	{
+		std::cout << "Connection was closed.\n";
+		gamePhase = GamePhase::GameOver;
+		UnBlockMtxBufferUpdated();
+		UnBlockMtxOnReceive();
+
+	},
+		[this](Pointer2Message p2M) {
+		queue.push(p2M);
+		UnBlockMtxOnReceive();
+	})
+{
 }
