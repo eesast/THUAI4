@@ -23,6 +23,10 @@ namespace Gaming
 						playerWillAttack.Position + new XYPosition((int)(Map.Constant.numOfGridPerCell * Math.Cos(angle)), (int)(Map.Constant.numOfGridPerCell * Math.Sin(angle))),
 						Map.Constant.bulletRadius, Map.Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP, playerWillAttack.HasSpear);
 
+					// 由于子弹的出发点位于人物面前的亦歌位置，所以子弹移动时间需要扣减
+					if (timeInMilliseconds <= Map.Constant.numOfGridPerCell * 1000 / newBullet.MoveSpeed) timeInMilliseconds = 0;
+					else timeInMilliseconds -= Map.Constant.numOfGridPerCell * 1000 / newBullet.MoveSpeed;
+
 					newBullet.Parent = playerWillAttack;
 
 					switch (playerWillAttack.bulletType)
