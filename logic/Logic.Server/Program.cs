@@ -24,7 +24,10 @@ namespace Logic.Server
                 server = new PlayBackServer(options);
 
             }
-            else { server = new GameServer(options); }
+            else
+            {
+                server = new GameServer(options);
+            }
 
             Console.WriteLine($"Final score: ");
             for (int i = 0; i < server.TeamCount; ++i)

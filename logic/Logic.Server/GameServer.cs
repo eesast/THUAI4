@@ -203,7 +203,7 @@ namespace Logic.Server
 
 		private void SendAddPlayerResponse(MessageToServer msgRecv, bool isValid)   //作为对 AddPlayer 消息的响应，给客户端发送信息
 		{
-			if (msgRecv.PlayerID == 1910 && msgRecv.TeamID == 1910)     // 观战
+			if (msgRecv.PlayerID == 1911 && msgRecv.TeamID == 1911)     // 观战
 			{
 				Console.WriteLine("A new spectator comes to watch this game.");
 				return;
