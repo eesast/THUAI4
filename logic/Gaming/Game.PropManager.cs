@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using GameEngine;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using THUnity2D;
-using GameEngine;
 
 namespace Gaming
 {
@@ -271,7 +270,7 @@ namespace Gaming
 			private Map gameMap;
 			private MoveEngine moveEngine;
 
-			public PropManager(Map gameMap, MoveEngine moveEngine)
+			public PropManager(Map gameMap)
 			{
 				this.gameMap = gameMap;
 				this.moveEngine = new MoveEngine
