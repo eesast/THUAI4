@@ -10,23 +10,18 @@ namespace GameEngine
 	public class MoveEngine
 	{
 
-		//检查obj下一步位于nextPos时是否会与listObj碰撞
+		/// <summary>
+		/// 检查obj下一步位于nextPos时是否会与listObj碰撞
+		/// </summary>
+		/// <param name="obj">主动碰撞物，默认obj.Rigid为true</param>
+		/// <param name="listObj">被动碰撞物</param>
+		/// <param name="nextPos">obj下一步想走的位置</param>
+		/// <returns></returns>
 		private bool WillCollide(GameObject obj, GameObject listObj, XYPosition nextPos)
 		{
 			if (!listObj.IsRigid || listObj.ID == obj.ID) return false; //不检查自己和非刚体
 
-			if (listObj is BirthPoint)          //如果是出生点，那么除了自己以外的其他玩家需要检查碰撞
-			{
-				//如果是角色并且出生点不是它的出生点，需要检查碰撞，否则不检查碰撞；
-				//下面的条件是obj is Character && !object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)求非得结果
-				if (!(obj is Character) || object.ReferenceEquals(((BirthPoint)listObj).Parent, obj)) return false;
-			}
-
-			if (listObj is Mine)
-			{
-				if (!(obj is Character)) return false;  //非人物不需要检查碰撞
-				if (((Mine)listObj).Parent.TeamID == ((Character)obj).TeamID) return false;     //同组的人不会触发地雷
-			}
+			if (IgnoreCollision(obj, listObj)) return false;			// 可以忽略碰撞
 
 			int deltaX = Math.Abs(nextPos.x - listObj.Position.x), deltaY = Math.Abs(nextPos.y - listObj.Position.y);
 
@@ -43,17 +38,27 @@ namespace GameEngine
 					if (deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) return false;
 					if (deltaX < listObj.Radius || deltaY < listObj.Radius) return true;
 					return (long)(deltaX - listObj.Radius) * (long)(deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius;
-					////return !(deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) && ((deltaX < listObj.Radius || deltaY < listObj.Radius) || ((long)(deltaX - listObj.Radius) * (long)(deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius));
 				}
 			}
 			return false;
 		}
 
 
-		//碰撞检测，如果这样行走是否会与之碰撞，返回与之碰撞的物体
+		/// <summary>
+		/// 碰撞检测，如果这样行走是否会与之碰撞，返回与之碰撞的物体
+		/// </summary>
+		/// <param name="obj">移动的物体</param>
+		/// <param name="moveVec">移动的位移向量</param>
+		/// <returns>和它碰撞的物体</returns>
 		private GameObject? CheckCollision(GameObject obj, Vector moveVec)
 		{
 			XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
+
+			if (!obj.IsRigid)
+			{
+				if (gameMap.OutOfBound(obj)) return new OutOfBoundBlock(nextPos);
+				return null;
+			}
 
 			//在某列表中检查碰撞
 			Func<ArrayList, ReaderWriterLockSlim, GameObject> CheckCollisionInList =
@@ -73,12 +78,6 @@ namespace GameEngine
 						}
 					}
 					finally { listLock.ExitReadLock(); }
-
-					//如果越界，则与越界方块碰撞
-					if (collisionObj == null && gameMap.OutOfBound(obj))
-					{
-						collisionObj = new OutOfBoundBlock(nextPos);
-					}
 					return collisionObj;
 				};
 
@@ -90,11 +89,23 @@ namespace GameEngine
 					return collisionObj;
 				}
 			}
+
+			//如果越界，则与越界方块碰撞
+			if (gameMap.OutOfBound(obj))
+			{
+				return new OutOfBoundBlock(nextPos);
+			}
+			
 			return null;
 		}
 
-		// 寻找最大可能移动距离
-
+		/// <summary>
+		/// 寻找最大可能移动距离
+		/// </summary>
+		/// <param name="obj">移动物体，默认obj.Rigid为true</param>
+		/// <param name="nextPos">下一步要到达的位置</param>
+		/// <param name="moveVec">移动的位移向量，默认与nextPos协调</param>
+		/// <returns>最大可能的移动距离</returns>
 		private uint FindMax(GameObject obj, XYPosition nextPos, Vector moveVec)
 		{
 			uint maxLen = uint.MaxValue;
@@ -183,6 +194,11 @@ namespace GameEngine
 			return maxLen;
 		}
 
+		/// <summary>
+		/// 在无碰撞的前提下行走最远的距离
+		/// </summary>
+		/// <param name="obj">移动物体，默认obj.Rigid为true</param>
+		/// <param name="moveVec">移动的位移向量</param>
 		private void MoveMax(GameObject obj,  Vector moveVec)
 		{
 
@@ -196,7 +212,22 @@ namespace GameEngine
 			obj.Move(new Vector(moveVec.angle, maxLen));
 		}
 
-		//物体移动
+		/// <summary>
+		/// 碰撞结束后要做的事情
+		/// </summary>
+		public enum AfterCollision
+		{
+			ContinueCheck = 0,		// 碰撞后继续检查其他碰撞
+			MoveMax = 1,			// 行走最远距离
+			Destroyed = 2			// 物体已经毁坏
+		}
+
+		/// <summary>
+		/// 移动物体
+		/// </summary>
+		/// <param name="obj">要移动的物体</param>
+		/// <param name="moveTime">移动的时间，毫秒</param>
+		/// <param name="moveDirection">移动的方向，弧度</param>
 		public void MoveObj(GameObject obj, int moveTime, double moveDirection)
 		{
 			Task.Run
@@ -225,33 +256,27 @@ namespace GameEngine
 							moveVec.length = obj.MoveSpeed / Map.Constant.numOfStepPerSecond + deltaLen;
 							deltaLen = 0;
 
-							//越界情况处理：如果越界，那么一定与四周的墙碰撞，在OnCollision中检测碰撞
-							//缺陷：半径为0的物体检测不到越界
-							//改进：如果越界，则与越界方块碰撞
+							//越界情况处理：如果越界，则与越界方块碰撞
 
-							while (true)
+							do
 							{
+							Check:
 								collisionObj = CheckCollision(obj, moveVec);
 								if (collisionObj == null) break;
-								if (collisionObj is Mine)       //CheckCollision保证只有不同组的人物会和地雷碰撞
-								{
-									OnCollision(obj, collisionObj, moveVec);
-								}
-								else
-								{
-									MoveMax(obj, moveVec);
-									if (OnCollision(obj, collisionObj, moveVec))
-									{
-										//已经被销毁
 
+								switch (OnCollision(obj, collisionObj, moveVec))
+								{
+									case AfterCollision.ContinueCheck: goto Check;
+									case AfterCollision.Destroyed:
 										GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
 										isDestroyed = true;
 										return false;
-									}
-									if (obj.IsRigid && obj is Character) moveVec.length = 0;
-									break;
+									case AfterCollision.MoveMax:
+										MoveMax(obj, moveVec);
+										moveVec.length = 0;
+										break;
 								}
-							}
+							} while (false);
 
 							deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));
 
@@ -292,12 +317,21 @@ namespace GameEngine
 
 		private Map gameMap;
 		private Tuple<ArrayList, ReaderWriterLockSlim>[] lists;
-		private Func<GameObject, GameObject, Vector, bool> OnCollision;
+		private Func<GameObject, GameObject, Vector, AfterCollision> OnCollision;
 		private Action<GameObject> EndMove;
+		private Func<GameObject, GameObject, bool> IgnoreCollision;
 
+		/// <summary>
+		/// Constrctor
+		/// </summary>
+		/// <param name="gameMap">游戏地图</param>
+		/// <param name="OnCollision">发生碰撞时要做的事情，第一个参数为移动的物体，第二个参数为撞到的物体，第三个参数为移动的位移向量，返回值见AfterCollision的定义</param>
+		/// <param name="EndMove">结束碰撞时要做的事情</param>
+		/// <param name="IgnoreCollision">是否忽略本次碰撞。第一个参数为移动的物体，第二个参数为撞到的物体。如果忽略本次碰撞，返回true；否则返回false</param>
 		public MoveEngine(Map gameMap,
-			Func<GameObject, GameObject, Vector, bool> OnCollision,
-			Action<GameObject> EndMove
+			Func<GameObject, GameObject, Vector, AfterCollision> OnCollision,
+			Action<GameObject> EndMove,
+			Func<GameObject, GameObject, bool> IgnoreCollision
 			)
 		{
 			this.gameMap = gameMap;
@@ -308,6 +342,7 @@ namespace GameEngine
 			};
 			this.OnCollision = OnCollision;
 			this.EndMove = EndMove;
+			this.IgnoreCollision = IgnoreCollision;
 		}
 	}
 }

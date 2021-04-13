@@ -107,6 +107,7 @@ namespace Logic.Server
 			ret.CanMove = gameObj.CanMove;
 			ret.IsMoving = gameObj.IsMoving;
 			ret.ShapeType = ConvertTool.ToCommunicationShapeType(gameObj.Shape);
+			ret.Radius = gameObj.Radius;
 		}
 	}
 }

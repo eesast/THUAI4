@@ -132,6 +132,12 @@ namespace Logic.Server
 
 		private void SendAddPlayerResponse(MessageToServer msgRecv, bool isValid)	//作为对 AddPlayer 消息的响应，给客户端发送信息
 		{
+			if (msgRecv.PlayerID == 1910 && msgRecv.TeamID == 1910)		// 观战
+			{
+				Console.WriteLine("A new spectator comes to watch this game.");
+				return;
+			}
+
 			MessageToOneClient msg2Send = new MessageToOneClient();
 			msg2Send.PlayerID = msgRecv.PlayerID;
 			msg2Send.TeamID = msgRecv.TeamID;
@@ -335,7 +341,7 @@ namespace Logic.Server
 						msg.PlayerGUIDs.Add(playerGUIDs[k]);
 					}
 
-					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(game.TeamToColor(i));
+					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(Map.TeamToColor(i));
 
 					foreach (var infos in msgGameObjs)
 					{
