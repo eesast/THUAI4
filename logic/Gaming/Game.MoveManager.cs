@@ -1,7 +1,5 @@
 ﻿using GameEngine;
 using System;
-using System.Collections;
-using System.Threading;
 using THUnity2D;
 
 namespace Gaming
@@ -64,18 +62,19 @@ namespace Gaming
 					},
 					IgnoreCollision: (obj, collisionObj) =>
 					{
-						if (collisionObj is BirthPoint)			// 自己的出生点可以忽略碰撞
+						if (collisionObj is BirthPoint)         // 自己的出生点可以忽略碰撞
 						{
 							if (object.ReferenceEquals(((BirthPoint)collisionObj).Parent, obj)) return true;
 							return false;
 						}
-						else if (collisionObj is Mine)			// 自己队的炸弹忽略碰撞
+						else if (collisionObj is Mine)          // 自己队的炸弹忽略碰撞
 						{
 							if (((Mine)collisionObj).Parent.TeamID == ((Character)obj).TeamID) return true;
 						}
 						return false;
 					}
 				);
+
 			}
 		}
 	}
