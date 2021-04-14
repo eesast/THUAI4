@@ -19,6 +19,7 @@ class Logic
 {
 private:
 	using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>>;
+	using Comm = Communication<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
 
 	bool AiTerminated = true;//更确切的含义是，AI线程是否终止或未开始
 	bool FlagBufferUpdated = false;
@@ -30,7 +31,7 @@ private:
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
 	std::condition_variable cv_buffer;
-	Communication<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2> comm;
+	Comm comm;
 
 	void UnBlockMtxBufferUpdated();
 	void PlayerWrapper();

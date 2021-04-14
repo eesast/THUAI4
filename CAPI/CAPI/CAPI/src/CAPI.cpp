@@ -177,7 +177,8 @@ Communication(std::function<void(Pointer2M)> OnReceive, std::function<void() > O
 			std::cout << "Connection was closed.\n";
 			loop = false;
 			UnBlock();
-			__OnClose();
+			if (__OnClose != nullptr)
+				__OnClose();
 
 		},
 		[this](Pointer2M p2M) {

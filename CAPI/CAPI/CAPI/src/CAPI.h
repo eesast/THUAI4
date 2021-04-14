@@ -105,6 +105,7 @@ public:
 	//结束线程并释放资源（当然构析函数也可以做到，所以其实没必要）
 	void Join();
 };
+
 #include "proto/Message2Client.pb.h"
 #include "proto/Message2Server.pb.h"
 template CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;

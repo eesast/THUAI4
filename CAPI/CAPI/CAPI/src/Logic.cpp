@@ -432,9 +432,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 }
 
 Logic::Logic() : pState(storage), pBuffer(storage + 1),
-comm(
-	[this](Pointer2Message p2M) {ProcessMessage(p2M); }
-	,
+comm([this](Pointer2Message p2M) {ProcessMessage(p2M); },
 	[this]()
 	{
 		Protobuf::MessageToServer message;
@@ -448,7 +446,6 @@ comm(
 	{
 		sw_AI = false;
 		UnBlockMtxBufferUpdated();
-
 	}
 		)
 {
