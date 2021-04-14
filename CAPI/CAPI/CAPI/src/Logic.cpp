@@ -114,7 +114,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 			}
 		}
 
-		gamePhase = GamePhase::Gaming;
+		sw_AI = true;
 		std::cout << "游戏开始" << std::endl;
 		std::thread tAI(asynchronous ? &Logic::PlayerWrapperAsyn : &Logic::PlayerWrapper, this);
 		tAI.detach();//虽在这里detach了，还是要在Main末尾同步
@@ -126,7 +126,7 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 	case Protobuf::MessageType::EndGame:
 	{
-		gamePhase = GamePhase::GameOver;
+		sw_AI = false;
 		std::cout << "Game ends\n";
 		{
 			std::lock_guard<std::mutex> lck(mtx_buffer);
@@ -150,7 +150,7 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 		std::cout << "Valid player." << std::endl;
 		break;
 	case Protobuf::MessageType::InvalidPlayer:
-		gamePhase = GamePhase::GameOver;
+		sw_AI = false;
 		std::cout << "Invalid player!" << std::endl;
 		break;
 	case Protobuf::MessageType::Send:
@@ -247,26 +247,28 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 		//如果这时候state还没被player访问，就把buffer转到state
 		if (mtx_state.try_lock())
 		{
-			State* temp = pState;
-			pState = pBuffer;
-			pBuffer = temp;
-			FlagBufferUpdated = false;
-			counter_state = counter_buffer;
-			CurrentStateAccessed = false;
+			Update();
 			mtx_state.unlock();
 		}
 	}
 	cv_buffer.notify_one();
 }
 
-void Logic::UnBlockMtxOnReceive()
+void Logic::ProcessMessage(Pointer2Message p2M)
 {
+	switch (p2M.index())
 	{
-		std::lock_guard<std::mutex> lck(mtxOnReceive);
-		FlagProcessMessage = true;
+	case 0: //M2C
+		ProcessM2C(std::get<std::shared_ptr<Protobuf::MessageToClient>>(p2M));
+		break;
+	case 1: //M2OC
+		ProcessM2OC(std::get<std::shared_ptr<Protobuf::MessageToOneClient>>(p2M));
+		break;
+	default:
+		std::cout << "std::variant_nops\n";
 	}
-	cvOnReceive.notify_one();
 }
+
 void Logic::UnBlockMtxBufferUpdated()
 {
 	{
@@ -275,39 +277,14 @@ void Logic::UnBlockMtxBufferUpdated()
 	}
 	cv_buffer.notify_one();
 }
-
-void Logic::ProcessMessage()
+void Logic::Update()
 {
-	Pointer2Message p2M;
-	while (gamePhase != GamePhase::GameOver)
-	{
-		//无消息处理时停下来少占资源
-		{
-			std::unique_lock<std::mutex> lck(mtxOnReceive); //OnReceive里往队列里Push时也锁了
-			FlagProcessMessage = !queue.empty();
-			cvOnReceive.wait(lck, [this]() { return FlagProcessMessage; });
-		}
-
-		if (!queue.try_pop(p2M))
-		{
-			if (gamePhase != GamePhase::GameOver) std::cout << "Failed to pop the message\n";
-			continue;
-		}
-
-		//处理消息
-		switch (p2M.index())
-		{
-		case 0: //M2C
-			ProcessM2C(std::get<std::shared_ptr<Protobuf::MessageToClient>>(p2M));
-			break;
-		case 1: //M2OC
-			ProcessM2OC(std::get<std::shared_ptr<Protobuf::MessageToOneClient>>(p2M));
-			break;
-		default:
-			std::cout << "std::variant_nops\n";
-		}
-	}
-	std::cout << "PM thread terminates" << std::endl;
+	State* temp = pState;
+	pState = pBuffer;
+	pBuffer = temp;
+	FlagBufferUpdated = false;
+	counter_state = counter_buffer;
+	CurrentStateAccessed = false;
 }
 
 
@@ -317,7 +294,7 @@ void Logic::PlayerWrapper()
 		std::lock_guard<std::mutex> lock_ai(mtx_ai);
 		AiTerminated = false;
 	}
-	while (gamePhase == GamePhase::Gaming)
+	while (sw_AI)
 	{
 		std::lock_guard<std::mutex> lck_state(mtx_state);
 		if (!CurrentStateAccessed)
@@ -329,29 +306,10 @@ void Logic::PlayerWrapper()
 		}
 		else
 		{
-			//否则看buffer是否有更新，更新的前提是buffer没被占用
-			//所以这里堵塞是可以接受的
 			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
-			if (FlagBufferUpdated)
-			{
-				State* temp = pState;
-				pState = pBuffer;
-				pBuffer = temp;
-				counter_state = counter_buffer;
-				CurrentStateAccessed = false;
-				FlagBufferUpdated = false;
-			}
-			else
-			{ //如果当前state已经接触过且buffer没更新，那就等到buffer更新
-				//意外断线这里也会锁住
-				cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
-				State* temp = pState;
-				pState = pBuffer;
-				pBuffer = temp;
-				counter_state = counter_buffer;
-				CurrentStateAccessed = false;
-				FlagBufferUpdated = false;
-			}
+			//如果buffer没更新就等
+			cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
+			Update();
 		}
 	}
 	{
@@ -368,7 +326,7 @@ void Logic::PlayerWrapperAsyn()
 		std::lock_guard<std::mutex> lock_ai(mtx_ai);
 		AiTerminated = false;
 	}
-	while (gamePhase == GamePhase::Gaming)
+	while (sw_AI)
 	{
 		//异步似乎反而逻辑变简洁了
 		pApi->StartTimer();
@@ -397,21 +355,15 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		auto tu = [this]() {
 			if (mtx_buffer.try_lock())
 			{
-				if (FlagBufferUpdated)
-				{
-					State* temp = pState;
-						pState = pBuffer;
-						pBuffer = temp;
-						counter_state = counter_buffer;
-						FlagBufferUpdated = false;
-				}
-				mtx_buffer.unlock();
-			} };
-	asynchronous)
+				if (FlagBufferUpdated)Update();
+					mtx_buffer.unlock();
+			}
+		};
+		asynchronous)
 	{
 		if (!debuglevel)
 		{
-			this->pApi = std::make_unique<API<true>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_unique<API<true>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); comm.Send(M2C); },
 				[this]() { return MessageStorage.empty(); },
 				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 				(const State*&)pState, mtx_state, tu);
@@ -428,7 +380,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 					flag = true;
 				}
 			}
-			this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_unique<DebugApi<true>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); comm.Send(M2C); },
 				[this]() { return MessageStorage.empty(); },
 				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 				(const State*&)pState, mtx_state, tu, debuglevel != 1,
@@ -439,7 +391,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 	{
 		if (!debuglevel)
 		{
-			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_unique<API<false>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); comm.Send(M2C); },
 				[this]() { return MessageStorage.empty(); },
 				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 				(const State*&)pState, mtx_state, tu);
@@ -456,7 +408,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 					flag = true;
 				}
 			}
-			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); capi.Send(M2C); },
+			this->pApi = std::make_unique<DebugApi<false>>([this](Protobuf::MessageToServer& M2C) {M2C.set_playerid(this->playerID); M2C.set_teamid(this->teamID); comm.Send(M2C); },
 				[this]() { return MessageStorage.empty(); },
 				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
 				(const State*&)pState, mtx_state, tu, debuglevel != 1,
@@ -464,18 +416,11 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		}
 	}
 
-	std::thread tPM(&Logic::ProcessMessage, this); //单线程处理收到的消息
-	if (!capi.Connect(address, port))
-	{
-		std::cout << "无法连接到Agent" << std::endl;
-		capi.Stop();
+	if (!comm.Start(address, port)) {
 		OutFile.close();
-		tPM.join();
 		return;
 	}
 	std::cout << "成功连接到Agent" << std::endl;
-
-	tPM.join();
 
 	UnBlockMtxBufferUpdated();//PlayerWrapper还可能在那卡着
 	{
@@ -483,11 +428,13 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		cv_ai.wait(lock, [this]() { return AiTerminated; });
 	}
 	OutFile.close();
-	capi.Stop();
+	comm.Join();
 }
 
 Logic::Logic() : pState(storage), pBuffer(storage + 1),
-capi(
+comm(
+	[this](Pointer2Message p2M) {ProcessMessage(p2M); }
+	,
 	[this]()
 	{
 		Protobuf::MessageToServer message;
@@ -495,19 +442,14 @@ capi(
 		message.set_playerid(playerID);
 		message.set_teamid(teamID);
 		message.set_jobtype((Protobuf::JobType)jobType);
-		capi.Send(message);
+		comm.Send(message);
 	},
 	[this]()
 	{
-		std::cout << "Connection was closed.\n";
-		gamePhase = GamePhase::GameOver;
+		sw_AI = false;
 		UnBlockMtxBufferUpdated();
-		UnBlockMtxOnReceive();
 
-	},
-		[this](Pointer2Message p2M) {
-		queue.push(p2M);
-		UnBlockMtxOnReceive();
-	})
+	}
+		)
 {
 }

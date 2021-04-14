@@ -20,58 +20,45 @@ class Logic
 private:
 	using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>>;
 
-	//Logic control
-	bool FlagProcessMessage = false;
+	bool AiTerminated = true;//更确切的含义是，AI线程是否终止或未开始
 	bool FlagBufferUpdated = false;
 	bool CurrentStateAccessed = false;
-	bool AiTerminated = true;//更确切的含义是，AI线程是否终止或未开始
-
-	enum class GamePhase : unsigned char
-	{
-		Uninitialized = 0,
-		Gaming = 1,
-		GameOver = 2,
-	};
-	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized; //仅用于循环条件判断，atomic即可
-	volatile std::int32_t counter_state = 0;
-	volatile std::int32_t counter_buffer = 0;
-
-	std::mutex mtxOnReceive;
-	std::condition_variable cvOnReceive;
-	std::mutex mtx_buffer;
-	std::mutex mtx_state;
-	std::condition_variable cv_buffer;
+	std::atomic_bool sw_AI = true;
 
 	std::mutex mtx_ai;
 	std::condition_variable cv_ai;
+	std::mutex mtx_buffer;
+	std::mutex mtx_state;
+	std::condition_variable cv_buffer;
+	Communication<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2> comm;
+
+	void UnBlockMtxBufferUpdated();
+	void PlayerWrapper();
+	void PlayerWrapperAsyn();
+	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
+	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
+	void ProcessMessage(Pointer2Message);
 
 	//Game data
 	THUAI4::JobType jobType = THUAI4::JobType::Job0;
 	int32_t playerID = 0;
 	int32_t teamID = 0;
 
+	volatile std::int32_t counter_state = 0;
+	volatile std::int32_t counter_buffer = 0;
+
 	State* pState;
 	State* pBuffer;
 	State storage[2];
 	concurrency::concurrent_queue<std::string> MessageStorage;
-	concurrency::concurrent_queue<Pointer2Message> queue;
 
-	CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2> capi;
 	std::unique_ptr<LogicInterface> pApi;
 	std::unique_ptr<AIBase> pAI;
 
-	void UnBlockMtxOnReceive();
-	void UnBlockMtxBufferUpdated();
-
-	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
-	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
-
-	void load(std::shared_ptr<Protobuf::MessageToClient>); //将最新状态信息加载到buffer 还会使得counter_buffer计数加一
-
-	void ProcessMessage();
-	void PlayerWrapper();
-	void PlayerWrapperAsyn();
-
+	//将最新状态信息加载到buffer 还会使得counter_buffer计数加一
+	void load(std::shared_ptr<Protobuf::MessageToClient>);
+	//即pState与pBuffer指向的地址互换
+	void Update();
 public:
 	Logic();
 	~Logic() = default;
