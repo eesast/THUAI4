@@ -1,9 +1,8 @@
-﻿using System;
-using System.Text;
+﻿using Communication.Proto;
+using Google.Protobuf;
+using System;
 using System.IO;
 using System.IO.Compression;
-using Communication.Proto;
-using Google.Protobuf;
 
 namespace playback
 {
