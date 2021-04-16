@@ -7,6 +7,12 @@ namespace Logic.Server
     {
         static int Main(string[] args)
         {
+            foreach (var arg in args)
+			{
+                Console.Write($"{arg} ");
+			}
+            Console.WriteLine();
+
             ArgumentOptions? options = null;
             Parser.Default.ParseArguments<ArgumentOptions>(args).WithParsed(o => { options = o; });
             if (options == null)

@@ -61,6 +61,8 @@ namespace Logic.Server
 			{
 				Thread.Sleep(1000);
 			}
+			endGameInfoSema.WaitOne();
+			mwr?.Dispose();
 		}
 
 		private long[,] communicationToGameID;      //把通信所用ID映射到游戏ID，[i, j]代表第 i 个队伍的第 j 个玩家的 id
@@ -70,7 +72,8 @@ namespace Logic.Server
 			return teamID >= 0 && teamID < options.TeamCount && playerID >= 0 && playerID < options.PlayerCountPerTeam;
 		}
 
-		private void SendMessageToAllClients(MessageType msgType)       //向所有的客户端发送消息
+		private object messageToAllClientsLock = new object();						//全局消息锁，保证EndGame消息是最后一个消息
+		private void SendMessageToAllClients(MessageType msgType, bool requireGaming = true)       //向所有的客户端发送消息
 		{
 			var gameObjList = game.GetGameObject();
 			var cellColor = game.GameMap.CellColor;
@@ -107,40 +110,44 @@ namespace Logic.Server
 				}
 			}
 
-
-			for (int i = 0; i < options.TeamCount; ++i)
+			lock (messageToAllClientsLock)
 			{
-				int teamScore = game.GetTeamScore(i);
-				for (int j = 0; j < options.PlayerCountPerTeam; ++j)
+				if (!game.GameMap.Timer.IsGaming && requireGaming) return;
+				for (int i = 0; i < options.TeamCount; ++i)
 				{
-					MessageToClient msg = new MessageToClient();
-					msg.TeamID = i;
-					msg.PlayerID = j;
-					msg.MessageType = msgType;
-					msg.SelfInfo = CopyInfo.Player(game.GetPlayerFromTeam(communicationToGameID[i, j]));
-
-					for (int k = 0; k < options.TeamCount; ++k)
+					int teamScore = game.GetTeamScore(i);
+					for (int j = 0; j < options.PlayerCountPerTeam; ++j)
 					{
-						msg.PlayerGUIDs.Add(playerGUIDs[k]);
+						MessageToClient msg = new MessageToClient();
+						msg.TeamID = i;
+						msg.PlayerID = j;
+						msg.MessageType = msgType;
+						msg.SelfInfo = CopyInfo.Player(game.GetPlayerFromTeam(communicationToGameID[i, j]));
+
+						for (int k = 0; k < options.TeamCount; ++k)
+						{
+							msg.PlayerGUIDs.Add(playerGUIDs[k]);
+						}
+
+						msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(Map.TeamToColor(i));
+
+						foreach (var infos in msgGameObjs)
+						{
+							msg.GameObjs.Add(infos);
+						}
+
+						for (int x = 0; x < rows; ++x)
+						{
+							msg.CellColors.Add(msgCellColors[x]);
+						}
+
+						msg.TeamScore = teamScore;
+
+						serverCommunicator.SendMessage(msg);
+
+						mwr?.WriteOne(msg);
+
 					}
-
-					msg.SelfTeamColor = ConvertTool.ToCommunicationColorType(Map.TeamToColor(i));
-
-					foreach (var infos in msgGameObjs)
-					{
-						msg.GameObjs.Add(infos);
-					}
-
-					for (int x = 0; x < rows; ++x)
-					{
-						msg.CellColors.Add(msgCellColors[x]);
-					}
-
-					msg.TeamScore = teamScore;
-
-					serverCommunicator.SendMessage(msg);
-
-					mwr?.WriteOne(msg);
 				}
 			}
 		}
@@ -294,6 +301,8 @@ namespace Logic.Server
 						OnGameEnd();
 					}
 				);
+
+			while (!game.GameMap.Timer.IsGaming) Thread.Sleep(1); //游戏未开始，等待
 			SendMessageToAllClients(MessageType.StartGame);     //发送开始游戏信息
 
 			//开始每隔一定时间向客户端发送游戏情况
@@ -301,8 +310,6 @@ namespace Logic.Server
 				(
 					() =>
 					{
-						while (!game.GameMap.Timer.IsGaming) Thread.Sleep(1); //游戏未开始，等待
-
 						var frt = new FrameRateTaskExecutor<int>
 						(
 							() => game.GameMap.Timer.IsGaming,
@@ -345,10 +352,14 @@ namespace Logic.Server
 				);
 		}
 
+		//private volatile bool finishSendingEndGameMessage = false;
+		private Semaphore endGameInfoSema = new Semaphore(0, 1);
 		private void OnGameEnd()        //游戏结束后的行为
 		{
 			//向所有玩家发送结束游戏消息
-			SendMessageToAllClients(MessageType.EndGame);
+			SendMessageToAllClients(MessageType.EndGame, false);
+			mwr.Flush();
+			endGameInfoSema.Release();
 		}
 
 	}
