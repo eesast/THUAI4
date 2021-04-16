@@ -22,6 +22,7 @@ namespace Logic.Server
 				using (MessageReader mr = new MessageReader(options.FileName))
 				{
 					teamScore = new int[mr.teamCount];
+					int infoNo = 0;
 					var frt = new FrameRateTaskExecutor<int>
 						(
 						loopCondition: () => true,
@@ -33,16 +34,25 @@ namespace Logic.Server
 								for (int j = 0; j < mr.playerCount; ++j)
 								{
 									msg = mr.ReadOne();
-									if (msg == null) return false;
+									if (msg == null)
+									{
+										Console.WriteLine("The game doesn't come to an end because of timing up!");
+										return false;
+									}
 									serverCommunicator.SendMessage(msg);
-									Console.WriteLine("Seccessfully sent a message.");
+									Console.WriteLine($"Seccessfully sent a message. Message number: {infoNo}.");
 									if (msg != null)
 									{
 										teamScore[i] = msg.TeamScore;
 									}
 								}
 							}
-							if (msg.MessageType == MessageType.EndGame) return false;
+							++infoNo;
+							if (msg.MessageType == MessageType.EndGame)
+							{
+								Console.WriteLine("Game over normally!");
+								return false;
+							}
 							return true;
 						},
 						GameServer.SendMessageToClientIntervalInMilliseconds,

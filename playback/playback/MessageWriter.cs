@@ -47,6 +47,7 @@ namespace playback
 		{
 			if (fs.CanWrite)
 			{
+				cos.Flush();
 				gzs.Write(ms.GetBuffer(), 0, (int)ms.Length);
 				ClearMemoryStream(ms);
 				fs.Flush();
@@ -58,7 +59,9 @@ namespace playback
 			if (fs.CanWrite)
 			{
 				Flush();
-				fs.Close();
+				cos.Dispose();
+				gzs.Dispose();
+				fs.Dispose();
 			}
 		}
 

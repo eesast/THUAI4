@@ -1,6 +1,0 @@
-@ECHO OFF
-
-START CMD /K D:\THUAI4-1\CAPI\CAPI\Debug\CAPI.exe -P 7777 -p 0 -t 0 -d
-
-START CMD /K D:\THUAI4-1\CAPI\CAPI\Debug\CAPI.exe -P 7778 -p 1 -t 0 -d
-
