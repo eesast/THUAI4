@@ -29,6 +29,9 @@ copy /Y mac\* %PUBLISHROOT%\mac\bin\*
 copy /Y macfordebug\* %PUBLISHROOT%\mac\bin\Debug\*
 copy /Y macbash\* %PUBLISHROOT%\mac\*
 
+copy /Y LICENSE.txt %PUBLISHROOT%\win\*
+copy /Y LICENSE.txt %PUBLISHROOT%\linux\*
+copy /Y LICENSE.txt %PUBLISHROOT%\mac\*
 
 
 :: Init relative files

@@ -9,5 +9,5 @@ THUAI4 原电子系第22届队式程序设计大赛
 - unity客户端读取回放文件
 
 ## 开发组成员
-刘雪枫
+Timothy-LiuXuefeng（刘雪枫）
 

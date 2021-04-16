@@ -341,6 +341,7 @@ namespace Logic.Server
 						);
 #endif
 						frt.Start();
+						mwr.Flush();
 					}
 				);
 		}
