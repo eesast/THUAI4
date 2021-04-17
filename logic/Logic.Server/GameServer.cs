@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using Timothy.FrameRateTask;
 using playback;
+using System.Net;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace Logic.Server
 {
@@ -25,9 +28,11 @@ namespace Logic.Server
 			return game.GetTeamScore(teamID);
 		}
 
-		public override int TeamCount { get => options.TeamCount; }
+		public override int TeamCount => options.TeamCount;
+		public override bool IsWebCompetition => httpSender != null;
 
-		MessageWriter? mwr;
+		private MessageWriter? mwr = null;
+		private HttpSender? httpSender = null;
 
 		public GameServer(ArgumentOptions options) : base(options)
 		{
@@ -41,7 +46,7 @@ namespace Logic.Server
 				}
 			}
 
-			if (options.FileName != "")
+			if (options.FileName != DefaultArgumentOptions.FileName)
 			{
 				try
 				{
@@ -51,6 +56,11 @@ namespace Logic.Server
 				{
 					Console.WriteLine($"Error: Cannot create the playback file: {options.FileName}!");
 				}
+			}
+
+			if (options.Token != DefaultArgumentOptions.Token)
+			{
+				httpSender = new HttpSender("https://api.eesast.com/contest", options.Token, "PUT");
 			}
 
 			while (!game.GameMap.Timer.IsGaming)
@@ -358,9 +368,25 @@ namespace Logic.Server
 		{
 			//向所有玩家发送结束游戏消息
 			SendMessageToAllClients(MessageType.EndGame, false);
-			mwr.Flush();
+			mwr?.Flush();
+			SendEndGameHttp();		// 向网站发送结束游戏消息
 			endGameInfoSema.Release();
 		}
 
+		private void SendEndGameHttp()
+		{
+			var scores = new JObject[options.TeamCount];
+			for (ushort i = 0; i < options.TeamCount; ++i)
+			{
+				scores[i] = new JObject { ["team_id"] = i.ToString(), ["score"] = GetTeamScore(i) };
+			}
+			httpSender?.SendHttpRequest
+				(
+					new JObject
+					{
+						["result"] = new JArray(scores)
+					}
+				);
+		}
 	}
 }

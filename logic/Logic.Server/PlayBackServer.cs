@@ -14,6 +14,7 @@ namespace Logic.Server
 		private int[] teamScore;
 
 		public override int TeamCount { get => teamScore.Length; }
+		public override bool IsWebCompetition => false;
 
 		public PlayBackServer(ArgumentOptions options) : base(options)
 		{
@@ -48,6 +49,11 @@ namespace Logic.Server
 								}
 							}
 							++infoNo;
+							if (msg == null)
+							{
+								Console.WriteLine("No game information in this file!");
+								return false;
+							}
 							if (msg.MessageType == MessageType.EndGame)
 							{
 								Console.WriteLine("Game over normally!");
@@ -83,6 +89,13 @@ namespace Logic.Server
 			{
 				Console.WriteLine(e);
 				return;
+			}
+			finally
+			{
+				if (teamScore == null)
+				{
+					teamScore = new int[1];
+				}
 			}
 		}
 		protected override void OnReceive(MessageToServer msg) { }

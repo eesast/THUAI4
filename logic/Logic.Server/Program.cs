@@ -23,7 +23,7 @@ namespace Logic.Server
 
             Console.WriteLine("Server begin to run: " + options.ServerPort.ToString());
 
-            ServerBase server = null;
+            ServerBase? server = null;
 
             if (options.PlayBack)
             {
@@ -41,8 +41,11 @@ namespace Logic.Server
                 Console.WriteLine($"Team {i}: {server.GetTeamScore(i)}");
 			}
 
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
+            if (!server.IsWebCompetition)
+			{
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }
             
             return 0;
         }

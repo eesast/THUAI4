@@ -2,10 +2,16 @@
 
 namespace Logic.Server
 {
+	static class DefaultArgumentOptions
+	{
+		public static string FileName = "枫哥最帅";		// A impossible name of the playback file to indicate -f is not sepcified.
+		public static string Token = "枫哥最帅";         // A impossible name of the token to indicate -f is not sepcified.
+	}
+
 	class ArgumentOptions
 	{
 		[Option('k', "token", Required = false, HelpText = "Web API Token")]
-		public string Token { get; set; } = "";
+		public string Token { get; set; } = DefaultArgumentOptions.Token;
 
 		[Option('p', "port", Required = true, HelpText = "Server listening port")]
 		public ushort ServerPort { get; set; } = 10086;
@@ -20,7 +26,7 @@ namespace Logic.Server
 		public uint GameTimeInSecond { get; set; } = 10 * 60;
 
 		[Option('f', "fileName", Required = false, HelpText = "The file to store playback file or to read file.")]
-		public string FileName { get; set; } = "";
+		public string FileName { get; set; } = DefaultArgumentOptions.FileName;
 
 		[Option('b', "playBack", Required = false, HelpText = "Whether open the server in a playback mode.")]
 		public bool PlayBack { get; set; } = false;

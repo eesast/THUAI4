@@ -37,6 +37,7 @@ bld/
 /THUnity2D/deleted.cs
 /Logic.Server/deleted.cs
 /ImageMaker/
+*.thuaipb
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
