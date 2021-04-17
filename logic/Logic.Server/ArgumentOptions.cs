@@ -4,8 +4,8 @@ namespace Logic.Server
 {
 	static class DefaultArgumentOptions
 	{
-		public static string FileName = "枫哥最帅";		// A impossible name of the playback file to indicate -f is not sepcified.
-		public static string Token = "枫哥最帅";         // A impossible name of the token to indicate -f is not sepcified.
+		public static string FileName = "枫哥最帅";		// An impossible name of the playback file to indicate -f is not sepcified.
+		public static string Token = "枫哥最帅";         // An impossible name of the token to indicate -f is not sepcified.
 	}
 
 	class ArgumentOptions
