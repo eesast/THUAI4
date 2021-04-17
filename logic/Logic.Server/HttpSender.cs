@@ -28,7 +28,11 @@ namespace Logic.Server
 				var raw = Encoding.UTF8.GetBytes(body.ToString());
 				request.GetRequestStream().Write(raw, 0, raw.Length);
 				var response = request.GetResponse();
+
+#if DEBUG
 				Console.WriteLine($"Web response: {response}");
+#endif
+
 			}
 			catch (Exception e)
 			{
