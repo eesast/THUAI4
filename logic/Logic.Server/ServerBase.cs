@@ -15,6 +15,8 @@ namespace Logic.Server
 
 		public abstract int TeamCount { get; }
 
+		public abstract bool IsWebCompetition { get; }
+
 		public ServerBase(ArgumentOptions options)
 		{
 			//队伍数量在 1~4 之间，总人数不超过 8
