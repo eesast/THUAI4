@@ -25,15 +25,7 @@ namespace Logic.Server
 
             ServerBase? server = null;
 
-            if (options.PlayBack)
-            {
-                server = new PlayBackServer(options);
-
-            }
-            else
-            {
-                server = new GameServer(options);
-            }
+            server = ServerFactory.GetServer(options);
 
             Console.WriteLine($"Final score: ");
             for (int i = 0; i < server.TeamCount; ++i)
