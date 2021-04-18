@@ -1,11 +1,9 @@
 ﻿using Communication.Proto;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using playback;
-using Timothy.FrameRateTask;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Timothy.FrameRateTask;
 
 namespace Logic.Server
 {

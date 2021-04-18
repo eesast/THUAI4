@@ -1,15 +1,13 @@
-﻿using System;
-using THUnity2D;
-using Gaming;
+﻿using Communication.Proto;
 using GameEngine;
-using Communication.Proto;
-using System.Threading.Tasks;
-using System.Threading;
-using Timothy.FrameRateTask;
-using playback;
-using System.Net;
+using Gaming;
 using Newtonsoft.Json.Linq;
-using System.Text;
+using playback;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using THUnity2D;
+using Timothy.FrameRateTask;
 
 namespace Logic.Server
 {
@@ -58,9 +56,9 @@ namespace Logic.Server
 				}
 			}
 
-			if (options.Token != DefaultArgumentOptions.Token)
+			if (options.Token != DefaultArgumentOptions.Token && options.Url != DefaultArgumentOptions.Url)
 			{
-				httpSender = new HttpSender("https://api.eesast.com/contest", options.Token, "PUT");
+				httpSender = new HttpSender(options.Url, options.Token, "PUT");
 			}
 
 			while (!game.GameMap.Timer.IsGaming)
@@ -207,7 +205,7 @@ namespace Logic.Server
 
 		private void SendMessageToTeammate(MessageToServer msgRecv)
 		{
-			if (!ValidTeamIDAndPlayerID(msgRecv.TeamID, msgRecv.PlayerID)) return;
+			if (!ValidTeamIDAndPlayerID(msgRecv.TeamID, msgRecv.PlayerID) || !ValidTeamIDAndPlayerID(msgRecv.TeamID, msgRecv.ToPlayerID)) return;
 			if (msgRecv.Message.Length > 64) return;
 			MessageToOneClient msg = new MessageToOneClient();
 			msg.PlayerID = msgRecv.ToPlayerID;

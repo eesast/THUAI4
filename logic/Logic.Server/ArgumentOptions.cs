@@ -6,13 +6,11 @@ namespace Logic.Server
 	{
 		public static string FileName = "枫哥最帅";		// An impossible name of the playback file to indicate -f is not sepcified.
 		public static string Token = "枫哥最帅";         // An impossible name of the token to indicate -f is not sepcified.
+		public static string Url = "枫哥最酷";
 	}
 
 	class ArgumentOptions
 	{
-		[Option('k', "token", Required = false, HelpText = "Web API Token")]
-		public string Token { get; set; } = DefaultArgumentOptions.Token;
-
 		[Option('p', "port", Required = true, HelpText = "Server listening port")]
 		public ushort ServerPort { get; set; } = 10086;
 
@@ -30,5 +28,14 @@ namespace Logic.Server
 
 		[Option('b', "playBack", Required = false, HelpText = "Whether open the server in a playback mode.")]
 		public bool PlayBack { get; set; } = false;
+
+		[Option('k', "token", Required = false, HelpText = "Web API Token")]
+		public string Token { get; set; } = DefaultArgumentOptions.Token;
+
+		[Option('u', "url", Required = false, HelpText = "Web url")]
+		public string Url { get; set; } = DefaultArgumentOptions.Url;
+
+		[Option("requestOnly", Required = false, HelpText = "Only send  web requests")]
+		public bool RequestOnly { get; set; } = false;
 	}
 }
