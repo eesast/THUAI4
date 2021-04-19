@@ -172,7 +172,7 @@ namespace Logic.Client
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(96, 42);
             this.button2.TabIndex = 10;
-            this.button2.Text = "Wacth";
+            this.button2.Text = "Watch";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
