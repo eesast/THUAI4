@@ -20,13 +20,13 @@ namespace THUnity2D
     public sealed class Bullet : Obj
     {
         private int ap;     //攻击力
-        public int AP { get => ap; }
+        public int AP => ap;
 
         private readonly bool hasSpear;
-        public bool HasSpear { get => hasSpear; }
+        public bool HasSpear => hasSpear;
 
         private readonly BulletType bulletType;
-        public BulletType BulletType { get => bulletType; }
+        public BulletType BulletType => bulletType;
 
         public Bullet(XYPosition initPos, int radius, int basicMoveSpeed, BulletType bulletType, int ap, bool hasSpear) 
             : base(initPos, radius, false, basicMoveSpeed, ObjType.Bullet, ShapeType.Circle)

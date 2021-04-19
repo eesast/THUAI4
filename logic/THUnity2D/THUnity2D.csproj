@@ -13,4 +13,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FrameRateTask\FrameRateTask.csproj" />
+  </ItemGroup>
+
 </Project>

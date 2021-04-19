@@ -18,11 +18,13 @@
 class Logic
 {
 private:
+	using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>>;
+
 	//Logic control
-	bool FlagProcessMessage=false;
+	bool FlagProcessMessage = false;
 	bool FlagBufferUpdated = false;
 	bool CurrentStateAccessed = false;
-	bool AiTerminated=true;//改架構后 AI 綫程 detach 了，主函數還要等......
+	bool AiTerminated = true;//更确切的含义是，AI线程是否终止或未开始
 
 	enum class GamePhase : unsigned char
 	{
@@ -30,7 +32,9 @@ private:
 		Gaming = 1,
 		GameOver = 2,
 	};
-	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized;//仅用于循环条件判断，atomic即可
+	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized; //仅用于循环条件判断，atomic即可
+	volatile std::int32_t counter_state = 0;
+	volatile std::int32_t counter_buffer = 0;
 
 	std::mutex mtxOnReceive;
 	std::condition_variable cvOnReceive;
@@ -50,24 +54,19 @@ private:
 	State* pBuffer;
 	State storage[2];
 	concurrency::concurrent_queue<std::string> MessageStorage;
+	concurrency::concurrent_queue<Pointer2Message> queue;
 
-	CAPI capi;
+	CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2> capi;
 	std::unique_ptr<LogicInterface> pApi;
 	std::unique_ptr<AIBase> pAI;
 
-	static bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo&);
-	static std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr<THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo& goi);
-	static std::shared_ptr<THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi);
+	void UnBlockMtxOnReceive();
+	void UnBlockMtxBufferUpdated();
+
 	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
 	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
 
-	void OnClose();
-	void OnReceive();
-	void OnConnect();
-	void load(std::shared_ptr<Protobuf::MessageToClient>); //将最新状态信息加载到buffer
+	void load(std::shared_ptr<Protobuf::MessageToClient>); //将最新状态信息加载到buffer 还会使得counter_buffer计数加一
 
 	void ProcessMessage();
 	void PlayerWrapper();
@@ -75,7 +74,7 @@ private:
 
 public:
 	Logic();
-	~Logic();
+	~Logic() = default;
 	void Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename = "");
 };
 

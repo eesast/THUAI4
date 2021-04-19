@@ -13,5 +13,13 @@
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
 
+#ifdef _UNICODE
+#define _tstring wstring
+#define _tostringstream wostringstream
+#else // _UNICODE
+#define _tstring string
+#define _tostringstream ostringstream
+#endif // _UNICODE
+
 #endif	//#ifndef WIN32_BASIC_H
 

@@ -102,7 +102,7 @@ namespace Communication.Agent
                     if (!dict.ContainsKey(key))
                     {
                         Console.WriteLine($"Error: No such player corresponding to ID {message.TeamID} {message.PlayerID}");
-                        return HandleResult.Error;
+                        return HandleResult.Ok;
                     }
                     if (!server.Send(dict[key], bytes, bytes.Length))
                     {

@@ -47,7 +47,7 @@ namespace Logic.Server
 			return AllEnums(bulletType, Communication.Proto.BulletType.Bullet0);
 		}
 
-		public static Communication.Proto.ColorType ToCommunicationColorType(THUnity2D.Map.ColorType colorType)
+		public static Communication.Proto.ColorType ToCommunicationColorType(GameEngine.Map.ColorType colorType)
 		{
 			return AllEnums(colorType, Communication.Proto.ColorType.None);
 		}

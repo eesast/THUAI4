@@ -28,12 +28,12 @@ struct State
 	std::vector<std::shared_ptr<THUAI4::Prop>> props;
 	std::vector<std::shared_ptr<THUAI4::Bullet>> bullets;
 	std::vector<std::shared_ptr<THUAI4::BirthPoint>> birthpoints;
-	std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> playerGUIDs;
+	static std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> playerGUIDs;
 	std::shared_ptr<THUAI4::Character> self;
 #ifdef _COLOR_MAP_BY_HASHING_
 	std::unordered_map<uint32_t, THUAI4::ColorType> cellColors;
 #else
-	std::array<std::array<ColorType, nCells>, nCells> cellColors;
+	std::array<std::array<THUAI4::ColorType, StateConstant::nCells>, StateConstant::nCells> cellColors;
 #endif
 };
 
@@ -43,12 +43,13 @@ protected:
 	const std::function<void(Protobuf::MessageToServer &)> SendMessageWrapper; //加入ID放到这个函数里了
 	const std::function<bool()> Empty;
 	const std::function<bool(std::string &)> TryPop;
+	const std::function<int()> GetCounter;
 	const State *&pState;
 
 public:
 	LogicInterface(std::function<void(Protobuf::MessageToServer &)> sm,
-				   std::function<bool()> e, std::function<bool(std::string &)> tp,
-				   const State *&pS) : SendMessageWrapper(sm), Empty(e), TryPop(tp), pState(pS) {}
+				   std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+				   const State *&pS) : SendMessageWrapper(sm), Empty(e), TryPop(tp), GetCounter(gc), pState(pS) {}
 	virtual void StartTimer() = 0;
 	virtual void EndTimer() = 0;
 };
@@ -57,17 +58,18 @@ template <bool>
 struct Members
 {
 public:
-	Members(std::mutex &mtx_state, std::function<void()>) {}
+	Members(std::mutex& mtx_state, std::function<void()> f){}
 };
 
 template <>
 struct Members<true>
 {
 public:
-	Members(std::mutex &mtx_state, std::function<void()> f): mtx_state(mtx_state),TryUpDate(f) {}
+	Members(std::mutex &mtx_state, std::function<void()> f) : mtx_state(mtx_state), TryUpDate(f) {}
+
 protected:
 	std::mutex &mtx_state;
-	std::function<void()> TryUpDate;
+	const std::function<void()> TryUpDate;
 };
 
 template <bool asyn> //如果为真，仅API函数调用与state更新互斥 否则play()函数调用期间state更新都阻塞
@@ -78,8 +80,8 @@ private:
 	virtual void EndTimer() {}
 
 public:
-	API(std::function<void(Protobuf::MessageToServer &)> sm,
-		std::function<bool()> e, std::function<bool(std::string &)> tp,
+	API(std::function<void(Protobuf::MessageToServer&)> sm,
+		std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 		const State *&pS, std::mutex &mtx_state, std::function<void()>);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual void MoveRight(uint32_t timeInMilliseconds);
@@ -93,6 +95,7 @@ public:
 	virtual void Send(int toPlayerID, std::string message);
 
 	//Information the player can get
+	virtual int GetCounterOfFrames();
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string &);
 
@@ -108,6 +111,10 @@ public:
 	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
+
+
+template class API<true>;
+template class API<false>;
 
 template <bool asyn>
 class DebugApi final : public LogicInterface, Members<asyn>
@@ -133,8 +140,8 @@ private:
 	virtual void EndTimer();
 
 public:
-	DebugApi(std::function<void(Protobuf::MessageToServer &)> sm,
-			 std::function<bool()> e, std::function<bool(std::string &)> tp,
+	DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
+			 std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
 			 const State *&pS, std::mutex &mtx_state, std::function<void()>, bool ev = false,
 			 std::ostream &out = std::cout);
 	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
@@ -149,6 +156,7 @@ public:
 	virtual void Send(int toPlayerID, std::string message);
 
 	//Information the player can get
+	virtual int GetCounterOfFrames();
 	virtual bool MessageAvailable();
 	virtual bool TryGetMessage(std::string &);
 
@@ -164,6 +172,10 @@ public:
 	virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const override;
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
+
+template class DebugApi<true>;
+template class DebugApi<false>;
+
 inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 {
 	int32_t centerX = CellX * Constants::Map::numOfGridPerCell + (Constants::Map::numOfGridPerCell >> 1);
@@ -173,5 +185,6 @@ inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 	int32_t D = (Constants::Map::numOfGridPerCell >> 1) + Constants::Map::sightRadius;
 	return dx <= D && dy <= D;
 }
+
 
 #endif // !API_H

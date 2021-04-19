@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Communication.Proto;
 using THUnity2D;
+using GameEngine;
 
 namespace Logic.Server
 {
@@ -37,7 +38,8 @@ namespace Logic.Server
 			ret.Ap = player.AP;
 			ret.BulletType = ConvertTool.ToCommunicationBulletType(player.bulletType);
 
-			ret.PropType = player.HoldProp == null ? Communication.Proto.PropType.Null : ConvertTool.ToCommunicationPropType(player.HoldProp.GetPropType());
+			Prop? holdProp = player.HoldProp;		// 防止判断后被突然置null
+			ret.PropType = holdProp == null ? Communication.Proto.PropType.Null : ConvertTool.ToCommunicationPropType(holdProp.GetPropType());
 
 			ret.IsDying = player.IsResetting;
 			ret.JobType = ConvertTool.ToCommunicationJobType(player.jobType);
@@ -105,6 +107,7 @@ namespace Logic.Server
 			ret.CanMove = gameObj.CanMove;
 			ret.IsMoving = gameObj.IsMoving;
 			ret.ShapeType = ConvertTool.ToCommunicationShapeType(gameObj.Shape);
+			ret.Radius = gameObj.Radius;
 		}
 	}
 }

@@ -74,13 +74,13 @@ namespace Logic.Client
             this.comboBox2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Items.AddRange(new object[] {
-            "职业0",
-            "职业1",
-            "职业2",
-            "职业3",
-            "职业4",
-            "职业5",
-            "职业6"});
+            "平凡的职业",
+            "贺岁师",
+            "懒羊羊",
+            "小紫鱼",
+            "猴博士",
+            "潇洒哥",
+            "铁扇公主"});
             this.comboBox2.Location = new System.Drawing.Point(89, 191);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(135, 29);

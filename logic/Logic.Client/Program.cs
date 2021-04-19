@@ -23,20 +23,19 @@ namespace Logic.Client
             //取得开始命令
             AOption? options = null;
             Parser.Default.ParseArguments<AOption>(args).WithParsed(o => { options = o; });
-            Int64 teamid, playerid;
             ClientData client;
             if (options == null)
             {
                 Starting starting = new Starting();
                 Application.Run(starting);
-                teamid = starting.teamid;
-                playerid = starting.playerid;
+                teamID = starting.teamid;
+                playerID = starting.playerid;
                 client = new ClientData(starting.teamid, starting.playerid, starting.job, starting.port);
             }
             else
             {
-                teamid = options.teamID;
-                playerid = options.playerID;
+                teamID = options.teamID;
+                playerID = options.playerID;
                 client = new ClientData(options.teamID, options.playerID, (JobType)options.job, options.ServerPort);
             }
             if (clientCommunicator.Connect("127.0.0.1", client.port))
@@ -50,9 +49,9 @@ namespace Logic.Client
             //向server发消息
             MessageToServer msg = new MessageToServer();
             msg.MessageType = MessageType.AddPlayer;
-            msg.TeamID = teamid;
-            msg.PlayerID = playerid;
-            msg.JobType = client.jobType;
+            msg.TeamID = teamID;
+            msg.PlayerID = playerID;
+            msg.JobType = jobType;
             //TO DO:发出消息
             clientCommunicator.OnReceive += delegate ()
             {
@@ -61,7 +60,7 @@ namespace Logic.Client
             };
             client.messageline = new BlockingCollection<Tuple<IMsg, long>>();
             int bulletspeed;
-            switch (client.jobType)
+            switch (jobType)
             {
                 default:
                 case JobType.Job0:
@@ -86,33 +85,38 @@ namespace Logic.Client
                     bulletspeed = Program.basicBulletMoveSpeed;
                     break;
             }
-            client.gameform = new Form1(teamid, playerid, bulletspeed, client.jobType);
-            new Thread(() =>
-            {
-                while (true)
-                {
-                    if (client.messageline.TryTake(out Tuple<IMsg, long> msg))
-                    {
-                        if (msg.Item1.PacketType == PacketType.MessageToOneClient)
-                        {
-                            MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
-                            if (mm.TeamID == teamid && mm.PlayerID == playerid) client.OnReciveShort(mm);
-                        }
-                        else if (msg.Item1.PacketType == PacketType.MessageToClient)
-                        {
-                            MessageToClient mm = msg.Item1.Content as MessageToClient;
-                            if (mm.TeamID == teamid && mm.PlayerID == playerid) client.OnReciveNormal(mm, msg.Item2);
-                        }
-                    }
-                }
-            }
-                ).Start();
+            client.gameform = new Form1(teamID, playerID, bulletspeed, jobType);
+            Thread thread = new Thread(() =>
+              {
+                  while (true)
+                  {
+                      if (client.messageline.TryTake(out Tuple<IMsg, long> msg))
+                      {
+                          if (msg.Item1.PacketType == PacketType.MessageToOneClient)
+                          {
+                              MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
+                              if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveShort(mm);
+                          }
+                          else if (msg.Item1.PacketType == PacketType.MessageToClient)
+                          {
+                              MessageToClient mm = msg.Item1.Content as MessageToClient;
+                              if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveNormal(mm, msg.Item2);
+                          }
+                      }
+                  }
+              }
+                );
+            thread.IsBackground = true;
+            thread.Start();
             clientCommunicator.SendMessage(msg);
             Application.Run(client.gameform);
             Application.Exit();
         }
         public const int cell = 1000;
         public const int basicBulletMoveSpeed = cell * 6;
+        public static Int64 teamID;
+        public static Int64 playerID;
+        public static JobType jobType;
         public static bool initneed = true;
         public static CSharpClient clientCommunicator = new CSharpClient();
     }
@@ -192,9 +196,6 @@ namespace Logic.Client
     }
     public class ClientData
     {
-        public Int64 teamID;
-        public Int64 playerID;
-        public JobType jobType;
         public int bulletspeed;
         public ushort port;
         public Form1 gameform; //游戏窗体
@@ -204,9 +205,9 @@ namespace Logic.Client
         public BlockingCollection<Tuple<IMsg, long>> messageline;
         public ClientData(Int64 teamID, Int64 playerID, JobType jobType, ushort port)
         {
-            this.teamID = teamID;
-            this.playerID = playerID;
-            this.jobType = jobType;
+            Program.teamID = teamID;
+            Program.playerID = playerID;
+            Program.jobType = jobType;
             this.port = port;
         }
         public void OnReciveShort(MessageToOneClient msg)  //连接是否成功
@@ -218,13 +219,25 @@ namespace Logic.Client
             {
                 MessageBox.Show("Invalid Player");
                 Starting starting = new Starting();
-                Application.Run(new Starting());
+                Application.Run(starting);
                 MessageToServer msg1 = new MessageToServer();
                 msg1.MessageType = MessageType.AddPlayer;
                 msg1.TeamID = starting.teamid;
                 msg1.PlayerID = starting.playerid;
                 msg1.JobType = starting.job;
-                Program.clientCommunicator.SendMessage(msg1);
+                Program.teamID = starting.teamid;
+                Program.playerID = starting.playerid;
+                Program.jobType = starting.job;
+                Program.clientCommunicator.Stop();
+                if (Program.clientCommunicator.Connect("127.0.0.1", starting.port))
+                {
+                    Program.clientCommunicator.SendMessage(msg1);
+                }
+                else
+                {
+                    MessageBox.Show("连接Agent失败");
+                    return;
+                }
             }
         }
         public void OnReciveNormal(MessageToClient msg, long clock) //处理游戏消息
@@ -241,6 +254,7 @@ namespace Logic.Client
                         }
                     }
                     gameform.movespeed = msg.SelfInfo.MoveSpeed;
+                    gameform.changeform(Program.teamID, Program.playerID, Program.jobType);
                     break;
                 case MessageType.Gaming:
                     if (System.Environment.TickCount64 - clock > 50) break;

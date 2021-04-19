@@ -37,6 +37,7 @@ bld/
 /THUnity2D/deleted.cs
 /Logic.Server/deleted.cs
 /ImageMaker/
+*.thuaipb
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -182,7 +183,10 @@ DocProject/Help/Html2
 DocProject/Help/html
 
 # Click-Once directory
-publish/
+publish/*
+
+# A Release batch
+!publish/publishall.cmd
 
 # Publish Web Output
 *.[Pp]ublish.xml

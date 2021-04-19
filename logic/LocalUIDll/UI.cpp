@@ -6,23 +6,24 @@
 #include <fstream>
 #include <unordered_map>
 #include <utility>
+#include <type_traits>
 
 namespace
 {
-    value class MapWrapper
+    value class GameWrapper
     {
     public:
-        THUnity2D::Map^ map;
+        Gaming::Game^ game;
     };
 
-    MapWrapper* pMW = nullptr;
+    GameWrapper* pGM = nullptr;
     std::atomic<bool> finishGcNew = false;
 
-    void GetPMW()
+    void GetPGM()
     {
-        MapWrapper mp;
-        mp.map = gcnew THUnity2D::Map(THUnity2D::MapInfo::map, 2);
-        pMW = &mp;
+        GameWrapper mp;
+        mp.game = gcnew Gaming::Game(GameEngine::MapInfo::defaultMap, 2);
+        pGM = &mp;
         finishGcNew = true;
         while (true) { std::this_thread::sleep_for(std::chrono::seconds(10)); }
     }
@@ -71,7 +72,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         (
             []()
             {
-                GetPMW();
+                GetPGM();
             }
         );
         
@@ -80,8 +81,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         while (!finishGcNew);
 
         int basicSize = 600;
-        int rows = pMW->map->Rows;
-        int cols = pMW->map->Cols;
+        int rows = pGM->game->GameMap->Rows;
+        int cols = pGM->game->GameMap->Cols;
 
         width = (pixelPerCell.x = basicSize / cols) * cols;
         width += appendCx = width / 2;
@@ -98,8 +99,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (job2 < 0 || job2 >= 7) job2 = 0;
         }
 
-        player1ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
-        player2ID = pMW->map->AddPlayer(THUnity2D::Map::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
+        player1ID = pGM->game->AddPlayer(Gaming::Game::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
+        player2ID = pGM->game->AddPlayer(Gaming::Game::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
         
         MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -110,7 +111,17 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         SetTimer(hWnd, paintTimerID, 50, NULL);
 
-        std::thread([]() {pMW->map->StartGame(1000 * 60 * 10); }).detach();
+        std::thread([hWnd]() 
+            {
+                pGM->game->StartGame(1000 * 60 * 10);
+                int score1 = pGM->game->GetTeamScore(0LL);
+                int score2 = pGM->game->GetTeamScore(1LL);
+                std::_tostringstream sout;
+                if constexpr (!std::is_same_v<decltype(sout), std::ostringstream>) sout.imbue(std::locale("chs"));
+                sout << TEXT("游戏结束！队伍一分数：") << score1 << TEXT("；队伍二分数：") << score2;
+                MessageBox(hWnd, sout.str().c_str(), TEXT("游戏结束！"), MB_OK);
+                SendMessage(hWnd, WM_CLOSE, 0, 0);
+            }).detach();
 
         auto UsrControl = [this](long long playerID, int up, int left, int down, int right, int atk, int pick, int use, int throwprop)
         {
@@ -161,25 +172,25 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     for (int i = THUnity2D::Prop::MinPropTypeNum; i <= THUnity2D::Prop::MaxPropTypeNum; ++i)
                     {
-                        if (pMW->map->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
+                        if (pGM->game->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
                     }
                 }
                 else if (UPress)
                 {
-                    pMW->map->Use(playerID);
+                    pGM->game->Use(playerID);
                 }
                 else if (JPress)
                 {
                     if (key && 
-                        pMW->map->Attack(playerID, time[key] * 20, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                        pGM->game->Attack(playerID, time[key] * 20, direct[key])) std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 }
                 else if (TPress)
                 {
-                    if (key) pMW->map->Throw(playerID, time[key] * 50, direct[key]);
+                    if (key) pGM->game->Throw(playerID, time[key] * 50, direct[key]);
                 }
                 else if (key)
                 {
-                    pMW->map->MovePlayer(playerID, time[key], direct[key]);
+                    pGM->game->MovePlayer(playerID, time[key], direct[key]);
                 }
             }
         };
@@ -209,18 +220,18 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HBRUSH hbrColor3 = CreateSolidBrush(RGB(0, 0, 100));
             HBRUSH hbrColor4 = CreateSolidBrush(RGB(100, 100, 0));
 
-            auto cellColor = pMW->map->CellColor;
-            int rows = pMW->map->Rows, cols = pMW->map->Cols;
+            auto cellColor = pGM->game->GameMap->CellColor;
+            int rows = pGM->game->GameMap->Rows, cols = pGM->game->GameMap->Cols;
             for (int i = 0, topPos = 0; i < rows; ++i, topPos += pixelPerCell.y)
             {
                 for (int j = 0, leftPos = 0; j < cols; ++j, leftPos += pixelPerCell.x)
                 {
                     switch (cellColor[i, j])
                     {
-                    case THUnity2D::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
-                    case THUnity2D::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
-                    case THUnity2D::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
-                    case THUnity2D::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
+                    case GameEngine::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
+                    case GameEngine::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
+                    case GameEngine::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
+                    case GameEngine::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
                     default: continue;
                     }
                     Rectangle(hdcMem, leftPos, topPos, leftPos + pixelPerCell.x, topPos + pixelPerCell.y);
@@ -258,18 +269,24 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             std::wostringstream wsout;
 
             wsout.imbue(std::locale("chs"));
-            wsout << L"队伍1：分数：" << pMW->map->GetTeamScore(0) << '\n';
-            auto hPlayer1 = pMW->map->GetPlayerFromTeam(player1ID), hPlayer2 = pMW->map->GetPlayerFromTeam(player2ID);
-            wsout << L"玩家1：\n生命：" << hPlayer1->HP << L"\n剩余子弹数：" << hPlayer1->BulletNum << L"\n分数：" << hPlayer1->Score << L"\n";
-            wsout << L"移动速度：" << hPlayer1->MoveSpeed << "\n";
-            wsout << L"攻击力：" << hPlayer1->AP << "\n";
-            wsout << '\n';
 
-            wsout << L"队伍2：分数：" << pMW->map->GetTeamScore(1) << '\n';
-            wsout << L"玩家2：\n生命：" << hPlayer2->HP << L"\n剩余子弹数：" << hPlayer2->BulletNum << L"\n分数：" << hPlayer2->Score << L"\n";
-            wsout << L"移动速度：" << hPlayer2->MoveSpeed << "\n";
-            wsout << L"攻击力：" << hPlayer2->AP << "\n";
-            wsout << '\n';
+            auto generatePlayerInfoStr = [&wsout](THUnity2D::Character^ hPlayer, long long id)
+            {
+                wsout << L"玩家" << std::to_wstring(id) << L"：\n生命：" << hPlayer->HP << L"\n剩余子弹数：" << hPlayer->BulletNum << L"\n分数：" << hPlayer->Score << L"\n";
+                wsout << L"移动速度：" << hPlayer->MoveSpeed << L"\n";
+                wsout << L"攻击力：" << hPlayer->AP << L"\n";
+                wsout << L"拥有盾牌：" << (hPlayer->HasShield ? L"是" : L"否") << L"\n";
+                wsout << L"拥有标枪：" << (hPlayer->HasSpear ? L"是" : L"否") << L"\n";
+                wsout << L"拥有衣服：" << (hPlayer->HasTotem ? L"是" : L"否") << L"\n";
+                wsout << '\n';
+            };
+
+            wsout << L"队伍1：分数：" << pGM->game->GetTeamScore(0) << '\n';
+            auto hPlayer1 = pGM->game->GetPlayerFromTeam(player1ID), hPlayer2 = pGM->game->GetPlayerFromTeam(player2ID);
+            generatePlayerInfoStr(hPlayer1, 1);
+
+            wsout << L"队伍2：分数：" << pGM->game->GetTeamScore(1) << '\n';
+            generatePlayerInfoStr(hPlayer2, 2);
 
             DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &RECT({ width - appendCx + 20, 20, width, height }), 0);
 
@@ -323,24 +340,27 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             HPEN hPenPlayerDirect = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 
-            auto gameObjList = pMW->map->GetGameObject();
-            int rowAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Rows;
-            int colAllGrid = THUnity2D::Map::Constant::numOfGridPerCell * pMW->map->Cols;
+            auto gameObjList = pGM->game->GetGameObject();
+            int rowAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pGM->game->GameMap->Rows;
+            int colAllGrid = GameEngine::Map::Constant::numOfGridPerCell * pGM->game->GameMap->Cols;
             for each (THUnity2D::GameObject^ gameObj in gameObjList)
             {
                 if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::Character)
                 {
-                    int rad = gameObj->Radius;
-                    auto [x, y] = gameObj->Position;
-                    SelectObject(hdcMem, hbrPlayer);
-                    Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
-                    int centerX = y * (width - appendCx) / colAllGrid, centerY = x * (height - appendCy) / rowAllGrid;
-                    double angle = gameObj->FacingDirection;
-                    int paintRadius = rad * (width - appendCx) / colAllGrid;
-                    MoveToEx(hdcMem, centerX, centerY, NULL);
-                    SelectObject(hdcMem, hPenPlayerDirect);
-                    LineTo(hdcMem, centerX + (int)(paintRadius * System::Math::Sin(angle)), centerY + (int)(paintRadius * System::Math::Cos(angle)));
-                    SelectObject(hdcMem, hPenNull);
+                    if (!static_cast<THUnity2D::Character^>(gameObj)->IsResetting)
+                    {
+                        int rad = gameObj->Radius;
+                        auto [x, y] = gameObj->Position;
+                        SelectObject(hdcMem, hbrPlayer);
+                        Ellipse(hdcMem, (y - rad) * (width - appendCx) / colAllGrid, (x - rad) * (height - appendCy) / rowAllGrid, (y + rad) * (width - appendCx) / colAllGrid, (x + rad) * (height - appendCy) / rowAllGrid);
+                        int centerX = y * (width - appendCx) / colAllGrid, centerY = x * (height - appendCy) / rowAllGrid;
+                        double angle = gameObj->FacingDirection;
+                        int paintRadius = rad * (width - appendCx) / colAllGrid;
+                        MoveToEx(hdcMem, centerX, centerY, NULL);
+                        SelectObject(hdcMem, hPenPlayerDirect);
+                        LineTo(hdcMem, centerX + (int)(paintRadius * System::Math::Sin(angle)), centerY + (int)(paintRadius * System::Math::Cos(angle)));
+                        SelectObject(hdcMem, hPenNull);
+                    }
                 }
                 else
                 {
