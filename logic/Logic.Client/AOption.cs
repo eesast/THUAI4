@@ -18,5 +18,8 @@ namespace Logic.Client
 
         [Option('j', "job", Required = true, HelpText = "choose your job")]
         public ushort job { get; set; } = 0;
+
+        [Option('w', "watch", Required = false, HelpText = "watch or not")]
+        public bool watch { get; set; } = false;
     }
 }
