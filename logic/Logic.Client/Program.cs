@@ -28,15 +28,35 @@ namespace Logic.Client
             {
                 Starting starting = new Starting();
                 Application.Run(starting);
-                teamID = starting.teamid;
-                playerID = starting.playerid;
-                client = new ClientData(starting.teamid, starting.playerid, starting.job, starting.port);
+                watch = starting.watch;
+                if (watch)
+                {
+                    teamID = 1911;
+                    playerID = 1911;
+                }
+                else
+                {
+                    teamID = starting.teamid;
+                    playerID = starting.playerid;
+                }
+                jobType = starting.job;
+                client = new ClientData(teamID, playerID, jobType, starting.port);
             }
             else
             {
-                teamID = options.teamID;
-                playerID = options.playerID;
-                client = new ClientData(options.teamID, options.playerID, (JobType)options.job, options.ServerPort);
+                watch = options.watch;
+                if (watch)
+                {
+                    teamID = 1911;
+                    playerID = 1911;
+                }
+                else
+                {
+                    teamID = options.teamID;
+                    playerID = options.playerID;
+                }
+                jobType = (JobType)options.job;
+                client = new ClientData(teamID, playerID, jobType, options.ServerPort);
             }
             if (clientCommunicator.Connect("127.0.0.1", client.port))
             {
@@ -59,31 +79,34 @@ namespace Logic.Client
                     client.messageline.Add(new Tuple<IMsg, long>(msg, System.Environment.TickCount64));
             };
             client.messageline = new BlockingCollection<Tuple<IMsg, long>>();
-            int bulletspeed;
-            switch (jobType)
+            int bulletspeed=0;
+            if (!watch)
             {
-                default:
-                case JobType.Job0:
-                    bulletspeed = Program.basicBulletMoveSpeed;
-                    break;
-                case JobType.Job1:
-                    bulletspeed = Program.basicBulletMoveSpeed * 2;
-                    break;
-                case JobType.Job2:
-                    bulletspeed = Program.basicBulletMoveSpeed / 2;
-                    break;
-                case JobType.Job3:
-                    bulletspeed = Program.basicBulletMoveSpeed / 2;
-                    break;
-                case JobType.Job4:
-                    bulletspeed = Program.basicBulletMoveSpeed * 4;
-                    break;
-                case JobType.Job5:
-                    bulletspeed = Program.basicBulletMoveSpeed;
-                    break;
-                case JobType.Job6:
-                    bulletspeed = Program.basicBulletMoveSpeed;
-                    break;
+                switch (jobType)
+                {
+                    default:
+                    case JobType.Job0:
+                        bulletspeed = Program.basicBulletMoveSpeed;
+                        break;
+                    case JobType.Job1:
+                        bulletspeed = Program.basicBulletMoveSpeed * 2;
+                        break;
+                    case JobType.Job2:
+                        bulletspeed = Program.basicBulletMoveSpeed / 2;
+                        break;
+                    case JobType.Job3:
+                        bulletspeed = Program.basicBulletMoveSpeed / 2;
+                        break;
+                    case JobType.Job4:
+                        bulletspeed = Program.basicBulletMoveSpeed * 4;
+                        break;
+                    case JobType.Job5:
+                        bulletspeed = Program.basicBulletMoveSpeed;
+                        break;
+                    case JobType.Job6:
+                        bulletspeed = Program.basicBulletMoveSpeed;
+                        break;
+                }
             }
             client.gameform = new Form1(teamID, playerID, bulletspeed, jobType);
             Thread thread = new Thread(() =>
@@ -94,13 +117,21 @@ namespace Logic.Client
                       {
                           if (msg.Item1.PacketType == PacketType.MessageToOneClient)
                           {
+                              if (watch) return;
                               MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
                               if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveShort(mm);
                           }
                           else if (msg.Item1.PacketType == PacketType.MessageToClient)
                           {
                               MessageToClient mm = msg.Item1.Content as MessageToClient;
-                              if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveNormal(mm, msg.Item2);
+                              if (watch) 
+                              {
+                                  if (client.gameform.IsHandleCreated)
+                                  {
+                                      if (mm.TeamID == 0 && mm.PlayerID == 0) client.OnReciveNormal(mm, msg.Item2);
+                                  }
+                              }
+                              else { if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveNormal(mm, msg.Item2); }
                           }
                       }
                   }
@@ -118,6 +149,7 @@ namespace Logic.Client
         public static Int64 playerID;
         public static JobType jobType;
         public static bool initneed = true;
+        public static bool watch = false;
         public static CSharpClient clientCommunicator = new CSharpClient();
     }
     public class Player  //玩家显示类
@@ -222,13 +254,14 @@ namespace Logic.Client
                 Application.Run(starting);
                 MessageToServer msg1 = new MessageToServer();
                 msg1.MessageType = MessageType.AddPlayer;
-                msg1.TeamID = starting.teamid;
-                msg1.PlayerID = starting.playerid;
-                msg1.JobType = starting.job;
-                Program.teamID = starting.teamid;
-                Program.playerID = starting.playerid;
+                Program.watch = starting.watch;
+                Program.teamID = Program.watch?1911:starting.teamid;
+                Program.playerID = Program.watch ? 1911 : starting.playerid;
                 Program.jobType = starting.job;
                 Program.clientCommunicator.Stop();
+                msg1.TeamID = Program.teamID;
+                msg1.PlayerID = Program.playerID;
+                msg1.JobType = starting.job;
                 if (Program.clientCommunicator.Connect("127.0.0.1", starting.port))
                 {
                     Program.clientCommunicator.SendMessage(msg1);
@@ -245,19 +278,34 @@ namespace Logic.Client
             switch (msg.MessageType)
             {
                 case MessageType.StartGame:
-                    Hashable = new Dictionary<Int64, Tuple<int, int>>();
-                    for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
+                    if (!Program.watch)
                     {
-                        for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                        Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                        for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
                         {
-                            Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                            for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                            {
+                                Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                            }
                         }
+                        gameform.movespeed = msg.SelfInfo.MoveSpeed;
+                        gameform.changeform(Program.teamID, Program.playerID, Program.jobType);
                     }
-                    gameform.movespeed = msg.SelfInfo.MoveSpeed;
-                    gameform.changeform(Program.teamID, Program.playerID, Program.jobType);
                     break;
                 case MessageType.Gaming:
                     if (System.Environment.TickCount64 - clock > 50) break;
+                    if (Program.watch && Program.initneed)
+                    {
+                        Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                        for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
+                        {
+                            for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                            {
+                                Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                            }
+                        }
+                        Program.initneed = false;
+                    }
                     Refresh(msg);
                     break;
                 case MessageType.EndGame:
