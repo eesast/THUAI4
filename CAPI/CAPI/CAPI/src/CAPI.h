@@ -57,5 +57,4 @@ public:
 
 };
 
-template CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
 #endif //!CAPI_H

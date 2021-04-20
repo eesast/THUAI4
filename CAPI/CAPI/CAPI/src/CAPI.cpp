@@ -3,6 +3,8 @@
 #include <thread>
 #include <chrono>
 
+template class CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
+
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
 CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::CAPI(std::function<void()> onconnect, std::function<void()> onclose, std::function<void(Pointer2M)> onreceive) : __OnConnect(onconnect), __OnReceive(onreceive), __OnClose(onclose), pclient(this) {}
 
