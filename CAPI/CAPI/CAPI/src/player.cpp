@@ -17,6 +17,7 @@ namespace
 	[[maybe_unused]] std::default_random_engine e{std::random_device{}()};
 }
 
+
 void AI::play(GameApi &g)
 {
 	auto self = g.GetSelfInfo();
