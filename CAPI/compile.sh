@@ -1,4 +1,5 @@
 cd CAPI/CAPI
+rm -f /usr/local/mnt/player/PLAYER*
 make SOURCE_DIR=/usr/local/mnt/cpp BIN_DIR=/usr/local/mnt/player/ &>  /usr/local/mnt/player/out.log
 cd /usr/local/mnt/player
 if [ [ -f ./PLAYER1 ] && [ -f ./PLAYER2 ] && [ -f ./PLAYER3 ] && [ -f ./PLAYER4 ] ]
