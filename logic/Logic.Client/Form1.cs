@@ -566,8 +566,8 @@ namespace Logic.Client
             ObjectInfoWord[2].Text = "TeamNum : " + Convert.ToString(player.teamnum);
             ObjectInfoWord[3].Text = "PlayerNum : " + Convert.ToString(player.playernum);
             ObjectInfoWord[4].Text = "Profession : " + Convert.ToString(player.job);
-            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
-            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
+            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
+            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
             ObjectInfoWord[7].Text = "Health : " + Convert.ToString(player.health);
             String tempo = "";
             switch ((int)player.possession)
