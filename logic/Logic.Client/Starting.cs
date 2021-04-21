@@ -26,11 +26,24 @@ namespace Logic.Client
             job = (Communication.Proto.JobType)comboBox2.SelectedIndex;
             playerid = comboBox3.SelectedIndex;
             port = (ushort)numericUpDown1.Value;
+            watch = false;
             this.Close();
         }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            teamid = comboBox1.SelectedIndex;
+            job = (Communication.Proto.JobType)comboBox2.SelectedIndex;
+            playerid = comboBox3.SelectedIndex;
+            port = (ushort)numericUpDown1.Value;
+            watch = true;
+            this.Close();
+        }
+
         public Int64 teamid;
         public Int64 playerid;
         public JobType job;
         public ushort port;
+        public bool watch;
+
     }
 }
