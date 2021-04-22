@@ -547,16 +547,19 @@ namespace Logic.Client
             }
             else if (mouseEventArgs.Button == MouseButtons.Right&&!watch)
             {
-                int y = this.PointToClient(Control.MousePosition).X;
-                int x = this.PointToClient(Control.MousePosition).Y;
-                MessageToServer msg = new MessageToServer();
-                msg.PlayerID = playerid;
-                msg.TeamID = teamid;
-                msg.MessageType = MessageType.Move;
-                msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
-                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
-                //TO DO:向server发移动指令消息
-                Program.clientCommunicator.SendMessage(msg);
+                if (PlayerLabelSet.ContainsKey(selfguid))
+                {
+                    int y = this.PointToClient(Control.MousePosition).X;
+                    int x = this.PointToClient(Control.MousePosition).Y;
+                    MessageToServer msg = new MessageToServer();
+                    msg.PlayerID = playerid;
+                    msg.TeamID = teamid;
+                    msg.MessageType = MessageType.Move;
+                    msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
+                    msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
+                    //TO DO:向server发移动指令消息
+                    Program.clientCommunicator.SendMessage(msg);
+                }
             }
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
@@ -662,7 +665,7 @@ namespace Logic.Client
         private void Form1_KeyPress(object sender, KeyPressEventArgs e) //键盘进行特殊操作
         {
             if (watch) return;
-            else
+            else if(PlayerLabelSet.ContainsKey(selfguid))
             {
                 switch (e.KeyChar)
                 {
