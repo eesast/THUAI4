@@ -113,7 +113,7 @@ namespace Logic.Client
               {
                   while (true)
                   {
-                      if (client.messageline.TryTake(out Tuple<IMsg, long> msg))
+                      Tuple<IMsg, long> msg = client.messageline.Take();
                       {
                           if (msg.Item1.PacketType == PacketType.MessageToOneClient)
                           {
