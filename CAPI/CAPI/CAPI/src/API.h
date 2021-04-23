@@ -176,14 +176,19 @@ public:
 template class DebugApi<true>;
 template class DebugApi<false>;
 
+inline uint64_t distance_squared(int32_t x, int32_t y)
+{
+	return x * x + y * y;
+}
 inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 {
-	int32_t centerX = CellX * Constants::Map::numOfGridPerCell + (Constants::Map::numOfGridPerCell >> 1);
-	int32_t centerY = CellY * Constants::Map::numOfGridPerCell + (Constants::Map::numOfGridPerCell >> 1);
+	constexpr int32_t half = Constants::Map::numOfGridPerCell >> 1;
+	int32_t centerX = (CellX << 10) - (CellX << 4) - (CellX << 3) + half;
+	int32_t centerY = (CellY << 10) - (CellY << 4) - (CellY << 3) + half;
 	int32_t dx = std::abs(centerX - x);
 	int32_t dy = std::abs(centerY - y);
-	int32_t D = (Constants::Map::numOfGridPerCell >> 1) + Constants::Map::sightRadius;
-	return dx <= D && dy <= D;
+	constexpr  int32_t D = half + Constants::Map::sightRadius;
+	return dx < D&& dy < D&& Constants::Map::sightRadiusSquared >= distance_squared(dx - half, dy - half);
 }
 
 
