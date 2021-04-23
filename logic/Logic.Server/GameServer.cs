@@ -162,6 +162,9 @@ namespace Logic.Server
 
 		protected override void OnReceive(MessageToServer msg)
 		{
+#if DEBUG
+			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}");
+#endif
 			switch (msg.MessageType)
 			{
 				case MessageType.AddPlayer:
