@@ -17,8 +17,8 @@ namespace
 	[[maybe_unused]] std::default_random_engine e{ std::random_device{}() };
 }
 
-bool flag = 0;
-void AI::play(GameApi& g)
+
+void AI::play(GameApi &g)
 {
 	auto self = g.GetSelfInfo();
 	g.Attack(10, 30);

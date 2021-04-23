@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using Timothy.FrameRateTask;
 using THUnity2D;
 
 namespace GameEngine
 {
-	
+
 	public partial class Map
 	{
 
@@ -20,6 +17,15 @@ namespace GameEngine
 			Color3 = 3,
 			Color4 = 4,
 		}
+		public static ColorType TeamToColor(long teamID)
+		{
+			return (ColorType)(teamID + 1L);
+		}
+		public static long ColorToTeam(ColorType color)
+		{
+			return (long)color - 1L;
+		}
+
 
 		private ColorType[,] cellColor;         //储存每格的颜色
 		public ColorType[,] CellColor

@@ -7,6 +7,12 @@ namespace Logic.Server
     {
         static int Main(string[] args)
         {
+            foreach (var arg in args)
+			{
+                Console.Write($"{arg} ");
+			}
+            Console.WriteLine();
+
             ArgumentOptions? options = null;
             Parser.Default.ParseArguments<ArgumentOptions>(args).WithParsed(o => { options = o; });
             if (options == null)
@@ -17,7 +23,21 @@ namespace Logic.Server
 
             Console.WriteLine("Server begin to run: " + options.ServerPort.ToString());
 
-            Server server = new Server(options);
+            ServerBase? server = null;
+
+            server = ServerFactory.GetServer(options);
+
+            Console.WriteLine($"Final score: ");
+            for (int i = 0; i < server.TeamCount; ++i)
+			{
+                Console.WriteLine($"Team {i}: {server.GetTeamScore(i)}");
+			}
+
+            if (!server.IsWebCompetition)
+			{
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }
             
             return 0;
         }

@@ -19,8 +19,10 @@ namespace Logic.Client
         static int fontforword = 15;
         static int fontforobjinfo = 15;
         HelpForm help = new HelpForm();
+        private bool watch = false;
         public Form1(Int64 teamID, Int64 playerID, int bulletspeed, JobType job)  //窗体构造时的初始化
         {
+            this.watch = (teamID == 1911 && playerID == 1911);
             this.teamid = teamID;
             this.playerid = playerID;
             this.bulletspeed = bulletspeed;
@@ -31,7 +33,8 @@ namespace Logic.Client
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.Text = "Client--- TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(job);
+            if (watch) this.Text = "Client---Watch Mode";
+            else this.Text = "Client---TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(job);
             //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             //this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             //绘制地图
@@ -542,18 +545,21 @@ namespace Logic.Client
                         break;
                 }
             }
-            else if (mouseEventArgs.Button == MouseButtons.Right)
+            else if (mouseEventArgs.Button == MouseButtons.Right&&!watch)
             {
-                int y = this.PointToClient(Control.MousePosition).X;
-                int x = this.PointToClient(Control.MousePosition).Y;
-                MessageToServer msg = new MessageToServer();
-                msg.PlayerID = playerid;
-                msg.TeamID = teamid;
-                msg.MessageType = MessageType.Move;
-                msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
-                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
-                //TO DO:向server发移动指令消息
-                Program.clientCommunicator.SendMessage(msg);
+                if (PlayerLabelSet.ContainsKey(selfguid))
+                {
+                    int y = this.PointToClient(Control.MousePosition).X;
+                    int x = this.PointToClient(Control.MousePosition).Y;
+                    MessageToServer msg = new MessageToServer();
+                    msg.PlayerID = playerid;
+                    msg.TeamID = teamid;
+                    msg.MessageType = MessageType.Move;
+                    msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
+                    msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
+                    //TO DO:向server发移动指令消息
+                    Program.clientCommunicator.SendMessage(msg);
+                }
             }
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
@@ -563,8 +569,8 @@ namespace Logic.Client
             ObjectInfoWord[2].Text = "TeamNum : " + Convert.ToString(player.teamnum);
             ObjectInfoWord[3].Text = "PlayerNum : " + Convert.ToString(player.playernum);
             ObjectInfoWord[4].Text = "Profession : " + Convert.ToString(player.job);
-            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
-            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
+            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
+            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
             ObjectInfoWord[7].Text = "Health : " + Convert.ToString(player.health);
             String tempo = "";
             switch ((int)player.possession)
@@ -658,52 +664,56 @@ namespace Logic.Client
         }
         private void Form1_KeyPress(object sender, KeyPressEventArgs e) //键盘进行特殊操作
         {
-            switch (e.KeyChar)
+            if (watch) return;
+            else if(PlayerLabelSet.ContainsKey(selfguid))
             {
-                case 'q':
-                case 'Q':
-                    int y = this.PointToClient(Control.MousePosition).X;
-                    int x = this.PointToClient(Control.MousePosition).Y;
-                    MessageToServer msg1 = new MessageToServer();
-                    msg1.PlayerID = playerid;
-                    msg1.TeamID = teamid;
-                    msg1.MessageType = MessageType.Attack;
-                    msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X, x - PlayerLabelSet[selfguid].label.Location.Y);//目前为弧度
-                    msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
-                    Program.clientCommunicator.SendMessage(msg1);
-                    break;
-                case 'w':
-                case 'W':
-                    MessageToServer msg2 = new MessageToServer();
-                    msg2.MessageType = MessageType.Use;
-                    msg2.PlayerID = playerid;
-                    msg2.TeamID = teamid;
-                    //TO DO:发消息
-                    Program.clientCommunicator.SendMessage(msg2);
-                    break;
-                case 'e':
-                case 'E':
-                    MessageToServer msg3 = new MessageToServer();
-                    msg3.MessageType = MessageType.Pick;
-                    msg3.PlayerID = playerid;
-                    msg3.TeamID = teamid;
-                    //TO DO:发消息
-                    for (int i = 1; i < 11; i++)
-                    {
-                        msg3.PropType = (PropType)i;
-                        Program.clientCommunicator.SendMessage(msg3);
-                    }
-                    break;
-                case 'r':
-                case 'R':
-                    MessageToServer msg4 = new MessageToServer();
-                    msg4.MessageType = MessageType.Throw;
-                    msg4.PlayerID = playerid;
-                    msg4.TeamID = teamid;
-                    //TO DO:发消息
-                    Program.clientCommunicator.SendMessage(msg4);
-                    break;
-                default: break;
+                switch (e.KeyChar)
+                {
+                    case 'q':
+                    case 'Q':
+                        int y = this.PointToClient(Control.MousePosition).X;
+                        int x = this.PointToClient(Control.MousePosition).Y;
+                        MessageToServer msg1 = new MessageToServer();
+                        msg1.PlayerID = playerid;
+                        msg1.TeamID = teamid;
+                        msg1.MessageType = MessageType.Attack;
+                        msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X, x - PlayerLabelSet[selfguid].label.Location.Y);//目前为弧度
+                        msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
+                        Program.clientCommunicator.SendMessage(msg1);
+                        break;
+                    case 'w':
+                    case 'W':
+                        MessageToServer msg2 = new MessageToServer();
+                        msg2.MessageType = MessageType.Use;
+                        msg2.PlayerID = playerid;
+                        msg2.TeamID = teamid;
+                        //TO DO:发消息
+                        Program.clientCommunicator.SendMessage(msg2);
+                        break;
+                    case 'e':
+                    case 'E':
+                        MessageToServer msg3 = new MessageToServer();
+                        msg3.MessageType = MessageType.Pick;
+                        msg3.PlayerID = playerid;
+                        msg3.TeamID = teamid;
+                        //TO DO:发消息
+                        for (int i = 1; i < 11; i++)
+                        {
+                            msg3.PropType = (PropType)i;
+                            Program.clientCommunicator.SendMessage(msg3);
+                        }
+                        break;
+                    case 'r':
+                    case 'R':
+                        MessageToServer msg4 = new MessageToServer();
+                        msg4.MessageType = MessageType.Throw;
+                        msg4.PlayerID = playerid;
+                        msg4.TeamID = teamid;
+                        //TO DO:发消息
+                        Program.clientCommunicator.SendMessage(msg4);
+                        break;
+                    default: break;
+                }
             }
         }
         //地雷先不画出“🚩”——锅
@@ -793,9 +803,17 @@ namespace Logic.Client
 
         private void Form1_HelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            help = new HelpForm();
-            help.Show();
-            this.WindowState = FormWindowState.Minimized;
+            if (watch) 
+            { 
+                MessageBox.Show("此为观战模式，仅可左键查看信息"); 
+                this.WindowState = FormWindowState.Minimized;
+            }
+            else
+            {
+                help = new HelpForm();
+                help.Show();
+                this.WindowState = FormWindowState.Minimized;
+            }
         }
     }
 }

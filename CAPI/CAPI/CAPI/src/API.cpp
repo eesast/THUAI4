@@ -130,12 +130,12 @@ std::vector<std::shared_ptr<const THUAI4::Character>> API<asyn>::GetCharacters()
 		Members<asyn>::TryUpDate();
 		std::vector<std::shared_ptr<const THUAI4::Character>> temp;
 		temp.assign(pState->characters.begin(), pState->characters.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		std::vector<std::shared_ptr<const THUAI4::Character>> temp;
 		temp.assign(pState->characters.begin(), pState->characters.end());
-		return std::move(temp);
+		return temp;
 	}
 }
 template <bool asyn>
@@ -147,12 +147,12 @@ std::vector<std::shared_ptr<const THUAI4::Wall>> API<asyn>::GetWalls() const
 		Members<asyn>::TryUpDate();
 		std::vector<std::shared_ptr<const THUAI4::Wall>> temp;
 		temp.assign(pState->walls.begin(), pState->walls.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		std::vector<std::shared_ptr<const THUAI4::Wall>> temp;
 		temp.assign(pState->walls.begin(), pState->walls.end());
-		return std::move(temp);
+		return temp;
 	}
 }
 template <bool asyn>
@@ -164,12 +164,12 @@ std::vector<std::shared_ptr<const THUAI4::Prop>> API<asyn>::GetProps() const
 		Members<asyn>::TryUpDate();
 		std::vector<std::shared_ptr<const THUAI4::Prop>> temp;
 		temp.assign(pState->props.begin(), pState->props.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		std::vector<std::shared_ptr<const THUAI4::Prop>> temp;
 		temp.assign(pState->props.begin(), pState->props.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -182,12 +182,12 @@ std::vector<std::shared_ptr<const THUAI4::Bullet>> API<asyn>::GetBullets() const
 		Members<asyn>::TryUpDate();
 		std::vector<std::shared_ptr<const THUAI4::Bullet>> temp;
 		temp.assign(pState->bullets.begin(), pState->bullets.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		std::vector<std::shared_ptr<const THUAI4::Bullet>> temp;
 		temp.assign(pState->bullets.begin(), pState->bullets.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -200,12 +200,12 @@ std::vector<std::shared_ptr<const THUAI4::BirthPoint>> API<asyn>::GetBirthPoints
 		Members<asyn>::TryUpDate();
 		std::vector<std::shared_ptr<const THUAI4::BirthPoint>> temp;
 		temp.assign(pState->birthpoints.begin(), pState->birthpoints.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		std::vector<std::shared_ptr<const THUAI4::BirthPoint>> temp;
 		temp.assign(pState->birthpoints.begin(), pState->birthpoints.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -534,13 +534,13 @@ std::vector<std::shared_ptr<const THUAI4::Character>> DebugApi<asyn>::GetCharact
 		OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Character>> temp;
 		temp.assign(pState->characters.begin(), pState->characters.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		OutStream << "Call GetCharacters() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Character>> temp;
 		temp.assign(pState->characters.begin(), pState->characters.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -554,13 +554,13 @@ std::vector<std::shared_ptr<const THUAI4::Wall>> DebugApi<asyn>::GetWalls() cons
 		OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Wall>> temp;
 		temp.assign(pState->walls.begin(), pState->walls.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		OutStream << "Call GetWalls() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Wall>> temp;
 		temp.assign(pState->walls.begin(), pState->walls.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -574,13 +574,13 @@ std::vector<std::shared_ptr<const THUAI4::Prop>> DebugApi<asyn>::GetProps() cons
 		OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Prop>> temp;
 		temp.assign(pState->props.begin(), pState->props.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		OutStream << "Call GetProps() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Prop>> temp;
 		temp.assign(pState->props.begin(), pState->props.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -594,13 +594,13 @@ std::vector<std::shared_ptr<const THUAI4::Bullet>> DebugApi<asyn>::GetBullets() 
 		OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Bullet>> temp;
 		temp.assign(pState->bullets.begin(), pState->bullets.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		OutStream << "Call GetBullets() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::Bullet>> temp;
 		temp.assign(pState->bullets.begin(), pState->bullets.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
@@ -614,13 +614,13 @@ std::vector<std::shared_ptr<const THUAI4::BirthPoint>> DebugApi<asyn>::GetBirthP
 		OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::BirthPoint>> temp;
 		temp.assign(pState->birthpoints.begin(), pState->birthpoints.end());
-		return std::move(temp);
+		return temp;
 	}
 	else {
 		OutStream << "Call GetBirthPoints() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		std::vector<std::shared_ptr<const THUAI4::BirthPoint>> temp;
 		temp.assign(pState->birthpoints.begin(), pState->birthpoints.end());
-		return std::move(temp);
+		return temp;
 	}
 
 }
