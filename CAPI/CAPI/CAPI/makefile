@@ -22,7 +22,8 @@ all: $(objects) player_obj
 		$$(echo $(objects) | sed -E "s/^| /&$(BIN_DIR_IN_SED)\//g") $(BIN_DIR_NO_SUFFIX)/$$i\
 		-L./a -lprotobuf -lhpsocket \
 		-Wl,-rpath=./so -std=c++17 -pthread -O2 -Wall;\
-	done
+	done\
+	echo Success
 
 CAPI.o: ./src/CAPI.cpp
 	g++ -c ./src/CAPI.cpp -o $(BIN_DIR_NO_SUFFIX)/CAPI.o -I./include/linux -std=c++17 -O2 -Wall

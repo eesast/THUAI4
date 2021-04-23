@@ -106,8 +106,5 @@ public:
 	void Join();
 };
 
-#include "proto/Message2Client.pb.h"
-#include "proto/Message2Server.pb.h"
-template CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
-template Communication<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
+
 #endif //!CAPI_H
