@@ -19,59 +19,53 @@ class Logic
 {
 private:
 	using Pointer2Message = std::variant<std::shared_ptr<Protobuf::MessageToClient>, std::shared_ptr<Protobuf::MessageToOneClient>>;
-
-	//Logic control
-	bool FlagProcessMessage = false;
+	using Comm = Communication<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
+	
+	std::atomic_bool sw_AI = true;
 	bool FlagBufferUpdated = false;
 	bool CurrentStateAccessed = false;
-	bool AiTerminated = true;//更确切的含义是，AI线程是否终止或未开始
-
-	enum class GamePhase : unsigned char
-	{
-		Uninitialized = 0,
-		Gaming = 1,
-		GameOver = 2,
-	};
-	std::atomic<GamePhase> gamePhase = GamePhase::Uninitialized; //仅用于循环条件判断，atomic即可
-	volatile std::int32_t counter_state = 0;
-	volatile std::int32_t counter_buffer = 0;
-
-	std::mutex mtxOnReceive;
-	std::condition_variable cvOnReceive;
+	bool WhetherToStartKnown = false;//也许是我设计的问题，无法优雅地让AI线程开始并结束……
 	std::mutex mtx_buffer;
 	std::mutex mtx_state;
-	std::condition_variable cv_buffer;
-
 	std::mutex mtx_ai;
+	std::condition_variable cv_buffer;//asyn=false情况下若无更新会阻塞
 	std::condition_variable cv_ai;
 
-	//Game data
-	THUAI4::JobType jobType = THUAI4::JobType::Job0;
-	int32_t playerID = 0;
-	int32_t teamID = 0;
+	std::unique_ptr<Comm> pComm;
+	std::unique_ptr<LogicInterface> pApi;
+	std::unique_ptr<AIBase> pAI;
 
+	volatile std::int32_t counter_state = 0;
+	volatile std::int32_t counter_buffer = 0;
 	State* pState;
 	State* pBuffer;
 	State storage[2];
 	concurrency::concurrent_queue<std::string> MessageStorage;
-	concurrency::concurrent_queue<Pointer2Message> queue;
 
-	CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2> capi;
-	std::unique_ptr<LogicInterface> pApi;
-	std::unique_ptr<AIBase> pAI;
 
-	void UnBlockMtxOnReceive();
+	//AI线程执行的函数
+	void PlayerWrapper(std::function<void()> player);
+
+	//作为Comm类的构造函数参数，每有消息（非并发）则调用
+	void ProcessMessage(Pointer2Message);
+
+	//处理MessageToClient
+	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
+
+	//处理MessageToOneClient
+	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
+	
+	//将状态信息加载到buffer，并使counter_buffer加一
+	void load(std::shared_ptr<Protobuf::MessageToClient>);
+
+	//即pState与pBuffer指向的地址互换
+	void Update();
+
+	//asynchronous=false时的一个辅助函数
 	void UnBlockMtxBufferUpdated();
 
-	void ProcessM2C(std::shared_ptr<Protobuf::MessageToClient>);
-	void ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient>);
-
-	void load(std::shared_ptr<Protobuf::MessageToClient>); //将最新状态信息加载到buffer 还会使得counter_buffer计数加一
-
-	void ProcessMessage();
-	void PlayerWrapper();
-	void PlayerWrapperAsyn();
-
+	//辅助函数，知道了AI线程该不该开始后执行
+	void UnBlockAI();
 public:
 	Logic();
 	~Logic() = default;

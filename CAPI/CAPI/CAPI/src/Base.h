@@ -33,7 +33,7 @@ public:
 	virtual void Send(int toPlayerID, std::string message) = 0;
 
 	//选手可获取的信息
-	[[nodiscard]] virtual int GetCounterOfFrames() =0;//约定-1表示游戏结束
+	[[nodiscard]] virtual int GetCounterOfFrames() = 0;//约定-1表示游戏结束
 	[[nodiscard]] virtual bool MessageAvailable() = 0;
 	[[nodiscard]] virtual bool TryGetMessage(std::string&) = 0;
 
@@ -46,7 +46,7 @@ public:
 
 	[[nodiscard]] virtual THUAI4::ColorType GetSelfTeamColor() const = 0;
 	[[nodiscard]] virtual uint32_t GetTeamScore() const = 0;
-	[[nodiscard]] virtual const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> &GetPlayerGUIDs() const = 0;
+	[[nodiscard]] virtual const std::vector<std::vector<int64_t>> GetPlayerGUIDs() const = 0;
 	[[nodiscard]] virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const = 0;
 
 };
@@ -54,11 +54,11 @@ public:
 class AIBase
 {
 public:
-	virtual void play(GameApi &g) = 0;
+	virtual void play(GameApi& g) = 0;
 };
-using CreateAIFunc = std::unique_ptr<AIBase> (*)();
+using CreateAIFunc = std::unique_ptr<AIBase>(*)();
 
-int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder);
+int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
 
 class ID
 {
@@ -70,7 +70,7 @@ public:
 	[[nodiscard]] static int GetPlayerID() { return playerID; }
 	[[nodiscard]] static int GetTeamID() { return teamID; }
 
-	friend int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder);
+	friend int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder);
 };
 
 #endif // !BASE_H
