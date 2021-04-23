@@ -30,8 +30,7 @@ all: $(objects) player_obj
 		$$(echo $(objects) | sed -E "s/^| /&$(BIN_DIR_IN_SED)\//g") $(BIN_DIR_NO_SUFFIX)/$$i\
 		-L./a -lprotobuf -lhpsocket \
 		-Wl,-rpath=./so -std=c++17 -pthread -O2 -Wall;\
-	done\
-	echo Success
+	done
 
 $(CPP_OBJECTS): %.o: $(SOURCE_DIR)/%.cpp
 	$(CPPCOMPILER) -o $(BIN_DIR)/$@ -c $<

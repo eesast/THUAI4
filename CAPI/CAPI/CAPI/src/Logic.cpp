@@ -86,7 +86,7 @@ bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
 {
 	Protobuf::GameObjType gT = g.gameobjtype();
 	Protobuf::PropType pT = g.proptype();
-	if (pT == Protobuf::GameObjType::Prop && g.islaid() && (pT == Protobuf::PropType::Attenuator || pT == Protobuf::PropType::Dirt || pT == Protobuf::PropType::Divider))
+	if (gT == Protobuf::GameObjType::Prop && g.islaid() && (pT == Protobuf::PropType::Attenuator || pT == Protobuf::PropType::Dirt || pT == Protobuf::PropType::Divider))
 		return false;
 
 	int64_t dx = x - g.x();

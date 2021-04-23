@@ -4,6 +4,8 @@
 
 #define CAPI_H
 
+#include "proto/Message2Client.pb.h"
+#include "proto/Message2Server.pb.h"
 #include"concurrent_queue.hpp"
 
 #include <google/protobuf/message.h>
@@ -12,6 +14,9 @@
 #include <variant> 
 #include <type_traits>
 #include <functional>
+#include <thread>
+#include <condition_variable>
+
 
 //CAPI 
 //模板参数：发给server的消息及其对应type 发给client的消息及其对应type
@@ -62,6 +67,7 @@ public:
 
 };
 
+template class CAPI<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
 
 //对CAPI做进一步封装，最主要的变化是保证OnReceive不并发
 
@@ -106,5 +112,6 @@ public:
 	void Join();
 };
 
+template class Communication<Protobuf::MessageToServer, 1, Protobuf::MessageToClient, 0, Protobuf::MessageToOneClient, 2>;
 
 #endif //!CAPI_H
