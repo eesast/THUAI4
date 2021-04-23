@@ -5,7 +5,7 @@
 #include <ctime>
 #include <utility>
 
-std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams> State::playerGUIDs;
+std::vector<std::vector<int64_t>> State::playerGUIDs;
 const static double PI = 3.14159265358979323846;
 
 double TimeSinceStart(const std::chrono::system_clock::time_point& sp)
@@ -247,7 +247,7 @@ uint32_t API<asyn>::GetTeamScore() const
 		return pState->teamScore;
 }
 template <bool asyn>
-const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& API<asyn>::GetPlayerGUIDs() const
+const std::vector<std::vector<int64_t>> API<asyn>::GetPlayerGUIDs() const
 {
 	if constexpr (asyn)
 	{
@@ -674,7 +674,7 @@ uint32_t DebugApi<asyn>::GetTeamScore() const
 	
 }
 template <bool asyn>
-const std::array<std::array<int64_t, StateConstant::nPlayers>, StateConstant::nTeams>& DebugApi<asyn>::GetPlayerGUIDs() const
+const std::vector<std::vector<int64_t>> DebugApi<asyn>::GetPlayerGUIDs() const
 {
 	if constexpr (asyn)
 	{
