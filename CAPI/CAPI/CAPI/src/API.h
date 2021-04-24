@@ -185,10 +185,9 @@ inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 	constexpr int32_t half = Constants::Map::numOfGridPerCell >> 1;
 	int32_t centerX = (CellX << 10) - (CellX << 4) - (CellX << 3) + half;
 	int32_t centerY = (CellY << 10) - (CellY << 4) - (CellY << 3) + half;
-	int32_t dx = std::abs(centerX - x);
-	int32_t dy = std::abs(centerY - y);
-	constexpr  int32_t D = half + Constants::Map::sightRadius;
-	return dx < D&& dy < D&& Constants::Map::sightRadiusSquared >= distance_squared(dx - half, dy - half);
+	int32_t dx = (std::max)(std::abs(centerX - x) - half, 0);
+	int32_t dy = (std::max)(std::abs(centerY - y) - half, 0);
+	return Constants::Map::sightRadiusSquared >= distance_squared(dx, dy);
 }
 
 
