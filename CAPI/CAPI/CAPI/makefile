@@ -2,7 +2,7 @@ CPPCOMPILER = g++ -I./include/linux -std=c++17 -O2 -Wall
 
 SOURCE_DIR?=./src
 BIN_DIR?=.
-PROTO_DIR = ./src/proto
+PROTO_DIR = $(SOURCE_DIR)/proto
 
 # remove the last / if it exits
 SOURCE_DIR_NO_SUFFIX=$(shell echo $(SOURCE_DIR) | sed "s/\/$$//g")
@@ -21,7 +21,7 @@ objects += $(PROTO_OBJECTS)
 
 CPP_DEPENDENCIES = $(patsubst %.o,%.d,$(CPP_OBJECTS))
 
-AI_O_PREREQUISITES= ./src/Base.h ./src/Constants.h ./src/Base.h
+AI_O_PREREQUISITES= $(SOURCE_DIR)/Base.h $(SOURCE_DIR)/Constants.h $(SOURCE_DIR)/Base.h
 
 all: $(objects) player_obj
 	for i in $(PLAYER_OBJECTS);\
