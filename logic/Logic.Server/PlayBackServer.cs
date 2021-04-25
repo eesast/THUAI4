@@ -83,11 +83,6 @@ namespace Logic.Server
 					frt.Start();
 				}
 			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				return;
-			}
 			finally
 			{
 				if (teamScore == null)

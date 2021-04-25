@@ -35,7 +35,7 @@ namespace GameEngine
 					{
 						if (deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) return false;
 						if (deltaX < listObj.Radius || deltaY < listObj.Radius) return true;
-						return (long)(deltaX - listObj.Radius) * (long)(deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius;
+						return (long)(deltaX - listObj.Radius) * (deltaX - listObj.Radius) + (long)(deltaY - listObj.Radius) * (deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius;
 					}
 			}
 			return false;
