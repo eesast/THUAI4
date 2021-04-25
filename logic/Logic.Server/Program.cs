@@ -25,7 +25,15 @@ namespace Logic.Server
 
             ServerBase? server = null;
 
-            server = ServerFactory.GetServer(options);
+            try
+            {
+                server = ServerFactory.GetServer(options);
+            }
+			catch (Exception e)
+			{
+                Console.WriteLine(e);
+                return 1;
+			}
 
             Console.WriteLine($"Final score: ");
             for (int i = 0; i < server.TeamCount; ++i)
