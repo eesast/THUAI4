@@ -9,8 +9,20 @@ namespace Logic.Client
 {
     public partial class Form1 : Form
     {
+        //字体大小
+        static int fontforinfo = 20;  
+        static int fontforexample = 13;
+        static int fontforegnum = 15;
+        static int fontforegpic = 14;
+        static int fontforpic = 14;
+        static int fontfornum = 13;
+        static int fontforword = 15;
+        static int fontforobjinfo = 15;
+        HelpForm help = new HelpForm();
+        private bool watch = false;
         public Form1(Int64 teamID, Int64 playerID, int bulletspeed, JobType job)  //窗体构造时的初始化
         {
+            this.watch = (teamID == 1911 && playerID == 1911);
             this.teamid = teamID;
             this.playerid = playerID;
             this.bulletspeed = bulletspeed;
@@ -21,7 +33,8 @@ namespace Logic.Client
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.Text = "Client--- TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(job);
+            if (watch) this.Text = "Client---Watch Mode";
+            else this.Text = "Client---TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(job);
             //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             //this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             //绘制地图
@@ -48,7 +61,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 50 * MapcellWidth + 2, Interval / 2),
                     Text = "Examples",
                     TextAlign = ContentAlignment.MiddleLeft,
-                    Font = new Font("等线", 17),
+                    Font = new Font("等线", fontforinfo,GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -65,7 +78,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 52 * MapcellWidth - 4, Interval + MapcellHeight * 2 + 6),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "出生点",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -82,7 +95,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 57 * MapcellWidth + 1, Interval + MapcellHeight * 2 + 6),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "墙体",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -116,7 +129,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 58 * MapcellWidth - 20, Interval * 3 + MapcellHeight * 3 + 1),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "各队染色区域",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -132,7 +145,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 61 * MapcellWidth + 4, Interval + MapcellHeight * 2 + 6),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "未染色区域",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -142,7 +155,7 @@ namespace Logic.Client
                     Text = "1",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 50 * MapcellWidth + 7, 96),
                     BackColor = Color.SteelBlue
                 };
@@ -152,7 +165,7 @@ namespace Logic.Client
                     Text = "2",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 52 * MapcellWidth + 1, 96),
                     BackColor = Color.Green
                 };
@@ -162,7 +175,7 @@ namespace Logic.Client
                     Text = "3",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 54 * MapcellWidth - 5, 96),
                     BackColor = Color.Blue
                 };
@@ -172,7 +185,7 @@ namespace Logic.Client
                     Text = "4",
                     ForeColor = Color.White,
                     TextAlign = ContentAlignment.TopRight,
-                    Font = new Font("Times New Roman", 10),
+                    Font = new Font("Times New Roman", fontforegnum, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 56 * MapcellWidth - 11, 96),
                     BackColor = Color.Pink
                 };
@@ -182,7 +195,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 58 * MapcellWidth - 20, 96),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "各队玩家",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -192,7 +205,7 @@ namespace Logic.Client
                     Text = "🏃",
                     ForeColor = Color.Red,
                     TextAlign = ContentAlignment.TopLeft,
-                    Font = new Font("Times New Roman", 11),
+                    Font = new Font("Times New Roman", fontforegpic, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 50 * MapcellWidth + 7, 122),
                     BackColor = Color.Yellow
                 };
@@ -202,7 +215,7 @@ namespace Logic.Client
                     Text = "❤",
                     ForeColor = Color.Red,
                     TextAlign = ContentAlignment.TopLeft,
-                    Font = new Font("Times New Roman", 11),
+                    Font = new Font("Times New Roman", fontforegpic, GraphicsUnit.Pixel),
                     Location = new Point(Interval * 2 + 52 * MapcellWidth + 1, 122),
                     BackColor = Color.Yellow
                 };
@@ -212,7 +225,7 @@ namespace Logic.Client
                     Location = new Point(Interval * 2 + 54 * MapcellWidth - 5, 122),
                     TextAlign = ContentAlignment.MiddleLeft,
                     Text = "各类道具",
-                    Font = new Font("等线", 10),
+                    Font = new Font("等线", fontforexample, GraphicsUnit.Pixel),
                     BackColor = Color.White,
                     ForeColor = Color.Black
                 };
@@ -237,7 +250,7 @@ namespace Logic.Client
             MapInfoWord.Location = new Point(710, 243);
             MapInfoWord.Text = "未被指定";
             MapInfoWord.TextAlign = ContentAlignment.MiddleLeft;
-            MapInfoWord.Font = new Font("等线", 13);
+            MapInfoWord.Font = new Font("等线", fontforword, GraphicsUnit.Pixel);
             MapInfoWord.BackColor = Color.White;
             MapInfoWord.ForeColor = Color.Black;
             this.Controls.Add(MapInfoWord);
@@ -246,7 +259,7 @@ namespace Logic.Client
             MapInfo.Location = new Point(672, 185);
             MapInfo.Text = "Map Info";
             MapInfo.TextAlign = ContentAlignment.MiddleLeft;
-            MapInfo.Font = new Font("等线", 17);
+            MapInfo.Font = new Font("等线", fontforinfo, GraphicsUnit.Pixel);
             MapInfo.BackColor = Color.White;
             MapInfo.ForeColor = Color.Black;
             this.Controls.Add(MapInfo);
@@ -262,11 +275,11 @@ namespace Logic.Client
             ObjectInfoWord[0].Size = new Size(MapcellWidth * 10, MapcellHeight * 2);
             ObjectInfoWord[0].Location = new Point(672, 328);
             ObjectInfoWord[0].Text = "Object Info";
-            ObjectInfoWord[0].Font = new Font("等线", 17);
+            ObjectInfoWord[0].Font = new Font("等线", fontforinfo, GraphicsUnit.Pixel);
             for (int i = 1; i < 10; i++)
             {
                 ObjectInfoWord[i].Location = new Point(672, 340 + i * 2 * MapcellHeight);
-                ObjectInfoWord[i].Font = new Font("等线", 10);
+                ObjectInfoWord[i].Font = new Font("等线", fontforobjinfo, GraphicsUnit.Pixel);
                 ObjectInfoWord[i].Size = new Size(MapcellWidth * 16, MapcellHeight + 3);
             }
             ObjectInfoWord[9].Size = new Size(MapcellWidth * 16, 3 * MapcellHeight);
@@ -355,7 +368,7 @@ namespace Logic.Client
                     label.label.Text = Convert.ToString(player.playernum);
                     label.label.ForeColor = Color.White;
                     label.label.TextAlign = ContentAlignment.TopRight;
-                    label.label.Font = new Font("Times New Roman", 8);
+                    label.label.Font = new Font("Times New Roman", fontfornum, GraphicsUnit.Pixel);
                     label.label.Click += delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
                     switch (player.teamnum)
                     {
@@ -431,7 +444,7 @@ namespace Logic.Client
                     label.label.Size = new Size(MapcellWidth, MapcellHeight);
                     label.label.ForeColor = Color.Red;
                     label.label.TextAlign = ContentAlignment.TopCenter;
-                    label.label.Font = new Font("Times New Roman", 9);
+                    label.label.Font = new Font("Times New Roman", fontforpic, GraphicsUnit.Pixel);
                     label.label.BackColor = Color.Yellow;
                     switch (item.type)
                     {
@@ -469,6 +482,15 @@ namespace Logic.Client
                     label.label.BringToFront();
                     ItemLabelSet.Add(item.id, label);
                 }
+            }));
+        }
+        public void changeform(Int64 teamID,Int64 playerID,JobType jobType)
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.Text = "Client--- TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(jobType);
+                this.playerid = playerID;
+                this.teamid = teamID;
             }));
         }
         private void LabelClick(object sender, EventArgs e)  //标签单击事件处理
@@ -523,19 +545,21 @@ namespace Logic.Client
                         break;
                 }
             }
-            else if (mouseEventArgs.Button == MouseButtons.Right)
+            else if (mouseEventArgs.Button == MouseButtons.Right&&!watch)
             {
-                int y = this.PointToClient(Control.MousePosition).X;
-                int x = this.PointToClient(Control.MousePosition).Y;
-                MessageToServer msg = new MessageToServer();
-                msg.PlayerID = playerid;
-                msg.TeamID = teamid;
-                msg.MessageType = MessageType.Move;
-                msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
-                msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
-                //TO DO:向server发移动指令消息
-                Program.clientCommunicator.SendMessage(msg);
-
+                if (PlayerLabelSet.ContainsKey(selfguid))
+                {
+                    int y = this.PointToClient(Control.MousePosition).X;
+                    int x = this.PointToClient(Control.MousePosition).Y;
+                    MessageToServer msg = new MessageToServer();
+                    msg.PlayerID = playerid;
+                    msg.TeamID = teamid;
+                    msg.MessageType = MessageType.Move;
+                    msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
+                    msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
+                    //TO DO:向server发移动指令消息
+                    Program.clientCommunicator.SendMessage(msg);
+                }
             }
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
@@ -545,8 +569,8 @@ namespace Logic.Client
             ObjectInfoWord[2].Text = "TeamNum : " + Convert.ToString(player.teamnum);
             ObjectInfoWord[3].Text = "PlayerNum : " + Convert.ToString(player.playernum);
             ObjectInfoWord[4].Text = "Profession : " + Convert.ToString(player.job);
-            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
-            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
+            ObjectInfoWord[5].Text = "X : " + Convert.ToString(player.y / Program.cell) + " (+" + Convert.ToString(player.y % Program.cell) + ")";
+            ObjectInfoWord[6].Text = "Y : " + Convert.ToString(player.x / Program.cell) + " (+" + Convert.ToString(player.x % Program.cell) + ")";
             ObjectInfoWord[7].Text = "Health : " + Convert.ToString(player.health);
             String tempo = "";
             switch ((int)player.possession)
@@ -640,56 +664,56 @@ namespace Logic.Client
         }
         private void Form1_KeyPress(object sender, KeyPressEventArgs e) //键盘进行特殊操作
         {
-            switch (e.KeyChar)
+            if (watch) return;
+            else if(PlayerLabelSet.ContainsKey(selfguid))
             {
-                case 'q':
-                case 'Q':
-                    int y = this.PointToClient(Control.MousePosition).X;
-                    int x = this.PointToClient(Control.MousePosition).Y;
-                    MessageToServer msg1 = new MessageToServer();
-                    msg1.PlayerID = playerid;
-                    msg1.TeamID = teamid;
-                    msg1.MessageType = MessageType.Attack;
-                    msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X, x - PlayerLabelSet[selfguid].label.Location.Y);//目前为弧度
-                    msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
-                    Program.clientCommunicator.SendMessage(msg1);
-                    break;
-                case 'w':
-                case 'W':
-                    MessageToServer msg2 = new MessageToServer();
-                    msg2.MessageType = MessageType.Use;
-                    msg2.PlayerID = playerid;
-                    msg2.TeamID = teamid;
-                    //TO DO:发消息
-                    Program.clientCommunicator.SendMessage(msg2);
-                    break;
-                case 'e':
-                case 'E':
-                    MessageToServer msg3 = new MessageToServer();
-                    msg3.MessageType = MessageType.Pick;
-                    msg3.PlayerID = playerid;
-                    msg3.TeamID = teamid;
-                    //TO DO:发消息
-                    for (int i = 1; i < 11; i++)
-                    {
-                        msg3.PropType = (PropType)i;
-                        Program.clientCommunicator.SendMessage(msg3);
-                    }
-                    break;
-                case 'r':
-                case 'R':
-                    MessageToServer msg4 = new MessageToServer();
-                    msg4.MessageType = MessageType.Throw;
-                    msg4.PlayerID = playerid;
-                    msg4.TeamID = teamid;
-                    //TO DO:发消息
-                    Program.clientCommunicator.SendMessage(msg4);
-                    break;
-                case 'a':
-                case 'A':
-                    Application.Exit();
-                    break;
-                default: break;
+                switch (e.KeyChar)
+                {
+                    case 'q':
+                    case 'Q':
+                        int y = this.PointToClient(Control.MousePosition).X;
+                        int x = this.PointToClient(Control.MousePosition).Y;
+                        MessageToServer msg1 = new MessageToServer();
+                        msg1.PlayerID = playerid;
+                        msg1.TeamID = teamid;
+                        msg1.MessageType = MessageType.Attack;
+                        msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X, x - PlayerLabelSet[selfguid].label.Location.Y);//目前为弧度
+                        msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
+                        Program.clientCommunicator.SendMessage(msg1);
+                        break;
+                    case 'w':
+                    case 'W':
+                        MessageToServer msg2 = new MessageToServer();
+                        msg2.MessageType = MessageType.Use;
+                        msg2.PlayerID = playerid;
+                        msg2.TeamID = teamid;
+                        //TO DO:发消息
+                        Program.clientCommunicator.SendMessage(msg2);
+                        break;
+                    case 'e':
+                    case 'E':
+                        MessageToServer msg3 = new MessageToServer();
+                        msg3.MessageType = MessageType.Pick;
+                        msg3.PlayerID = playerid;
+                        msg3.TeamID = teamid;
+                        //TO DO:发消息
+                        for (int i = 1; i < 11; i++)
+                        {
+                            msg3.PropType = (PropType)i;
+                            Program.clientCommunicator.SendMessage(msg3);
+                        }
+                        break;
+                    case 'r':
+                    case 'R':
+                        MessageToServer msg4 = new MessageToServer();
+                        msg4.MessageType = MessageType.Throw;
+                        msg4.PlayerID = playerid;
+                        msg4.TeamID = teamid;
+                        //TO DO:发消息
+                        Program.clientCommunicator.SendMessage(msg4);
+                        break;
+                    default: break;
+                }
             }
         }
         //地雷先不画出“🚩”——锅
@@ -775,6 +799,21 @@ namespace Logic.Client
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void Form1_HelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (watch) 
+            { 
+                MessageBox.Show("此为观战模式，仅可左键查看信息"); 
+                this.WindowState = FormWindowState.Minimized;
+            }
+            else
+            {
+                help = new HelpForm();
+                help.Show();
+                this.WindowState = FormWindowState.Minimized;
+            }
         }
     }
 }

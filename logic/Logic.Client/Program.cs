@@ -23,21 +23,40 @@ namespace Logic.Client
             //取得开始命令
             AOption? options = null;
             Parser.Default.ParseArguments<AOption>(args).WithParsed(o => { options = o; });
-            Int64 teamid, playerid;
             ClientData client;
             if (options == null)
             {
                 Starting starting = new Starting();
                 Application.Run(starting);
-                teamid = starting.teamid;
-                playerid = starting.playerid;
-                client = new ClientData(starting.teamid, starting.playerid, starting.job, starting.port);
+                watch = starting.watch;
+                if (watch)
+                {
+                    teamID = 1911;
+                    playerID = 1911;
+                }
+                else
+                {
+                    teamID = starting.teamid;
+                    playerID = starting.playerid;
+                }
+                jobType = starting.job;
+                client = new ClientData(teamID, playerID, jobType, starting.port);
             }
             else
             {
-                teamid = options.teamID;
-                playerid = options.playerID;
-                client = new ClientData(options.teamID, options.playerID, (JobType)options.job, options.ServerPort);
+                watch = options.watch;
+                if (watch)
+                {
+                    teamID = 1911;
+                    playerID = 1911;
+                }
+                else
+                {
+                    teamID = options.teamID;
+                    playerID = options.playerID;
+                }
+                jobType = (JobType)options.job;
+                client = new ClientData(teamID, playerID, jobType, options.ServerPort);
             }
             if (clientCommunicator.Connect("127.0.0.1", client.port))
             {
@@ -50,9 +69,9 @@ namespace Logic.Client
             //向server发消息
             MessageToServer msg = new MessageToServer();
             msg.MessageType = MessageType.AddPlayer;
-            msg.TeamID = teamid;
-            msg.PlayerID = playerid;
-            msg.JobType = client.jobType;
+            msg.TeamID = teamID;
+            msg.PlayerID = playerID;
+            msg.JobType = jobType;
             //TO DO:发出消息
             clientCommunicator.OnReceive += delegate ()
             {
@@ -60,60 +79,77 @@ namespace Logic.Client
                     client.messageline.Add(new Tuple<IMsg, long>(msg, System.Environment.TickCount64));
             };
             client.messageline = new BlockingCollection<Tuple<IMsg, long>>();
-            int bulletspeed;
-            switch (client.jobType)
+            int bulletspeed=0;
+            if (!watch)
             {
-                default:
-                case JobType.Job0:
-                    bulletspeed = Program.basicBulletMoveSpeed;
-                    break;
-                case JobType.Job1:
-                    bulletspeed = Program.basicBulletMoveSpeed * 2;
-                    break;
-                case JobType.Job2:
-                    bulletspeed = Program.basicBulletMoveSpeed / 2;
-                    break;
-                case JobType.Job3:
-                    bulletspeed = Program.basicBulletMoveSpeed / 2;
-                    break;
-                case JobType.Job4:
-                    bulletspeed = Program.basicBulletMoveSpeed * 4;
-                    break;
-                case JobType.Job5:
-                    bulletspeed = Program.basicBulletMoveSpeed;
-                    break;
-                case JobType.Job6:
-                    bulletspeed = Program.basicBulletMoveSpeed;
-                    break;
-            }
-            client.gameform = new Form1(teamid, playerid, bulletspeed, client.jobType);
-            new Thread(() =>
-            {
-                while (true)
+                switch (jobType)
                 {
-                    if (client.messageline.TryTake(out Tuple<IMsg, long> msg))
-                    {
-                        if (msg.Item1.PacketType == PacketType.MessageToOneClient)
-                        {
-                            MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
-                            if (mm.TeamID == teamid && mm.PlayerID == playerid) client.OnReciveShort(mm);
-                        }
-                        else if (msg.Item1.PacketType == PacketType.MessageToClient)
-                        {
-                            MessageToClient mm = msg.Item1.Content as MessageToClient;
-                            if (mm.TeamID == teamid && mm.PlayerID == playerid) client.OnReciveNormal(mm, msg.Item2);
-                        }
-                    }
+                    default:
+                    case JobType.Job0:
+                        bulletspeed = Program.basicBulletMoveSpeed;
+                        break;
+                    case JobType.Job1:
+                        bulletspeed = Program.basicBulletMoveSpeed * 2;
+                        break;
+                    case JobType.Job2:
+                        bulletspeed = Program.basicBulletMoveSpeed / 2;
+                        break;
+                    case JobType.Job3:
+                        bulletspeed = Program.basicBulletMoveSpeed / 2;
+                        break;
+                    case JobType.Job4:
+                        bulletspeed = Program.basicBulletMoveSpeed * 4;
+                        break;
+                    case JobType.Job5:
+                        bulletspeed = Program.basicBulletMoveSpeed;
+                        break;
+                    case JobType.Job6:
+                        bulletspeed = Program.basicBulletMoveSpeed;
+                        break;
                 }
             }
-                ).Start();
+            client.gameform = new Form1(teamID, playerID, bulletspeed, jobType);
+            Thread thread = new Thread(() =>
+              {
+                  while (true)
+                  {
+                      Tuple<IMsg, long> msg = client.messageline.Take();
+                      {
+                          if (msg.Item1.PacketType == PacketType.MessageToOneClient)
+                          {
+                              if (watch) return;
+                              MessageToOneClient mm = msg.Item1.Content as MessageToOneClient;
+                              if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveShort(mm);
+                          }
+                          else if (msg.Item1.PacketType == PacketType.MessageToClient)
+                          {
+                              MessageToClient mm = msg.Item1.Content as MessageToClient;
+                              if (watch) 
+                              {
+                                  if (client.gameform.IsHandleCreated)
+                                  {
+                                      if (mm.TeamID == 0 && mm.PlayerID == 0) client.OnReciveNormal(mm, msg.Item2);
+                                  }
+                              }
+                              else { if (mm.TeamID == teamID && mm.PlayerID == playerID) client.OnReciveNormal(mm, msg.Item2); }
+                          }
+                      }
+                  }
+              }
+                );
+            thread.IsBackground = true;
+            thread.Start();
             clientCommunicator.SendMessage(msg);
             Application.Run(client.gameform);
             Application.Exit();
         }
         public const int cell = 1000;
         public const int basicBulletMoveSpeed = cell * 6;
+        public static Int64 teamID;
+        public static Int64 playerID;
+        public static JobType jobType;
         public static bool initneed = true;
+        public static bool watch = false;
         public static CSharpClient clientCommunicator = new CSharpClient();
     }
     public class Player  //玩家显示类
@@ -192,9 +228,6 @@ namespace Logic.Client
     }
     public class ClientData
     {
-        public Int64 teamID;
-        public Int64 playerID;
-        public JobType jobType;
         public int bulletspeed;
         public ushort port;
         public Form1 gameform; //游戏窗体
@@ -204,9 +237,9 @@ namespace Logic.Client
         public BlockingCollection<Tuple<IMsg, long>> messageline;
         public ClientData(Int64 teamID, Int64 playerID, JobType jobType, ushort port)
         {
-            this.teamID = teamID;
-            this.playerID = playerID;
-            this.jobType = jobType;
+            Program.teamID = teamID;
+            Program.playerID = playerID;
+            Program.jobType = jobType;
             this.port = port;
         }
         public void OnReciveShort(MessageToOneClient msg)  //连接是否成功
@@ -218,13 +251,26 @@ namespace Logic.Client
             {
                 MessageBox.Show("Invalid Player");
                 Starting starting = new Starting();
-                Application.Run(new Starting());
+                Application.Run(starting);
                 MessageToServer msg1 = new MessageToServer();
                 msg1.MessageType = MessageType.AddPlayer;
-                msg1.TeamID = starting.teamid;
-                msg1.PlayerID = starting.playerid;
+                Program.watch = starting.watch;
+                Program.teamID = Program.watch?1911:starting.teamid;
+                Program.playerID = Program.watch ? 1911 : starting.playerid;
+                Program.jobType = starting.job;
+                Program.clientCommunicator.Stop();
+                msg1.TeamID = Program.teamID;
+                msg1.PlayerID = Program.playerID;
                 msg1.JobType = starting.job;
-                Program.clientCommunicator.SendMessage(msg1);
+                if (Program.clientCommunicator.Connect("127.0.0.1", starting.port))
+                {
+                    Program.clientCommunicator.SendMessage(msg1);
+                }
+                else
+                {
+                    MessageBox.Show("连接Agent失败");
+                    return;
+                }
             }
         }
         public void OnReciveNormal(MessageToClient msg, long clock) //处理游戏消息
@@ -232,18 +278,34 @@ namespace Logic.Client
             switch (msg.MessageType)
             {
                 case MessageType.StartGame:
-                    Hashable = new Dictionary<Int64, Tuple<int, int>>();
-                    for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
+                    if (!Program.watch)
                     {
-                        for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                        Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                        for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
                         {
-                            Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                            for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                            {
+                                Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                            }
                         }
+                        gameform.movespeed = msg.SelfInfo.MoveSpeed;
+                        gameform.changeform(Program.teamID, Program.playerID, Program.jobType);
                     }
-                    gameform.movespeed = msg.SelfInfo.MoveSpeed;
                     break;
                 case MessageType.Gaming:
                     if (System.Environment.TickCount64 - clock > 50) break;
+                    if (Program.watch && Program.initneed)
+                    {
+                        Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                        for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
+                        {
+                            for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                            {
+                                Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                            }
+                        }
+                        Program.initneed = false;
+                    }
                     Refresh(msg);
                     break;
                 case MessageType.EndGame:

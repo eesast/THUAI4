@@ -1,7 +1,8 @@
 ﻿using System;
 using THUnity2D;
+using Gaming;
+using GameEngine;
 using System.Threading;
-using System.Collections;
 using System.Runtime.InteropServices;
 
 namespace test
@@ -15,14 +16,14 @@ namespace test
 	{
 		static void Main(string[] args)
 		{
-			Map mp = new Map(Mapinfo.map, 1);
+			Game game = new Game(MapInfo.defaultMap, 1);
 			long tmpID;
 			long[] player2ID = new long[2];
 
-			XYPosition player1Pos = mp.CellToGrid(1, 1);
-			XYPosition player2Pos = mp.CellToGrid(2, 2);
+			XYPosition player1Pos = Map.Constant.CellToGrid(1, 1);
+			XYPosition player2Pos = Map.Constant.CellToGrid(2, 2);
 
-			if ((tmpID = mp.AddPlayer(new Map.PlayerInitInfo(player1Pos, (JobType)0, 0))) == GameObject.invalidID)
+			if ((tmpID = game.AddPlayer(new Game.PlayerInitInfo(0u, (JobType)0, 0))) == GameObject.invalidID)
 			{
 				Console.WriteLine("Add player failed!");
 			}
@@ -31,7 +32,7 @@ namespace test
 				player2ID[0] = (tmpID);
 			}
 
-			if (((tmpID) = mp.AddPlayer(new Map.PlayerInitInfo(player2Pos, (JobType)0, 0))) == GameObject.invalidID)
+			if (((tmpID) = game.AddPlayer(new Game.PlayerInitInfo(1u, (JobType)0, 0))) == GameObject.invalidID)
 			{
 				Console.WriteLine("Add player failed!");
 			}
@@ -41,7 +42,7 @@ namespace test
 				(
 					() =>
 					{
-						mp.StartGame(5 * 60 * 1000);
+						game.StartGame(5 * 60 * 1000);
 					}
 				)
 			{ IsBackground = true }.Start();
@@ -86,7 +87,7 @@ namespace test
 							if (DPress) key |= DKey;
 							if (key != 0)
 							{
-								mp.MovePlayer((long)player2ID[1], time[key], direct[key]);
+								game.MovePlayer((long)player2ID[1], time[key], direct[key]);
 							}
 						}
 					}
@@ -129,12 +130,12 @@ namespace test
 				if (DPress) key |= DKey;
 				if (key != 0)
 				{
-					mp.MovePlayer((long)player2ID[0], time[key], direct[key]);
+					game.MovePlayer((long)player2ID[0], time[key], direct[key]);
 				}
 
 				if (Win32Api.GetKeyState((Int32)ConsoleKey.J) < 0)
 				{
-					mp.Attack((long)player2ID[0], 10000000, Math.PI);
+					game.Attack((long)player2ID[0], 10000000, Math.PI);
 				}
 			}
 		}
