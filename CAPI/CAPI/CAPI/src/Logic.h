@@ -66,6 +66,7 @@ private:
 
 	//辅助函数，知道了AI线程该不该开始后执行
 	void UnBlockAI();
+
 public:
 	Logic();
 	~Logic() = default;

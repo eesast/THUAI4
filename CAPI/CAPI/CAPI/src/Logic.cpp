@@ -207,7 +207,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 					std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
 				}
 			}
-	}
+		}
 
 		for (int i = 0; i < StateConstant::nCells; i++)
 		{
@@ -234,8 +234,8 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 					pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
 				}
 #endif // _COLOR_MAP_BY_HASHING_
+			}
 		}
-}
 
 		FlagBufferUpdated = true;
 		counter_buffer += 1;
@@ -336,70 +336,79 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		);
 
 	std::ofstream OutFile;
-	//又臭又长
-	if (
-		auto tu = [this]() {
+	{
+		//又臭又长
+		std::function<void()> tu = [this]()
+		{
 			if (mtx_buffer.try_lock())
 			{
-				if (FlagBufferUpdated)Update();
-					mtx_buffer.unlock();
+				if (FlagBufferUpdated) Update();
+				mtx_buffer.unlock();
 			}
 		};
-		asynchronous)
-	{
-		if (!debuglevel)
+		std::function<void()> wait = [this]()
 		{
-			pApi = std::make_unique<API<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu);
+			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
+			cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
+			Update();
+		};
+		if (asynchronous)
+		{
+			if (!debuglevel)
+			{
+				pApi = std::make_unique<API<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
+					[this]() { return MessageStorage.empty(); },
+					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+					(const State*&)pState, mtx_state, tu, wait);
+			}
+			else
+			{
+				bool flag = filename == "";
+				if (!flag)
+				{
+					OutFile.open(filename);
+					if (OutFile.fail())
+					{
+						std::cout << "Failed to open the file " << filename << std::endl;
+						flag = true;
+					}
+				}
+				pApi = std::make_unique<DebugApi<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
+					[this]() { return MessageStorage.empty(); },
+					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+					(const State*&)pState, mtx_state, tu, wait, debuglevel != 1,
+					flag ? std::cout : OutFile);
+			}
 		}
 		else
 		{
-			bool flag = filename == "";
-			if (!flag)
+			if (!debuglevel)
 			{
-				OutFile.open(filename);
-				if (OutFile.fail())
-				{
-					std::cout << "Failed to open the file " << filename << std::endl;
-					flag = true;
-				}
+				pApi = std::make_unique<API<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
+					[this]() { return MessageStorage.empty(); },
+					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+					(const State*&)pState, mtx_state, tu, wait);
 			}
-			pApi = std::make_unique<DebugApi<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu, debuglevel != 1,
-				flag ? std::cout : OutFile);
-		}
-	}
-	else
-	{
-		if (!debuglevel)
-		{
-			pApi = std::make_unique<API<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu);
-		}
-		else
-		{
-			bool flag = filename == "";
-			if (!flag)
+			else
 			{
-				OutFile.open(filename);
-				if (OutFile.fail())
+				bool flag = filename == "";
+				if (!flag)
 				{
-					std::cout << "Failed to open the file " << filename << std::endl;
-					flag = true;
+					OutFile.open(filename);
+					if (OutFile.fail())
+					{
+						std::cout << "Failed to open the file " << filename << std::endl;
+						flag = true;
+					}
 				}
+				pApi = std::make_unique<DebugApi<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
+					[this]() { return MessageStorage.empty(); },
+					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
+					(const State*&)pState, mtx_state, tu, wait, debuglevel != 1,
+					flag ? std::cout : OutFile);
 			}
-			pApi = std::make_unique<DebugApi<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu, debuglevel != 1,
-				flag ? std::cout : OutFile);
 		}
+
 	}
 
 	//启动AI线程（但要等到游戏开始才会正式执行）
@@ -415,11 +424,12 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		(std::function<void()>)[this]() {
 			std::lock_guard<std::mutex> lck_state(mtx_state);
 			if (!CurrentStateAccessed)
-			{
+			{	
+				CurrentStateAccessed = true;
 				pApi->StartTimer();//再细一些的分类可以把这里去掉，但似乎没太大意义
 				pAI->play(*pApi);
 				pApi->EndTimer();
-				CurrentStateAccessed = true;
+				
 			}
 			else
 			{

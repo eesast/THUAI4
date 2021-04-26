@@ -5,7 +5,7 @@
 
 Logic logic;
 
-int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
+int thuai4_main(int argc, char** argv, CreateAIFunc AIBuilder)
 {
 	std::string aIP;
 	uint16_t aPort;
@@ -25,19 +25,19 @@ int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
 		TCLAP::ValueArg<uint16_t> agentPort("P", "agentPort", "Port the agent listens to", true, 0, "USHORT");
 		cmd.add(agentPort);
 
-		std::vector<int> validPlayerIDs{0, 1, 2, 3};
+		std::vector<int> validPlayerIDs{ 0, 1, 2, 3 };
 		TCLAP::ValuesConstraint<int> playerIdConstraint(validPlayerIDs);
 		TCLAP::ValueArg<int> playerID("p", "playerID", "Player ID 0,1,2,3 valid only", true, -1, &playerIdConstraint);
 		cmd.add(playerID);
 
-		std::vector<int> validTeamIDs{0, 1};
+		std::vector<int> validTeamIDs{ 0, 1 };
 		TCLAP::ValuesConstraint<int> temIdConstraint(validTeamIDs);
 		TCLAP::ValueArg<int> teamID("t", "teamID", "Team ID, which can only be 0 or 1", true, -1, &temIdConstraint);
 		cmd.add(teamID);
 
 		std::string DebugDesc = "Set this flag to use API for debugging.\n"
-								"If \"-f\" is not set, the log will be printed on the screen.\n"
-								"Or you could specify a file to store it.";
+			"If \"-f\" is not set, the log will be printed on the screen.\n"
+			"Or you could specify a file to store it.";
 		TCLAP::SwitchArg debug("d", "debug", DebugDesc);
 		cmd.add(debug);
 
@@ -51,8 +51,8 @@ int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
 		extern const THUAI4::JobType playerJob; // Entern variable, actually defined in AI.cpp
 		pID = playerID.getValue();
 		tID = teamID.getValue();
-		ID::playerID=pID;
-		ID::teamID=tID;
+		ID::playerID = pID;
+		ID::teamID = tID;
 		jType = playerJob;
 		aIP = agentIP.getValue();
 		aPort = agentPort.getValue();
@@ -65,7 +65,7 @@ int thuai4_main(int argc, char **argv, CreateAIFunc AIBuilder)
 		}
 		filename = FileName.getValue();
 	}
-	catch (TCLAP::ArgException &e) // catch exceptions
+	catch (TCLAP::ArgException& e) // catch exceptions
 	{
 		std::cerr << "Parsing error: " << e.error() << " for arg " << e.argId() << std::endl;
 		return 0;
@@ -80,7 +80,7 @@ std::unique_ptr<AIBase> CreateAI()
 	return std::make_unique<AI>();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	return thuai4_main(argc, argv, CreateAI);
 }
