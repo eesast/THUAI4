@@ -16,6 +16,7 @@
 #include <functional>
 #include <thread>
 #include <condition_variable>
+#include <atomic>
 
 
 //CAPI 
@@ -79,6 +80,11 @@ private:
 	static_assert(std::is_base_of<google::protobuf::Message, Message2C2>::value);
 	static_assert(typeM2C1 != typeM2C2);
 
+	//目的是要限制发消息的数量，不求精确
+	//为实现简单每收到一次message2client就允许发50条消息
+	constexpr static int Limit = 50;
+	std::atomic_int counter = 0;
+
 	using Pointer2M = std::variant<std::shared_ptr<Message2C1>, std::shared_ptr<Message2C2>>;
 	bool blocking = false;//在没有消息时线程阻塞节约资源
 	std::atomic_bool loop = true;
@@ -106,7 +112,7 @@ public:
 	bool Start(const char* address, uint16_t port);
 
 	//发消息
-	void Send(const Message2S&);
+	bool Send(const Message2S&);
 
 	//结束线程并释放资源（当然构析函数也可以做到，所以其实没必要）
 	void Join();

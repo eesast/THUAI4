@@ -18,84 +18,99 @@ double TimeSinceStart(const std::chrono::system_clock::time_point& sp)
 
 
 template <bool asyn>
-API<asyn>::API(std::function<void(Protobuf::MessageToServer&)> sm,
+API<asyn>::API(std::function<bool(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-	const State*& pS, std::mutex& mtx_state, std::function<void()> tu) : LogicInterface(sm, e, tp, gc, pS), Members<asyn>(mtx_state, tu)
+	const State*& pS, std::mutex& mtx_state, std::function<void()> tu, std::function<void()> w) : LogicInterface(sm, e, tp, gc, pS, w), Members<asyn>(mtx_state, tu)
 {
 
 }
 
 template <bool asyn>
-void API<asyn>::Use()
+bool API<asyn>::Use()
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Use);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void API<asyn>::Pick(THUAI4::PropType propType)
+bool API<asyn>::Pick(THUAI4::PropType propType)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
 	message.set_proptype(Protobuf::PropType(propType));
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void API<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
+bool API<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Throw);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void API<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
+bool API<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Attack);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void API<asyn>::Send(int toPlayerID, std::string message)
+bool API<asyn>::Send(int toPlayerID, std::string message)
 {
 	Protobuf::MessageToServer msg;
 	msg.set_messagetype(Protobuf::MessageType::Send);
 	msg.set_toplayerid(toPlayerID);
 	msg.set_message(message);
-	SendMessageWrapper(msg);
+	return SendMessageWrapper(msg);
 }
 template <bool asyn>
-void API<asyn>::MovePlayer(uint32_t timeInMilliseconds, double angle)
+bool API<asyn>::MovePlayer(uint32_t timeInMilliseconds, double angle)
 {
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void API<asyn>::MoveRight(uint32_t timeInMilliseconds)
+bool API<asyn>::MoveRight(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, PI * 0.5);
+	return MovePlayer(timeInMilliseconds, PI * 0.5);
 }
 template <bool asyn>
-void API<asyn>::MoveUp(uint32_t timeInMilliseconds)
+bool API<asyn>::MoveUp(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, PI);
+	return MovePlayer(timeInMilliseconds, PI);
 }
 template <bool asyn>
-void API<asyn>::MoveLeft(uint32_t timeInMilliseconds)
+bool API<asyn>::MoveLeft(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, PI * 1.5);
+	return MovePlayer(timeInMilliseconds, PI * 1.5);
 }
 template <bool asyn>
-void API<asyn>::MoveDown(uint32_t timeInMilliseconds)
+bool API<asyn>::MoveDown(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, 0);
+	return MovePlayer(timeInMilliseconds, 0);
 }
+template <bool asyn>
+bool API<asyn>::Wait()
+{
+	if (GetCounter() == -1) return false;
+	if constexpr (asyn) {
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		_Wait();
+		return true;
+	}
+	else {
+		_Wait();
+		return true;
+	}
+}
+
 
 template <bool asyn>
 int API<asyn>::GetCounterOfFrames()
@@ -275,7 +290,7 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 #else
 		return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
-	}
+		}
 	else {
 #ifdef _COLOR_MAP_BY_HASHING_
 		auto it = pState->cellColors.find((CellX << 16) + CellY);
@@ -287,18 +302,18 @@ THUAI4::ColorType API<asyn>::GetCellColor(int CellX, int CellY) const
 #else
 		return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
-	}
+		}
 
-}
+	}
 
 
 //Debug API
 //目前实现的功能：调用函数都留下记录、可选合法性检查、记录每次play用时
 template <bool asyn>
-DebugApi<asyn>::DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
+DebugApi<asyn>::DebugApi(std::function<bool(Protobuf::MessageToServer&)> sm,
 	std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-	const State*& pS, std::mutex& mtx_state, std::function<void()> tu, bool ev,
-	std::ostream& out) : LogicInterface(sm, e, tp, gc, pS), Members<asyn>(mtx_state, tu),
+	const State*& pS, std::mutex& mtx_state, std::function<void()> tu, std::function<void()> w, bool ev,
+	std::ostream& out) : LogicInterface(sm, e, tp, gc, pS, w), Members<asyn>(mtx_state, tu),
 	ExamineValidity(ev), OutStream(out)
 {
 
@@ -319,7 +334,7 @@ void DebugApi<asyn>::EndTimer()
 	OutStream << std::endl;
 }
 template <bool asyn>
-void DebugApi<asyn>::Use()
+bool DebugApi<asyn>::Use()
 {
 	OutStream << "Call Use() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	if (ExamineValidity)
@@ -327,17 +342,17 @@ void DebugApi<asyn>::Use()
 		if (pState->self->isDying)
 		{
 			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return; //不合法发了也是白发
+			return false; //不合法发了也是白发
 		}
 		if (pState->self->propType == THUAI4::PropType::Null)
 		{
 			OutStream << "[Warning: You don`t have any properties.]" << std::endl;
-			return;
+			return false;
 		}
 	}
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Use);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 inline bool InSameCell(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
 {
@@ -357,7 +372,7 @@ bool DebugApi<asyn>::CanPick(THUAI4::PropType propType)
 	return false;
 }
 template <bool asyn>
-void DebugApi<asyn>::Pick(THUAI4::PropType propType)
+bool DebugApi<asyn>::Pick(THUAI4::PropType propType)
 {
 	OutStream << "Call Pick(" << dict[propType] << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	if (ExamineValidity)
@@ -365,21 +380,21 @@ void DebugApi<asyn>::Pick(THUAI4::PropType propType)
 		if (pState->self->isDying)
 		{
 			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
+			return false;
 		}
 		if (!CanPick(propType))
 		{
 			OutStream << "[Warning: No such property to pick within the cell.]" << std::endl;
-			return;
+			return false;
 		}
 	}
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Pick);
 	message.set_proptype(Protobuf::PropType(propType));
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void DebugApi<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
+bool DebugApi<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
 {
 	OutStream << "Call Throw(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	if (ExamineValidity)
@@ -387,22 +402,22 @@ void DebugApi<asyn>::Throw(uint32_t timeInMilliseconds, double angle)
 		if (pState->self->isDying)
 		{
 			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
+			return false;
 		}
 		if (pState->self->propType == THUAI4::PropType::Null)
 		{
 			OutStream << "[Warning: Nothing to throw.]" << std::endl;
-			return;
+			return false;
 		}
 	}
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Throw);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void DebugApi<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
+bool DebugApi<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
 {
 	OutStream << "Call Attack(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	if (ExamineValidity)
@@ -410,22 +425,22 @@ void DebugApi<asyn>::Attack(uint32_t timeInMilliseconds, double angle)
 		if (pState->self->isDying)
 		{
 			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
+			return false;
 		}
 		if (pState->self->bulletNum == 0)
 		{
 			OutStream << "[Warning: You are out of bullets.]" << std::endl;
-			return;
+			return false;
 		}
 	}
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Attack);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void DebugApi<asyn>::Send(int toPlayerID, std::string message)
+bool DebugApi<asyn>::Send(int toPlayerID, std::string message)
 {
 	OutStream << "Call Send(" << toPlayerID << "," << message << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 	if (ExamineValidity)
@@ -433,58 +448,73 @@ void DebugApi<asyn>::Send(int toPlayerID, std::string message)
 		if (toPlayerID < 0 || toPlayerID >= StateConstant::nPlayers)
 		{
 			OutStream << "[Warning: Illegal player ID.]" << std::endl;
-			return;
+			return false;
 		}
 		if (State::playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid)
 		{
 			OutStream << "[Warning: You are sending a message to yourself.]" << std::endl;
-			return;
+			return false;
 		}
 	}
 	Protobuf::MessageToServer msg;
 	msg.set_messagetype(Protobuf::MessageType::Send);
 	msg.set_toplayerid(toPlayerID);
 	msg.set_message(message);
-	SendMessageWrapper(msg);
+	return SendMessageWrapper(msg);
 }
 template <bool asyn>
-void DebugApi<asyn>::MovePlayer(uint32_t timeInMilliseconds, double angle)
+bool DebugApi<asyn>::MovePlayer(uint32_t timeInMilliseconds, double angle)
 {
 	OutStream << "Call MovePlayer(" << timeInMilliseconds << "," << angle << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
-	;
+
 	if (ExamineValidity)
 	{
 		if (pState->self->isDying)
 		{
 			OutStream << "[Warning: You have been slained.]" << std::endl;
-			return;
+			return false;
 		}
 	}
 	Protobuf::MessageToServer message;
 	message.set_messagetype(Protobuf::MessageType::Move);
 	message.set_timeinmilliseconds(timeInMilliseconds);
 	message.set_angle(angle);
-	SendMessageWrapper(message);
+	return SendMessageWrapper(message);
 }
 template <bool asyn>
-void DebugApi<asyn>::MoveRight(uint32_t timeInMilliseconds)
+bool DebugApi<asyn>::MoveRight(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, PI * 0.5);
+	return MovePlayer(timeInMilliseconds, PI * 0.5);
 }
 template <bool asyn>
-void DebugApi<asyn>::MoveUp(uint32_t timeInMilliseconds)
+bool DebugApi<asyn>::MoveUp(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, PI);
+	return MovePlayer(timeInMilliseconds, PI);
 }
 template <bool asyn>
-void DebugApi<asyn>::MoveLeft(uint32_t timeInMilliseconds)
+bool DebugApi<asyn>::MoveLeft(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, PI * 1.5);
+	return MovePlayer(timeInMilliseconds, PI * 1.5);
 }
 template <bool asyn>
-void DebugApi<asyn>::MoveDown(uint32_t timeInMilliseconds)
+bool DebugApi<asyn>::MoveDown(uint32_t timeInMilliseconds)
 {
-	MovePlayer(timeInMilliseconds, 0);
+	return MovePlayer(timeInMilliseconds, 0);
+}
+template <bool asyn>
+bool DebugApi<asyn>::Wait()
+{
+	OutStream << "Call Wait() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
+	if (GetCounter() == -1) return false;
+	if constexpr (asyn) {
+		std::lock_guard<std::mutex> lck(Members<asyn>::mtx_state);
+		_Wait();
+		return true;
+	}
+	else {
+		_Wait();
+		return true;
+	}
 }
 
 template <bool asyn>
@@ -671,7 +701,7 @@ uint32_t DebugApi<asyn>::GetTeamScore() const
 		OutStream << "Call GetTeamScore() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		return pState->teamScore;
 	}
-	
+
 }
 template <bool asyn>
 const std::vector<std::vector<int64_t>> DebugApi<asyn>::GetPlayerGUIDs() const
@@ -687,7 +717,7 @@ const std::vector<std::vector<int64_t>> DebugApi<asyn>::GetPlayerGUIDs() const
 		OutStream << "Call GetPlayerGUIDs() at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		return State::playerGUIDs;
 	}
-	
+
 }
 template <bool asyn>
 THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
@@ -717,7 +747,7 @@ THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
 #else
 		return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
-	}
+		}
 	else {
 		OutStream << "Call GetCellColor(" << CellX << "," << CellY << ") at " << TimeSinceStart(StartPoint) << "ms" << std::endl;
 		assert(CellX >= 0 && CellX < StateConstant::nCells&& CellY >= 0 && CellY < StateConstant::nCells);
@@ -740,6 +770,6 @@ THUAI4::ColorType DebugApi<asyn>::GetCellColor(int CellX, int CellY) const
 #else
 		return pState->cellColors[CellX][CellY];
 #endif // _COLOR_MAP_BY_HASHING_
-	}
+		}
 
-}
+	}

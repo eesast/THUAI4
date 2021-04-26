@@ -40,16 +40,17 @@ struct State
 struct LogicInterface : public GameApi
 {
 protected:
-	const std::function<void(Protobuf::MessageToServer&)> SendMessageWrapper; //加入ID放到这个函数里了
+	const std::function<bool(Protobuf::MessageToServer&)> SendMessageWrapper; //加入ID放到这个函数里了
 	const std::function<bool()> Empty;
 	const std::function<bool(std::string&)> TryPop;
 	const std::function<int()> GetCounter;
+	const std::function<void()> _Wait;
 	const State*& pState;
 
 public:
-	LogicInterface(std::function<void(Protobuf::MessageToServer&)> sm,
+	LogicInterface(std::function<bool(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS) : SendMessageWrapper(sm), Empty(e), TryPop(tp), GetCounter(gc), pState(pS) {}
+		const State*& pS, std::function<void()> w) : SendMessageWrapper(sm), Empty(e), TryPop(tp), GetCounter(gc), pState(pS), _Wait(w) {}
 	virtual void StartTimer() = 0;
 	virtual void EndTimer() = 0;
 };
@@ -80,19 +81,21 @@ private:
 	virtual void EndTimer() {}
 
 public:
-	API(std::function<void(Protobuf::MessageToServer&)> sm,
+	API(std::function<bool(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, std::mutex& mtx_state, std::function<void()>);
-	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
-	virtual void MoveRight(uint32_t timeInMilliseconds);
-	virtual void MoveUp(uint32_t timeInMilliseconds);
-	virtual void MoveLeft(uint32_t timeInMilliseconds);
-	virtual void MoveDown(uint32_t timeInMilliseconds);
-	virtual void Use();
-	virtual void Pick(THUAI4::PropType propType);
-	virtual void Throw(uint32_t timeInMilliseconds, double angle);
-	virtual void Attack(uint32_t timeInMilliseconds, double angle);
-	virtual void Send(int toPlayerID, std::string message);
+		const State*& pS, std::mutex& mtx_state, std::function<void()> tu, std::function<void()> w);
+	virtual bool MovePlayer(uint32_t timeInMilliseconds, double angle);
+	virtual bool MoveRight(uint32_t timeInMilliseconds);
+	virtual bool MoveUp(uint32_t timeInMilliseconds);
+	virtual bool MoveLeft(uint32_t timeInMilliseconds);
+	virtual bool MoveDown(uint32_t timeInMilliseconds);
+	virtual bool Use();
+	virtual bool Pick(THUAI4::PropType propType);
+	virtual bool Throw(uint32_t timeInMilliseconds, double angle);
+	virtual bool Attack(uint32_t timeInMilliseconds, double angle);
+	virtual bool Send(int toPlayerID, std::string message);
+
+	virtual bool Wait();
 
 	//Information the player can get
 	virtual int GetCounterOfFrames();
@@ -140,20 +143,22 @@ private:
 	virtual void EndTimer();
 
 public:
-	DebugApi(std::function<void(Protobuf::MessageToServer&)> sm,
+	DebugApi(std::function<bool(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, std::mutex& mtx_state, std::function<void()>, bool ev = false,
+		const State*& pS, std::mutex& mtx_state, std::function<void()> tu, std::function<void()> w, bool ev = false,
 		std::ostream& out = std::cout);
-	virtual void MovePlayer(uint32_t timeInMilliseconds, double angle);
-	virtual void MoveRight(uint32_t timeInMilliseconds);
-	virtual void MoveUp(uint32_t timeInMilliseconds);
-	virtual void MoveLeft(uint32_t timeInMilliseconds);
-	virtual void MoveDown(uint32_t timeInMilliseconds);
-	virtual void Use();
-	virtual void Pick(THUAI4::PropType propType);
-	virtual void Throw(uint32_t timeInMilliseconds, double angle);
-	virtual void Attack(uint32_t timeInMilliseconds, double angle);
-	virtual void Send(int toPlayerID, std::string message);
+	virtual bool MovePlayer(uint32_t timeInMilliseconds, double angle);
+	virtual bool MoveRight(uint32_t timeInMilliseconds);
+	virtual bool MoveUp(uint32_t timeInMilliseconds);
+	virtual bool MoveLeft(uint32_t timeInMilliseconds);
+	virtual bool MoveDown(uint32_t timeInMilliseconds);
+	virtual bool Use();
+	virtual bool Pick(THUAI4::PropType propType);
+	virtual bool Throw(uint32_t timeInMilliseconds, double angle);
+	virtual bool Attack(uint32_t timeInMilliseconds, double angle);
+	virtual bool Send(int toPlayerID, std::string message);
+
+	virtual bool Wait();
 
 	//Information the player can get
 	virtual int GetCounterOfFrames();
