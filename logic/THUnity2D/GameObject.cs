@@ -40,17 +40,17 @@ namespace THUnity2D
 		//Direction
 		private double facingDirection = 0.0;		//面向的方向，去极角的弧度值
 		public double FacingDirection
-        {
+		{
 			get => facingDirection;
 			private set
-            {
+			{
 				//Operations.Add
 				lock (gameObjLock)
 				{
 					facingDirection = value;
 				}
 			}
-        }
+		}
 
 		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
 
@@ -59,7 +59,7 @@ namespace THUnity2D
 
 		protected int moveSpeed;
 		public int MoveSpeed
-        {
+		{
 			get => moveSpeed;
 			protected set
 			{
@@ -77,7 +77,7 @@ namespace THUnity2D
 		private bool canMove = false;              //当前是否能移动
 
 		public bool CanMove
-        {
+		{
 			get => canMove;
 			set
 			{
@@ -87,7 +87,7 @@ namespace THUnity2D
 					canMove = value;
 					Debug(this, canMove ? "Enable move!" : "Disable move!");
 				}
-            }
+			}
 		}
 
 		//当前是否正在移动
@@ -124,17 +124,17 @@ namespace THUnity2D
 
 		//移动，改变坐标，反馈实际走的长度的平方
 		public long Move(Vector displacement)
-        {
+		{
 			var deltaPos = Vector.Vector2XY(displacement);
 			//Operations.Add
 			lock (gameObjLock)
-            {
+			{
 				FacingDirection = displacement.angle;
 				this.position.x += deltaPos.x;
 				this.position.y += deltaPos.y;
 			}
 			return deltaPos.x * deltaPos.x + deltaPos.y * deltaPos.y;
-        }
+		}
 
 		//圆或内切圆半径
 		private int radius;

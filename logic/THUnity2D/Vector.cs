@@ -12,9 +12,9 @@ namespace THUnity2D
 		public double length;
 		
 		public static XYPosition Vector2XY(Vector v)
-        {
+		{
 			return new XYPosition((int)(v.length * Math.Cos(v.angle)), (int)(v.length * Math.Sin(v.angle)));
-        }
+		}
 		public static Vector XY2Vector(double x, double y)
 		{
 			return new Vector(Math.Atan2(y, x), Math.Sqrt(x * x + y * y));
