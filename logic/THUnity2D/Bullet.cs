@@ -54,7 +54,7 @@ namespace THUnity2D
                 IsRigid = true;
                 break;
             case BulletType.Bullet4:
-                MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 4;
+                MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3;
                 IsRigid = false;
                 break;
             case BulletType.Bullet5:
@@ -76,8 +76,6 @@ namespace THUnity2D
 			{
             case BulletType.Bullet0:
             case BulletType.Bullet1:
-            case BulletType.Bullet5:
-            case BulletType.Bullet6:
                 range = new XYPosition[9];
                 for (int i = 0; i < 3; ++i)
                 {
@@ -89,7 +87,18 @@ namespace THUnity2D
                 }
                 break;
             case BulletType.Bullet2:
+                range = new XYPosition[49];
+                for (int i = 0; i < 7; ++i)
+                {
+                    for (int j = 0; j < 7; ++j)
+                    {
+                        range[i * 7 + j].x = i - 3;
+                        range[i * 7 + j].y = j - 3;
+                    }
+                }
+                break;
             case BulletType.Bullet3:
+            case BulletType.Bullet5:
                 range = new XYPosition[25];
                 for (int i = 0; i < 5; ++i)
                 {
@@ -101,6 +110,7 @@ namespace THUnity2D
                 }
                 break;
             case BulletType.Bullet4:
+            case BulletType.Bullet6:
                 range = new XYPosition[1];
                 range[0].x = range[0].y = 0;
                 break;
@@ -132,13 +142,13 @@ namespace THUnity2D
                 }
                 break;
             case BulletType.Bullet2:
-                range = new XYPosition[25];
-                for (int i = 0; i < 5; ++i)
+                range = new XYPosition[49];
+                for (int i = 0; i < 7; ++i)
                 {
-                    for (int j = 0; j < 5; ++j)
+                    for (int j = 0; j < 7; ++j)
                     {
-                        range[i * 5 + j].x = i - 2;
-                        range[i * 5 + j].y = j - 2;
+                        range[i * 7 + j].x = i - 3;
+                        range[i * 7 + j].y = j - 3;
                     }
                 }
                 break;
