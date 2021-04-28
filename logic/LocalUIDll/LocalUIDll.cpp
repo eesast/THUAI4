@@ -4,7 +4,7 @@ using namespace THUnity2D;
 
 namespace LocalUIDll
 {
-	public ref class LocalUI
+	static public ref class LocalUI
 	{
 	public:
 

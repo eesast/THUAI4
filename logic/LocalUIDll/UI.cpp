@@ -99,7 +99,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		std::thread([hWnd, this]()
 			{
 				Gaming::Game^ game = const_cast<GameWrapper*>(pGM)->Game();
+
 				game->StartGame(1000 * 60 * 10);
+				
 				int score1 = game->GetTeamScore(0LL);
 				int score2 = game->GetTeamScore(1LL);
 				std::_tostringstream sout;
