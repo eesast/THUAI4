@@ -29,6 +29,9 @@ namespace Logic.Server
 		[Option('b', "playBack", Required = false, HelpText = "Whether open the server in a playback mode.")]
 		public bool PlayBack { get; set; } = false;
 
+		[Option("playBackSpeed", Required = false, HelpText = "The speed of the playback, between 0.25 and 4.0")]
+		public double PlayBackSpeed { get; set; } = 1.0;
+
 		[Option('k', "token", Required = false, HelpText = "Web API Token")]
 		public string Token { get; set; } = DefaultArgumentOptions.Token;
 

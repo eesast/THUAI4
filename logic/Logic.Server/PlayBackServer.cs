@@ -18,6 +18,12 @@ namespace Logic.Server
 		{
 			try
 			{
+				int timeInterval = GameServer.SendMessageToClientIntervalInMilliseconds;
+				if (options.PlayBackSpeed != 1.0)
+				{
+					options.PlayBackSpeed = Math.Max(0.25, Math.Min(4.0, options.PlayBackSpeed));
+					timeInterval = (int)Math.Round(timeInterval / options.PlayBackSpeed);
+				}
 				using (MessageReader mr = new MessageReader(options.FileName))
 				{
 					teamScore = new int[mr.teamCount];
@@ -59,7 +65,7 @@ namespace Logic.Server
 							}
 							return true;
 						},
-						GameServer.SendMessageToClientIntervalInMilliseconds,
+						timeInterval: timeInterval,
 						finallyReturn: () => 0
 						)
 					{ AllowTimeExceed = true, MaxTolerantTimeExceedCount = 5 };
