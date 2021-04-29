@@ -82,7 +82,7 @@ private:
 
 	//目的是要限制发消息的数量，不求精确
 	//为实现简单每收到一次message2client就允许发50条消息
-	constexpr static int Limit = 50;
+	constexpr static inline int Limit = 50;
 	std::atomic_int counter = 0;
 
 	using Pointer2M = std::variant<std::shared_ptr<Message2C1>, std::shared_ptr<Message2C2>>;

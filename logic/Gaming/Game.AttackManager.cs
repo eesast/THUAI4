@@ -37,7 +37,6 @@ namespace Gaming
 							break;
 						case BulletType.Bullet5:
 							timeInMilliseconds = 0;
-							angle = playerWillAttack.FacingDirection;
 							break;
 						case BulletType.Bullet3:        //不断检测它所位于的格子，并将其染色
 							timeInMilliseconds = int.MaxValue;
@@ -108,48 +107,45 @@ namespace Gaming
 			/// <param name="playerBeingShot">被打到的玩家</param>
 			private void BombOnePlayer(Bullet bullet, Character playerBeingShot)
 			{
-				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
+				playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, bullet.Parent);
+				if (playerBeingShot.HP <= 0)                //如果打死了
 				{
-					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, bullet.Parent);
-					if (playerBeingShot.HP <= 0)                //如果打死了
+					//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
+					playerBeingShot.CanMove = false;
+					playerBeingShot.IsResetting = true;
+					gameMap.PlayerListLock.EnterWriteLock();
+					try
 					{
-						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
-						playerBeingShot.CanMove = false;
-						playerBeingShot.IsResetting = true;
-						gameMap.PlayerListLock.EnterWriteLock();
-						try
-						{
-							gameMap.PlayerList.Remove(playerBeingShot);
-						}
-						finally { gameMap.PlayerListLock.ExitWriteLock(); }
-						playerBeingShot.Reset();
-
-						bullet.Parent.AddScore(Map.Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
-
-						new Thread
-							(() =>
-							{
-
-								Thread.Sleep(Map.Constant.deadRestoreTime);
-
-								playerBeingShot.AddShield(Map.Constant.shieldTimeAtBirth);  //复活加个盾
-
-									gameMap.PlayerListLock.EnterWriteLock();
-								try
-								{
-									gameMap.PlayerList.Add(playerBeingShot);
-								}
-								finally { gameMap.PlayerListLock.ExitWriteLock(); }
-
-								if (gameMap.Timer.IsGaming)
-								{
-									playerBeingShot.CanMove = true;
-								}
-								playerBeingShot.IsResetting = false;
-							}
-							)
-						{ IsBackground = true }.Start();
+						gameMap.PlayerList.Remove(playerBeingShot);
 					}
+					finally { gameMap.PlayerListLock.ExitWriteLock(); }
+					playerBeingShot.Reset();
+
+					bullet.Parent.AddScore(Map.Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
+
+					new Thread
+						(() =>
+						{
+
+							Thread.Sleep(Map.Constant.deadRestoreTime);
+
+							playerBeingShot.AddShield(Map.Constant.shieldTimeAtBirth);  //复活加个盾
+
+								gameMap.PlayerListLock.EnterWriteLock();
+							try
+							{
+								gameMap.PlayerList.Add(playerBeingShot);
+							}
+							finally { gameMap.PlayerListLock.ExitWriteLock(); }
+
+							if (gameMap.Timer.IsGaming)
+							{
+								playerBeingShot.CanMove = true;
+							}
+							playerBeingShot.IsResetting = false;
+						}
+						)
+					{ IsBackground = true }.Start();
 				}
 			}
 

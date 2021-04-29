@@ -20,9 +20,9 @@ namespace THUnity2D
 	public sealed partial class Character : GameObject
 	{
 		public const int basicAp = 1000;
-		public const int basicHp = 5000;
-		public const int basicCD = 2000;
-		public const int basicBulletNum = 15;
+		public const int basicHp = 6000;
+		public const int basicCD = 1000;
+		public const int basicBulletNum = 12;
 
 		public override GameObjType GetGameObjType()
 		{
@@ -137,15 +137,29 @@ namespace THUnity2D
 
 		public void BeAttack(int subHP, bool hasSpear, Character? attacker)	//遭到攻击
 		{
-			if (hasSpear || !HasShield) SubHp(subHP);
-			if (hp <= 0) TryActivatingTotem();
-			if (jobType == JobType.Job6) attacker?.BeBounced(subHP / 2, this.HasSpear, this);   //职业6可以反弹伤害
+			if (attacker.TeamID != this.TeamID)
+			{
+				if (hasSpear || !HasShield) SubHp(subHP);
+				if (hp <= 0) TryActivatingTotem();
+				if (jobType == JobType.Job6) attacker?.BeBounced(subHP * 3 / 4, this.HasSpear, this);   //职业6可以反弹伤害
+			}
+			else if (attacker?.jobType == JobType.Job6)
+			{
+				AddHp(subHP * 6);				// 职业六回血6倍
+			}
 		}
 
 		private void BeBounced(int subHP, bool hasSpear, Character? attacker)	//遭到反弹
 		{
-			if (hasSpear || !HasShield) SubHp(subHP);
-			if (hp <= 0) hp = 1;		//反弹不会致死
+			if (hasSpear || !HasShield)
+			{
+				var hpBeforeBounce = hp;
+				if (hpBeforeBounce - subHP <= 0)
+				{
+					subHP = hpBeforeBounce - 1;
+				}
+				SubHp(subHP);
+			}
 		}
 
 		public const int MinAP = 0;
@@ -226,7 +240,7 @@ namespace THUnity2D
 			hp = maxHp;
 			ap = orgAp;
 			holdProp = null;
-			bulletNum = maxBulletNum;
+			bulletNum = maxBulletNum / 2;
 			buffManeger.ClearAll();
 		}
 
@@ -292,8 +306,8 @@ namespace THUnity2D
 			case JobType.Job1:
 				cd = orgCD = basicCD;
 				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp;
-				ap = orgAp = basicAp;
+				hp = maxHp = basicHp * 4 / 3;
+				ap = orgAp = basicAp * 3 / 4;
 				holdProp = null;
 				bulletType = BulletType.Bullet1;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
@@ -302,25 +316,25 @@ namespace THUnity2D
 				cd = orgCD = basicCD * 2;
 				bulletNum = maxBulletNum = basicBulletNum;
 				hp = maxHp = basicHp;
-				ap = orgAp = basicAp * 2;
+				ap = orgAp = basicAp * 5 / 4;
 				holdProp = null;
 				bulletType = BulletType.Bullet2;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2 / 3;
+				MoveSpeed = OrgMoveSpeed = basicMoveSpeed / 3;
 				break;
 			case JobType.Job3:
-				cd = orgCD = basicCD * 2;
+				cd = orgCD = basicCD * 3;
 				bulletNum = maxBulletNum = basicBulletNum / 2;
-				hp = maxHp = basicHp / 2;
-				ap = orgAp = basicAp / 2;
+				hp = maxHp = basicHp * 2 / 5;
+				ap = orgAp = basicAp * 3 / 8;
 				holdProp = null;
 				bulletType = BulletType.Bullet3;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3 / 2;
 				break;
 			case JobType.Job4:
-				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum / 3;
+				cd = orgCD = basicCD * 4;
+				bulletNum = maxBulletNum = basicBulletNum / 4;
 				hp = maxHp = basicHp * 2 / 3;
-				ap = orgAp = basicAp * 3;
+				ap = orgAp = basicAp * 7 / 2;
 				holdProp = null;
 				bulletType = BulletType.Bullet4;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
@@ -329,7 +343,7 @@ namespace THUnity2D
 				cd = orgCD = basicCD * 2;
 				bulletNum = maxBulletNum = basicBulletNum / 3;
 				hp = maxHp = basicHp * 2 / 3;
-				ap = orgAp = basicAp * 3;
+				ap = orgAp = basicAp * 4;
 				holdProp = null;
 				bulletType = BulletType.Bullet5;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
@@ -337,11 +351,11 @@ namespace THUnity2D
 			case JobType.Job6:
 				cd = orgCD = basicCD;
 				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp * 3;
-				ap = orgAp = basicAp;
+				hp = maxHp = basicHp * 2;
+				ap = orgAp = basicAp / 2;
 				holdProp = null;
 				bulletType = BulletType.Bullet6;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3 / 4;
+				MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
 				break;
 			}
 

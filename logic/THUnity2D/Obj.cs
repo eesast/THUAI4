@@ -28,10 +28,10 @@ namespace THUnity2D
 
 		private Character? parent = null;		//道具的主人
 		public Character? Parent
-        {
+		{
 			get => parent;
-            set
-            {
+			set
+			{
 				//Operations.Add
 				lock (gameObjLock)
 				{
@@ -41,8 +41,8 @@ namespace THUnity2D
 					parent = value;
 					Debug(this, debugStr);
 				}
-            }
-        }
+			}
+		}
 
 		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType, ShapeType shape) : base(initPos, radius, isRigid, moveSpeed, shape)
 		{
