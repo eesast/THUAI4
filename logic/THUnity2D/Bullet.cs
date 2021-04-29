@@ -76,6 +76,7 @@ namespace THUnity2D
 			{
 			case BulletType.Bullet0:
 			case BulletType.Bullet1:
+			case BulletType.Bullet5:
 				range = new XYPosition[9];
 				for (int i = 0; i < 3; ++i)
 				{
@@ -88,17 +89,16 @@ namespace THUnity2D
 				break;
 			case BulletType.Bullet2:
 				range = new XYPosition[49];
-				for (int i = 0; i < 7; ++i)
+				for (int i = 0; i < 5; ++i)
 				{
-					for (int j = 0; j < 7; ++j)
+					for (int j = 0; j < 5; ++j)
 					{
-						range[i * 7 + j].x = i - 3;
-						range[i * 7 + j].y = j - 3;
+						range[i * 5 + j].x = i - 2;
+						range[i * 5 + j].y = j - 2;
 					}
 				}
 				break;
 			case BulletType.Bullet3:
-			case BulletType.Bullet5:
 				range = new XYPosition[25];
 				for (int i = 0; i < 5; ++i)
 				{

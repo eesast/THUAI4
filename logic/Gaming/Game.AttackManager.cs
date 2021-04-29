@@ -32,7 +32,6 @@ namespace Gaming
 					switch (playerWillAttack.bulletType)
 					{
 						case BulletType.Bullet0:
-						case BulletType.Bullet2:
 						case BulletType.Bullet6:
 							timeInMilliseconds = int.MaxValue;
 							break;

@@ -307,7 +307,7 @@ namespace THUnity2D
 				cd = orgCD = basicCD;
 				bulletNum = maxBulletNum = basicBulletNum;
 				hp = maxHp = basicHp * 4 / 3;
-				ap = orgAp = basicAp;
+				ap = orgAp = basicAp * 3 / 4;
 				holdProp = null;
 				bulletType = BulletType.Bullet1;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
@@ -316,7 +316,7 @@ namespace THUnity2D
 				cd = orgCD = basicCD * 2;
 				bulletNum = maxBulletNum = basicBulletNum;
 				hp = maxHp = basicHp;
-				ap = orgAp = basicAp * 3 / 2;
+				ap = orgAp = basicAp * 5 / 4;
 				holdProp = null;
 				bulletType = BulletType.Bullet2;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed / 3;
@@ -325,7 +325,7 @@ namespace THUnity2D
 				cd = orgCD = basicCD * 3;
 				bulletNum = maxBulletNum = basicBulletNum / 2;
 				hp = maxHp = basicHp * 2 / 5;
-				ap = orgAp = basicAp / 4;
+				ap = orgAp = basicAp * 3 / 8;
 				holdProp = null;
 				bulletType = BulletType.Bullet3;
 				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3 / 2;
@@ -351,7 +351,7 @@ namespace THUnity2D
 			case JobType.Job6:
 				cd = orgCD = basicCD;
 				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp * 3;
+				hp = maxHp = basicHp * 2;
 				ap = orgAp = basicAp / 2;
 				holdProp = null;
 				bulletType = BulletType.Bullet6;

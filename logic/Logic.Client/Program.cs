@@ -98,7 +98,7 @@ namespace Logic.Client
                         bulletspeed = Program.basicBulletMoveSpeed / 2;
                         break;
                     case JobType.Job4:
-                        bulletspeed = Program.basicBulletMoveSpeed * 4;
+                        bulletspeed = Program.basicBulletMoveSpeed * 3;
                         break;
                     case JobType.Job5:
                         bulletspeed = Program.basicBulletMoveSpeed;
