@@ -2,7 +2,9 @@
 using System;
 using System.Collections;
 using System.Threading;
+using System.Threading.Tasks;
 using THUnity2D;
+using Timothy.FrameRateTask;
 
 namespace Gaming
 {
@@ -22,9 +24,9 @@ namespace Gaming
 		}
 		
 		public const int maxTeamNum = 4;
-
+		private const long checkColorInterval = 50;		// 检查脚下颜色间隔时间
 		private ArrayList teamList;                     // 队伍列表
-														//private object teamListLock = new object();	// 队伍暂时不需要锁
+		//private object teamListLock = new object();	// 队伍暂时不需要锁
 		private readonly int numOfTeam;
 
 		public long AddPlayer(PlayerInitInfo playerInitInfo)
@@ -47,33 +49,52 @@ namespace Gaming
 
 			//开启装弹线程
 
-			new Thread
+			Task.Run
 				(
 					() =>
 					{
 						while (!gameMap.Timer.IsGaming) Thread.Sleep(newPlayer.CD);
-						while (gameMap.Timer.IsGaming)
+
+						long addBulletTime = long.MaxValue;
+
+						new FrameRateTaskExecutor<int>
+						(
+							loopCondition: () => gameMap.Timer.IsGaming,
+							loopToDo: () =>
+							{
+								var cellX = Map.Constant.GridToCellX(newPlayer.Position);
+								var cellY = Map.Constant.GridToCellY(newPlayer.Position);
+								if (gameMap.GetCellColor(cellX, cellY) == Map.TeamToColor(newPlayer.TeamID))
+								{
+									var nowTime = Environment.TickCount64;
+									if (nowTime >= addBulletTime)
+									{
+										newPlayer.AddBulletNum();
+										addBulletTime = nowTime + newPlayer.CD;
+									}
+									else if (nowTime + newPlayer.CD < addBulletTime)
+									{
+										addBulletTime = nowTime + newPlayer.CD;
+									}
+								}
+								else
+								{
+									addBulletTime = long.MaxValue;
+								}
+							},
+							timeInterval: checkColorInterval,
+							() => 0
+						)
 						{
-							var beginTime = Environment.TickCount64;
-
-							var cellX = Map.Constant.GridToCellX(newPlayer.Position);
-							var cellY = Map.Constant.GridToCellY(newPlayer.Position);
-							if (gameMap.GetCellColor(cellX, cellY) == Map.TeamToColor(newPlayer.TeamID)) newPlayer.AddBulletNum();
-
-							var endTime = Environment.TickCount64;
-							var deltaTime = endTime - beginTime;
-							if (deltaTime < newPlayer.CD)
+							AllowTimeExceed = true,
+							MaxTolerantTimeExceedCount = 5,
+							TimeExceedAction = exceedTooMuch =>
 							{
-								Thread.Sleep(newPlayer.CD - (int)deltaTime);
+								if (exceedTooMuch) Console.WriteLine("The computer runs too slow that it cannot check the color below the player in time!");
 							}
-							else
-							{
-								Console.WriteLine("The computer runs so slow that the player cannot finish adding bullet during this time!!!!!!");
-							}
-						}
+						}.Start();
 					}
-				)
-			{ IsBackground = true }.Start();
+				);
 			return newPlayer.ID;
 		}
 
