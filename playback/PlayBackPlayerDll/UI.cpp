@@ -733,7 +733,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			HBITMAP hBmBkgndOld = (HBITMAP)SelectObject(hdcBmBkgnd, hBmBkGnd);
 			double rate = bkGnd.bmWidth / bkGnd.bmHeight;
 			double actualRate = (clrec.right - clrec.left) / (double)(clrec.bottom - clrec.top);
-			if (rate > actualRate)
+			if (rate < actualRate)
 			{
 				StretchBlt(hdcMem, 0, 0, clrec.right - clrec.left, (clrec.right - clrec.left) / rate, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
 			}
