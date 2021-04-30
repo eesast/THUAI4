@@ -184,7 +184,7 @@ chooseFile:
 	WCHAR fileName[MAX_PATH + 2] = { 0 };
 	OPENFILENAMEW ofn;
 	ZeroMemory((void*)&ofn, sizeof(ofn));
-	WCHAR filter[] = L"THUAI Playback Files (.thuaipb)\0*.thuaipb\0\0";
+	WCHAR filter[] = L"THUAI Playback Files (*.thuaipb)\0*.thuaipb\0\0";
 
 	if (first)
 	{
