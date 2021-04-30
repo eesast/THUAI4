@@ -13,7 +13,8 @@ set PUBLISHROOT="..\private\ReleaseDemo\Preview 2.0"
 mkdir %PUBLISHROOT%\linux\bin\Debug
 mkdir %PUBLISHROOT%\mac\bin\Debug
 mkdir %PUBLISHROOT%\win\exe\Debug
-mkdir %PUBLISHROOT%\win\Game\Debug
+mkdir %PUBLISHROOT%\win\Game
+mkdir %PUBLISHROOT%\win\PlayBackPlayer
 
 :: Copy to release
 copy /Y linux\* %PUBLISHROOT%\linux\bin\*
@@ -23,6 +24,7 @@ copy /Y linuxbash\* %PUBLISHROOT%\linux\*
 copy /Y win\* %PUBLISHROOT%\win\exe\*
 copy /Y winfordebug\* %PUBLISHROOT%\win\exe\Debug\*
 copy /Y game\* %PUBLISHROOT%\win\Game\*
+copy /Y PlayBackPlayer\* %PUBLISHROOT%\win\PlayBackPlayer\*
 copy /Y winbatch\* %PUBLISHROOT%\win\*
 
 copy /Y mac\* %PUBLISHROOT%\mac\bin\*

@@ -1,6 +1,6 @@
 //////////////////////////////
 //
-//  å°è£…Windows API
+//  ·â×°Windows API
 //
 
 #ifndef BASIC_WINDOW_H
@@ -9,22 +9,22 @@
 
 #include "Win32Basic.h"
 
-//é”™è¯¯æç¤º
+//´íÎóÌáÊ¾
 
-static LPCTSTR c_lpszError = TEXT("Error");								//é”™è¯¯
+static LPCTSTR c_lpszError = TEXT("Error");								//´íÎó
 
-//çª—å£æŠ½è±¡ç±»
+//´°¿Ú³éÏóÀà
 class BasicWindow
 {
 
 protected:
 
-	//å…³äºçª—å£
+	//¹ØÓÚ´°¿Ú
 
-	HINSTANCE m_hInst;					//å½“å‰å®ä¾‹
-	HWND m_hWnd = NULL;				//ä¸»çª—å£å¥æŸ„
+	HINSTANCE m_hInst;					//µ±Ç°ÊµÀı
+	HWND m_hWnd = NULL;				//Ö÷´°¿Ú¾ä±ú
 
-	//åˆ›å»ºçª—å£
+	//´´½¨´°¿Ú
 	BOOL Init
 	(
 		HINSTANCE hInstance, int nCmdShow,
@@ -32,7 +32,7 @@ protected:
 		LPCTSTR c_lpszWndTitle, WNDCLASSEX wcex
 	);
 
-	//å¤„ç†äº†æ¶ˆæ¯è¿”å›trueï¼Œæ²¡æœ‰å¤„ç†åˆ™è¿”å›false
+	//´¦ÀíÁËÏûÏ¢·µ»Øtrue£¬Ã»ÓĞ´¦ÀíÔò·µ»Øfalse
 	virtual bool MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
 
 private:
@@ -43,5 +43,3 @@ private:
 };
 
 #endif // #ifndef BASIC_WINDOW_H
-
-
