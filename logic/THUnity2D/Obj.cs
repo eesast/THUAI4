@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-
-//所有游戏人物，道具，子弹的基类
+﻿//所有游戏人物，道具，子弹的基类
 namespace THUnity2D
 {
 

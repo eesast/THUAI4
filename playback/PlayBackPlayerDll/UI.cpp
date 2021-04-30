@@ -517,7 +517,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				wsout << L"玩家" << playerID + 1 << L"：\n生命：" << hPlayer->Hp << L"\n剩余子弹数：" << hPlayer->BulletNum << L"\n";
 				wsout << L"移动速度：" << hPlayer->MoveSpeed << L"\n";
 				wsout << L"攻击力：" << hPlayer->Ap << L"\n";
-				wsout << L"道具类型：" << propToWStr.find((int)hPlayer->BulletType)->second << L"\n职业：" << jobToWStr.find((int)hPlayer->JobType)->second << L"\n";
+				wsout << L"道具类型：" << propToWStr.find((int)hPlayer->PropType)->second << L"\n职业：" << jobToWStr.find((int)hPlayer->JobType)->second << L"\n";
 				/*wsout << L"拥有盾牌：" << (hPlayer->HasShield ? L"是" : L"否") << L"\n";
 				wsout << L"拥有标枪：" << (hPlayer->HasSpear ? L"是" : L"否") << L"\n";
 				wsout << L"拥有衣服：" << (hPlayer->HasTotem ? L"是" : L"否") << L"\n";*/

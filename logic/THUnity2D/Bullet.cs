@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
-using System.Dynamic;
-using System.Text;
-using System.Threading;
-
-namespace THUnity2D
+﻿namespace THUnity2D
 {
 	public enum BulletType
 	{

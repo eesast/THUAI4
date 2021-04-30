@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using playback;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using THUnity2D;
 using Timothy.FrameRateTask;
 

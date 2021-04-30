@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Threading;
-using System.Threading.Tasks;
 using THUnity2D;
 using Timothy.FrameRateTask;
 
