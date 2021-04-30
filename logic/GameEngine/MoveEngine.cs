@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Threading;
 using THUnity2D;
 using Timothy.FrameRateTask;
 
@@ -44,7 +44,7 @@ namespace GameEngine
 		/// <param name="moveDirection">移动的方向，弧度</param>
 		public void MoveObj(GameObject obj, int moveTime, double moveDirection)
 		{
-			Task.Run
+			new Thread
 			(
 				() =>
 				{
@@ -126,7 +126,8 @@ namespace GameEngine
 						}
 					}.Start();
 				}
-			);
+			)
+			{ IsBackground = true }.Start();
 		}
 
 		private Map gameMap;

@@ -44,7 +44,7 @@ namespace THUnity2D
 
 			private void AddBuff(BuffValue bf, int buffTime, BuffType buffType, Action ReCalculateFunc)
 			{
-				Task.Run
+				new Thread
 					(
 						() =>
 						{
@@ -65,7 +65,8 @@ namespace THUnity2D
 							catch { }
 							ReCalculateFunc();
 						}
-					);
+					)
+				{ IsBackground = true }.Start();
 			}
 
 			private int ReCalculateFloatBuff(BuffType buffType, int orgVal, int maxVal, int minVal)

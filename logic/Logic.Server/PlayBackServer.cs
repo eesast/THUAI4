@@ -145,7 +145,7 @@ namespace Logic.Server
 						Console.WriteLine("If ALL clients have opened, press any key to start.");
 						Console.ReadKey();
 
-						Task.Run
+						new Thread
 							(
 								() =>
 								{
@@ -170,7 +170,8 @@ namespace Logic.Server
 										Thread.Sleep(1000);
 									}
 								}
-							);
+							)
+						{ IsBackground = true }.Start();
 
 						lock (cursorLock)
 						{

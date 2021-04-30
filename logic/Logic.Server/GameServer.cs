@@ -301,7 +301,7 @@ namespace Logic.Server
 				if (id == GameObject.invalidID) return;     //如果有未初始化的玩家，不开始游戏
 			}
 
-			Task.Run
+			new Thread
 				(
 					() =>
 					{
@@ -311,13 +311,14 @@ namespace Logic.Server
 						//游戏结束
 						OnGameEnd();
 					}
-				);
+				)
+			{ IsBackground = true }.Start();
 
 			while (!game.GameMap.Timer.IsGaming) Thread.Sleep(1); //游戏未开始，等待
 			SendMessageToAllClients(MessageType.StartGame);     //发送开始游戏信息
 
 			//开始每隔一定时间向客户端发送游戏情况
-			Task.Run
+			new Thread
 				(
 					() =>
 					{
@@ -346,7 +347,7 @@ namespace Logic.Server
 							}
 						};
 #if DEBUG
-						Task.Run
+						new Thread
 						(
 							() =>
 							{
@@ -356,11 +357,13 @@ namespace Logic.Server
 									Thread.Sleep(1000);
 								}
 							}
-						);
+						)
+						{ IsBackground = true }.Start();
 #endif
 						frt.Start();
 					}
-				);
+				)
+			{ IsBackground = true }.Start();
 		}
 
 		//private volatile bool finishSendingEndGameMessage = false;

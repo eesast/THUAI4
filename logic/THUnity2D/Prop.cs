@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using THUnity2D;
-
-namespace THUnity2D
+﻿namespace THUnity2D
 {
 
 	public enum PropType
@@ -14,10 +9,10 @@ namespace THUnity2D
 		JinKeLa = 3,
 		Rice = 4,
 		Shield = 5,
-		NegativeFeedback = Shield,
+		NegativeFeedback = Shield,		// !!!NegativeFeedBack 必须在下面，否则转换成通信类型时失败
 		Totem = 6,
 		Spear = 7,
-		Phaser = Spear,
+		Phaser = Spear,					// !!!Phaser 必须在下面，否则转换成通信类型时失败
 		Dirt = 8,
 		Attenuator = 9,
 		Divider = 10
@@ -43,7 +38,7 @@ namespace THUnity2D
 			MoveSpeed = newMoveSpeed;
 		}
 
-		public Prop(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Prop, ShapeType.Sqare) { }
+		public Prop(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Prop, ShapeType.Square) { }
 	}
 
 	public abstract class Buff : Prop

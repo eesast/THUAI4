@@ -14,8 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\communication\communication_csharp\Proto\Proto.csproj" />
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
     <ProjectReference Include="..\Gaming\Gaming.csproj" />
+    <ProjectReference Include="..\Logic.Server\Logic.Server.csproj" />
     <ProjectReference Include="..\THUnity2D\THUnity2D.csproj" />
   </ItemGroup>
 

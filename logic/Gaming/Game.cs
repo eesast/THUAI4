@@ -49,7 +49,7 @@ namespace Gaming
 
 			//开启装弹线程
 
-			Task.Run
+			new Thread
 				(
 					() =>
 					{
@@ -94,7 +94,8 @@ namespace Gaming
 							}
 						}.Start();
 					}
-				);
+				)
+			{ IsBackground = true }.Start();
 			return newPlayer.ID;
 		}
 
