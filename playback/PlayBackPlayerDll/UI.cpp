@@ -55,7 +55,7 @@ void UI::GetPMR(System::String^ fileName)
 	}
 	catch ([[maybe_unused]] playback::FileFormatNotLegalException^ e)
 	{
-		MessageBox(m_hWnd, TEXT("This playback file has been destroyed!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+		MessageBox(NULL, TEXT("This playback file has been destroyed!"), TEXT("Error"), MB_OK | MB_ICONERROR);
 	}
 	catch (System::Exception^ e)
 	{
@@ -73,21 +73,21 @@ void UI::GetPMR(System::String^ fileName)
 			{
 				pMsg[len + i] = 0;
 			}
-			MessageBoxW(m_hWnd, (WCHAR*)pMsg, L"Error", MB_OK | MB_ICONERROR);
+			MessageBoxW(NULL, (WCHAR*)pMsg, L"Error", MB_OK | MB_ICONERROR);
 		}
 		catch (...)
 		{
-			MessageBox(m_hWnd, TEXT("Unknown error!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, TEXT("Unknown error!"), TEXT("Error"), MB_OK | MB_ICONERROR);
 		}
 		finally { delete[] pMsg; }
 	}
 	catch (std::exception& e)
 	{
-		MessageBoxA(m_hWnd, e.what(), "Error", MB_OK | MB_ICONERROR);
+		MessageBoxA(NULL, e.what(), "Error", MB_OK | MB_ICONERROR);
 	}
 	catch (...)
 	{
-		MessageBox(m_hWnd, TEXT("Unknown error!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+		MessageBox(NULL, TEXT("Unknown error!"), TEXT("Error"), MB_OK | MB_ICONERROR);
 	}
 	finally
 	{
@@ -322,10 +322,13 @@ chooseFile:
 				nextTime += chooseFileDlg.TimeInterval();
 			}
 
+			goto playOver;
+
 		endParse:
 			
 			MessageBox(m_hWnd, TEXT("Game over!"), TEXT("Game over!"), MB_OK);
 
+		playOver:;
 		}
 	).detach();
 }
