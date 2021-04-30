@@ -16,6 +16,38 @@ namespace test
 	{
 		static void Main(string[] args)
 		{
+
+			foreach (THUnity2D.PropType propType in Enum.GetValues(typeof(THUnity2D.PropType)))
+			{
+				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationPropType(propType).ToString()}");
+			}
+
+			foreach (THUnity2D.JobType propType in Enum.GetValues(typeof(THUnity2D.JobType)))
+			{
+				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationJobType(propType).ToString()}");
+			}
+
+			foreach (THUnity2D.PropType propType in Enum.GetValues(typeof(THUnity2D.PropType)))
+			{
+				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationPropType(propType).ToString()}");
+			}
+
+			foreach (THUnity2D.GameObject.ShapeType propType in Enum.GetValues(typeof(THUnity2D.GameObject.ShapeType)))
+			{
+				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationShapeType(propType).ToString()}");
+			}
+
+			foreach (THUnity2D.BulletType propType in Enum.GetValues(typeof(THUnity2D.BulletType)))
+			{
+				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationBulletType(propType).ToString()}");
+			}
+
+			foreach (GameEngine.Map.ColorType propType in Enum.GetValues(typeof(GameEngine.Map.ColorType)))
+			{
+				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationColorType(propType).ToString()}");
+			}
+			return;
+
 			Game game = new Game(MapInfo.defaultMap, 1);
 			long tmpID;
 			long[] player2ID = new long[2];

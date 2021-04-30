@@ -6,6 +6,6 @@ namespace THUnity2D
 {
 	public class Wall : Obj
 	{
-		public Wall(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Wall, ShapeType.Sqare) { }
+		public Wall(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Wall, ShapeType.Square) { }
 	}
 }

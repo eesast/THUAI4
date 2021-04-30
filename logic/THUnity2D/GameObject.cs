@@ -18,7 +18,7 @@ namespace THUnity2D
 		{
 			Null = 0,
 			Circle = 1,
-			Sqare = 2
+			Square = 2
 		}
 		public abstract GameObjType GetGameObjType();	//给C++/CLI调试用的，因为我不知道C++/CLI怎么用is操作符（狗头保命）
 

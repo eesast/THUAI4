@@ -32,6 +32,9 @@ namespace Logic.Server
 		[Option("playBackSpeed", Required = false, HelpText = "The speed of the playback, between 0.25 and 4.0")]
 		public double PlayBackSpeed { get; set; } = 1.0;
 
+		[Option("resultOnly", Required = false, HelpText = "In playback mode to get the result directly")]
+		public bool ResultOnly { get; set; } = false;
+
 		[Option('k', "token", Required = false, HelpText = "Web API Token")]
 		public string Token { get; set; } = DefaultArgumentOptions.Token;
 

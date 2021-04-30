@@ -37,7 +37,7 @@ namespace Gaming
 
 				//开始产生道具
 
-				Task.Run
+				new Thread
 				(
 					() =>
 					{
@@ -58,7 +58,8 @@ namespace Gaming
 							}
 						}
 					}
-				);
+				)
+				{ IsBackground = true }.Start();
 
 				return true;
 			}

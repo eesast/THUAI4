@@ -384,7 +384,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						switch (obj->Shape)
 						{
 						case THUnity2D::GameObject::ShapeType::Circle: PaintFunc = &Ellipse; break;
-						case THUnity2D::GameObject::ShapeType::Sqare: PaintFunc = &Rectangle; break;
+						case THUnity2D::GameObject::ShapeType::Square: PaintFunc = &Rectangle; break;
 						}
 						RECT rect;
 						rect.left = (y - rad) * (width - appendCx) / colAllGrid;

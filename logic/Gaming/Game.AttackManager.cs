@@ -40,12 +40,12 @@ namespace Gaming
 							break;
 						case BulletType.Bullet3:        //不断检测它所位于的格子，并将其染色
 							timeInMilliseconds = int.MaxValue;
-							Task.Run
+							new Thread
 								(
 									() =>
 									{
 										for (int i = 0; i < 50 && !newBullet.CanMove; ++i)      //等待子弹开始移动，最多等待50次
-									{
+										{
 											Thread.Sleep(1000 / Map.Constant.numOfStepPerSecond);
 										}
 
@@ -86,7 +86,8 @@ namespace Gaming
 											() => 0
 										).Start();
 									}
-								);
+								)
+							{ IsBackground = true }.Start();
 
 							break;
 					}
@@ -131,7 +132,7 @@ namespace Gaming
 
 							playerBeingShot.AddShield(Map.Constant.shieldTimeAtBirth);  //复活加个盾
 
-								gameMap.PlayerListLock.EnterWriteLock();
+							gameMap.PlayerListLock.EnterWriteLock();
 							try
 							{
 								gameMap.PlayerList.Add(playerBeingShot);

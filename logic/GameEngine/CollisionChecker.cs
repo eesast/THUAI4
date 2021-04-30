@@ -31,7 +31,7 @@ namespace GameEngine
 					{
 						return (long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius);
 					}
-				case GameObject.ShapeType.Sqare:        //圆与正方形碰撞
+				case GameObject.ShapeType.Square:        //圆与正方形碰撞
 					{
 						if (deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) return false;
 						if (deltaX < listObj.Radius || deltaY < listObj.Radius) return true;
@@ -157,7 +157,7 @@ namespace GameEngine
 										}
 										break;
 									}
-								case GameObject.ShapeType.Sqare:
+								case GameObject.ShapeType.Square:
 									{
 										//如果当前已经贴合，那么不能再行走了
 										if (WillCollide(obj, listObj, obj.Position)) tmpMax = 0;
