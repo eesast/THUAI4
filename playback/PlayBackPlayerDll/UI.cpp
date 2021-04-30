@@ -188,7 +188,6 @@ chooseFile:
 
 	if (first)
 	{
-		System::Console::WriteLine("First!");
 		if (m_initialFileName != L"")
 		{
 			if (m_initialFileName.length() > MAX_PATH)
