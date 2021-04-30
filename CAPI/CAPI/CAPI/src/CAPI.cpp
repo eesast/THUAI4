@@ -132,6 +132,8 @@ bool  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2
 	if (!capi.Connect(address, port))
 	{
 		std::cout << "无法连接到Agent" << std::endl;
+		loop=false;
+		UnBlock();
 		tPM.join();
 		return false;
 	}

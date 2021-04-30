@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef API_H
 
 #define API_H
@@ -40,17 +38,17 @@ struct State
 struct LogicInterface : public GameApi
 {
 protected:
-	const std::function<bool(Protobuf::MessageToServer&)> SendMessageWrapper; //加入ID放到这个函数里了
+	const std::function<bool(Protobuf::MessageToServer &)> SendMessageWrapper; //加入ID放到这个函数里了
 	const std::function<bool()> Empty;
-	const std::function<bool(std::string&)> TryPop;
+	const std::function<bool(std::string &)> TryPop;
 	const std::function<int()> GetCounter;
+	const State *&pState;
 	const std::function<void()> _Wait;
-	const State*& pState;
 
 public:
-	LogicInterface(std::function<bool(Protobuf::MessageToServer&)> sm,
-		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, std::function<void()> w) : SendMessageWrapper(sm), Empty(e), TryPop(tp), GetCounter(gc), pState(pS), _Wait(w) {}
+	LogicInterface(std::function<bool(Protobuf::MessageToServer &)> sm,
+				   std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+				   const State *&pS, std::function<void()> w) : SendMessageWrapper(sm), Empty(e), TryPop(tp), GetCounter(gc), pState(pS), _Wait(w) {}
 	virtual void StartTimer() = 0;
 	virtual void EndTimer() = 0;
 };
@@ -59,17 +57,17 @@ template <bool>
 struct Members
 {
 public:
-	Members(CriticalSection& mtx_state, std::function<void()> f) {}
+	Members(CriticalSection &mtx_state, std::function<void()> f) {}
 };
 
 template <>
 struct Members<true>
 {
 public:
-	Members(CriticalSection& cs, std::function<void()> f) : cs_state(cs), TryUpDate(f) {}
+	Members(CriticalSection &cs, std::function<void()> f) : cs_state(cs), TryUpDate(f) {}
 
 protected:
-	CriticalSection& cs_state;
+	CriticalSection &cs_state;
 	const std::function<void()> TryUpDate;
 };
 
@@ -81,9 +79,9 @@ private:
 	virtual void EndTimer() {}
 
 public:
-	API(std::function<bool(Protobuf::MessageToServer&)> sm,
-		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, CriticalSection& cs_state, std::function<void()> tu, std::function<void()> w);
+	API(std::function<bool(Protobuf::MessageToServer &)> sm,
+		std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+		const State *&pS, CriticalSection &cs_state, std::function<void()> tu, std::function<void()> w);
 	virtual bool MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual bool MoveRight(uint32_t timeInMilliseconds);
 	virtual bool MoveUp(uint32_t timeInMilliseconds);
@@ -100,7 +98,7 @@ public:
 	//Information the player can get
 	virtual int GetCounterOfFrames();
 	virtual bool MessageAvailable();
-	virtual bool TryGetMessage(std::string&);
+	virtual bool TryGetMessage(std::string &);
 
 	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const;
 	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const;
@@ -115,7 +113,6 @@ public:
 	virtual THUAI4::ColorType GetCellColor(int CellX, int CellY) const;
 };
 
-
 template class API<true>;
 template class API<false>;
 
@@ -124,7 +121,7 @@ class DebugApi final : public LogicInterface, Members<asyn>
 {
 private:
 	bool ExamineValidity;
-	std::ostream& OutStream;
+	std::ostream &OutStream;
 	std::chrono::system_clock::time_point StartPoint;
 	bool CanPick(THUAI4::PropType propType);
 	std::map<THUAI4::PropType, std::string> dict{
@@ -138,15 +135,15 @@ private:
 		{THUAI4::PropType::Null, "Null"},
 		{THUAI4::PropType::Phaser, "Phaser"},
 		{THUAI4::PropType::Rice, "Rice"},
-		{THUAI4::PropType::Totem, "Totem"} };
+		{THUAI4::PropType::Totem, "Totem"}};
 	virtual void StartTimer();
 	virtual void EndTimer();
 
 public:
-	DebugApi(std::function<bool(Protobuf::MessageToServer&)> sm,
-		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, CriticalSection& cs_state, std::function<void()> tu, std::function<void()> w, bool ev = false,
-		std::ostream& out = std::cout);
+	DebugApi(std::function<bool(Protobuf::MessageToServer &)> sm,
+			 std::function<bool()> e, std::function<bool(std::string &)> tp, std::function<int()> gc,
+			 const State *&pS, CriticalSection &cs_state, std::function<void()> tu, std::function<void()> w, bool ev = false,
+			 std::ostream &out = std::cout);
 	virtual bool MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual bool MoveRight(uint32_t timeInMilliseconds);
 	virtual bool MoveUp(uint32_t timeInMilliseconds);
@@ -163,7 +160,7 @@ public:
 	//Information the player can get
 	virtual int GetCounterOfFrames();
 	virtual bool MessageAvailable();
-	virtual bool TryGetMessage(std::string&);
+	virtual bool TryGetMessage(std::string &);
 
 	virtual std::vector<std::shared_ptr<const THUAI4::Character>> GetCharacters() const;
 	virtual std::vector<std::shared_ptr<const THUAI4::Wall>> GetWalls() const;
@@ -194,6 +191,5 @@ inline bool CellColorVisible(int32_t x, int32_t y, int32_t CellX, int32_t CellY)
 	int32_t dy = (std::max)(std::abs(centerY - y) - half, 0);
 	return Constants::Map::sightRadiusSquared >= distance_squared(dx, dy);
 }
-
 
 #endif // !API_H

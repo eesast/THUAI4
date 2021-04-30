@@ -32,13 +32,13 @@ all: $(objects) player_obj
 		-Wl,-rpath=./so -std=c++17 -pthread -O2 -Wall;\
 	done
 
-$(CPP_OBJECTS): %.o: $(SOURCE_DIR)/%.cpp
+$(CPP_OBJECTS): %.o: ./src/%.cpp
 	$(CPPCOMPILER) -o $(BIN_DIR)/$@ -c $<
 
 $(PROTO_OBJECTS): %.o: $(PROTO_DIR)/%.cc
 	$(CPPCOMPILER) -o $(BIN_DIR)/$@ -c $<
 
-$(CPP_DEPENDENCIES): %.d: $(SOURCE_DIR)/%.cpp
+$(CPP_DEPENDENCIES): %.d: ./src/%.cpp
 	$(CPPCOMPILER) -o $@ -MM $<
 
 include $(CPP_DEPENDENCIES)
