@@ -69,7 +69,7 @@ bool CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Conne
 }
 
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
-void CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Send(const Message2S& message)
+bool CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Send(const Message2S& message)
 {
 	unsigned char data[maxlength];
 	data[0] = typeM2S & 0xff;
@@ -78,11 +78,7 @@ void CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Send(
 	data[3] = (typeM2S >> 24) & 0xff;
 	int msgSize = message.ByteSizeLong();
 	message.SerializeToArray(data + 4, msgSize);
-	if (!pclient->Send(data, 4 + msgSize))
-	{
-		std::cout << "Failed to send the message. Error code:";
-		std::cout << pclient->GetLastError() << std::endl;
-	}
+	return pclient->Send(data, 4 + msgSize);
 }
 
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
@@ -102,10 +98,9 @@ void CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Stop(
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
 void Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::UnBlock()
 {
-	{
-		std::lock_guard<std::mutex> lck(mtx);
-		blocking = false;
-	}
+	cs.lock();
+	blocking = false;
+	cs.unlock();
 	cv.notify_one();
 }
 
@@ -116,9 +111,10 @@ void Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C
 	while (loop)
 	{
 		{
-			std::unique_lock<std::mutex> lck(mtx);
+			cs.lock();
 			blocking = queue.empty();
-			cv.wait(lck, [this]() { return !blocking; });
+			while (blocking) cv.wait(cs);
+			cs.unlock();
 		}
 		if (!queue.try_pop(p2M))
 		{
@@ -145,10 +141,9 @@ bool  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
 bool  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Send(const Message2S& m)
 {
-	if (counter == Limit) return false;
-	capi.Send(m);
+	if (counter >= Limit) return false;
 	counter++;
-	return true;
+	return capi.Send(m);
 }
 
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>

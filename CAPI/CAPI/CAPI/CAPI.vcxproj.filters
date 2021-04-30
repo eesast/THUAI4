@@ -80,5 +80,8 @@
     <ClInclude Include="src\concurrent_queue.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\critical_section.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

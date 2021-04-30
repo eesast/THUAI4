@@ -123,11 +123,10 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 	{
 		sw_AI = false;
 		std::cout << "游戏结束" << std::endl;
-		{
-			std::lock_guard<std::mutex> lck(mtx_buffer);
-			FlagBufferUpdated = true;
-			counter_buffer = -1;
-		}
+		cs_buffer.lock();
+		FlagBufferUpdated = true;
+		counter_buffer = -1;
+		cs_buffer.unlock();
 		cv_buffer.notify_one();
 		break;
 	}
@@ -159,94 +158,93 @@ void Logic::ProcessM2OC(std::shared_ptr<Protobuf::MessageToOneClient> pM2OC)
 
 void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 {
-	{
-		//首先load到buffer
-		std::lock_guard<std::mutex> lck(mtx_buffer);
-		pBuffer->characters.clear();
-		pBuffer->walls.clear();
-		pBuffer->props.clear();
-		pBuffer->bullets.clear();
-		pBuffer->birthpoints.clear();
-#ifdef _COLOR_MAP_BY_HASHING_
-		pBuffer->cellColors.clear();
-#endif // _COLOR_MAP_BY_HASHING_
-		pBuffer->teamScore = pM2C->teamscore();
-		pBuffer->selfTeamColor = (THUAI4::ColorType)pM2C->selfteamcolor();
-		pBuffer->self = obj2C(pM2C->selfinfo());
-		int selfX = pBuffer->self->x;
-		int selfY = pBuffer->self->y;
 
-		for (auto it : pM2C->gameobjs())
+	//首先load到buffer
+	cs_buffer.lock();
+	pBuffer->characters.clear();
+	pBuffer->walls.clear();
+	pBuffer->props.clear();
+	pBuffer->bullets.clear();
+	pBuffer->birthpoints.clear();
+#ifdef _COLOR_MAP_BY_HASHING_
+	pBuffer->cellColors.clear();
+#endif // _COLOR_MAP_BY_HASHING_
+	pBuffer->teamScore = pM2C->teamscore();
+	pBuffer->selfTeamColor = (THUAI4::ColorType)pM2C->selfteamcolor();
+	pBuffer->self = obj2C(pM2C->selfinfo());
+	int selfX = pBuffer->self->x;
+	int selfY = pBuffer->self->y;
+
+	for (auto it : pM2C->gameobjs())
+	{
+		if (
+#ifdef _ALL_VISIBLE_
+			true
+#else
+			visible(selfX, selfY, it)
+#endif // _ALL_VISIBLE_
+			)
+		{
+			switch (it.gameobjtype())
+			{
+			case Protobuf::GameObjType::Character:
+				pBuffer->characters.push_back(obj2C(it));
+				break;
+			case Protobuf::GameObjType::Wall:
+				pBuffer->walls.push_back(obj2W(it));
+				break;
+			case Protobuf::GameObjType::Prop:
+				pBuffer->props.push_back(obj2P(it));
+				break;
+			case Protobuf::GameObjType::Bullet:
+				pBuffer->bullets.push_back(obj2Blt(it));
+				break;
+			case Protobuf::GameObjType::BirthPoint:
+				pBuffer->birthpoints.push_back(obj2Bp(it));
+				break;
+			default:
+				std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
+			}
+		}
+	}
+
+	for (int i = 0; i < StateConstant::nCells; i++)
+	{
+		for (int j = 0; j < StateConstant::nCells; j++)
 		{
 			if (
 #ifdef _ALL_VISIBLE_
 				true
 #else
-				visible(selfX, selfY, it)
-#endif // _ALL_VISIBLE_
+				CellColorVisible(selfX, selfY, i, j)
+#endif
 				)
 			{
-				switch (it.gameobjtype())
-				{
-				case Protobuf::GameObjType::Character:
-					pBuffer->characters.push_back(obj2C(it));
-					break;
-				case Protobuf::GameObjType::Wall:
-					pBuffer->walls.push_back(obj2W(it));
-					break;
-				case Protobuf::GameObjType::Prop:
-					pBuffer->props.push_back(obj2P(it));
-					break;
-				case Protobuf::GameObjType::Bullet:
-					pBuffer->bullets.push_back(obj2Blt(it));
-					break;
-				case Protobuf::GameObjType::BirthPoint:
-					pBuffer->birthpoints.push_back(obj2Bp(it));
-					break;
-				default:
-					std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
-				}
-			}
-		}
-
-		for (int i = 0; i < StateConstant::nCells; i++)
-		{
-			for (int j = 0; j < StateConstant::nCells; j++)
-			{
-				if (
-#ifdef _ALL_VISIBLE_
-					true
-#else
-					CellColorVisible(selfX, selfY, i, j)
-#endif
-					)
-				{
 #ifdef _COLOR_MAP_BY_HASHING_
-					pBuffer->cellColors.insert(std::pair((i << 16) + j, (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j)));
+				pBuffer->cellColors.insert(std::pair((i << 16) + j, (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j)));
 #else
-					pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
-#endif // _COLOR_MAP_BY_HASHING_
-				}
-#ifndef _COLOR_MAP_BY_HASHING_
-				//unorderer_map
-				else
-				{
-					pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
-				}
+				pBuffer->cellColors[i][j] = (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j);
 #endif // _COLOR_MAP_BY_HASHING_
 			}
-		}
-
-		FlagBufferUpdated = true;
-		counter_buffer += 1;
-
-		//如果这时候state还没被player访问，就把buffer转到state
-		if (mtx_state.try_lock())
-		{
-			Update();
-			mtx_state.unlock();
+#ifndef _COLOR_MAP_BY_HASHING_
+			//unorderer_map
+			else
+			{
+				pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
+			}
+#endif // _COLOR_MAP_BY_HASHING_
 		}
 	}
+
+	FlagBufferUpdated = true;
+	counter_buffer += 1;
+
+	//如果这时候state还没被player访问，就把buffer转到state
+	if (cs_state.try_lock()) {
+		Update();
+		cs_state.unlock();
+	}
+	cs_buffer.unlock();
 	cv_buffer.notify_one();
 }
 
@@ -267,19 +265,17 @@ void Logic::ProcessMessage(Pointer2Message p2M)
 
 void Logic::UnBlockMtxBufferUpdated()
 {
-	{
-		std::lock_guard<std::mutex> lck(mtx_buffer);
-		FlagBufferUpdated = true;
-	}
+	cs_buffer.lock();
+	FlagBufferUpdated = true;
+	cs_buffer.unlock();
 	cv_buffer.notify_one();
 }
 
 void Logic::UnBlockAI()
 {
-	{
-		std::lock_guard<std::mutex> lck(mtx_ai);
-		WhetherToStartKnown = true;
-	}
+	cs_ai.lock();
+	WhetherToStartKnown = true;
+	cs_ai.unlock();
 	cv_ai.notify_one();
 }
 
@@ -295,10 +291,9 @@ void Logic::Update()
 
 void Logic::PlayerWrapper(std::function<void()> player)
 {
-	{
-		std::unique_lock<std::mutex> lock(mtx_ai);
-		cv_ai.wait(lock, [this]() {return WhetherToStartKnown; });
-	}
+	cs_ai.lock();
+	while (!WhetherToStartKnown) cv_ai.wait(cs_ai);
+	cs_ai.unlock();
 	while (sw_AI)
 	{
 		player();
@@ -340,16 +335,17 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		//又臭又长
 		std::function<void()> tu = [this]()
 		{
-			if (mtx_buffer.try_lock())
+			if (cs_buffer.try_lock())
 			{
 				if (FlagBufferUpdated) Update();
-				mtx_buffer.unlock();
+				cs_buffer.unlock();
 			}
 		};
 		std::function<void()> wait = [this]()
 		{
-			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
-			cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
+			cs_buffer.lock();
+			while (!FlagBufferUpdated) cv_buffer.wait(cs_buffer);
+			cs_buffer.unlock();
 			Update();
 		};
 		if (asynchronous)
@@ -359,7 +355,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 				pApi = std::make_unique<API<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
 					[this]() { return MessageStorage.empty(); },
 					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-					(const State*&)pState, mtx_state, tu, wait);
+					(const State*&)pState, cs_state, tu, wait);
 			}
 			else
 			{
@@ -376,7 +372,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 				pApi = std::make_unique<DebugApi<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
 					[this]() { return MessageStorage.empty(); },
 					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-					(const State*&)pState, mtx_state, tu, wait, debuglevel != 1,
+					(const State*&)pState, cs_state, tu, wait, debuglevel != 1,
 					flag ? std::cout : OutFile);
 			}
 		}
@@ -387,7 +383,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 				pApi = std::make_unique<API<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
 					[this]() { return MessageStorage.empty(); },
 					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-					(const State*&)pState, mtx_state, tu, wait);
+					(const State*&)pState, cs_state, tu, wait);
 			}
 			else
 			{
@@ -404,7 +400,7 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 				pApi = std::make_unique<DebugApi<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); return pComm->Send(M2C); },
 					[this]() { return MessageStorage.empty(); },
 					[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-					(const State*&)pState, mtx_state, tu, wait, debuglevel != 1,
+					(const State*&)pState, cs_state, tu, wait, debuglevel != 1,
 					flag ? std::cout : OutFile);
 			}
 		}
@@ -422,22 +418,24 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 		}
 		:
 		(std::function<void()>)[this]() {
-			std::lock_guard<std::mutex> lck_state(mtx_state);
+			cs_state.lock();
 			if (!CurrentStateAccessed)
-			{	
+			{
 				CurrentStateAccessed = true;
 				pApi->StartTimer();//再细一些的分类可以把这里去掉，但似乎没太大意义
 				pAI->play(*pApi);
 				pApi->EndTimer();
-				
+
 			}
 			else
 			{
-				std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
+				cs_buffer.lock();
 				//如果buffer没更新就等
-				cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
+				while (!FlagBufferUpdated) cv_buffer.wait(cs_buffer);
+				cs_buffer.unlock();
 				Update();
 			}
+			cs_state.unlock();
 		}
 		);
 

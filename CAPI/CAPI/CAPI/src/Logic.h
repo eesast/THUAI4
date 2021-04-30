@@ -6,14 +6,12 @@
 
 #include "proto/Message2Client.pb.h"
 #include <functional>
-#include <array>
 #include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <iostream>
 #include "Base.h"
 #include "CAPI.h"
 #include "API.h"
+#include "critical_section.hpp"
 
 class Logic
 {
@@ -25,11 +23,13 @@ private:
 	bool FlagBufferUpdated = false;
 	bool CurrentStateAccessed = false;
 	bool WhetherToStartKnown = false;//也许是我设计的问题，无法优雅地让AI线程开始并结束……
-	std::mutex mtx_buffer;
-	std::mutex mtx_state;
-	std::mutex mtx_ai;
-	std::condition_variable cv_buffer;//asyn=false情况下若无更新会阻塞
-	std::condition_variable cv_ai;
+	
+	CriticalSection cs_buffer;
+	CriticalSection cs_state;
+	CriticalSection cs_ai;
+	ConditionVariable cv_buffer;
+	ConditionVariable cv_ai;
+
 
 	std::unique_ptr<Comm> pComm;
 	std::unique_ptr<LogicInterface> pApi;

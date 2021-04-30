@@ -6,7 +6,8 @@
 
 #include "proto/Message2Client.pb.h"
 #include "proto/Message2Server.pb.h"
-#include"concurrent_queue.hpp"
+#include "concurrent_queue.hpp"
+#include "critical_section.hpp"
 
 #include <google/protobuf/message.h>
 #include <HPSocket/HPSocket.h>
@@ -15,7 +16,6 @@
 #include <type_traits>
 #include <functional>
 #include <thread>
-#include <condition_variable>
 #include <atomic>
 
 
@@ -61,7 +61,7 @@ public:
 	bool Connect(const char* address, uint16_t port);
 
 	//发送消息
-	void Send(const Message2S&);
+	bool Send(const Message2S&);
 
 	//停止client
 	void Stop();
@@ -92,8 +92,8 @@ private:
 	const std::function<void()> __OnClose;
 
 	std::thread tPM;
-	std::mutex mtx;
-	std::condition_variable cv;
+	CriticalSection cs;
+	ConditionVariable cv;
 
 	concurrency::concurrent_queue<Pointer2M> queue;
 	CAPI<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2> capi;

@@ -35,6 +35,7 @@
     <ClInclude Include="src\CAPI.h" />
     <ClInclude Include="src\concurrent_queue.hpp" />
     <ClInclude Include="src\Constants.h" />
+    <ClInclude Include="src\critical_section.hpp" />
     <ClInclude Include="src\Logic.h" />
     <ClInclude Include="src\proto\Message2Client.pb.h" />
     <ClInclude Include="src\proto\Message2Server.pb.h" />

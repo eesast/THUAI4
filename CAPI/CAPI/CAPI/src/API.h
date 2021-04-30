@@ -4,7 +4,6 @@
 
 #define API_H
 
-#include <mutex>
 #include <string>
 #include <HPSocket/HPSocket.h>
 #include <HPSocket/SocketInterface.h>
@@ -12,6 +11,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include "concurrent_queue.hpp"
+#include "critical_section.hpp"
 
 #include "proto/Message2Server.pb.h"
 #include "Structures.h"
@@ -59,17 +59,17 @@ template <bool>
 struct Members
 {
 public:
-	Members(std::mutex& mtx_state, std::function<void()> f) {}
+	Members(CriticalSection& mtx_state, std::function<void()> f) {}
 };
 
 template <>
 struct Members<true>
 {
 public:
-	Members(std::mutex& mtx_state, std::function<void()> f) : mtx_state(mtx_state), TryUpDate(f) {}
+	Members(CriticalSection& cs, std::function<void()> f) : cs_state(cs), TryUpDate(f) {}
 
 protected:
-	std::mutex& mtx_state;
+	CriticalSection& cs_state;
 	const std::function<void()> TryUpDate;
 };
 
@@ -83,7 +83,7 @@ private:
 public:
 	API(std::function<bool(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, std::mutex& mtx_state, std::function<void()> tu, std::function<void()> w);
+		const State*& pS, CriticalSection& cs_state, std::function<void()> tu, std::function<void()> w);
 	virtual bool MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual bool MoveRight(uint32_t timeInMilliseconds);
 	virtual bool MoveUp(uint32_t timeInMilliseconds);
@@ -145,7 +145,7 @@ private:
 public:
 	DebugApi(std::function<bool(Protobuf::MessageToServer&)> sm,
 		std::function<bool()> e, std::function<bool(std::string&)> tp, std::function<int()> gc,
-		const State*& pS, std::mutex& mtx_state, std::function<void()> tu, std::function<void()> w, bool ev = false,
+		const State*& pS, CriticalSection& cs_state, std::function<void()> tu, std::function<void()> w, bool ev = false,
 		std::ostream& out = std::cout);
 	virtual bool MovePlayer(uint32_t timeInMilliseconds, double angle);
 	virtual bool MoveRight(uint32_t timeInMilliseconds);
