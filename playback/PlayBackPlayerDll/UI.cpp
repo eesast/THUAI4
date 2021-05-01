@@ -38,7 +38,7 @@ UI::MessageReaderWrapper::MessageReaderWrapper(System::String^ fileName)
 	messageReader = gcnew playback::MessageReader(fileName);
 }
 
-void UI::GetPMR(System::String^ fileName)
+void UI::GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> messager)
 {
 	if (finishConstruct) return;
 	bool success = false;
@@ -46,12 +46,12 @@ void UI::GetPMR(System::String^ fileName)
 	{
 		System::Console::WriteLine(fileName);
 		MessageReaderWrapper gm(fileName);
+		successConstruct = true;
 		gm.recentMsg = nullptr;
 		pMR = &gm;
 		finishConstruct = true;
-		while (finishConstruct) { std::this_thread::sleep_for(std::chrono::milliseconds(200)); }
+		while (*messager) { std::this_thread::sleep_for(std::chrono::milliseconds(200)); }
 		success = true;
-		pMR = nullptr;
 	}
 	catch ([[maybe_unused]] playback::FileFormatNotLegalException^ e)
 	{
@@ -216,8 +216,9 @@ chooseFile:
 	beginOpenFile:
 
 	finishConstruct = false;
+	auto newMessager = std::make_shared<volatile bool>(true);
 
-	std::thread([this, &fileName]
+	std::thread([this, &fileName, newMessager]
 	{
 		auto fileNameBytes = gcnew array<System::Byte, 1>(static_cast<int>(wcslen(fileName) * sizeof(WCHAR)));
 		uint8_t* p = (uint8_t*)fileName;
@@ -225,35 +226,34 @@ chooseFile:
 		{
 			fileNameBytes[i] = *p;
 		}
-		GetPMR(System::Text::Encoding::Unicode->GetString(fileNameBytes));
+		GetPMR(System::Text::Encoding::Unicode->GetString(fileNameBytes), newMessager);
 	}).detach();
 
 	while (!finishConstruct) std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-	if (pMR == nullptr)
+	if (!successConstruct)
 	{
 		finishConstruct = false;
 		if (!first) goto chooseFile;
 		else return;
 	}
+	successConstruct = false;
 
 	*msgParserMessager = false;
-	msgParserMessager = std::make_shared<volatile bool>(true);
+	msgParserMessager = newMessager;
 
 	std::thread
 	(
-		[this]
+		[this, newMessager]
 		{
 			playback::MessageReader^ mr = const_cast<MessageReaderWrapper*>(pMR)->MessageReader();
-
-			std::shared_ptr<volatile bool> messager = msgParserMessager;
 
 			uint64_t timeExceedCount = 0UL;
 			uint64_t MaxTolerantTimeExceedCount = 5;
 			auto beginTime = System::Environment::TickCount64;
 			auto nextTime = beginTime + chooseFileDlg.TimeInterval();
 
-			while (*messager)
+			while (*newMessager)
 			{
 				Communication::Proto::MessageToClient^ msg = nullptr;
 				for (unsigned i = 0; i < mr->teamCount; ++i)
@@ -267,37 +267,17 @@ chooseFile:
 					}
 				}
 
-				if (msg != nullptr)
-				{
-					auto cellColor = msg->CellColors;
-
-					/*
-					* !! This is a very fuck phenomenon that below will cause an error from Intelligense when coding.
-					* Because calling the default indexer 'cellColor->default[0]' is ok before cpp11
-					* but not after cpp11 because 'default' becomes a keyword in cpp11.
-					* So after cpp11 we can use [] directly as 'cellColor[0]' instead of using the word 'default' to call the default indexer.
-					* Unfortunately and fuckingly, the Intelligense hasn't been updated by Microsoft
-					* so the intelligense will give an error since this syntax is not allowed before cpp11,
-					* although we are writing cpp17 codes.
-					* So ignore these errors "expression must have pointer-to-object or handle-to-C++/CLI-array type"
-					* from Intelligense as long as it can pass the compilation!
-					*/
-					int rows = cellColor->Count, cols = cellColor[0]->RowColors->Count;
-
-					int tmpWidth = (pixelPerCell.x = basicSize / cols) * cols;
-					appendCx = 15 + tmpWidth;
-					width = tmpWidth + appendCx;
-					height = (pixelPerCell.y = basicSize / rows) * rows + appendCy;
-
-					//WINDOWINFO wi;
-					//ZeroMemory(&wi, sizeof(wi));
-					//wi.cbSize = sizeof(wi);
-					//GetWindowInfo(m_hWnd, &wi);
-					//if (wi.rcWindow.right - wi.rcWindow.left != width || wi.rcWindow.bottom - wi.rcWindow.top != height)
-					//{
-					//	MoveWindow(m_hWnd, wi.rcWindow.left, wi.rcWindow.top, width, height, FALSE);
-					//}
-				}
+				//if (msg != nullptr)
+				//{
+				//	//WINDOWINFO wi;
+				//	//ZeroMemory(&wi, sizeof(wi));
+				//	//wi.cbSize = sizeof(wi);
+				//	//GetWindowInfo(m_hWnd, &wi);
+				//	//if (wi.rcWindow.right - wi.rcWindow.left != width || wi.rcWindow.bottom - wi.rcWindow.top != height)
+				//	//{
+				//	//	MoveWindow(m_hWnd, wi.rcWindow.left, wi.rcWindow.top, width, height, FALSE);
+				//	//}
+				//}
 
 				InvalidateRect(m_hWnd, NULL, FALSE);
 
@@ -325,7 +305,13 @@ chooseFile:
 
 		endParse:
 			
+			auto orgPMR = pMR;
 			MessageBox(m_hWnd, TEXT("Game over!"), TEXT("Game over!"), MB_OK);
+			if (orgPMR == pMR)
+			{
+				pMR = nullptr;
+				InvalidateRect(m_hWnd, NULL, FALSE);
+			}
 
 		playOver:;
 		}
@@ -392,6 +378,28 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			auto recentMsg = const_cast<MessageReaderWrapper*>(pMR)->recentMsg;
 			if (recentMsg == nullptr) goto endPaint;
+
+			{
+				auto cellColor = recentMsg->CellColors;
+
+				/*
+				* !! This is a very fuck phenomenon that below will cause an error from Intelligense when coding.
+				* Because calling the default indexer 'cellColor->default[0]' is ok before cpp11
+				* but not after cpp11 because 'default' becomes a keyword in cpp11.
+				* So after cpp11 we can use [] directly as 'cellColor[0]' instead of using the word 'default' to call the default indexer.
+				* Unfortunately and fuckingly, the Intelligense hasn't been updated by Microsoft
+				* so the intelligense will give an error since this syntax is not allowed before cpp11,
+				* although we are writing cpp17 codes.
+				* So ignore these errors "expression must have pointer-to-object or handle-to-C++/CLI-array type"
+				* from Intelligense as long as it can pass the compilation!
+				*/
+				int rows = cellColor->Count, cols = cellColor[0]->RowColors->Count;
+
+				int tmpWidth = (pixelPerCell.x = basicSize / cols) * cols;
+				appendCx = 15 + tmpWidth;
+				width = tmpWidth + appendCx;
+				height = (pixelPerCell.y = basicSize / rows) * rows + appendCy;
+			}
 
 			HPEN hPenNull = (HPEN)GetStockObject(PS_NULL);
 			SelectObject(hdcMem, hPenNull);

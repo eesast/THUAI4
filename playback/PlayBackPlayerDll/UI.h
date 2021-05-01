@@ -81,7 +81,8 @@ private:
 
 	volatile MessageReaderWrapper* pMR = nullptr;
 	volatile bool finishConstruct = false;
-	void GetPMR(System::String^ fileName);
+	volatile bool successConstruct = false;
+	void GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> messager);
 	std::array<int, 8> teamScores;
 
 	void ChooseFile(bool first = false);
