@@ -314,7 +314,7 @@ namespace THUnity2D
 				break;
 			case JobType.Job2:
 				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum;
+				bulletNum = maxBulletNum = basicBulletNum * 2 / 3;
 				hp = maxHp = basicHp;
 				ap = orgAp = basicAp * 5 / 4;
 				holdProp = null;

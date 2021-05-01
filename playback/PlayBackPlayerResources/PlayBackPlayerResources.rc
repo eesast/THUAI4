@@ -1,0 +1,144 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (Simplified, PRC) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDM_MAINMENU MENU
+BEGIN
+    POPUP "File(&F)"
+    BEGIN
+        MENUITEM "Choose Playback File(&B)\tCtrl+B", IDM_CHOOSEFILE
+        MENUITEM SEPARATOR
+        MENUITEM "Exit(&E)\tCtrl+E",            IDM_EXIT
+    END
+    MENUITEM "About(&A)",                   IDM_ABOUT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CHOOSESPEEDDLG DIALOGEX 0, 0, 145, 100
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Choose Speed"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "4x",IDC_FOUR,"Button",BS_AUTORADIOBUTTON,15,15,23,10
+    CONTROL         "2x",IDC_TWO,"Button",BS_AUTORADIOBUTTON,15,30,23,10
+    CONTROL         "1x",IDC_ONE,"Button",BS_AUTORADIOBUTTON,15,45,23,10
+    CONTROL         "0.5x",IDC_HALF,"Button",BS_AUTORADIOBUTTON,15,60,30,10
+    CONTROL         "0.25x",IDC_QUARTER,"Button",BS_AUTORADIOBUTTON,15,75,34,10
+    DEFPUSHBUTTON      "OK",IDC_OK,80,42,50,15
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDA_MAINMENUACCEL ACCELERATORS
+BEGIN
+    "^B",           IDM_CHOOSEFILE,         ASCII,  NOINVERT
+    "^E",           IDM_EXIT,               ASCII,  NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BKGND               BITMAP                  "image\\bkgnd.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_CHOOSESPEEDDLG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 100
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_CHOOSESPEEDDLG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // Chinese (Simplified, PRC) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

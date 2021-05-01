@@ -99,17 +99,36 @@ namespace GameEngine
 						1000 / Map.Constant.numOfStepPerSecond,
 						() =>
 						{
+							int leftTime = moveTime % (1000 / Map.Constant.numOfStepPerSecond);
 							if (!isDestroyed)
 							{
-								moveVec.length = deltaLen;
+							Check:
+								moveVec.length = deltaLen + leftTime * obj.MoveSpeed / Map.Constant.numOfStepPerSecond / 50;
 								if ((collisionObj = collisionChecker.CheckCollision(obj, moveVec)) == null)
 								{
 									obj.Move(moveVec);
 								}
 								else
 								{
-									OnCollision(obj, collisionObj, moveVec);
+									switch (OnCollision(obj, collisionObj, moveVec))
+									{
+										case AfterCollision.ContinueCheck: goto Check;
+										case AfterCollision.Destroyed:
+											GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+											isDestroyed = true;
+											break;
+										case AfterCollision.MoveMax:
+											MoveMax(obj, moveVec);
+											moveVec.length = 0;
+											break;
+									}
 								}
+
+								if (leftTime != 0)
+								{
+									Thread.Sleep(leftTime);
+								}
+
 								obj.IsMoving = false;        //结束移动
 								EndMove(obj);
 							}

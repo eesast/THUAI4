@@ -186,7 +186,7 @@ namespace Constants
 
 			M_SCI std::int32_t job0 = basicBulletNum;
 			M_SCI std::int32_t job1 = basicBulletNum;
-			M_SCI std::int32_t job2 = basicBulletNum;
+			M_SCI std::int32_t job2 = basicBulletNum * 2 / 3;
 			M_SCI std::int32_t job3 = basicBulletNum / 2;
 			M_SCI std::int32_t job4 = basicBulletNum / 4;
 			M_SCI std::int32_t job5 = basicBulletNum / 3;
@@ -194,7 +194,7 @@ namespace Constants
 
 			M_SCI std::int32_t OrdinaryJob = job0;			// 12
 			M_SCI std::int32_t HappyMan = job1;				// 12
-			M_SCI std::int32_t LazyGoat = job2;				// 12
+			M_SCI std::int32_t LazyGoat = job2;				// 8
 			M_SCI std::int32_t PurpleFish = job3;			// 6
 			M_SCI std::int32_t MonkeyDoctor = job4;			// 3
 			M_SCI std::int32_t EggMan = job5;				// 4
