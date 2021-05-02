@@ -50,7 +50,8 @@ void UI::GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> message
 		gm.recentMsg = nullptr;
 		pMR = &gm;
 		finishConstruct = true;
-		while (*messager) { std::this_thread::sleep_for(std::chrono::milliseconds(200)); }
+		while (*messager) { std::this_thread::sleep_for(std::chrono::seconds(2)); }
+		std::this_thread::sleep_for(std::chrono::seconds(5));	// Wait for all accessment to gm to end.
 		success = true;
 	}
 	catch ([[maybe_unused]] playback::FileFormatNotLegalException^ e)
@@ -246,7 +247,7 @@ chooseFile:
 	(
 		[this, newMessager]
 		{
-			playback::MessageReader^ mr = const_cast<MessageReaderWrapper*>(pMR)->MessageReader();
+			playback::MessageReader^ mr = pMR->MessageReader();
 
 			uint64_t timeExceedCount = 0UL;
 			uint64_t MaxTolerantTimeExceedCount = 5;
@@ -263,7 +264,7 @@ chooseFile:
 						msg = mr->ReadOne();
 						if (msg == nullptr) goto endParse;
 						teamScores[msg->TeamID] = msg->TeamScore;
-						const_cast<MessageReaderWrapper*>(pMR)->recentMsg = msg;
+						pMR->recentMsg = msg;
 					}
 				}
 
@@ -373,10 +374,12 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		HBITMAP hBmMem = CreateCompatibleBitmap(hdc, clrec.right - clrec.left, clrec.bottom - clrec.top);
 		HBITMAP hBmMemOld = (HBITMAP)SelectObject(hdcMem, hBmMem);
 
+		auto pMR = this->pMR;
+
 		if (pMR != nullptr)
 		{
 
-			auto recentMsg = const_cast<MessageReaderWrapper*>(pMR)->recentMsg;
+			auto recentMsg = pMR->recentMsg;
 			if (recentMsg == nullptr) goto endPaint;
 
 			{

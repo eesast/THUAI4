@@ -66,6 +66,15 @@ public:
 
 private:
 
+	MessageReaderWrapper* volatile pMR = nullptr;
+	volatile bool finishConstruct = false;
+	volatile bool successConstruct = false;
+	void GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> messager);
+	std::array<int, 8> teamScores;
+
+	void ChooseFile(bool first = false);
+	std::shared_ptr<volatile bool> msgParserMessager = std::make_shared<volatile bool>(false);
+
 	class ChooseFileDialog : BasicModelessDialog
 	{
 	public:
@@ -79,14 +88,6 @@ private:
 
 	ChooseFileDialog chooseFileDlg;
 
-	volatile MessageReaderWrapper* pMR = nullptr;
-	volatile bool finishConstruct = false;
-	volatile bool successConstruct = false;
-	void GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> messager);
-	std::array<int, 8> teamScores;
-
-	void ChooseFile(bool first = false);
-	std::shared_ptr<volatile bool> msgParserMessager = std::make_shared<volatile bool>(false);
 };
 
 #endif
