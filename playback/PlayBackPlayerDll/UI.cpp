@@ -362,6 +362,14 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		basicSize = widCalBasic < heightCalBasic ? widCalBasic : heightCalBasic;
 		break;
 	}
+	case WM_CLOSE:
+	{
+		if (MessageBox(hWnd, TEXT("Do you really want to exit?"), TEXT("Exit"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			SendMessage(hWnd, WM_DESTROY, 0, 0);
+		}
+		break;
+	}
 	case WM_COMMAND:
 	{
 		switch (LOWORD(wParam))
@@ -373,7 +381,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		case IDM_EXIT:
 		{
-			SendMessage(hWnd, WM_DESTROY, wParam, lParam);
+			SendMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
 		}
 		case IDM_CHOOSEFILE:
