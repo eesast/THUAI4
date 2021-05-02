@@ -58,6 +58,7 @@ BEGIN
         MENUITEM "Pause(&P)\tCtrl+P",                   IDM_PAUSE
         MENUITEM "Restart(&R)\tCtrl+R",                 IDM_RESTART
         MENUITEM "See Result(&T)\tCtrl+T",              IDM_SEERESULT
+        MENUITEM "Back to Home Page(&H)\tCtrl+H",       IDM_BACKTOHOMEPAGE
         MENUITEM SEPARATOR
         MENUITEM "Exit(&E)\tCtrl+E",                    IDM_EXIT
     END
@@ -77,6 +78,7 @@ BEGIN
     "^P", IDM_PAUSE, ASCII, NOINVERT
     "^R", IDM_RESTART, ASCII, NOINVERT
     "^T", IDM_SEERESULT, ASCII, NOINVERT
+    "^H", IDM_BACKTOHOMEPAGE, ASCII, NOINVERT
 END
 
 

@@ -156,6 +156,7 @@ int UI::Begin(System::String^ initialFileName)
 	HMENU hMenu = LoadMenu(hRes, MAKEINTRESOURCE(IDM_MAINMENU));
 	EnableMenuItem(hMenu, IDM_RESTART, MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMenu, IDM_SEERESULT, MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_BACKTOHOMEPAGE, MF_BYCOMMAND | MF_GRAYED);
 	SetMenu(m_hWnd, hMenu);
 	hBmBkGnd = (HBITMAP)LoadImage(hRes, MAKEINTRESOURCE(IDB_BKGND), IMAGE_BITMAP, 0, 0, 0);
 	if (hBmBkGnd == NULL)
@@ -402,6 +403,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		case IDM_RESTART:
 		case IDM_SEERESULT:
+		case IDM_BACKTOHOMEPAGE:
 		{
 			MessageBox(hWnd, TEXT("This function is not available yet. Please stay tuned!"), TEXT("Stay tuned please"), MB_OK | MB_ICONINFORMATION);
 			break;

@@ -16,6 +16,7 @@
 #define IDM_PAUSE                       2005
 #define IDM_RESTART                     2006
 #define IDM_SEERESULT                   2007
+#define IDM_BACKTOHOMEPAGE              2008
 
 #define IDA_MAINMENUACCEL               3001
 #define IDB_BKGND                       3002
