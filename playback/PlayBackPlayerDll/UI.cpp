@@ -624,7 +624,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				wsout.str(L"");
 			}
 
-			wsout << L"道具图例：\n";
+			wsout << L"道具图例：\n\n";
 			for (auto& p2c : propToChar)
 			{
 				wsout << p2c.second << L": " << propToStr.find(p2c.first)->second << L'\n';
