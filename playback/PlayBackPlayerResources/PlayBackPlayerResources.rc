@@ -54,11 +54,29 @@ IDM_MAINMENU MENU
 BEGIN
     POPUP "File(&F)"
     BEGIN
-        MENUITEM "Choose Playback File(&B)\tCtrl+B", IDM_CHOOSEFILE
+        MENUITEM "Choose Playback File(&B)\tCtrl+B",    IDM_CHOOSEFILE
+        MENUITEM "Pause(&P)\tCtrl+P",                   IDM_PAUSE
+        MENUITEM "Restart(&R)\tCtrl+R",                 IDM_RESTART
+        MENUITEM "See Result(&T)\tCtrl+T",              IDM_SEERESULT
         MENUITEM SEPARATOR
-        MENUITEM "Exit(&E)\tCtrl+E",            IDM_EXIT
+        MENUITEM "Exit(&E)\tCtrl+E",                    IDM_EXIT
     END
-    MENUITEM "About(&A)",                   IDM_ABOUT
+    MENUITEM "About(&A)",                               IDM_ABOUT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDA_MAINMENUACCEL ACCELERATORS
+BEGIN
+    "^B", IDM_CHOOSEFILE, ASCII, NOINVERT
+    "^E", IDM_EXIT, ASCII, NOINVERT
+    "^P", IDM_PAUSE, ASCII, NOINVERT
+    "^R", IDM_RESTART, ASCII, NOINVERT
+    "^T", IDM_SEERESULT, ASCII, NOINVERT
 END
 
 
@@ -80,17 +98,6 @@ BEGIN
     DEFPUSHBUTTON      "OK",IDC_OK,80,42,50,15
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Accelerator
-//
-
-IDA_MAINMENUACCEL ACCELERATORS
-BEGIN
-    "^B",           IDM_CHOOSEFILE,         ASCII,  NOINVERT
-    "^E",           IDM_EXIT,               ASCII,  NOINVERT
-END
 
 
 /////////////////////////////////////////////////////////////////////////////

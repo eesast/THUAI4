@@ -31,6 +31,18 @@ UI::UI()
 		oneTeamScore = 0;
 	}
 	appendCy = GetSystemMetrics(SM_CYMIN) + GetSystemMetrics(SM_CYMENU);
+
+	std::thread
+	(
+		[this]
+		{
+			MonitorWrapper mw;
+			mw.Init();
+			pauseLock = &mw;
+			while (true) std::this_thread::sleep_for(std::chrono::minutes(100));
+		}
+	).detach();
+	while (pauseLock != nullptr) std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 UI::MessageReaderWrapper::MessageReaderWrapper(System::String^ fileName)
@@ -142,6 +154,8 @@ int UI::Begin(System::String^ initialFileName)
 
 	HACCEL hAccel = LoadAccelerators(hRes, MAKEINTRESOURCE(IDA_MAINMENUACCEL));
 	HMENU hMenu = LoadMenu(hRes, MAKEINTRESOURCE(IDM_MAINMENU));
+	EnableMenuItem(hMenu, IDM_RESTART, MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_SEERESULT, MF_BYCOMMAND | MF_GRAYED);
 	SetMenu(m_hWnd, hMenu);
 	hBmBkGnd = (HBITMAP)LoadImage(hRes, MAKEINTRESOURCE(IDB_BKGND), IMAGE_BITMAP, 0, 0, 0);
 	if (hBmBkGnd == NULL)
@@ -257,16 +271,23 @@ chooseFile:
 			while (*newMessager)
 			{
 				Communication::Proto::MessageToClient^ msg = nullptr;
-				for (unsigned i = 0; i < mr->teamCount; ++i)
+
+				pauseLock->Lock();
+
+				try
 				{
-					for (unsigned j = 0; j < mr->playerCount; ++j)
+					for (unsigned i = 0; i < mr->teamCount; ++i)
 					{
-						msg = mr->ReadOne();
-						if (msg == nullptr) goto endParse;
-						teamScores[msg->TeamID] = msg->TeamScore;
-						pMR->recentMsg = msg;
+						for (unsigned j = 0; j < mr->playerCount; ++j)
+						{
+							msg = mr->ReadOne();
+							if (msg == nullptr) goto endParse;
+							teamScores[msg->TeamID] = msg->TeamScore;
+							pMR->recentMsg = msg;
+						}
 					}
 				}
+				finally { pauseLock->Unlock(); }
 
 				//if (msg != nullptr)
 				//{
@@ -357,6 +378,32 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_CHOOSEFILE:
 		{
 			ChooseFile();
+			break;
+		}
+		case IDM_PAUSE:
+		{
+			if (pMR == nullptr)
+			{
+				MessageBox(hWnd, TEXT("The player isn't playing any playback files now!"), TEXT("Disabled"), MB_OK | MB_ICONWARNING);
+			}
+			else
+			{
+				pauseLock->Lock();
+				try
+				{
+					MessageBox(hWnd, TEXT("Pausing..."), TEXT("Pausing..."), MB_OK);
+				}
+				finally
+				{
+					pauseLock->Unlock();
+				}
+			}
+			break;
+		}
+		case IDM_RESTART:
+		case IDM_SEERESULT:
+		{
+			MessageBox(hWnd, TEXT("This function is not available yet. Please stay tuned!"), TEXT("Stay tuned please"), MB_OK | MB_ICONINFORMATION);
 			break;
 		}
 		}
