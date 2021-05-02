@@ -748,11 +748,15 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			double actualRate = (clrec.right - clrec.left) / (double)(clrec.bottom - clrec.top);
 			if (rate < actualRate)
 			{
-				StretchBlt(hdcMem, 0, 0, clrec.right - clrec.left, (clrec.right - clrec.left) / rate, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
+				int paintHeight = (clrec.right - clrec.left) / rate;
+				int paintYDest = (paintHeight - (clrec.bottom - clrec.top)) / 2;
+				StretchBlt(hdcMem, 0, -paintYDest, clrec.right - clrec.left, paintHeight, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
 			}
 			else
 			{
-				StretchBlt(hdcMem, 0, 0, (clrec.bottom - clrec.top) * rate, clrec.bottom - clrec.top, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
+				int paintWidth = (clrec.bottom - clrec.top) * rate;
+				int paintXDest = (paintWidth - (clrec.right - clrec.left)) / 2;
+				StretchBlt(hdcMem, -paintXDest, 0, paintWidth, clrec.bottom - clrec.top, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
 			}
 			SelectObject(hdcBmBkgnd, hBmBkgndOld);
 			DeleteDC(hdcBmBkgnd);
