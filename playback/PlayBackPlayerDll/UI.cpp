@@ -627,7 +627,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			wsout << L"道具图例：\n";
 			for (auto& p2c : propToChar)
 			{
-				wsout << p2c.second << ": " << propToStr.find(p2c.first)->second << '\n';
+				wsout << p2c.second << L": " << propToStr.find(p2c.first)->second << L'\n';
 			}
 			RECT textRect = { actualWidth + 15 + sigleTeamWidth * teamCount, 15, actualWidth + 15 + sigleTeamWidth * (teamCount + 1), height };
 			DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &textRect, 0);
