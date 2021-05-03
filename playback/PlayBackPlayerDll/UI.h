@@ -6,6 +6,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <atomic>
 
 class BasicModelessDialog
 {
@@ -96,7 +97,7 @@ private:
 		BOOL Begin(HINSTANCE hInst, LPCTSTR hTempName, HWND hWndParent);
 		HWND GetHangle() const { return m_hDlg; }
 	private:
-		int timeInterval = 50;
+		std::atomic_int timeInterval = 50;
 	};
 
 	ChooseFileDialog chooseFileDlg;
