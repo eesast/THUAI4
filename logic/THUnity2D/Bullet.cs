@@ -102,7 +102,7 @@
 
 	}
 
-	internal class Bullet0 : Bullet
+	internal sealed class Bullet0 : Bullet
 	{
 		public Bullet0(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{
@@ -119,7 +119,7 @@
 		}
 	}
 
-	internal class Bullet1 : Bullet
+	internal sealed class Bullet1 : Bullet
 	{
 		public Bullet1(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{
@@ -131,7 +131,7 @@
 		protected override uint AttackRangeEdgeLength => 3;
 	}
 
-	internal class Bullet2 : Bullet
+	internal sealed class Bullet2 : Bullet
 	{
 		public Bullet2(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{
@@ -143,7 +143,7 @@
 		protected override uint AttackRangeEdgeLength => 7;
 	}
 
-	internal class Bullet3 : Bullet
+	internal sealed class Bullet3 : Bullet
 	{
 		public Bullet3(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{
@@ -162,7 +162,7 @@
 		}
 	}
 
-	internal class Bullet4 : Bullet
+	internal sealed class Bullet4 : Bullet
 	{
 		public Bullet4(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{
@@ -174,7 +174,7 @@
 		protected override uint AttackRangeEdgeLength => 7;
 	}
 
-	internal class Bullet5 : Bullet
+	internal sealed class Bullet5 : Bullet
 	{
 		public Bullet5(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{
@@ -192,7 +192,7 @@
 
 	}
 
-	internal class Bullet6 : Bullet
+	internal sealed class Bullet6 : Bullet
 	{
 		public Bullet6(XYPosition initPos, int radius, int basicMoveSpeed, int ap, bool hasSpear) : base(initPos, radius, ap, hasSpear)
 		{

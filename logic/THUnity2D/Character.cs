@@ -355,7 +355,7 @@ namespace THUnity2D
 
 	}
 
-	internal class Character0 : Character
+	internal sealed class Character0 : Character
 	{
 		public Character0(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
@@ -375,7 +375,7 @@ namespace THUnity2D
 		}
 	}
 
-	internal class Character1 : Character
+	internal sealed class Character1 : Character
 	{
 		public Character1(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
@@ -395,7 +395,7 @@ namespace THUnity2D
 		}
 	}
 
-	internal class Character2 : Character
+	internal sealed class Character2 : Character
 	{
 		public Character2(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
@@ -415,7 +415,7 @@ namespace THUnity2D
 		}
 	}
 
-	internal class Character3 : Character
+	internal sealed class Character3 : Character
 	{
 		public Character3(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
@@ -435,7 +435,7 @@ namespace THUnity2D
 		}
 	}
 
-	internal class Character4 : Character
+	internal sealed class Character4 : Character
 	{
 		public Character4(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
@@ -455,7 +455,7 @@ namespace THUnity2D
 		}
 	}
 
-	internal class Character5 : Character
+	internal sealed class Character5 : Character
 	{
 		public Character5(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
@@ -475,7 +475,7 @@ namespace THUnity2D
 		}
 	}
 
-	internal class Character6 : Character
+	internal sealed class Character6 : Character
 	{
 		public Character6(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
 		{
