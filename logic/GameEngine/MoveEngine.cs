@@ -23,7 +23,7 @@ namespace GameEngine
 		/// </summary>
 		/// <param name="obj">移动物体，默认obj.Rigid为true</param>
 		/// <param name="moveVec">移动的位移向量</param>
-		private void MoveMax(GameObject obj,  Vector moveVec)
+		private void MoveMax(IMovable obj,  Vector moveVec)
 		{
 
 			/*由于四周是墙，所以人物永远不可能与越界方块碰撞*/
@@ -42,13 +42,13 @@ namespace GameEngine
 		/// <param name="obj">要移动的物体</param>
 		/// <param name="moveTime">移动的时间，毫秒</param>
 		/// <param name="moveDirection">移动的方向，弧度</param>
-		public void MoveObj(GameObject obj, int moveTime, double moveDirection)
+		public void MoveObj(IMovable obj, int moveTime, double moveDirection)
 		{
 			new Thread
 			(
 				() =>
 				{
-					lock (obj.moveLock)
+					lock (obj.MoveLock)
 					{
 						if (!obj.IsAvailable) return;
 						obj.IsMoving = true;     //开始移动
@@ -150,9 +150,9 @@ namespace GameEngine
 		}
 
 		private Map gameMap;
-		private Action<GameObject> EndMove;
+		private Action<IMovable> EndMove;
 		private CollisionChecker collisionChecker;
-		private Func<GameObject, GameObject, Vector, AfterCollision> OnCollision;
+		private Func<IMovable, GameObject, Vector, AfterCollision> OnCollision;
 
 
 		/// <summary>
@@ -161,19 +161,17 @@ namespace GameEngine
 		/// <param name="gameMap">游戏地图</param>
 		/// <param name="OnCollision">发生碰撞时要做的事情，第一个参数为移动的物体，第二个参数为撞到的物体，第三个参数为移动的位移向量，返回值见AfterCollision的定义</param>
 		/// <param name="EndMove">结束碰撞时要做的事情</param>
-		/// <param name="IgnoreCollision">是否忽略本次碰撞。第一个参数为移动的物体，第二个参数为撞到的物体。如果忽略本次碰撞，返回true；否则返回false</param>
 		public MoveEngine
 			(
 				Map gameMap,
-				Func<GameObject, GameObject, Vector, AfterCollision> OnCollision,
-				Action<GameObject> EndMove,
-				Func<GameObject, GameObject, bool> IgnoreCollision
+				Func<IMovable, GameObject, Vector, AfterCollision> OnCollision,
+				Action<IMovable> EndMove
 			)
 		{
 			this.gameMap = gameMap;
 			this.EndMove = EndMove;
 			this.OnCollision = OnCollision;
-			this.collisionChecker = new CollisionChecker(gameMap, IgnoreCollision);
+			this.collisionChecker = new CollisionChecker(gameMap);
 		}
 	}
 }

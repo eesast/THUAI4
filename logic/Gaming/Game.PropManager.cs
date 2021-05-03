@@ -285,8 +285,7 @@ namespace Gaming
 					EndMove: obj =>
 					{
 						GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
-					},
-					IgnoreCollision: (obj, collisionObj) => true		// 道具行动，一切皆忽略
+					}
 				);
 				unpickedPropList = new LinkedList<Prop>();
 				unpickedPropListLock = new ReaderWriterLockSlim();

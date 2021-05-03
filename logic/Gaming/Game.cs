@@ -35,7 +35,9 @@ namespace Gaming
 				|| gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent != null) return GameObject.invalidID;
 
 			XYPosition pos = gameMap.BirthPointList[playerInitInfo.birthPointIdx].Position;
-			Character newPlayer = new Character(pos, Map.Constant.playerRadius, playerInitInfo.jobType, Map.Constant.basicPlayerMoveSpeed);
+			Character? newPlayer = Character.GetCharacter(pos, Map.Constant.playerRadius, Map.Constant.basicPlayerMoveSpeed, playerInitInfo.jobType);
+			if (newPlayer == null) return GameObject.invalidID;
+
 			gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent = newPlayer;
 			gameMap.PlayerListLock.EnterWriteLock(); try { gameMap.PlayerList.Add(newPlayer); } finally { gameMap.PlayerListLock.ExitWriteLock(); }
 			((Team)teamList[(int)playerInitInfo.teamID]).AddPlayer(newPlayer);

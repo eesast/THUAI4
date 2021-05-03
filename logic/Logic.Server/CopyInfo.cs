@@ -36,13 +36,13 @@ namespace Logic.Server
 
 			ret.TeamID = player.TeamID;
 			ret.Ap = player.AP;
-			ret.BulletType = ConvertTool.ToCommunicationBulletType(player.bulletType);
+			ret.BulletType = ConvertTool.ToCommunicationBulletType(player.Bullet);
 
 			Prop? holdProp = player.HoldProp;		// 防止判断后被突然置null
 			ret.PropType = holdProp == null ? Communication.Proto.PropType.Null : ConvertTool.ToCommunicationPropType(holdProp.GetPropType());
 
 			ret.IsDying = player.IsResetting;
-			ret.JobType = ConvertTool.ToCommunicationJobType(player.jobType);
+			ret.JobType = ConvertTool.ToCommunicationJobType(player.Job);
 			ret.CD = player.CD;
 			ret.MaxBulletNum = player.MaxBulletNum;
 			ret.BulletNum = player.BulletNum;
@@ -61,7 +61,7 @@ namespace Logic.Server
 
 			ret.TeamID = bullet.Parent == null ? Team.invalidTeamID : bullet.Parent.TeamID;
 			ret.Ap = bullet.AP;
-			ret.BulletType = ConvertTool.ToCommunicationBulletType(bullet.BulletType);
+			ret.BulletType = ConvertTool.ToCommunicationBulletType(bullet.BulletX);
 
 			return ret;
 		}

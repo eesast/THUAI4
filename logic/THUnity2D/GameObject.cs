@@ -21,11 +21,12 @@ namespace THUnity2D
 		}
 		public abstract GameObjType GetGameObjType();	//给C++/CLI调试用的，因为我不知道C++/CLI怎么用is操作符（狗头保命）
 
-		public const int MinSpeed = 1;                  //最小速度
-		public const int MaxSpeed = int.MaxValue;  //最大速度
+		//public const int MinSpeed = 1;                  //最小速度
+		//public const int MaxSpeed = int.MaxValue;  //最大速度
 
 		protected readonly object gameObjLock = new object();
-		public readonly object moveLock = new object();
+		protected readonly object moveLock = new object();
+		public object MoveLock => moveLock;
 
 		private static long currentMaxID = 0;           //目前游戏对象的最大ID
 		public const long invalidID = long.MaxValue;            //无效的ID
@@ -51,25 +52,10 @@ namespace THUnity2D
 			}
 		}
 
-		public bool IsRigid { get; protected set; }     //是否是刚体，即是否具有碰撞
+		public abstract bool IsRigid { get; }     //是否是刚体，即是否具有碰撞
 
 		protected ShapeType shape;
 		public ShapeType Shape => shape;				//形状
-
-		protected int moveSpeed;
-		public int MoveSpeed
-		{
-			get => moveSpeed;
-			protected set
-			{
-				lock (gameObjLock)
-				{
-					moveSpeed = value;
-				}
-			}
-		}
-		private int orgMoveSpeed;
-		public int OrgMoveSpeed { get => orgMoveSpeed; protected set { orgMoveSpeed = value; } }
 
 		//当前是否能移动
 
@@ -122,7 +108,7 @@ namespace THUnity2D
 
 
 		//移动，改变坐标，反馈实际走的长度的平方
-		public long Move(Vector displacement)
+		protected long Move(Vector displacement)
 		{
 			var deltaPos = Vector.Vector2XY(displacement);
 			//Operations.Add
@@ -144,14 +130,13 @@ namespace THUnity2D
 			lock (moveLock)
 			{
 				this.position = orgPos;
-				this.moveSpeed = orgMoveSpeed;
 				facingDirection = 0.0;
 				isMoving = false;
 				canMove = false;
 			}
 		}
 
-		public GameObject(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ShapeType shape)
+		public GameObject(XYPosition initPos, int radius, ShapeType shape)
 		{
 			ID = currentMaxID;
 			++currentMaxID;
@@ -159,9 +144,6 @@ namespace THUnity2D
 			this.position = initPos;
 			this.orgPos = initPos;
 			this.radius = radius;
-			this.IsRigid = isRigid;
-			this.moveSpeed = Math.Min(Math.Max(moveSpeed, MinSpeed), MaxSpeed);
-			this.orgMoveSpeed = this.moveSpeed;
 			this.shape = shape;
 		}
 
@@ -171,13 +153,44 @@ namespace THUnity2D
 		}
 
 		//用于Debug时从控制台观察到各个游戏对象的状况
-		public static void Debug(GameObject current, string str)
+		public static void Debug(object current, string str)
 		{
 
 #if DEBUG
 			Console.WriteLine(current.GetType() + " " + current.ToString() + str);
 #endif
 
+		}
+
+
+		/// <summary>
+		/// 检查下一步位于nextPos时是否会与targetObj碰撞
+		/// </summary>
+		/// <param name="targetObj">被动碰撞物</param>
+		/// <param name="nextPos">obj下一步想走的位置</param>
+		/// <returns>如果会碰撞，返回true</returns>
+		public virtual bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
+		{
+			if (!targetObj.IsRigid || targetObj.ID == ID) return false; //不检查自己和非刚体
+
+			int deltaX = Math.Abs(nextPos.x - targetObj.Position.x), deltaY = Math.Abs(nextPos.y - targetObj.Position.y);
+
+			//默认obj是圆形的，因为能移动的物体目前只有圆形（会移动的道具尚未被捡起，其形状没有意义，可默认为圆形）
+
+			switch (targetObj.Shape)
+			{
+				case ShapeType.Circle:       //圆与圆碰撞
+					{
+						return (long)deltaX * deltaX + (long)deltaY * deltaY < ((long)Radius + targetObj.Radius) * ((long)Radius + targetObj.Radius);
+					}
+				case ShapeType.Square:        //圆与正方形碰撞
+					{
+						if (deltaX >= targetObj.Radius + Radius || deltaY >= targetObj.Radius + Radius) return false;
+						if (deltaX < targetObj.Radius || deltaY < targetObj.Radius) return true;
+						return (long)(deltaX - targetObj.Radius) * (deltaX - targetObj.Radius) + (long)(deltaY - targetObj.Radius) * (deltaY - targetObj.Radius) < (long)Radius * (long)Radius;
+					}
+			}
+			return false;
 		}
 
 
