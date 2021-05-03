@@ -41,6 +41,7 @@ namespace Logic.Server
 			Prop? holdProp = player.HoldProp;		// 防止判断后被突然置null
 			ret.PropType = holdProp == null ? Communication.Proto.PropType.Null : ConvertTool.ToCommunicationPropType(holdProp.GetPropType());
 
+			ret.MoveSpeed = player.MoveSpeed;
 			ret.IsDying = player.IsResetting;
 			ret.JobType = ConvertTool.ToCommunicationJobType(player.Job);
 			ret.CD = player.CD;
@@ -59,6 +60,7 @@ namespace Logic.Server
 			ret.GameObjType = Communication.Proto.GameObjType.Bullet;
 			Basic(bullet, ref ret);
 
+			ret.MoveSpeed = bullet.MoveSpeed;
 			ret.TeamID = bullet.Parent == null ? Team.invalidTeamID : bullet.Parent.TeamID;
 			ret.Ap = bullet.AP;
 			ret.BulletType = ConvertTool.ToCommunicationBulletType(bullet.BulletX);
@@ -72,6 +74,7 @@ namespace Logic.Server
 			ret.GameObjType = Communication.Proto.GameObjType.Prop;
 			Basic(prop, ref ret);
 
+			ret.MoveSpeed = prop.MoveSpeed;
 			ret.PropType = ConvertTool.ToCommunicationPropType(prop.GetPropType());
 			ret.IsLaid = prop.Laid;
 			ret.TeamID = prop.Parent == null ? Team.invalidTeamID : prop.Parent.TeamID;
@@ -103,7 +106,6 @@ namespace Logic.Server
 			ret.X = gameObj.Position.x;
 			ret.Y = gameObj.Position.y;
 			ret.FacingDirection = gameObj.FacingDirection;
-			ret.MoveSpeed = gameObj.MoveSpeed;
 			ret.CanMove = gameObj.CanMove;
 			ret.IsMoving = gameObj.IsMoving;
 			ret.ShapeType = ConvertTool.ToCommunicationShapeType(gameObj.Shape);
