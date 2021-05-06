@@ -6,6 +6,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <atomic>
 
 class BasicModelessDialog
 {
@@ -64,7 +65,29 @@ public:
 		playback::MessageReader^ messageReader;
 	};
 
+	value class MonitorWrapper
+	{
+	public:
+		void Init() { if (lockObj == nullptr) lockObj = gcnew System::Object(); }
+		void Lock() { System::Threading::Monitor::Enter(lockObj); }
+		void Unlock() { System::Threading::Monitor::Exit(lockObj); }
+
+	private:
+		System::Object^ lockObj;
+	};
+
 private:
+
+	MessageReaderWrapper* volatile pMR = nullptr;
+	volatile bool finishConstruct = false;
+	volatile bool successConstruct = false;
+	void GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> messager);
+	std::array<int, 8> teamScores;
+
+	void ChooseFile(bool first = false);
+	std::shared_ptr<volatile bool> msgParserMessager = std::make_shared<volatile bool>(false);
+
+	MonitorWrapper* volatile pauseLock = nullptr;
 
 	class ChooseFileDialog : BasicModelessDialog
 	{
@@ -74,18 +97,11 @@ private:
 		BOOL Begin(HINSTANCE hInst, LPCTSTR hTempName, HWND hWndParent);
 		HWND GetHangle() const { return m_hDlg; }
 	private:
-		int timeInterval = 50;
+		std::atomic_int timeInterval = 50;
 	};
 
 	ChooseFileDialog chooseFileDlg;
 
-	volatile MessageReaderWrapper* pMR = nullptr;
-	volatile bool finishConstruct = false;
-	void GetPMR(System::String^ fileName);
-	std::array<int, 8> teamScores;
-
-	void ChooseFile(bool first = false);
-	std::shared_ptr<volatile bool> msgParserMessager = std::make_shared<volatile bool>(false);
 };
 
 #endif

@@ -72,6 +72,7 @@ namespace GameEngine
 		public bool OutOfBound(GameObject obj) => 
 			obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
 					|| obj.Position.x >= Map.Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius;
+		public bool OutOfBound(IMovable obj) => OutOfBound((GameObject)obj);
 
 		private readonly ArrayList objList;              // 游戏对象（除了玩家外）的列表
 		public ArrayList ObjList => objList;

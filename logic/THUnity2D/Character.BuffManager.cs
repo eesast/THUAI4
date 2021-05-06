@@ -5,10 +5,13 @@ using System.Threading;
 
 namespace THUnity2D
 {
-	public sealed partial class Character
+	public abstract partial class Character
 	{
 
 		private BuffManeger buffManeger;
+
+		public const int MinSpeed = 1;             //最小速度
+		public const int MaxSpeed = int.MaxValue;  //最大速度
 
 		// Buff 管理类
 

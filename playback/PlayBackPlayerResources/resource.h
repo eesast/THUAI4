@@ -13,6 +13,11 @@
 #define IDM_CHOOSEFILE                  2002
 #define IDM_ABOUT                       2003
 #define IDM_EXIT                        2004
+#define IDM_PAUSE                       2005
+#define IDM_RESTART                     2006
+#define IDM_SEERESULT                   2007
+#define IDM_BACKTOHOMEPAGE              2008
+
 #define IDA_MAINMENUACCEL               3001
 #define IDB_BKGND                       3002
 #define IDD_CHOOSESPEEDDLG              4001

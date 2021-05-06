@@ -31,6 +31,18 @@ UI::UI()
 		oneTeamScore = 0;
 	}
 	appendCy = GetSystemMetrics(SM_CYMIN) + GetSystemMetrics(SM_CYMENU);
+
+	std::thread
+	(
+		[this]
+		{
+			MonitorWrapper mw;
+			mw.Init();
+			pauseLock = &mw;
+			while (true) std::this_thread::sleep_for(std::chrono::minutes(100));
+		}
+	).detach();
+	while (pauseLock != nullptr) std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
 UI::MessageReaderWrapper::MessageReaderWrapper(System::String^ fileName)
@@ -38,7 +50,7 @@ UI::MessageReaderWrapper::MessageReaderWrapper(System::String^ fileName)
 	messageReader = gcnew playback::MessageReader(fileName);
 }
 
-void UI::GetPMR(System::String^ fileName)
+void UI::GetPMR(System::String^ fileName, std::shared_ptr<volatile bool> messager)
 {
 	if (finishConstruct) return;
 	bool success = false;
@@ -46,12 +58,13 @@ void UI::GetPMR(System::String^ fileName)
 	{
 		System::Console::WriteLine(fileName);
 		MessageReaderWrapper gm(fileName);
+		successConstruct = true;
 		gm.recentMsg = nullptr;
 		pMR = &gm;
 		finishConstruct = true;
-		while (finishConstruct) { std::this_thread::sleep_for(std::chrono::milliseconds(200)); }
+		while (*messager) { std::this_thread::sleep_for(std::chrono::seconds(2)); }
+		std::this_thread::sleep_for(std::chrono::seconds(5));	// Wait for all accessment to gm to end.
 		success = true;
-		pMR = nullptr;
 	}
 	catch ([[maybe_unused]] playback::FileFormatNotLegalException^ e)
 	{
@@ -126,26 +139,23 @@ int UI::Begin(System::String^ initialFileName)
 		delete[] fileNameStr;
 	}
 
-	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
-		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME,
-		TEXT("THUAI Playback"), wcex);
-
-	MSG msg;
-
 	HMODULE hRes = LoadLibrary(TEXT("PlayBackPlayerResources.dll"));
 	if (hRes == NULL)
 	{
-		MessageBox(m_hWnd, TEXT("Cannot load PlayBackPlayerResources.dll"), TEXT("Error"), MB_OK);
+		MessageBox(GetConsoleWindow(), TEXT("Cannot load PlayBackPlayerResources.dll"), TEXT("Error"), MB_OK);
 		::exit(1);
 	}
 
 	HACCEL hAccel = LoadAccelerators(hRes, MAKEINTRESOURCE(IDA_MAINMENUACCEL));
 	HMENU hMenu = LoadMenu(hRes, MAKEINTRESOURCE(IDM_MAINMENU));
-	SetMenu(m_hWnd, hMenu);
+	EnableMenuItem(hMenu, IDM_RESTART, MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_SEERESULT, MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMenu, IDM_BACKTOHOMEPAGE, MF_BYCOMMAND | MF_GRAYED);
+	
 	hBmBkGnd = (HBITMAP)LoadImage(hRes, MAKEINTRESOURCE(IDB_BKGND), IMAGE_BITMAP, 0, 0, 0);
 	if (hBmBkGnd == NULL)
 	{
-		if (MessageBox(m_hWnd, TEXT("The library PlayBackPlayerResources.dll has been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
+		if (MessageBox(GetConsoleWindow(), TEXT("The library PlayBackPlayerResources.dll has been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
 		{
 			exit(1);
 		}
@@ -157,13 +167,22 @@ int UI::Begin(System::String^ initialFileName)
 
 	if (!chooseFileDlg.Begin(hRes, MAKEINTRESOURCE(IDD_CHOOSESPEEDDLG), m_hWnd))
 	{
-		if (MessageBox(m_hWnd, TEXT("The library PlayBackPlayerResources.dll might have been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
+		if (MessageBox(GetConsoleWindow(), TEXT("The library PlayBackPlayerResources.dll might have been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
 		{
 			exit(1);
 		}
 	}
 
+	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
+		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME,
+		TEXT("THUAI Playback"), wcex);
+
+	SetMenu(m_hWnd, hMenu);
+
 	FreeLibrary(hRes);
+
+
+	MSG msg;
 
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
@@ -216,8 +235,9 @@ chooseFile:
 	beginOpenFile:
 
 	finishConstruct = false;
+	auto newMessager = std::make_shared<volatile bool>(true);
 
-	std::thread([this, &fileName]
+	std::thread([this, &fileName, newMessager]
 	{
 		auto fileNameBytes = gcnew array<System::Byte, 1>(static_cast<int>(wcslen(fileName) * sizeof(WCHAR)));
 		uint8_t* p = (uint8_t*)fileName;
@@ -225,79 +245,65 @@ chooseFile:
 		{
 			fileNameBytes[i] = *p;
 		}
-		GetPMR(System::Text::Encoding::Unicode->GetString(fileNameBytes));
+		GetPMR(System::Text::Encoding::Unicode->GetString(fileNameBytes), newMessager);
 	}).detach();
 
 	while (!finishConstruct) std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-	if (pMR == nullptr)
+	if (!successConstruct)
 	{
 		finishConstruct = false;
 		if (!first) goto chooseFile;
 		else return;
 	}
+	successConstruct = false;
 
 	*msgParserMessager = false;
-	msgParserMessager = std::make_shared<volatile bool>(true);
+	msgParserMessager = newMessager;
 
 	std::thread
 	(
-		[this]
+		[this, newMessager]
 		{
-			playback::MessageReader^ mr = const_cast<MessageReaderWrapper*>(pMR)->MessageReader();
-
-			std::shared_ptr<volatile bool> messager = msgParserMessager;
+			playback::MessageReader^ mr = pMR->MessageReader();
 
 			uint64_t timeExceedCount = 0UL;
 			uint64_t MaxTolerantTimeExceedCount = 5;
 			auto beginTime = System::Environment::TickCount64;
 			auto nextTime = beginTime + chooseFileDlg.TimeInterval();
 
-			while (*messager)
+			while (*newMessager)
 			{
 				Communication::Proto::MessageToClient^ msg = nullptr;
-				for (unsigned i = 0; i < mr->teamCount; ++i)
+
+				pauseLock->Lock();
+
+				try
 				{
-					for (unsigned j = 0; j < mr->playerCount; ++j)
+					for (unsigned i = 0; i < mr->teamCount; ++i)
 					{
-						msg = mr->ReadOne();
-						if (msg == nullptr) goto endParse;
-						teamScores[msg->TeamID] = msg->TeamScore;
-						const_cast<MessageReaderWrapper*>(pMR)->recentMsg = msg;
+						for (unsigned j = 0; j < mr->playerCount; ++j)
+						{
+							msg = mr->ReadOne();
+							if (msg == nullptr) goto endParse;
+							teamScores[msg->TeamID] = msg->TeamScore;
+							pMR->recentMsg = msg;
+						}
 					}
 				}
+				finally { pauseLock->Unlock(); }
 
-				if (msg != nullptr)
-				{
-					auto cellColor = msg->CellColors;
-
-					/*
-					* !! This is a very fuck phenomenon that below will cause an error from Intelligense when coding.
-					* Because calling the default indexer 'cellColor->default[0]' is ok before cpp11
-					* but not after cpp11 because 'default' becomes a keyword in cpp11.
-					* So after cpp11 we can use [] directly as 'cellColor[0]' instead of using the word 'default' to call the default indexer.
-					* Unfortunately and fuckingly, the Intelligense hasn't been updated by Microsoft
-					* so the intelligense will give an error since this syntax is not allowed before cpp11,
-					* although we are writing cpp17 codes.
-					* So ignore these errors "expression must have pointer-to-object or handle-to-C++/CLI-array type"
-					* from Intelligense as long as it can pass the compilation!
-					*/
-					int rows = cellColor->Count, cols = cellColor[0]->RowColors->Count;
-
-					int tmpWidth = (pixelPerCell.x = basicSize / cols) * cols;
-					appendCx = 15 + tmpWidth;
-					width = tmpWidth + appendCx;
-					height = (pixelPerCell.y = basicSize / rows) * rows + appendCy;
-
-					//WINDOWINFO wi;
-					//ZeroMemory(&wi, sizeof(wi));
-					//wi.cbSize = sizeof(wi);
-					//GetWindowInfo(m_hWnd, &wi);
-					//if (wi.rcWindow.right - wi.rcWindow.left != width || wi.rcWindow.bottom - wi.rcWindow.top != height)
-					//{
-					//	MoveWindow(m_hWnd, wi.rcWindow.left, wi.rcWindow.top, width, height, FALSE);
-					//}
-				}
+				//if (msg != nullptr)
+				//{
+				//	//WINDOWINFO wi;
+				//	//ZeroMemory(&wi, sizeof(wi));
+				//	//wi.cbSize = sizeof(wi);
+				//	//GetWindowInfo(m_hWnd, &wi);
+				//	//if (wi.rcWindow.right - wi.rcWindow.left != width || wi.rcWindow.bottom - wi.rcWindow.top != height)
+				//	//{
+				//	//	MoveWindow(m_hWnd, wi.rcWindow.left, wi.rcWindow.top, width, height, FALSE);
+				//	//}
+				//}
 
 				InvalidateRect(m_hWnd, NULL, FALSE);
 
@@ -325,7 +331,13 @@ chooseFile:
 
 		endParse:
 			
+			auto orgPMR = pMR;
 			MessageBox(m_hWnd, TEXT("Game over!"), TEXT("Game over!"), MB_OK);
+			if (orgPMR == pMR)
+			{
+				pMR = nullptr;
+				InvalidateRect(m_hWnd, NULL, FALSE);
+			}
 
 		playOver:;
 		}
@@ -353,6 +365,14 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		basicSize = widCalBasic < heightCalBasic ? widCalBasic : heightCalBasic;
 		break;
 	}
+	case WM_CLOSE:
+	{
+		if (MessageBox(hWnd, TEXT("Do you really want to exit?"), TEXT("Exit"), MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			SendMessage(hWnd, WM_DESTROY, 0, 0);
+		}
+		break;
+	}
 	case WM_COMMAND:
 	{
 		switch (LOWORD(wParam))
@@ -364,12 +384,39 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		case IDM_EXIT:
 		{
-			SendMessage(hWnd, WM_DESTROY, wParam, lParam);
+			SendMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
 		}
 		case IDM_CHOOSEFILE:
 		{
 			ChooseFile();
+			break;
+		}
+		case IDM_PAUSE:
+		{
+			if (pMR == nullptr)
+			{
+				MessageBox(hWnd, TEXT("The player isn't playing any playback files now!"), TEXT("Disabled"), MB_OK | MB_ICONWARNING);
+			}
+			else
+			{
+				pauseLock->Lock();
+				try
+				{
+					MessageBox(hWnd, TEXT("Pausing..."), TEXT("Pausing..."), MB_OK);
+				}
+				finally
+				{
+					pauseLock->Unlock();
+				}
+			}
+			break;
+		}
+		case IDM_RESTART:
+		case IDM_SEERESULT:
+		case IDM_BACKTOHOMEPAGE:
+		{
+			MessageBox(hWnd, TEXT("This function is not available yet. Please stay tuned!"), TEXT("Stay tuned please"), MB_OK | MB_ICONINFORMATION);
 			break;
 		}
 		}
@@ -387,11 +434,35 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		HBITMAP hBmMem = CreateCompatibleBitmap(hdc, clrec.right - clrec.left, clrec.bottom - clrec.top);
 		HBITMAP hBmMemOld = (HBITMAP)SelectObject(hdcMem, hBmMem);
 
+		auto pMR = this->pMR;
+
 		if (pMR != nullptr)
 		{
 
-			auto recentMsg = const_cast<MessageReaderWrapper*>(pMR)->recentMsg;
+			auto recentMsg = pMR->recentMsg;
 			if (recentMsg == nullptr) goto endPaint;
+
+			{
+				auto cellColor = recentMsg->CellColors;
+
+				/*
+				* !! This is a very fuck phenomenon that below will cause an error from Intelligense when coding.
+				* Because calling the default indexer 'cellColor->default[0]' is ok before cpp11
+				* but not after cpp11 because 'default' becomes a keyword in cpp11.
+				* So after cpp11 we can use [] directly as 'cellColor[0]' instead of using the word 'default' to call the default indexer.
+				* Unfortunately and fuckingly, the Intelligense hasn't been updated by Microsoft
+				* so the intelligense will give an error since this syntax is not allowed before cpp11,
+				* although we are writing cpp17 codes.
+				* So ignore these errors "expression must have pointer-to-object or handle-to-C++/CLI-array type"
+				* from Intelligense as long as it can pass the compilation!
+				*/
+				int rows = cellColor->Count, cols = cellColor[0]->RowColors->Count;
+
+				int tmpWidth = (pixelPerCell.x = basicSize / cols) * cols;
+				appendCx = 15 + tmpWidth;
+				width = tmpWidth + appendCx;
+				height = (pixelPerCell.y = basicSize / rows) * rows + appendCy;
+			}
 
 			HPEN hPenNull = (HPEN)GetStockObject(PS_NULL);
 			SelectObject(hdcMem, hPenNull);
@@ -556,10 +627,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				wsout.str(L"");
 			}
 
-			wsout << L"道具图例：\n";
+			wsout << L"道具图例：\n\n";
 			for (auto& p2c : propToChar)
 			{
-				wsout << p2c.second << ": " << propToStr.find(p2c.first)->second << '\n';
+				wsout << p2c.second << L": " << propToStr.find(p2c.first)->second << L'\n';
 			}
 			RECT textRect = { actualWidth + 15 + sigleTeamWidth * teamCount, 15, actualWidth + 15 + sigleTeamWidth * (teamCount + 1), height };
 			DrawTextW(hdcMem, wsout.str().c_str(), static_cast<int>(wsout.str().length()), &textRect, 0);
@@ -737,11 +808,15 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			double actualRate = (clrec.right - clrec.left) / (double)(clrec.bottom - clrec.top);
 			if (rate < actualRate)
 			{
-				StretchBlt(hdcMem, 0, 0, clrec.right - clrec.left, (clrec.right - clrec.left) / rate, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
+				int paintHeight = (clrec.right - clrec.left) / rate;
+				int paintYDest = (paintHeight - (clrec.bottom - clrec.top)) / 2;
+				StretchBlt(hdcMem, 0, -paintYDest, clrec.right - clrec.left, paintHeight, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
 			}
 			else
 			{
-				StretchBlt(hdcMem, 0, 0, (clrec.bottom - clrec.top) * rate, clrec.bottom - clrec.top, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
+				int paintWidth = (clrec.bottom - clrec.top) * rate;
+				int paintXDest = (paintWidth - (clrec.right - clrec.left)) / 2;
+				StretchBlt(hdcMem, -paintXDest, 0, paintWidth, clrec.bottom - clrec.top, hdcBmBkgnd, 0, 0, bkGnd.bmWidth, bkGnd.bmHeight, SRCCOPY);
 			}
 			SelectObject(hdcBmBkgnd, hBmBkgndOld);
 			DeleteDC(hdcBmBkgnd);

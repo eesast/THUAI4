@@ -17,7 +17,7 @@ namespace THUnity2D
 		Job6 = 6,
 		InvalidJobType = int.MaxValue
 	}
-	public sealed partial class Character : GameObject
+	public abstract partial class Character : GameObject, IMovable
 	{
 		public const int basicAp = 1000;
 		public const int basicHp = 6000;
@@ -43,7 +43,25 @@ namespace THUnity2D
 			}
 		}
 
-		public readonly JobType jobType;
+		protected int moveSpeed;
+		public int MoveSpeed
+		{
+			get => moveSpeed;
+			protected set
+			{
+				lock (gameObjLock)
+				{
+					moveSpeed = value;
+				}
+			}
+		}
+
+		private int orgMoveSpeed;
+		public int OrgMoveSpeed { get => orgMoveSpeed; protected set { orgMoveSpeed = value; } }
+
+		public new long Move(Vector displacement) => base.Move(displacement);
+
+		public abstract JobType Job { get; }
 
 		public readonly object propLock = new object();
 		private bool isModifyingProp = false;
@@ -59,7 +77,9 @@ namespace THUnity2D
 			}
 		}
 
-		private int cd;							//人物装弹固有CD
+		public override bool IsRigid => true;
+
+		protected int cd;							//人物装弹固有CD
 		public int CD
 		{
 			get => cd;
@@ -72,12 +92,12 @@ namespace THUnity2D
 				}
 			}
 		}
-		public readonly int orgCD;
+		public int OrgCD { get; protected set; }
 
-		private int maxBulletNum;               //人物最大子弹数
+		protected int maxBulletNum;               //人物最大子弹数
 		public int MaxBulletNum => maxBulletNum;
 
-		private int bulletNum;                  //目前持有的子弹数
+		protected int bulletNum;                  //目前持有的子弹数
 		public int BulletNum => bulletNum;
 		private bool TrySubBulletNum()              //尝试将子弹数量减1
 		{
@@ -101,10 +121,9 @@ namespace THUnity2D
 			}
 		}
 
-		private readonly int maxHp;				//最大血量
-		public int MaxHp => maxHp;
+		public int MaxHp { get; protected set; }				//最大血量
 
-		private int hp;							//当前血量
+		protected int hp;						//当前血量
 		public int HP => hp;
 		public void AddHp(int add)				//加血
 		{
@@ -135,21 +154,27 @@ namespace THUnity2D
 			}
 		}
 
-		public void BeAttack(int subHP, bool hasSpear, Character? attacker)	//遭到攻击
+		private object beAttackedLock = new object();
+		public bool BeAttack(int subHP, bool hasSpear, Character? attacker)	//遭到攻击，如果因为此次攻击致死则返回 true
 		{
-			if (attacker.TeamID != this.TeamID)
+			lock (beAttackedLock)
 			{
-				if (hasSpear || !HasShield) SubHp(subHP);
-				if (hp <= 0) TryActivatingTotem();
-				if (jobType == JobType.Job6) attacker?.BeBounced(subHP * 3 / 4, this.HasSpear, this);   //职业6可以反弹伤害
-			}
-			else if (attacker?.jobType == JobType.Job6)
-			{
-				AddHp(subHP * 6);				// 职业六回血6倍
-			}
+				if (hp <= 0) return false;
+				if (attacker.TeamID != this.TeamID)
+				{
+					if (hasSpear || !HasShield) SubHp(subHP);
+					if (hp <= 0) TryActivatingTotem();
+					if (Job == JobType.Job6) attacker?.BeBounced(subHP * 3 / 4, this.HasSpear, this);   //职业6可以反弹伤害
+				}
+				else if (attacker?.Job == JobType.Job6)
+				{
+					AddHp(subHP * 6);               // 职业六回血6倍
+				}
+				return hp <= 0;
+			}	
 		}
 
-		private void BeBounced(int subHP, bool hasSpear, Character? attacker)	//遭到反弹
+		private void BeBounced(int subHP, bool hasSpear, Character? bouncer)	//遭到反弹
 		{
 			if (hasSpear || !HasShield)
 			{
@@ -164,8 +189,8 @@ namespace THUnity2D
 
 		public const int MinAP = 0;
 		public const int MaxAP = int.MaxValue;
-		public readonly int orgAp;      //固有攻击力
-		private int ap;                 //当前攻击力
+		public int OrgAp { get; protected set; }		//固有攻击力
+		protected int ap;								//当前攻击力
 		public int AP
 		{
 			get => ap;
@@ -195,13 +220,14 @@ namespace THUnity2D
 			}
 		}
 
-		public readonly BulletType bulletType;	//人物的发射子弹类型，射程伤害等信息存在子弹里
+		public abstract BulletType Bullet { get; } //人物的发射子弹类型，射程伤害等信息存在子弹里
 
-		public bool Attack()					//进行一次攻击
+		public Bullet? Attack(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)		//进行一次攻击
 		{
-			if (TrySubBulletNum()) return true;
-			else return false;
+			if (TrySubBulletNum()) return ProduceOneBullet(posOffset, bulletRadius, basicBulletMoveSpeed);
+			else return null;
 		}
+		protected abstract Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed);
 
 		public Prop? UseProp()					//使用手中道具，将道具返回给外部
 		{
@@ -213,6 +239,19 @@ namespace THUnity2D
 			}
 		}
 
+		public override bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
+		{
+			if (targetObj is BirthPoint && object.ReferenceEquals(((BirthPoint)targetObj).Parent, this))         // 自己的出生点可以忽略碰撞
+			{
+				return false;
+			}
+			else if (targetObj is Mine && ((Mine)targetObj).Parent.TeamID == TeamID)          // 自己队的炸弹忽略碰撞
+			{
+				return false;
+			}
+			return base.WillCollideWith(targetObj, nextPos);
+		}
+		
 		private int score;						//当前分数
 		public int Score => score;
 		public void AddScore(int add)
@@ -235,10 +274,11 @@ namespace THUnity2D
 
 		public override void Reset()
 		{
-			++lifeNum;
+			AddLifeNum();
 			base.Reset();
-			hp = maxHp;
-			ap = orgAp;
+			this.moveSpeed = orgMoveSpeed;
+			hp = MaxHp;
+			ap = OrgAp;
 			holdProp = null;
 			bulletNum = maxBulletNum / 2;
 			buffManeger.ClearAll();
@@ -261,9 +301,9 @@ namespace THUnity2D
 
 		public void AddMoveSpeed(double add, int buffTime) => buffManeger.AddMoveSpeed(add, buffTime, newVal => { MoveSpeed = newVal; }, OrgMoveSpeed);
 
-		public void AddAP(double add, int buffTime) => buffManeger.AddAP(add, buffTime, newVal => { AP = newVal; }, orgAp);
+		public void AddAP(double add, int buffTime) => buffManeger.AddAP(add, buffTime, newVal => { AP = newVal; }, OrgAp);
 
-		public void ChangeCD(double discount, int buffTime) => buffManeger.ChangeCD(discount, buffTime, newVal => { CD = newVal; }, orgCD);
+		public void ChangeCD(double discount, int buffTime) => buffManeger.ChangeCD(discount, buffTime, newVal => { CD = newVal; }, OrgCD);
 
 		public void AddShield(int shieldTime) => buffManeger.AddShield(shieldTime);
 		public bool HasShield => buffManeger.HasShield;
@@ -278,89 +318,180 @@ namespace THUnity2D
 		{
 			if (buffManeger.TryActivatingTotem())
 			{
-				hp = maxHp;
+				hp = MaxHp;
 			}
 		}
 
 		#endregion
 
-		public Character(XYPosition initPos, int radius, JobType jobType, int basicMoveSpeed) : base(initPos, radius, true, basicMoveSpeed, ShapeType.Circle)
+		/// <summary>
+		/// Construct a character
+		/// </summary>
+		/// <returns>A handle to the character</returns>
+		static public Character? GetCharacter(XYPosition initPos, int radius, int basicMoveSpeed, JobType job)
+		{
+			switch (job)
+			{
+				case JobType.Job0: return new Character0(initPos, radius, basicMoveSpeed);
+				case JobType.Job1: return new Character1(initPos, radius, basicMoveSpeed);
+				case JobType.Job2: return new Character2(initPos, radius, basicMoveSpeed);
+				case JobType.Job3: return new Character3(initPos, radius, basicMoveSpeed);
+				case JobType.Job4: return new Character4(initPos, radius, basicMoveSpeed);
+				case JobType.Job5: return new Character5(initPos, radius, basicMoveSpeed);
+				case JobType.Job6: return new Character6(initPos, radius, basicMoveSpeed);
+			}
+			return null;
+		}
+
+		public Character(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, ShapeType.Circle)
 		{
 			buffManeger = new BuffManeger();
 
 			score = 0;
-			this.jobType = jobType;
-
-			switch (jobType)
-			{
-			default:
-			case JobType.Job0:
-				cd = orgCD = basicCD;
-				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp;
-				ap = orgAp = basicAp;
-				holdProp = null;
-				bulletType = BulletType.Bullet0;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
-				break;
-			case JobType.Job1:
-				cd = orgCD = basicCD;
-				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp * 4 / 3;
-				ap = orgAp = basicAp * 3 / 4;
-				holdProp = null;
-				bulletType = BulletType.Bullet1;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
-				break;
-			case JobType.Job2:
-				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum * 2 / 3;
-				hp = maxHp = basicHp;
-				ap = orgAp = basicAp * 5 / 4;
-				holdProp = null;
-				bulletType = BulletType.Bullet2;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed / 3;
-				break;
-			case JobType.Job3:
-				cd = orgCD = basicCD * 3;
-				bulletNum = maxBulletNum = basicBulletNum / 2;
-				hp = maxHp = basicHp * 2 / 5;
-				ap = orgAp = basicAp * 3 / 8;
-				holdProp = null;
-				bulletType = BulletType.Bullet3;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3 / 2;
-				break;
-			case JobType.Job4:
-				cd = orgCD = basicCD * 4;
-				bulletNum = maxBulletNum = basicBulletNum / 4;
-				hp = maxHp = basicHp * 2 / 3;
-				ap = orgAp = basicAp * 7 / 2;
-				holdProp = null;
-				bulletType = BulletType.Bullet4;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
-				break;
-			case JobType.Job5:
-				cd = orgCD = basicCD * 2;
-				bulletNum = maxBulletNum = basicBulletNum / 3;
-				hp = maxHp = basicHp * 2 / 3;
-				ap = orgAp = basicAp * 4;
-				holdProp = null;
-				bulletType = BulletType.Bullet5;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
-				break;
-			case JobType.Job6:
-				cd = orgCD = basicCD;
-				bulletNum = maxBulletNum = basicBulletNum;
-				hp = maxHp = basicHp * 2;
-				ap = orgAp = basicAp / 2;
-				holdProp = null;
-				bulletType = BulletType.Bullet6;
-				MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
-				break;
-			}
+			holdProp = null;
 
 			Debug(this, " constructed!");
 		}
 
+	}
+
+	internal sealed class Character0 : Character
+	{
+		public Character0(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD;
+			bulletNum = maxBulletNum = basicBulletNum;
+			hp = MaxHp = basicHp;
+			ap = OrgAp = basicAp;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
+		}
+
+		public override JobType Job => JobType.Job0;
+		public override BulletType Bullet => BulletType.Bullet0;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet0(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
+	}
+
+	internal sealed class Character1 : Character
+	{
+		public Character1(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD;
+			bulletNum = maxBulletNum = basicBulletNum;
+			hp = MaxHp = basicHp * 4 / 3;
+			ap = OrgAp = basicAp * 3 / 4;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
+		}
+
+		public override JobType Job => JobType.Job1;
+		public override BulletType Bullet => BulletType.Bullet1;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet1(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
+	}
+
+	internal sealed class Character2 : Character
+	{
+		public Character2(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD * 2;
+			bulletNum = maxBulletNum = basicBulletNum * 2 / 3;
+			hp = MaxHp = basicHp;
+			ap = OrgAp = basicAp * 5 / 4;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed / 3;
+		}
+
+		public override JobType Job => JobType.Job2;
+		public override BulletType Bullet => BulletType.Bullet2;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet2(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
+	}
+
+	internal sealed class Character3 : Character
+	{
+		public Character3(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD * 3;
+			bulletNum = maxBulletNum = basicBulletNum / 2;
+			hp = MaxHp = basicHp * 2 / 5;
+			ap = OrgAp = basicAp * 3 / 8;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 3 / 2;
+		}
+
+		public override JobType Job => JobType.Job3;
+		public override BulletType Bullet => BulletType.Bullet3;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet3(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
+	}
+
+	internal sealed class Character4 : Character
+	{
+		public Character4(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD * 4;
+			bulletNum = maxBulletNum = basicBulletNum / 4;
+			hp = MaxHp = basicHp * 2 / 3;
+			ap = OrgAp = basicAp * 7 / 2;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
+		}
+
+		public override JobType Job => JobType.Job4;
+		public override BulletType Bullet => BulletType.Bullet4;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet4(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
+	}
+
+	internal sealed class Character5 : Character
+	{
+		public Character5(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD * 2;
+			bulletNum = maxBulletNum = basicBulletNum / 3;
+			hp = MaxHp = basicHp * 2 / 3;
+			ap = OrgAp = basicAp * 4;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed * 2;
+		}
+
+		public override JobType Job => JobType.Job5;
+		public override BulletType Bullet => BulletType.Bullet5;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet5(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
+	}
+
+	internal sealed class Character6 : Character
+	{
+		public Character6(XYPosition initPos, int radius, int basicMoveSpeed) : base(initPos, radius, basicMoveSpeed)
+		{
+			cd = OrgCD = basicCD;
+			bulletNum = maxBulletNum = basicBulletNum;
+			hp = MaxHp = basicHp * 2;
+			ap = OrgAp = basicAp / 2;
+			MoveSpeed = OrgMoveSpeed = basicMoveSpeed;
+		}
+
+		public override JobType Job => JobType.Job6;
+		public override BulletType Bullet => BulletType.Bullet6;
+
+		protected override Bullet ProduceOneBullet(XYPosition posOffset, int bulletRadius, int basicBulletMoveSpeed)
+		{
+			return new Bullet6(Position + posOffset, bulletRadius, basicBulletMoveSpeed, ap, HasSpear);
+		}
 	}
 }

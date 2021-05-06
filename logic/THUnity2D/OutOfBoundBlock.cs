@@ -3,6 +3,8 @@ namespace THUnity2D
 {
 	public class OutOfBoundBlock : Obj
 	{
-		public OutOfBoundBlock(XYPosition initPos) : base(initPos, int.MaxValue, true, 0, ObjType.OutOfBoundBlock, ShapeType.Square) { }
+		public OutOfBoundBlock(XYPosition initPos) : base(initPos, int.MaxValue, ObjType.OutOfBoundBlock, ShapeType.Square) { }
+
+		public override bool IsRigid => true;
 	}
 }

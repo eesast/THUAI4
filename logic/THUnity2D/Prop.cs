@@ -18,7 +18,7 @@
 		Divider = 10
 	}
 
-	public abstract class Prop : Obj
+	public abstract class Prop : Obj, IMovable
 	{
 		public const int MinPropTypeNum = 1;
 		public const int MaxPropTypeNum = 10;
@@ -26,9 +26,25 @@
 		protected bool laid = false;		//道具是否已放置
 		public bool Laid => laid;
 
+		public override bool IsRigid => true;
+
 		public abstract PropType GetPropType();
 
-		
+		protected int moveSpeed = 0;
+		public int MoveSpeed
+		{
+			get => moveSpeed;
+			protected set
+			{
+				lock (gameObjLock)
+				{
+					moveSpeed = value;
+				}
+			}
+		}
+
+		public new long Move(Vector displacement) => base.Move(displacement);
+
 		public void ResetPosition(XYPosition pos)
 		{
 			Position = pos;
@@ -38,7 +54,12 @@
 			MoveSpeed = newMoveSpeed;
 		}
 
-		public Prop(XYPosition initPos, int radius) : base(initPos, radius, true, 0, ObjType.Prop, ShapeType.Square) { }
+		public override bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
+		{
+			return false;
+		}
+
+		public Prop(XYPosition initPos, int radius) : base(initPos, radius, ObjType.Prop, ShapeType.Square) { }
 	}
 
 	public abstract class Buff : Prop

@@ -38,7 +38,7 @@ namespace THUnity2D
 			}
 		}
 
-		public Obj(XYPosition initPos, int radius, bool isRigid, int moveSpeed, ObjType objType, ShapeType shape) : base(initPos, radius, isRigid, moveSpeed, shape)
+		public Obj(XYPosition initPos, int radius, ObjType objType, ShapeType shape) : base(initPos, radius, shape)
 		{
 			this.objType = objType;
 
