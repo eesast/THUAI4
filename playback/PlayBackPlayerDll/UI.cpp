@@ -139,16 +139,10 @@ int UI::Begin(System::String^ initialFileName)
 		delete[] fileNameStr;
 	}
 
-	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
-		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME,
-		TEXT("THUAI Playback"), wcex);
-
-	MSG msg;
-
 	HMODULE hRes = LoadLibrary(TEXT("PlayBackPlayerResources.dll"));
 	if (hRes == NULL)
 	{
-		MessageBox(m_hWnd, TEXT("Cannot load PlayBackPlayerResources.dll"), TEXT("Error"), MB_OK);
+		MessageBox(GetConsoleWindow(), TEXT("Cannot load PlayBackPlayerResources.dll"), TEXT("Error"), MB_OK);
 		::exit(1);
 	}
 
@@ -157,11 +151,11 @@ int UI::Begin(System::String^ initialFileName)
 	EnableMenuItem(hMenu, IDM_RESTART, MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMenu, IDM_SEERESULT, MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMenu, IDM_BACKTOHOMEPAGE, MF_BYCOMMAND | MF_GRAYED);
-	SetMenu(m_hWnd, hMenu);
+	
 	hBmBkGnd = (HBITMAP)LoadImage(hRes, MAKEINTRESOURCE(IDB_BKGND), IMAGE_BITMAP, 0, 0, 0);
 	if (hBmBkGnd == NULL)
 	{
-		if (MessageBox(m_hWnd, TEXT("The library PlayBackPlayerResources.dll has been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
+		if (MessageBox(GetConsoleWindow(), TEXT("The library PlayBackPlayerResources.dll has been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
 		{
 			exit(1);
 		}
@@ -173,13 +167,22 @@ int UI::Begin(System::String^ initialFileName)
 
 	if (!chooseFileDlg.Begin(hRes, MAKEINTRESOURCE(IDD_CHOOSESPEEDDLG), m_hWnd))
 	{
-		if (MessageBox(m_hWnd, TEXT("The library PlayBackPlayerResources.dll might have been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
+		if (MessageBox(GetConsoleWindow(), TEXT("The library PlayBackPlayerResources.dll might have been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
 		{
 			exit(1);
 		}
 	}
 
+	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
+		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME,
+		TEXT("THUAI Playback"), wcex);
+
+	SetMenu(m_hWnd, hMenu);
+
 	FreeLibrary(hRes);
+
+
+	MSG msg;
 
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
