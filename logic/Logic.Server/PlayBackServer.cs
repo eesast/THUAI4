@@ -191,10 +191,7 @@ namespace Logic.Server
 			}
 			finally
 			{
-				if (teamScore == null)
-				{
-					teamScore = new int[0];
-				}
+				teamScore ??= new int[0];
 			}
 		}
 
