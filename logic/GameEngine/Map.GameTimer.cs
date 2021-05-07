@@ -9,7 +9,7 @@ namespace GameEngine
 		public GameTimer Timer => timer;
 		public class GameTimer
 		{
-			private bool isGaming;
+			private bool isGaming = false;
 			public bool IsGaming => isGaming;
 			object isGamingLock = new object();
 

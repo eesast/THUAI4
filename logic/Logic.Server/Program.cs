@@ -35,14 +35,16 @@ namespace Logic.Server
 				return 1;
 			}
 
+			server.WaitForGame();
+
 			Console.WriteLine($"Final score: ");
 			for (int i = 0; i < server.TeamCount; ++i)
 			{
 				Console.WriteLine($"Team {i}: {server.GetTeamScore(i)}");
 			}
 
-			if (!server.IsWebCompetition)
-			{
+			if (server.ForManualOperation)
+			{	
 				Console.WriteLine("Press any key to continue...");
 				Console.ReadKey();
 			}
