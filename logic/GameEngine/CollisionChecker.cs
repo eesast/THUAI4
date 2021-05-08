@@ -24,16 +24,16 @@ namespace GameEngine
 			}
 
 			//在某列表中检查碰撞
-			Func<ArrayList, ReaderWriterLockSlim, GameObject> CheckCollisionInList =
-				(ArrayList lst, ReaderWriterLockSlim listLock) =>
+			Func<IList, ReaderWriterLockSlim, GameObject?> CheckCollisionInList =
+				(IList lst, ReaderWriterLockSlim listLock) =>
 				{
 					GameObject? collisionObj = null;
 					listLock.EnterReadLock();
 					try
 					{
-						foreach (GameObject listObj in lst)
+						foreach (GameObject? listObj in lst)
 						{
-							if (obj.WillCollideWith(listObj, nextPos))
+							if (listObj != null && obj.WillCollideWith(listObj, nextPos))
 							{
 								collisionObj = listObj;
 								break;
@@ -44,7 +44,7 @@ namespace GameEngine
 					return collisionObj;
 				};
 
-			GameObject collisionObj = null;
+			GameObject? collisionObj = null;
 			foreach (var list in lists)
 			{
 				if ((collisionObj = CheckCollisionInList(list.Item1, list.Item2)) != null)
@@ -80,10 +80,10 @@ namespace GameEngine
 				listLock.EnterReadLock();
 				try
 				{
-					foreach (GameObject listObj in lst)
+					foreach (GameObject? listObj in lst)
 					{
 						//如果再走一步发生碰撞
-						if (obj.WillCollideWith(listObj, nextPos))
+						if (listObj != null && obj.WillCollideWith(listObj, nextPos))
 						{
 							switch (listObj.Shape)  //默认obj为圆形
 							{
@@ -158,15 +158,15 @@ namespace GameEngine
 		}
 
 		Map gameMap;
-		private Tuple<ArrayList, ReaderWriterLockSlim>[] lists;
+		private Tuple<IList, ReaderWriterLockSlim>[] lists;
 
 		public CollisionChecker(Map gameMap)
 		{
 			this.gameMap = gameMap;
-			lists = new Tuple<ArrayList, ReaderWriterLockSlim>[]
+			lists = new Tuple<IList, ReaderWriterLockSlim>[]
 			{
-				new Tuple<ArrayList, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
-				new Tuple<ArrayList, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
+				new Tuple<IList, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
+				new Tuple<IList, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
 			};
 		}
 	}

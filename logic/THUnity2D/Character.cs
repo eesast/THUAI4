@@ -160,7 +160,7 @@ namespace THUnity2D
 			lock (beAttackedLock)
 			{
 				if (hp <= 0) return false;
-				if (attacker.TeamID != this.TeamID)
+				if (!(attacker?.TeamID == this.TeamID))
 				{
 					if (hasSpear || !HasShield) SubHp(subHP);
 					if (hp <= 0) TryActivatingTotem();
@@ -245,7 +245,7 @@ namespace THUnity2D
 			{
 				return false;
 			}
-			else if (targetObj is Mine && ((Mine)targetObj).Parent.TeamID == TeamID)          // 自己队的炸弹忽略碰撞
+			else if (targetObj is Mine && ((Mine)targetObj).Parent?.TeamID == TeamID)          // 自己队的炸弹忽略碰撞
 			{
 				return false;
 			}

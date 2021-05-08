@@ -1,6 +1,6 @@
 ﻿using GameEngine;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
 using Timothy.FrameRateTask;
@@ -114,7 +114,7 @@ namespace Gaming
 					finally { gameMap.PlayerListLock.ExitWriteLock(); }
 					playerBeingShot.Reset();
 
-					bullet.Parent.AddScore(Map.Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
+					bullet.Parent?.AddScore(Map.Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
 
 					new Thread
 						(() =>
@@ -157,7 +157,7 @@ namespace Gaming
 				gameMap.ObjListLock.EnterWriteLock();
 				try
 				{
-					foreach (GameObject obj in gameMap.ObjList)
+					foreach (Obj obj in gameMap.ObjList)
 					{
 						if (obj.ID == bullet.ID)
 						{
@@ -208,7 +208,8 @@ namespace Gaming
 					if (colorCellX < 0 || colorCellX >= gameMap.Rows || colorCellY < 0 || colorCellY >= gameMap.Cols) continue;
 					if (!cannotColor[colorCellX, colorCellY])
 					{
-						gameMap.SetCellColor(colorCellX, colorCellY, Map.TeamToColor(bullet.Parent.TeamID));
+						if (bullet.Parent != null)
+							gameMap.SetCellColor(colorCellX, colorCellY, Map.TeamToColor(bullet.Parent.TeamID));
 					}
 				}
 
@@ -218,7 +219,7 @@ namespace Gaming
 					attackRange[i].x += cellX;
 					attackRange[i].y += cellY;
 				}
-				ArrayList willBeAttacked = new ArrayList();
+				var willBeAttacked = new List<GameObject>();
 				gameMap.PlayerListLock.EnterReadLock();
 				try
 				{

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
 
 //队伍
 
@@ -20,13 +20,13 @@ namespace THUnity2D
 				int score = 0;
 				foreach (var player in playerList)
 				{
-					score += ((Character)player).Score;
+					score += player.Score;
 				}
 				return score;
 			}
 		}
 
-		private ArrayList playerList;
+		private List<Character> playerList;
 
 		public Character? GetPlayer(long playerID)
 		{
@@ -41,7 +41,7 @@ namespace THUnity2D
 		}
 
 		//并发不安全，请谨慎使用此方法，目前此方法仅由 Map 的 GetGameObject 调用，其余地方不要调用
-		public ArrayList GetPlayerListForUnsafe()
+		public List<Character> GetPlayerListForUnsafe()
 		{
 			return playerList;
 		}
@@ -55,13 +55,13 @@ namespace THUnity2D
 			int i;
 			for (i = 0; i < playerList.Count; ++i)
 			{
-				if (((Character)playerList[i]).ID == playerID) break;
+				if (playerList[i].ID == playerID) break;
 			}
 			playerList.RemoveAt(i);
 		}
 		public void ClearPlayer()
 		{
-			playerList = ArrayList.Synchronized(new ArrayList());
+			playerList = new List<Character>();
 		}
 		public long[] GetPlayerIDs()
 		{
@@ -80,7 +80,7 @@ namespace THUnity2D
 		public Team()
 		{
 			teamID = currentMaxTeamID++;
-			playerList = ArrayList.Synchronized(new ArrayList());
+			playerList = new List<Character>();
 		}
 	}
 }

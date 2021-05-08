@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
 
@@ -74,13 +73,13 @@ namespace GameEngine
 					|| obj.Position.x >= Map.Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius;
 		public bool OutOfBound(IMovable obj) => OutOfBound((GameObject)obj);
 
-		private readonly ArrayList objList;              // 游戏对象（除了玩家外）的列表
-		public ArrayList ObjList => objList;
-		private readonly ReaderWriterLockSlim objListLock;       // 读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的ArrayList
+		private readonly List<Obj> objList;              // 游戏对象（除了玩家外）的列表
+		public List<Obj> ObjList => objList;
+		private readonly ReaderWriterLockSlim objListLock;       // 读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的集合
 		public ReaderWriterLockSlim ObjListLock => objListLock;
 
-		private readonly ArrayList playerList;           // 玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList
-		public ArrayList PlayerList => playerList;
+		private readonly List<Character> playerList;           // 玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList
+		public List<Character> PlayerList => playerList;
 		private readonly ReaderWriterLockSlim playerListLock;
 		public ReaderWriterLockSlim PlayerListLock => playerListLock;
 
@@ -120,8 +119,8 @@ namespace GameEngine
 				}
 
 			//创建列表
-			objList = new ArrayList();
-			playerList = new ArrayList();
+			objList = new List<Obj>();
+			playerList = new List<Character>();
 			objListLock = new ReaderWriterLockSlim();
 			playerListLock = new ReaderWriterLockSlim();
 

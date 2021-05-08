@@ -4,11 +4,13 @@ namespace Logic.Server
 {
 	public static class ConvertTool			//用于通信所用类型与游戏内部所用类型之间的转换
 	{
-		private static D AllEnums<S, D>(S src, D defaultVal)	//应用反射转换枚举成员名相同的枚举类型，若转换失败则使用默认值defaultVal
+		private static D AllEnums<S, D>(S src, D defaultVal)    //应用反射转换枚举成员名相同的枚举类型，若转换失败则使用默认值defaultVal
+			where S : notnull
+			where D : notnull
 		{
 			try
 			{
-				return (D)Enum.Parse(typeof(D), src.ToString());
+				return (D)Enum.Parse(typeof(D), src.ToString() ?? "");
 			}
 			catch
 			{

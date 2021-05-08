@@ -1,6 +1,6 @@
 ﻿using GameEngine;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
 using Timothy.FrameRateTask;
@@ -24,7 +24,7 @@ namespace Gaming
 		
 		public const int maxTeamNum = 4;
 		private const long checkColorInterval = 50;		// 检查脚下颜色间隔时间
-		private ArrayList teamList;                     // 队伍列表
+		private List<Team> teamList;                     // 队伍列表
 		//private object teamListLock = new object();	// 队伍暂时不需要锁
 		private readonly int numOfTeam;
 
@@ -40,7 +40,7 @@ namespace Gaming
 
 			gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent = newPlayer;
 			gameMap.PlayerListLock.EnterWriteLock(); try { gameMap.PlayerList.Add(newPlayer); } finally { gameMap.PlayerListLock.ExitWriteLock(); }
-			((Team)teamList[(int)playerInitInfo.teamID]).AddPlayer(newPlayer);
+			teamList[(int)playerInitInfo.teamID].AddPlayer(newPlayer);
 			newPlayer.TeamID = playerInitInfo.teamID;
 
 			//设置出生点的颜色
@@ -219,9 +219,9 @@ namespace Gaming
 		/// <summary>
 		/// 获取当前场上的对象，和已经下场的玩家
 		/// </summary>
-		public ArrayList GetGameObject()
+		public List<GameObject> GetGameObject()
 		{
-			ArrayList gameObjList = new ArrayList();
+			var gameObjList = new List<GameObject>();
 			foreach (Team team in teamList)     // team 只有在开始游戏之前被修改，开始之后是只读的，因此不须加锁
 			{
 				gameObjList.AddRange(team.GetPlayerListForUnsafe());
@@ -246,7 +246,7 @@ namespace Gaming
 
 		public long[] GetPlayerIDsOfTheTeam(long teamID)
 		{
-			return ((Team)teamList[(int)teamID]).GetPlayerIDs();
+			return teamList[(int)teamID].GetPlayerIDs();
 		}
 
 		/// <summary>
@@ -275,7 +275,7 @@ namespace Gaming
 
 			//加入队伍
 			this.numOfTeam = numOfTeam;
-			teamList = new ArrayList();
+			teamList = new List<Team>();
 			for (int i = 0; i < numOfTeam; ++i)
 			{
 				teamList.Add(new Team());
