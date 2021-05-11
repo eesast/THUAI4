@@ -163,6 +163,7 @@ namespace Logic.Server
 #if DEBUG
 			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}");
 #endif
+			if (double.IsNaN(msg.Angle) || double.IsInfinity(msg.Angle)) msg.Angle = 0.0;
 			switch (msg.MessageType)
 			{
 				case MessageType.AddPlayer:
