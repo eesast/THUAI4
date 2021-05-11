@@ -1,8 +1,11 @@
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
+
 /// <summary>
 /// 出生点类
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
 	public class BirthPoint : Obj
 	{

@@ -4,7 +4,7 @@
 /// 一些必要的运算函数储存在Tools类里
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.Utility
 {
 	public static class Tools
 	{

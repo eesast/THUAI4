@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 using Timothy.FrameRateTask;
 
 namespace Gaming
@@ -101,7 +103,7 @@ namespace Gaming
 			/// <param name="playerBeingShot">被打到的玩家</param>
 			private void BombOnePlayer(Bullet bullet, Character playerBeingShot)
 			{
-				if (playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, bullet.Parent))                //如果打死了
+				if (playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, (Character?)bullet.Parent))                //如果打死了
 				{
 					//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
 					playerBeingShot.CanMove = false;
@@ -114,7 +116,7 @@ namespace Gaming
 					finally { gameMap.PlayerListLock.ExitWriteLock(); }
 					playerBeingShot.Reset();
 
-					bullet.Parent?.AddScore(Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
+					((Character?)bullet.Parent)?.AddScore(Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
 
 					new Thread
 						(() =>
@@ -149,7 +151,7 @@ namespace Gaming
 			/// <param name="objBeingShot">子弹打到的物体，如果为null，则未打到物体便爆炸，例如越界或被其他子弹引爆</param>
 			private void BulletBomb(Bullet bullet, GameObject? objBeingShot)
 			{
-				GameObject.Debug(bullet, " bombed!");
+				Debugger.Output(bullet, " bombed!");
 				/*子弹要爆炸时的行为*/
 
 				bullet.CanMove = false;
@@ -278,7 +280,7 @@ namespace Gaming
 						},
 						EndMove: obj =>
 						{
-							GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
+							Debugger.Output(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 							BulletBomb((Bullet)obj, null);
 						}
 					);

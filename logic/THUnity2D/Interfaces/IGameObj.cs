@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using THUnity2D.Utility;
 
-namespace THUnity2D
+namespace THUnity2D.Interfaces
 {
+
 	public enum ShapeType
 	{
 		Null = 0,
 		Circle = 1,
 		Square = 2
-	}
-
-	public enum GameObjType
-	{
-		Character = 0,
-		Obj = 1
 	}
 
 	public interface IGameObj

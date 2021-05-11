@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 
 namespace GameEngine
 {
@@ -19,7 +20,7 @@ namespace GameEngine
 
 			if (!obj.IsRigid)
 			{
-				if (gameMap.OutOfBound(obj)) return new OutOfBoundBlock(nextPos);
+				if (gameMap.OutOfBound(obj)) return gameMap.GetOutOfBoundBlock(nextPos);
 				return null;
 			}
 
@@ -56,7 +57,7 @@ namespace GameEngine
 			//如果越界，则与越界方块碰撞
 			if (gameMap.OutOfBound(obj))
 			{
-				return new OutOfBoundBlock(nextPos);
+				return gameMap.GetOutOfBoundBlock(nextPos);
 			}
 
 			return null;

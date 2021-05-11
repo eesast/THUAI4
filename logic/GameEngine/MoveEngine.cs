@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 using Timothy.FrameRateTask;
 
 namespace GameEngine
@@ -54,7 +56,7 @@ namespace GameEngine
 						obj.IsMoving = true;     //开始移动
 					}
 
-					GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
+					Debugger.Output(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
 					double deltaLen = 0.0;      //储存行走的误差
 					Vector moveVec = new Vector(moveDirection, 0.0);
 					//先转向
@@ -82,7 +84,7 @@ namespace GameEngine
 								{
 									case AfterCollision.ContinueCheck: goto Check;
 									case AfterCollision.Destroyed:
-										GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+										Debugger.Output(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
 										isDestroyed = true;
 										return false;
 									case AfterCollision.MoveMax:
@@ -114,7 +116,7 @@ namespace GameEngine
 									{
 										case AfterCollision.ContinueCheck: goto Check;
 										case AfterCollision.Destroyed:
-											GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+											Debugger.Output(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
 											isDestroyed = true;
 											break;
 										case AfterCollision.MoveMax:

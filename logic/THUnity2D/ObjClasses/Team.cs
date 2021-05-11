@@ -2,7 +2,7 @@
 
 //队伍
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
 	// 队伍类。此类并发不安全，须谨慎使用（需要并发安全须额外加锁）
 	public class Team

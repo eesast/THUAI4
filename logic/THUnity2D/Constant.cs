@@ -1,4 +1,7 @@
-﻿namespace THUnity2D
+﻿using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
+
+namespace THUnity2D
 {
 	public static class Constant
 	{

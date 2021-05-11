@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using THUnity2D.Utility;
 
-namespace THUnity2D
+namespace THUnity2D.Interfaces
 {
 	public interface IMovable : IGameObj
 	{

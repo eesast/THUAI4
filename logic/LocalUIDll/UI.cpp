@@ -84,8 +84,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (job2 < 0 || job2 >= 7) job2 = 0;
 		}
 
-		player1ID = game->AddPlayer(Gaming::Game::PlayerInitInfo(0u, THUnity2D::JobType(job1), 0));
-		player2ID = game->AddPlayer(Gaming::Game::PlayerInitInfo(1u, THUnity2D::JobType(job2), 1));
+		player1ID = game->AddPlayer(Gaming::Game::PlayerInitInfo(0u, THUnity2D::ObjClasses::JobType(job1), 0));
+		player2ID = game->AddPlayer(Gaming::Game::PlayerInitInfo(1u, THUnity2D::ObjClasses::JobType(job2), 1));
 		
 		MoveWindow(hWnd, 0, 0, width + 15, height, FALSE);
 
@@ -160,9 +160,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				if (PPress)
 				{
-					for (int i = THUnity2D::Prop::MinPropTypeNum; i <= THUnity2D::Prop::MaxPropTypeNum; ++i)
+					for (int i = THUnity2D::ObjClasses::Prop::MinPropTypeNum; i <= THUnity2D::ObjClasses::Prop::MaxPropTypeNum; ++i)
 					{
-						if (game->Pick(playerID, static_cast<THUnity2D::PropType>(i))) break;
+						if (game->Pick(playerID, static_cast<THUnity2D::ObjClasses::PropType>(i))) break;
 					}
 				}
 				else if (UPress)
@@ -263,7 +263,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			wsout.imbue(std::locale("chs"));
 
-			auto generatePlayerInfoStr = [&wsout](THUnity2D::Character^ hPlayer, long long id)
+			auto generatePlayerInfoStr = [&wsout](THUnity2D::ObjClasses::Character^ hPlayer, long long id)
 			{
 				wsout << L"玩家" << std::to_wstring(id) << L"：\n生命：" << hPlayer->HP << L"\n剩余子弹数：" << hPlayer->BulletNum << L"\n分数：" << hPlayer->Score << L"\n";
 				wsout << L"移动速度：" << hPlayer->MoveSpeed << L"\n";
@@ -291,16 +291,16 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//道具转换到字符
 			static const std::unordered_map<int, TCHAR> propToChar
 			{
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Bike, TEXT('B')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Amplifier, TEXT('A')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::JinKeLa, TEXT('J')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Rice, TEXT('R')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Shield, TEXT('N')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Totem, TEXT('T')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Phaser, TEXT('P')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Dirt, TEXT('D')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Attenuator, TEXT('S')),
-				std::pair<int, TCHAR>((int)THUnity2D::PropType::Divider, TEXT('F'))
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Bike, TEXT('B')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Amplifier, TEXT('A')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::JinKeLa, TEXT('J')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Rice, TEXT('R')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Shield, TEXT('N')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Totem, TEXT('T')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Phaser, TEXT('P')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Dirt, TEXT('D')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Attenuator, TEXT('S')),
+				std::pair<int, TCHAR>((int)THUnity2D::ObjClasses::PropType::Divider, TEXT('F'))
 			};
 
 			HFONT hfUnpickedProp = CreateFont
@@ -336,11 +336,11 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			auto gameObjList = game->GetGameObject();
 			int rowAllGrid = THUnity2D::Constant::numOfGridPerCell * game->GameMap->Rows;
 			int colAllGrid = THUnity2D::Constant::numOfGridPerCell * game->GameMap->Cols;
-			for each (THUnity2D::GameObject^ gameObj in gameObjList)
+			for each (THUnity2D::ObjClasses::GameObject^ gameObj in gameObjList)
 			{
-				if (gameObj->GetGameObjType() == THUnity2D::GameObjType::Character)
+				if (gameObj->GetGameObjType() == THUnity2D::ObjClasses::GameObjType::Character)
 				{
-					if (!static_cast<THUnity2D::Character^>(gameObj)->IsResetting)
+					if (!static_cast<THUnity2D::ObjClasses::Character^>(gameObj)->IsResetting)
 					{
 						int rad = gameObj->Radius;
 						auto [x, y] = gameObj->Position;
@@ -357,19 +357,19 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 				else
 				{
-					THUnity2D::Obj^ obj = (THUnity2D::Obj^)gameObj;
+					THUnity2D::ObjClasses::Obj^ obj = (THUnity2D::ObjClasses::Obj^)gameObj;
 					switch (obj->ObjType)
 					{
-					case THUnity2D::ObjType::Bullet:
+					case THUnity2D::ObjClasses::ObjType::Bullet:
 						SelectObject(hdcMem, hbrBullet);
 						break;
-					case THUnity2D::ObjType::Wall:
+					case THUnity2D::ObjClasses::ObjType::Wall:
 						SelectObject(hdcMem, hbrWall);
 						break;
-					case THUnity2D::ObjType::Prop:
+					case THUnity2D::ObjClasses::ObjType::Prop:
 						SelectObject(hdcMem, hbrPropUnpicked);
 						break;
-					case THUnity2D::ObjType::BirthPoint:
+					case THUnity2D::ObjClasses::ObjType::BirthPoint:
 						goto notPaint;
 						break;
 					}
@@ -383,8 +383,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 						switch (obj->Shape)
 						{
-						case THUnity2D::ShapeType::Circle: PaintFunc = &Ellipse; break;
-						case THUnity2D::ShapeType::Square: PaintFunc = &Rectangle; break;
+						case THUnity2D::Interfaces::ShapeType::Circle: PaintFunc = &Ellipse; break;
+						case THUnity2D::Interfaces::ShapeType::Square: PaintFunc = &Rectangle; break;
 						}
 						RECT rect;
 						rect.left = (y - rad) * (width - appendCx) / colAllGrid;
@@ -392,9 +392,9 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						rect.right = (y + rad) * (width - appendCx) / colAllGrid;
 						rect.bottom = (x + rad) * (height - appendCy) / rowAllGrid;
 						PaintFunc(hdcMem, rect.left, rect.top, rect.right, rect.bottom);
-						if (obj->ObjType == THUnity2D::ObjType::Prop && ((THUnity2D::Prop^)obj)->Laid == false)
+						if (obj->ObjType == THUnity2D::ObjClasses::ObjType::Prop && ((THUnity2D::ObjClasses::Prop^)obj)->Laid == false)
 						{
-							THUnity2D::Prop^ prop = (THUnity2D::Prop^)obj;
+							THUnity2D::ObjClasses::Prop^ prop = (THUnity2D::ObjClasses::Prop^)obj;
 							TCHAR ch = propToChar.find((int)(prop->GetPropType()))->second;
 							DrawText(hdcMem, &ch, 1, &rect, DT_CENTER | DT_VCENTER);
 						}

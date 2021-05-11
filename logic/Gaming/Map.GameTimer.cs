@@ -1,5 +1,5 @@
 ﻿using System.Threading;
-using THUnity2D;
+using THUnity2D.Interfaces;
 
 namespace Gaming
 {

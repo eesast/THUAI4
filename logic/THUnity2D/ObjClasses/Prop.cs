@@ -1,4 +1,7 @@
-﻿namespace THUnity2D
+﻿using THUnity2D.Interfaces;
+using THUnity2D.Utility;
+
+namespace THUnity2D.ObjClasses
 {
 
 	public enum PropType

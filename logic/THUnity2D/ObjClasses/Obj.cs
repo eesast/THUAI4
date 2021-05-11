@@ -1,6 +1,19 @@
-﻿//所有游戏人物，道具，子弹的基类
-namespace THUnity2D
+﻿using THUnity2D.Interfaces;
+using THUnity2D.Utility;
+
+//所有游戏人物，道具，子弹的基类
+namespace THUnity2D.ObjClasses
 {
+
+	public enum ObjType
+	{
+		Empty = 0,
+		Wall = 1,
+		Prop = 2,
+		Bullet = 3,
+		BirthPoint = 4,
+		OutOfBoundBlock = 5
+	}
 
 	public abstract class Obj : GameObject, IObj	//道具，墙
 	{
@@ -11,8 +24,8 @@ namespace THUnity2D
 		protected ObjType objType;
 		public ObjType ObjType => objType;
 
-		private Character? parent = null;		//道具的主人
-		public Character? Parent
+		private ICharacter? parent = null;		//道具的主人
+		public ICharacter? Parent
 		{
 			get => parent;
 			set
@@ -24,7 +37,7 @@ namespace THUnity2D
 					" has been throwed by " + (parent == null ? "null." : parent.ToString()) 
 					: "has been picked by " + (value == null ? "null." : value.ToString()));
 					parent = value;
-					Debug(this, debugStr);
+					Debugger.Output(this, debugStr);
 				}
 			}
 		}
@@ -33,7 +46,7 @@ namespace THUnity2D
 		{
 			this.objType = objType;
 
-			Debug(this, " constructed!");
+			Debugger.Output(this, " constructed!");
 		}
 
 		public override string ToString()

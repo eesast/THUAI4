@@ -1,11 +1,20 @@
 ﻿using System;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 
 /// <summary>
 /// 游戏对象的公共基类GameObject
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
+
+	public enum GameObjType
+	{
+		Character = 0,
+		Obj = 1
+	}
+
 	public abstract class GameObject : IGameObj
 	{
 		
@@ -60,7 +69,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					canMove = value;
-					Debug(this, canMove ? "Enable move!" : "Disable move!");
+					Debugger.Output(this, canMove ? "Enable move!" : "Disable move!");
 				}
 			}
 		}
@@ -76,7 +85,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					isMoving = value;
-					Debug(this, isMoving ? " begin to move!" : " end moving!");
+					Debugger.Output(this, isMoving ? " begin to move!" : " end moving!");
 				}
 			}
 		}
@@ -140,16 +149,6 @@ namespace THUnity2D
 		public override string ToString()
 		{
 			return ID.ToString() + ": " + Position.ToString();
-		}
-
-		//用于Debug时从控制台观察到各个游戏对象的状况
-		public static void Debug(object current, string str)
-		{
-
-#if DEBUG
-			Console.WriteLine(current.GetType() + " " + current.ToString() + str);
-#endif
-
 		}
 	}
 }

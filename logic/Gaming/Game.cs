@@ -1,8 +1,10 @@
-﻿using GameEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 using Timothy.FrameRateTask;
 
 namespace Gaming

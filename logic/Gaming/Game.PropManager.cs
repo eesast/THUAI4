@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 
 namespace Gaming
 {
@@ -284,7 +286,7 @@ namespace Gaming
 					},
 					EndMove: obj =>
 					{
-						GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
+						Debugger.Output(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 					}
 				);
 				unpickedPropList = new LinkedList<Prop>();

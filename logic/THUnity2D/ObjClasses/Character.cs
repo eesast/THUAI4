@@ -1,10 +1,12 @@
 ﻿using System;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 
 /// <summary>
 /// 人物类
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
 	public enum JobType : int
 	{
@@ -38,7 +40,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					teamID = value;
-					Debug(this, " joins in the tream: " + value.ToString());
+					Debugger.Output(this, " joins in the tream: " + value.ToString());
 				}
 			}
 		}
@@ -86,7 +88,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					cd = value;
-					Debug(this, string.Format("'s AP has been set to: {0}.", value));
+					Debugger.Output(this, string.Format("'s AP has been set to: {0}.", value));
 				}
 			}
 		}
@@ -129,7 +131,7 @@ namespace THUnity2D
 			lock (gameObjLock)
 			{
 				hp = Math.Max(Math.Min(MaxHp, hp + add), 0);
-				Debug(this, " hp has added to: " + hp.ToString());
+				Debugger.Output(this, " hp has added to: " + hp.ToString());
 			}
 		}
 		private void SubHp(int sub)				//扣血
@@ -138,7 +140,7 @@ namespace THUnity2D
 			lock (gameObjLock)
 			{
 				hp = Math.Min(Math.Max(0, hp - sub), MaxHp);
-				Debug(this, " hp has subed to: " + hp.ToString());
+				Debugger.Output(this, " hp has subed to: " + hp.ToString());
 			}
 		}
 
@@ -198,7 +200,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					ap = value;
-					Debug(this, "'s AP has been set to: " + value.ToString());
+					Debugger.Output(this, "'s AP has been set to: " + value.ToString());
 				}
 			}
 		}
@@ -213,7 +215,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					holdProp = value;
-					Debug(this, " picked the prop: " + (holdProp == null ? "null" : holdProp.ToString()));
+					Debugger.Output(this, " picked the prop: " + (holdProp == null ? "null" : holdProp.ToString()));
 				}
 			}
 		}
@@ -258,7 +260,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					score += add;
-					Debug(this, " 's score has been added to: " + score.ToString());
+					Debugger.Output(this, " 's score has been added to: " + score.ToString());
 				}
 		}
 		public void SubScore(int sub)
@@ -266,7 +268,7 @@ namespace THUnity2D
 			lock (gameObjLock)
 			{
 				score -= sub;
-				Debug(this, " 's score has been subed to: " + score.ToString());
+				Debugger.Output(this, " 's score has been subed to: " + score.ToString());
 			}
 		}
 
@@ -348,7 +350,7 @@ namespace THUnity2D
 			score = 0;
 			holdProp = null;
 
-			Debug(this, " constructed!");
+			Debugger.Output(this, " constructed!");
 		}
 
 	}

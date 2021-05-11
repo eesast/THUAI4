@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 
 namespace Gaming
 {
@@ -103,6 +106,11 @@ namespace Gaming
 			}
 			finally { playerListLock.ExitReadLock(); }
 			return player;
+		}
+
+		public IOutOfBoundBlock GetOutOfBoundBlock(XYPosition pos)
+		{
+			return new OutOfBoundBlock(pos);
 		}
 
 		public Map(uint[,] mapResource)

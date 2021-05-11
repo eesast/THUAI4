@@ -4,7 +4,7 @@
 /// 向量结构体Vector
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.Utility
 {
 	public struct Vector
 	{

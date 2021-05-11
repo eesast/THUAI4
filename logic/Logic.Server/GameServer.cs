@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using playback;
 using System;
 using System.Threading;
-using THUnity2D;
+using THUnity2D.ObjClasses;
 using Timothy.FrameRateTask;
 
 namespace Logic.Server
@@ -164,6 +164,7 @@ namespace Logic.Server
 			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}");
 #endif
 			if (double.IsNaN(msg.Angle) || double.IsInfinity(msg.Angle)) msg.Angle = 0.0;
+
 			switch (msg.MessageType)
 			{
 				case MessageType.AddPlayer:
@@ -269,10 +270,10 @@ namespace Logic.Server
 				}
 
 				Game.PlayerInitInfo playerInitInfo = new Game.PlayerInitInfo(GetBirthPointIdx(msg.TeamID, msg.PlayerID), ConvertTool.ToGameJobType(msg.JobType), msg.TeamID);
-				if (playerInitInfo.jobType == THUnity2D.JobType.InvalidJobType) return false;       //非法职业
+				if (playerInitInfo.jobType == THUnity2D.ObjClasses.JobType.InvalidJobType) return false;       //非法职业
 
 				bool legalJob = false;
-				foreach (var enumMem in typeof(THUnity2D.JobType).GetFields())
+				foreach (var enumMem in typeof(THUnity2D.ObjClasses.JobType).GetFields())
 				{
 					if (playerInitInfo.jobType.ToString() == enumMem.Name)
 					{

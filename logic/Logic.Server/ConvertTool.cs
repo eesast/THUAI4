@@ -17,32 +17,32 @@ namespace Logic.Server
 				return defaultVal;
 			}
 		}
-		public static THUnity2D.JobType ToGameJobType(Communication.Proto.JobType jobType)
+		public static THUnity2D.ObjClasses.JobType ToGameJobType(Communication.Proto.JobType jobType)
 		{
-			return AllEnums(jobType, THUnity2D.JobType.InvalidJobType);
+			return AllEnums(jobType, THUnity2D.ObjClasses.JobType.InvalidJobType);
 		}
 
-		public static Communication.Proto.JobType ToCommunicationJobType(THUnity2D.JobType jobType)
+		public static Communication.Proto.JobType ToCommunicationJobType(THUnity2D.ObjClasses.JobType jobType)
 		{
 			return AllEnums(jobType, Communication.Proto.JobType.Job0);
 		}
 
-		public static THUnity2D.PropType ToGamePropType(Communication.Proto.PropType propType)
+		public static THUnity2D.ObjClasses.PropType ToGamePropType(Communication.Proto.PropType propType)
 		{
-			return AllEnums(propType, THUnity2D.PropType.Null);
+			return AllEnums(propType, THUnity2D.ObjClasses.PropType.Null);
 		}
 
-		public static Communication.Proto.PropType ToCommunicationPropType(THUnity2D.PropType jobType)
+		public static Communication.Proto.PropType ToCommunicationPropType(THUnity2D.ObjClasses.PropType jobType)
 		{
 			return AllEnums(jobType, Communication.Proto.PropType.Null);
 		}
 
-		public static Communication.Proto.ShapeType ToCommunicationShapeType(THUnity2D.ShapeType shapeType)
+		public static Communication.Proto.ShapeType ToCommunicationShapeType(THUnity2D.Interfaces.ShapeType shapeType)
 		{
 			return AllEnums(shapeType, Communication.Proto.ShapeType.Circle);
 		}
 
-		public static Communication.Proto.BulletType ToCommunicationBulletType(THUnity2D.BulletType bulletType)
+		public static Communication.Proto.BulletType ToCommunicationBulletType(THUnity2D.ObjClasses.BulletType bulletType)
 		{
 			return AllEnums(bulletType, Communication.Proto.BulletType.Bullet0);
 		}

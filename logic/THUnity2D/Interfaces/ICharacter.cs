@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace THUnity2D
+﻿namespace THUnity2D.Interfaces
 {
 	public interface ICharacter : IGameObj, IMovable
 	{

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using THUnity2D.Utility;
 
-namespace THUnity2D
+namespace THUnity2D.Interfaces
 {
 	public interface ITimer
 	{
@@ -12,6 +13,7 @@ namespace THUnity2D
 	public interface IMap
 	{
 		bool OutOfBound(IGameObj obj);
+		IOutOfBoundBlock GetOutOfBoundBlock(XYPosition pos);
 		ITimer Timer { get; }
 		List<ICharacter> PlayerList { get; }
 		List<IObj> ObjList { get; }
