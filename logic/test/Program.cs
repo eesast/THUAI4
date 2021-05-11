@@ -1,7 +1,8 @@
 ﻿using System;
 using THUnity2D;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 using Gaming;
-using GameEngine;
 using System.Threading;
 using System.Runtime.InteropServices;
 
@@ -17,32 +18,32 @@ namespace test
 		static void Main(string[] args)
 		{
 
-			foreach (THUnity2D.PropType propType in Enum.GetValues(typeof(THUnity2D.PropType)))
+			foreach (THUnity2D.ObjClasses.PropType propType in Enum.GetValues(typeof(THUnity2D.ObjClasses.PropType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationPropType(propType).ToString()}");
 			}
 
-			foreach (THUnity2D.JobType propType in Enum.GetValues(typeof(THUnity2D.JobType)))
+			foreach (THUnity2D.ObjClasses.JobType propType in Enum.GetValues(typeof(THUnity2D.ObjClasses.JobType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationJobType(propType).ToString()}");
 			}
 
-			foreach (THUnity2D.PropType propType in Enum.GetValues(typeof(THUnity2D.PropType)))
+			foreach (THUnity2D.ObjClasses.PropType propType in Enum.GetValues(typeof(THUnity2D.ObjClasses.PropType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationPropType(propType).ToString()}");
 			}
 
-			foreach (THUnity2D.GameObject.ShapeType propType in Enum.GetValues(typeof(THUnity2D.GameObject.ShapeType)))
+			foreach (THUnity2D.Interfaces.ShapeType propType in Enum.GetValues(typeof(THUnity2D.Interfaces.ShapeType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationShapeType(propType).ToString()}");
 			}
 
-			foreach (THUnity2D.BulletType propType in Enum.GetValues(typeof(THUnity2D.BulletType)))
+			foreach (THUnity2D.ObjClasses.BulletType propType in Enum.GetValues(typeof(THUnity2D.ObjClasses.BulletType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationBulletType(propType).ToString()}");
 			}
 
-			foreach (GameEngine.Map.ColorType propType in Enum.GetValues(typeof(GameEngine.Map.ColorType)))
+			foreach (Gaming.Map.ColorType propType in Enum.GetValues(typeof(Gaming.Map.ColorType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationColorType(propType).ToString()}");
 			}
@@ -52,8 +53,8 @@ namespace test
 			long tmpID;
 			long[] player2ID = new long[2];
 
-			XYPosition player1Pos = Map.Constant.CellToGrid(1, 1);
-			XYPosition player2Pos = Map.Constant.CellToGrid(2, 2);
+			XYPosition player1Pos = Constant.CellToGrid(1, 1);
+			XYPosition player2Pos = Constant.CellToGrid(2, 2);
 
 			if ((tmpID = game.AddPlayer(new Game.PlayerInitInfo(0u, (JobType)0, 0))) == GameObject.invalidID)
 			{

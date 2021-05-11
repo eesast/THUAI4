@@ -15,7 +15,7 @@ namespace Logic.Server
 
 		public abstract int TeamCount { get; }
 
-		public abstract bool IsWebCompetition { get; }
+		public abstract bool ForManualOperation { get; }
 
 		public ServerBase(ArgumentOptions options)
 		{
@@ -50,6 +50,8 @@ namespace Logic.Server
 			};
 
 		}
+
+		public abstract void WaitForGame();
 
 		protected abstract void OnReceive(MessageToServer msg);
 

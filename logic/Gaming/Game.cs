@@ -1,8 +1,10 @@
-﻿using GameEngine;
-using System;
-using System.Collections;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 using Timothy.FrameRateTask;
 
 namespace Gaming
@@ -24,7 +26,7 @@ namespace Gaming
 		
 		public const int maxTeamNum = 4;
 		private const long checkColorInterval = 50;		// 检查脚下颜色间隔时间
-		private ArrayList teamList;                     // 队伍列表
+		private List<Team> teamList;                     // 队伍列表
 		//private object teamListLock = new object();	// 队伍暂时不需要锁
 		private readonly int numOfTeam;
 
@@ -35,17 +37,17 @@ namespace Gaming
 				|| gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent != null) return GameObject.invalidID;
 
 			XYPosition pos = gameMap.BirthPointList[playerInitInfo.birthPointIdx].Position;
-			Character? newPlayer = Character.GetCharacter(pos, Map.Constant.playerRadius, Map.Constant.basicPlayerMoveSpeed, playerInitInfo.jobType);
+			Character? newPlayer = Character.GetCharacter(pos, Constant.playerRadius, Constant.basicPlayerMoveSpeed, playerInitInfo.jobType);
 			if (newPlayer == null) return GameObject.invalidID;
 
 			gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent = newPlayer;
 			gameMap.PlayerListLock.EnterWriteLock(); try { gameMap.PlayerList.Add(newPlayer); } finally { gameMap.PlayerListLock.ExitWriteLock(); }
-			((Team)teamList[(int)playerInitInfo.teamID]).AddPlayer(newPlayer);
+			teamList[(int)playerInitInfo.teamID].AddPlayer(newPlayer);
 			newPlayer.TeamID = playerInitInfo.teamID;
 
 			//设置出生点的颜色
 
-			int cellX = Map.Constant.GridToCellX(pos), cellY = Map.Constant.GridToCellY(pos);
+			int cellX = Constant.GridToCellX(pos), cellY = Constant.GridToCellY(pos);
 			gameMap.SetCellColor(cellX, cellY, Map.TeamToColor(playerInitInfo.teamID));
 
 			//开启装弹线程
@@ -63,8 +65,8 @@ namespace Gaming
 							loopCondition: () => gameMap.Timer.IsGaming,
 							loopToDo: () =>
 							{
-								var cellX = Map.Constant.GridToCellX(newPlayer.Position);
-								var cellY = Map.Constant.GridToCellY(newPlayer.Position);
+								var cellX = Constant.GridToCellX(newPlayer.Position);
+								var cellY = Constant.GridToCellY(newPlayer.Position);
 								if (gameMap.GetCellColor(cellX, cellY) == Map.TeamToColor(newPlayer.TeamID))
 								{
 									var nowTime = Environment.TickCount64;
@@ -109,7 +111,7 @@ namespace Gaming
 				foreach (Character player in gameMap.PlayerList)
 				{
 					player.CanMove = true;
-					player.AddShield(Map.Constant.shieldTimeAtBirth);       //出生时附加盾牌
+					player.AddShield(Constant.shieldTimeAtBirth);       //出生时附加盾牌
 				}
 			}
 			finally { gameMap.PlayerListLock.ExitReadLock(); }
@@ -219,9 +221,9 @@ namespace Gaming
 		/// <summary>
 		/// 获取当前场上的对象，和已经下场的玩家
 		/// </summary>
-		public ArrayList GetGameObject()
+		public List<IGameObj> GetGameObject()
 		{
-			ArrayList gameObjList = new ArrayList();
+			var gameObjList = new List<IGameObj>();
 			foreach (Team team in teamList)     // team 只有在开始游戏之前被修改，开始之后是只读的，因此不须加锁
 			{
 				gameObjList.AddRange(team.GetPlayerListForUnsafe());
@@ -246,7 +248,7 @@ namespace Gaming
 
 		public long[] GetPlayerIDsOfTheTeam(long teamID)
 		{
-			return ((Team)teamList[(int)teamID]).GetPlayerIDs();
+			return teamList[(int)teamID].GetPlayerIDs();
 		}
 
 		/// <summary>
@@ -275,7 +277,7 @@ namespace Gaming
 
 			//加入队伍
 			this.numOfTeam = numOfTeam;
-			teamList = new ArrayList();
+			teamList = new List<Team>();
 			for (int i = 0; i < numOfTeam; ++i)
 			{
 				teamList.Add(new Team());

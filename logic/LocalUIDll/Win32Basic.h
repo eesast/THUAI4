@@ -1,4 +1,4 @@
-#ifndef WIN32_BASIC_H
+﻿#ifndef WIN32_BASIC_H
 
 #define WIN32_BASIC_H
 
@@ -22,4 +22,3 @@
 #endif // _UNICODE
 
 #endif	//#ifndef WIN32_BASIC_H
-

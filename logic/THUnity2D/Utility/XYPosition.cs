@@ -3,7 +3,7 @@
 /// 坐标结构体XYPosition
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.Utility
 {
 	public struct XYPosition
 	{

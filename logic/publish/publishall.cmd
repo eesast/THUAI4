@@ -7,7 +7,7 @@
 SETLOCAL
 
 :: The root folder to publish into
-set PUBLISHROOT="..\private\ReleaseDemo\Release 2.0"
+set PUBLISHROOT="..\private\ReleaseDemo\Release 3.0"
 
 :: Create Relative drectories
 mkdir %PUBLISHROOT%\linux\bin\Debug

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Communication.Proto;
-using THUnity2D;
-using GameEngine;
+﻿using Communication.Proto;
+using THUnity2D.ObjClasses;
 
 namespace Logic.Server
 {
@@ -11,17 +7,17 @@ namespace Logic.Server
 	{
 		public static GameObjInfo Auto(GameObject gameObj)		//自动判断转换的类型
 		{
-			if (gameObj.GetGameObjType() == THUnity2D.GameObject.GameObjType.Character) return Player((Character)gameObj);
-			switch (((Obj)gameObj).objType)
+			if (gameObj.GetGameObjType() == THUnity2D.ObjClasses.GameObjType.Character) return Player((Character)gameObj);
+			switch (((Obj)gameObj).ObjType)
 			{
-			case THUnity2D.ObjType.Bullet: return Bullet((Bullet)gameObj);
-			case THUnity2D.ObjType.Prop: return Prop((Prop)gameObj);
-			case THUnity2D.ObjType.Wall: return Wall((Wall)gameObj);
-			case THUnity2D.ObjType.BirthPoint: return BirthPoint((BirthPoint)gameObj);
+			case THUnity2D.ObjClasses.ObjType.Bullet: return Bullet((Bullet)gameObj);
+			case THUnity2D.ObjClasses.ObjType.Prop: return Prop((Prop)gameObj);
+			case THUnity2D.ObjClasses.ObjType.Wall: return Wall((Wall)gameObj);
+			case THUnity2D.ObjClasses.ObjType.BirthPoint: return BirthPoint((BirthPoint)gameObj);
 			default:		//错误情况，理论上不应该出现，为了过编译而设置
 			{
 				GameObjInfo ret = new GameObjInfo();
-				ret.GameObjType = GameObjType.OutOfBoundBlock;
+				ret.GameObjType = Communication.Proto.GameObjType.OutOfBoundBlock;
 				Basic(gameObj, ref ret);
 				return ret;
 			}

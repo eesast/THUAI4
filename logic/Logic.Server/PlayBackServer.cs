@@ -6,14 +6,21 @@ using Timothy.FrameRateTask;
 
 namespace Logic.Server
 {
+	/// <summary>
+	/// 回放用 Server
+	/// </summary>
 	class PlayBackServer : ServerBase
 	{
 		private int[] teamScore;
 
 		public override int TeamCount { get => teamScore.Length; }
-		public override bool IsWebCompetition => false;
+		public override bool ForManualOperation => true;
 
 		public PlayBackServer(ArgumentOptions options) : base(options)
+		{
+			teamScore = new int[0];
+		}
+		public override void WaitForGame()
 		{
 			try
 			{
@@ -184,12 +191,10 @@ namespace Logic.Server
 			}
 			finally
 			{
-				if (teamScore == null)
-				{
-					teamScore = new int[1];
-				}
+				teamScore ??= new int[0];
 			}
 		}
+
 		protected override void OnReceive(MessageToServer msg) { }
 		public override int GetTeamScore(long teamID)
 		{

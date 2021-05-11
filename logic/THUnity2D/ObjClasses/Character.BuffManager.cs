@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
 	public abstract partial class Character
 	{

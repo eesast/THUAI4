@@ -1,10 +1,12 @@
 ﻿using System;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 
 /// <summary>
 /// 人物类
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
 	public enum JobType : int
 	{
@@ -17,7 +19,7 @@ namespace THUnity2D
 		Job6 = 6,
 		InvalidJobType = int.MaxValue
 	}
-	public abstract partial class Character : GameObject, IMovable
+	public abstract partial class Character : GameObject, ICharacter
 	{
 		public const int basicAp = 1000;
 		public const int basicHp = 6000;
@@ -38,7 +40,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					teamID = value;
-					Debug(this, " joins in the tream: " + value.ToString());
+					Debugger.Output(this, " joins in the tream: " + value.ToString());
 				}
 			}
 		}
@@ -58,8 +60,6 @@ namespace THUnity2D
 
 		private int orgMoveSpeed;
 		public int OrgMoveSpeed { get => orgMoveSpeed; protected set { orgMoveSpeed = value; } }
-
-		public new long Move(Vector displacement) => base.Move(displacement);
 
 		public abstract JobType Job { get; }
 
@@ -88,7 +88,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					cd = value;
-					Debug(this, string.Format("'s AP has been set to: {0}.", value));
+					Debugger.Output(this, string.Format("'s AP has been set to: {0}.", value));
 				}
 			}
 		}
@@ -131,7 +131,7 @@ namespace THUnity2D
 			lock (gameObjLock)
 			{
 				hp = Math.Max(Math.Min(MaxHp, hp + add), 0);
-				Debug(this, " hp has added to: " + hp.ToString());
+				Debugger.Output(this, " hp has added to: " + hp.ToString());
 			}
 		}
 		private void SubHp(int sub)				//扣血
@@ -140,7 +140,7 @@ namespace THUnity2D
 			lock (gameObjLock)
 			{
 				hp = Math.Min(Math.Max(0, hp - sub), MaxHp);
-				Debug(this, " hp has subed to: " + hp.ToString());
+				Debugger.Output(this, " hp has subed to: " + hp.ToString());
 			}
 		}
 
@@ -160,7 +160,7 @@ namespace THUnity2D
 			lock (beAttackedLock)
 			{
 				if (hp <= 0) return false;
-				if (attacker.TeamID != this.TeamID)
+				if (!(attacker?.TeamID == this.TeamID))
 				{
 					if (hasSpear || !HasShield) SubHp(subHP);
 					if (hp <= 0) TryActivatingTotem();
@@ -200,7 +200,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					ap = value;
-					Debug(this, "'s AP has been set to: " + value.ToString());
+					Debugger.Output(this, "'s AP has been set to: " + value.ToString());
 				}
 			}
 		}
@@ -215,7 +215,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					holdProp = value;
-					Debug(this, " picked the prop: " + (holdProp == null ? "null" : holdProp.ToString()));
+					Debugger.Output(this, " picked the prop: " + (holdProp == null ? "null" : holdProp.ToString()));
 				}
 			}
 		}
@@ -239,17 +239,17 @@ namespace THUnity2D
 			}
 		}
 
-		public override bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
+		bool IMovable.IgnoreCollide(IGameObj targetObj)
 		{
 			if (targetObj is BirthPoint && object.ReferenceEquals(((BirthPoint)targetObj).Parent, this))         // 自己的出生点可以忽略碰撞
 			{
-				return false;
+				return true;
 			}
-			else if (targetObj is Mine && ((Mine)targetObj).Parent.TeamID == TeamID)          // 自己队的炸弹忽略碰撞
+			else if (targetObj is Mine && ((Mine)targetObj).Parent?.TeamID == TeamID)          // 自己队的炸弹忽略碰撞
 			{
-				return false;
+				return true;
 			}
-			return base.WillCollideWith(targetObj, nextPos);
+			return false;
 		}
 		
 		private int score;						//当前分数
@@ -260,7 +260,7 @@ namespace THUnity2D
 				lock (gameObjLock)
 				{
 					score += add;
-					Debug(this, " 's score has been added to: " + score.ToString());
+					Debugger.Output(this, " 's score has been added to: " + score.ToString());
 				}
 		}
 		public void SubScore(int sub)
@@ -268,7 +268,7 @@ namespace THUnity2D
 			lock (gameObjLock)
 			{
 				score -= sub;
-				Debug(this, " 's score has been subed to: " + score.ToString());
+				Debugger.Output(this, " 's score has been subed to: " + score.ToString());
 			}
 		}
 
@@ -350,7 +350,7 @@ namespace THUnity2D
 			score = 0;
 			holdProp = null;
 
-			Debug(this, " constructed!");
+			Debugger.Output(this, " constructed!");
 		}
 
 	}

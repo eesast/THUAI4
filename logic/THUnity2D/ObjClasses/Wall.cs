@@ -1,8 +1,11 @@
-﻿/// <summary>
+﻿using THUnity2D.Interfaces;
+using THUnity2D.Utility;
+
+/// <summary>
 /// 墙类
 /// </summary>
 
-namespace THUnity2D
+namespace THUnity2D.ObjClasses
 {
 	public class Wall : Obj
 	{

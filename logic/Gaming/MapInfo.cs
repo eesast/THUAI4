@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameEngine
+namespace Gaming
 {
 	public static class MapInfo
 	{

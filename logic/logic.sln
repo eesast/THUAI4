@@ -37,8 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gaming", "Gaming\Gaming.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "playback", "..\playback\playback\playback.csproj", "{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayBackPlayer", "..\playback\PlayBackPlayer\PlayBackPlayer.csproj", "{71AA0CC2-2FB2-40A0-B709-612794F13D23}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -215,18 +213,6 @@ Global
 		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x64.Build.0 = Release|Any CPU
 		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x86.ActiveCfg = Release|Any CPU
 		{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}.Release|x86.Build.0 = Release|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Debug|x64.Build.0 = Debug|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Debug|x86.Build.0 = Debug|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Release|x64.ActiveCfg = Release|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Release|x64.Build.0 = Release|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Release|x86.ActiveCfg = Release|Any CPU
-		{71AA0CC2-2FB2-40A0-B709-612794F13D23}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

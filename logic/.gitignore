@@ -34,8 +34,6 @@ bld/
 
 # My private folder
 /private/
-/THUnity2D/deleted.cs
-/Logic.Server/deleted.cs
 /ImageMaker/
 *.thuaipb
 

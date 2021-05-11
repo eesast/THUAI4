@@ -1,12 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 
-namespace GameEngine
+namespace Gaming
 {
 
-	public partial class Map
+	public partial class Map : IMap
 	{
 
 		public enum ColorType
@@ -69,18 +71,17 @@ namespace GameEngine
 		{
 			get => cellColor.GetLength(1);
 		}
-		public bool OutOfBound(GameObject obj) => 
+		public bool OutOfBound(IGameObj obj) => 
 			obj.Position.x <= obj.Radius || obj.Position.y <= obj.Radius
-					|| obj.Position.x >= Map.Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius;
-		public bool OutOfBound(IMovable obj) => OutOfBound((GameObject)obj);
+					|| obj.Position.x >= Constant.numOfGridPerCell * Rows - obj.Radius || obj.Position.y >= Constant.numOfGridPerCell * Cols - obj.Radius;
 
-		private readonly ArrayList objList;              // 游戏对象（除了玩家外）的列表
-		public ArrayList ObjList => objList;
-		private readonly ReaderWriterLockSlim objListLock;       // 读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的ArrayList
+		private readonly List<IObj> objList;              // 游戏对象（除了玩家外）的列表
+		public List<IObj> ObjList => objList;
+		private readonly ReaderWriterLockSlim objListLock;       // 读写锁，防止foreach遍历出现冲突（若可改成无foreach遍历考虑去掉读写锁而用线程安全的集合
 		public ReaderWriterLockSlim ObjListLock => objListLock;
 
-		private readonly ArrayList playerList;           // 玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList
-		public ArrayList PlayerList => playerList;
+		private readonly List<ICharacter> playerList;           // 玩家列表（可能要频繁通过ID查找player，但玩家最多只有8个；如果玩家更多，考虑改为SortedList
+		public List<ICharacter> PlayerList => playerList;
 		private readonly ReaderWriterLockSlim playerListLock;
 		public ReaderWriterLockSlim PlayerListLock => playerListLock;
 
@@ -107,6 +108,11 @@ namespace GameEngine
 			return player;
 		}
 
+		public IOutOfBoundBlock GetOutOfBoundBlock(XYPosition pos)
+		{
+			return new OutOfBoundBlock(pos);
+		}
+
 		public Map(uint[,] mapResource)
 		{
 			//初始化颜色
@@ -120,8 +126,8 @@ namespace GameEngine
 				}
 
 			//创建列表
-			objList = new ArrayList();
-			playerList = new ArrayList();
+			objList = new List<IObj>();
+			playerList = new List<ICharacter>();
 			objListLock = new ReaderWriterLockSlim();
 			playerListLock = new ReaderWriterLockSlim();
 

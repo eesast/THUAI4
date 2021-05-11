@@ -43,5 +43,8 @@ namespace Logic.Server
 
 		[Option("requestOnly", Required = false, HelpText = "Only send  web requests")]
 		public bool RequestOnly { get; set; } = false;
+
+		[Option("finalGame", Required = false, HelpText = "Whether it is the final game")]
+		public bool FinalGame { get; set; } = false;
 	}
 }
