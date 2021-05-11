@@ -31,9 +31,9 @@ namespace GameEngine
 					listLock.EnterReadLock();
 					try
 					{
-						foreach (IGameObj? listObj in lst)
+						foreach (var listObj in lst)
 						{
-							if (listObj != null && obj.WillCollideWith(listObj, nextPos))
+							if (obj.WillCollideWith(listObj, nextPos))
 							{
 								collisionObj = listObj;
 								break;
@@ -80,10 +80,10 @@ namespace GameEngine
 				listLock.EnterReadLock();
 				try
 				{
-					foreach (IGameObj? listObj in lst)
+					foreach (IGameObj listObj in lst)
 					{
 						//如果再走一步发生碰撞
-						if (listObj != null && obj.WillCollideWith(listObj, nextPos))
+						if (obj.WillCollideWith(listObj, nextPos))
 						{
 							switch (listObj.Shape)  //默认obj为圆形
 							{
