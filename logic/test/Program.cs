@@ -32,7 +32,7 @@ namespace test
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationPropType(propType).ToString()}");
 			}
 
-			foreach (THUnity2D.GameObject.ShapeType propType in Enum.GetValues(typeof(THUnity2D.GameObject.ShapeType)))
+			foreach (THUnity2D.ShapeType propType in Enum.GetValues(typeof(THUnity2D.ShapeType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationShapeType(propType).ToString()}");
 			}
@@ -42,7 +42,7 @@ namespace test
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationBulletType(propType).ToString()}");
 			}
 
-			foreach (GameEngine.Map.ColorType propType in Enum.GetValues(typeof(GameEngine.Map.ColorType)))
+			foreach (Gaming.Map.ColorType propType in Enum.GetValues(typeof(Gaming.Map.ColorType)))
 			{
 				Console.WriteLine($"{propType} -> {propType.ToString() == Logic.Server.ConvertTool.ToCommunicationColorType(propType).ToString()}");
 			}
@@ -52,8 +52,8 @@ namespace test
 			long tmpID;
 			long[] player2ID = new long[2];
 
-			XYPosition player1Pos = Map.Constant.CellToGrid(1, 1);
-			XYPosition player2Pos = Map.Constant.CellToGrid(2, 2);
+			XYPosition player1Pos = Constant.CellToGrid(1, 1);
+			XYPosition player2Pos = Constant.CellToGrid(2, 2);
 
 			if ((tmpID = game.AddPlayer(new Game.PlayerInitInfo(0u, (JobType)0, 0))) == GameObject.invalidID)
 			{

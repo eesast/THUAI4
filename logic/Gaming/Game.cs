@@ -35,7 +35,7 @@ namespace Gaming
 				|| gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent != null) return GameObject.invalidID;
 
 			XYPosition pos = gameMap.BirthPointList[playerInitInfo.birthPointIdx].Position;
-			Character? newPlayer = Character.GetCharacter(pos, Map.Constant.playerRadius, Map.Constant.basicPlayerMoveSpeed, playerInitInfo.jobType);
+			Character? newPlayer = Character.GetCharacter(pos, Constant.playerRadius, Constant.basicPlayerMoveSpeed, playerInitInfo.jobType);
 			if (newPlayer == null) return GameObject.invalidID;
 
 			gameMap.BirthPointList[playerInitInfo.birthPointIdx].Parent = newPlayer;
@@ -45,7 +45,7 @@ namespace Gaming
 
 			//设置出生点的颜色
 
-			int cellX = Map.Constant.GridToCellX(pos), cellY = Map.Constant.GridToCellY(pos);
+			int cellX = Constant.GridToCellX(pos), cellY = Constant.GridToCellY(pos);
 			gameMap.SetCellColor(cellX, cellY, Map.TeamToColor(playerInitInfo.teamID));
 
 			//开启装弹线程
@@ -63,8 +63,8 @@ namespace Gaming
 							loopCondition: () => gameMap.Timer.IsGaming,
 							loopToDo: () =>
 							{
-								var cellX = Map.Constant.GridToCellX(newPlayer.Position);
-								var cellY = Map.Constant.GridToCellY(newPlayer.Position);
+								var cellX = Constant.GridToCellX(newPlayer.Position);
+								var cellY = Constant.GridToCellY(newPlayer.Position);
 								if (gameMap.GetCellColor(cellX, cellY) == Map.TeamToColor(newPlayer.TeamID))
 								{
 									var nowTime = Environment.TickCount64;
@@ -109,7 +109,7 @@ namespace Gaming
 				foreach (Character player in gameMap.PlayerList)
 				{
 					player.CanMove = true;
-					player.AddShield(Map.Constant.shieldTimeAtBirth);       //出生时附加盾牌
+					player.AddShield(Constant.shieldTimeAtBirth);       //出生时附加盾牌
 				}
 			}
 			finally { gameMap.PlayerListLock.ExitReadLock(); }
@@ -219,9 +219,9 @@ namespace Gaming
 		/// <summary>
 		/// 获取当前场上的对象，和已经下场的玩家
 		/// </summary>
-		public List<GameObject> GetGameObject()
+		public List<IGameObj> GetGameObject()
 		{
-			var gameObjList = new List<GameObject>();
+			var gameObjList = new List<IGameObj>();
 			foreach (Team team in teamList)     // team 只有在开始游戏之前被修改，开始之后是只读的，因此不须加锁
 			{
 				gameObjList.AddRange(team.GetPlayerListForUnsafe());

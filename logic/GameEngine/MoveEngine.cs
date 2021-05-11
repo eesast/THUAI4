@@ -32,7 +32,7 @@ namespace GameEngine
 
 			uint maxLen = collisionChecker.FindMax(obj, nextPos, moveVec);
 
-			maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Map.Constant.numOfStepPerSecond));
+			maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Constant.numOfStepPerSecond));
 			obj.Move(new Vector(moveVec.angle, maxLen));
 		}
 
@@ -58,16 +58,16 @@ namespace GameEngine
 					double deltaLen = 0.0;      //储存行走的误差
 					Vector moveVec = new Vector(moveDirection, 0.0);
 					//先转向
-					if (gameMap.Timer.IsGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
-					GameObject? collisionObj = null;
+					if (gameTimer.IsGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
+					IGameObj? collisionObj = null;
 
 					bool isDestroyed = false;
 					new FrameRateTaskExecutor<int>
 					(
-						() => gameMap.Timer.IsGaming && obj.CanMove && !obj.IsResetting,
+						() => gameTimer.IsGaming && obj.CanMove && !obj.IsResetting,
 						() =>
 						{
-							moveVec.length = obj.MoveSpeed / Map.Constant.numOfStepPerSecond + deltaLen;
+							moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
 							deltaLen = 0;
 
 							//越界情况处理：如果越界，则与越界方块碰撞
@@ -96,14 +96,14 @@ namespace GameEngine
 
 							return true;
 						},
-						1000 / Map.Constant.numOfStepPerSecond,
+						1000 / Constant.numOfStepPerSecond,
 						() =>
 						{
-							int leftTime = moveTime % (1000 / Map.Constant.numOfStepPerSecond);
+							int leftTime = moveTime % (1000 / Constant.numOfStepPerSecond);
 							if (!isDestroyed)
 							{
 							Check:
-								moveVec.length = deltaLen + leftTime * obj.MoveSpeed / Map.Constant.numOfStepPerSecond / 50;
+								moveVec.length = deltaLen + leftTime * obj.MoveSpeed / Constant.numOfStepPerSecond / 50;
 								if ((collisionObj = collisionChecker.CheckCollision(obj, moveVec)) == null)
 								{
 									obj.Move(moveVec);
@@ -149,10 +149,10 @@ namespace GameEngine
 			{ IsBackground = true }.Start();
 		}
 
-		private Map gameMap;
+		private ITimer gameTimer;
 		private Action<IMovable> EndMove;
 		private CollisionChecker collisionChecker;
-		private Func<IMovable, GameObject, Vector, AfterCollision> OnCollision;
+		private Func<IMovable, IGameObj, Vector, AfterCollision> OnCollision;
 
 
 		/// <summary>
@@ -163,12 +163,12 @@ namespace GameEngine
 		/// <param name="EndMove">结束碰撞时要做的事情</param>
 		public MoveEngine
 			(
-				Map gameMap,
-				Func<IMovable, GameObject, Vector, AfterCollision> OnCollision,
+				IMap gameMap,
+				Func<IMovable, IGameObj, Vector, AfterCollision> OnCollision,
 				Action<IMovable> EndMove
 			)
 		{
-			this.gameMap = gameMap;
+			this.gameTimer = gameMap.Timer;
 			this.EndMove = EndMove;
 			this.OnCollision = OnCollision;
 			this.collisionChecker = new CollisionChecker(gameMap);

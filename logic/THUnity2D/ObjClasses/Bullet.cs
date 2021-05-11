@@ -29,8 +29,6 @@
 			}
 		}
 
-		public new long Move(Vector displacement) => base.Move(displacement);
-
 
 		private int ap;
 		/// <summary>
@@ -85,10 +83,10 @@
 			return GetSquareRange(AttackRangeEdgeLength);
 		}
 
-		public override bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
+		bool IMovable.IgnoreCollide(IGameObj targetObj)
 		{
-			if (targetObj is BirthPoint || targetObj is Mine) return false;		// 子弹不会与出生点和道具碰撞
-			return base.WillCollideWith(targetObj, nextPos);
+			if (targetObj is BirthPoint || targetObj is Mine) return true;		// 子弹不会与出生点和道具碰撞
+			return false;
 		}
 
 		public virtual void BeforeShooting(ref int timeInMilliseconds, ref double angle) { }

@@ -26,13 +26,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Win32Basic.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BasicWindow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32Basic.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

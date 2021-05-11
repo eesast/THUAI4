@@ -17,7 +17,7 @@ namespace THUnity2D
 		Job6 = 6,
 		InvalidJobType = int.MaxValue
 	}
-	public abstract partial class Character : GameObject, IMovable
+	public abstract partial class Character : GameObject, ICharacter
 	{
 		public const int basicAp = 1000;
 		public const int basicHp = 6000;
@@ -58,8 +58,6 @@ namespace THUnity2D
 
 		private int orgMoveSpeed;
 		public int OrgMoveSpeed { get => orgMoveSpeed; protected set { orgMoveSpeed = value; } }
-
-		public new long Move(Vector displacement) => base.Move(displacement);
 
 		public abstract JobType Job { get; }
 
@@ -239,17 +237,17 @@ namespace THUnity2D
 			}
 		}
 
-		public override bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
+		bool IMovable.IgnoreCollide(IGameObj targetObj)
 		{
 			if (targetObj is BirthPoint && object.ReferenceEquals(((BirthPoint)targetObj).Parent, this))         // 自己的出生点可以忽略碰撞
 			{
-				return false;
+				return true;
 			}
 			else if (targetObj is Mine && ((Mine)targetObj).Parent?.TeamID == TeamID)          // 自己队的炸弹忽略碰撞
 			{
-				return false;
+				return true;
 			}
-			return base.WillCollideWith(targetObj, nextPos);
+			return false;
 		}
 		
 		private int score;						//当前分数

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using THUnity2D;
 
@@ -13,7 +13,7 @@ namespace GameEngine
 		/// <param name="obj">移动的物体</param>
 		/// <param name="moveVec">移动的位移向量</param>
 		/// <returns>和它碰撞的物体</returns>
-		public GameObject? CheckCollision(IMovable obj, Vector moveVec)
+		public IGameObj? CheckCollision(IMovable obj, Vector moveVec)
 		{
 			XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
 
@@ -24,14 +24,14 @@ namespace GameEngine
 			}
 
 			//在某列表中检查碰撞
-			Func<IList, ReaderWriterLockSlim, GameObject?> CheckCollisionInList =
-				(IList lst, ReaderWriterLockSlim listLock) =>
+			Func<IEnumerable<IGameObj>, ReaderWriterLockSlim, IGameObj?> CheckCollisionInList =
+				(IEnumerable<IGameObj> lst, ReaderWriterLockSlim listLock) =>
 				{
-					GameObject? collisionObj = null;
+					IGameObj? collisionObj = null;
 					listLock.EnterReadLock();
 					try
 					{
-						foreach (GameObject? listObj in lst)
+						foreach (IGameObj? listObj in lst)
 						{
 							if (listObj != null && obj.WillCollideWith(listObj, nextPos))
 							{
@@ -44,7 +44,7 @@ namespace GameEngine
 					return collisionObj;
 				};
 
-			GameObject? collisionObj = null;
+			IGameObj? collisionObj = null;
 			foreach (var list in lists)
 			{
 				if ((collisionObj = CheckCollisionInList(list.Item1, list.Item2)) != null)
@@ -80,14 +80,14 @@ namespace GameEngine
 				listLock.EnterReadLock();
 				try
 				{
-					foreach (GameObject? listObj in lst)
+					foreach (IGameObj? listObj in lst)
 					{
 						//如果再走一步发生碰撞
 						if (listObj != null && obj.WillCollideWith(listObj, nextPos))
 						{
 							switch (listObj.Shape)  //默认obj为圆形
 							{
-								case GameObject.ShapeType.Circle:
+								case ShapeType.Circle:
 									{
 										//计算两者之间的距离
 										int orgDeltaX = listObj.Position.x - obj.Position.x;
@@ -122,7 +122,7 @@ namespace GameEngine
 										}
 										break;
 									}
-								case GameObject.ShapeType.Square:
+								case ShapeType.Square:
 									{
 										//如果当前已经贴合，那么不能再行走了
 										if (obj.WillCollideWith(listObj, obj.Position)) tmpMax = 0;
@@ -157,16 +157,16 @@ namespace GameEngine
 			return maxLen;
 		}
 
-		Map gameMap;
-		private Tuple<IList, ReaderWriterLockSlim>[] lists;
+		IMap gameMap;
+		private Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>[] lists;
 
-		public CollisionChecker(Map gameMap)
+		public CollisionChecker(IMap gameMap)
 		{
 			this.gameMap = gameMap;
-			lists = new Tuple<IList, ReaderWriterLockSlim>[]
+			lists = new Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>[]
 			{
-				new Tuple<IList, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
-				new Tuple<IList, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
+				new Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
+				new Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
 			};
 		}
 	}

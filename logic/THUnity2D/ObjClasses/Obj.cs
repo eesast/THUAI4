@@ -2,23 +2,14 @@
 namespace THUnity2D
 {
 
-	public enum ObjType
-	{
-		Empty = 0,
-		Wall = 1,
-		Prop = 2,
-		Bullet = 3,
-		BirthPoint = 4,
-		OutOfBoundBlock = 5
-	}
-
-	public abstract class Obj : GameObject	//道具，墙
+	public abstract class Obj : GameObject, IObj	//道具，墙
 	{
 		public override GameObjType GetGameObjType()
 		{
 			return GameObjType.Obj;
 		}
-		public readonly ObjType objType;
+		protected ObjType objType;
+		public ObjType ObjType => objType;
 
 		private Character? parent = null;		//道具的主人
 		public Character? Parent

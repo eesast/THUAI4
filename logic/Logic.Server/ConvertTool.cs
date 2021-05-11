@@ -37,7 +37,7 @@ namespace Logic.Server
 			return AllEnums(jobType, Communication.Proto.PropType.Null);
 		}
 
-		public static Communication.Proto.ShapeType ToCommunicationShapeType(THUnity2D.GameObject.ShapeType shapeType)
+		public static Communication.Proto.ShapeType ToCommunicationShapeType(THUnity2D.ShapeType shapeType)
 		{
 			return AllEnums(shapeType, Communication.Proto.ShapeType.Circle);
 		}
@@ -47,7 +47,7 @@ namespace Logic.Server
 			return AllEnums(bulletType, Communication.Proto.BulletType.Bullet0);
 		}
 
-		public static Communication.Proto.ColorType ToCommunicationColorType(GameEngine.Map.ColorType colorType)
+		public static Communication.Proto.ColorType ToCommunicationColorType(Gaming.Map.ColorType colorType)
 		{
 			return AllEnums(colorType, Communication.Proto.ColorType.None);
 		}

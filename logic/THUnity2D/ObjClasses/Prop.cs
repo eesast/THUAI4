@@ -43,8 +43,6 @@
 			}
 		}
 
-		public new long Move(Vector displacement) => base.Move(displacement);
-
 		public void ResetPosition(XYPosition pos)
 		{
 			Position = pos;
@@ -54,10 +52,7 @@
 			MoveSpeed = newMoveSpeed;
 		}
 
-		public override bool WillCollideWith(GameObject targetObj, XYPosition nextPos)
-		{
-			return false;
-		}
+		bool IMovable.IgnoreCollide(IGameObj targetObj) => true;
 
 		public Prop(XYPosition initPos, int radius) : base(initPos, radius, ObjType.Prop, ShapeType.Square) { }
 	}

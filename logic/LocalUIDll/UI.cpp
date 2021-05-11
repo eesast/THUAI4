@@ -60,7 +60,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
-		std::thread([this] { GetPGM(GameEngine::MapInfo::defaultMap, 2); }).detach();
+		std::thread([this] { GetPGM(Gaming::MapInfo::defaultMap, 2); }).detach();
 
 		while (pGM == nullptr) std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		Gaming::Game^ game = const_cast<GameWrapper*>(pGM)->Game();
@@ -221,10 +221,10 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					switch (cellColor[i, j])
 					{
-					case GameEngine::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
-					case GameEngine::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
-					case GameEngine::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
-					case GameEngine::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
+					case Gaming::Map::ColorType::Color1: SelectObject(hdcMem, hbrColor1); break;
+					case Gaming::Map::ColorType::Color2: SelectObject(hdcMem, hbrColor2); break;
+					case Gaming::Map::ColorType::Color3: SelectObject(hdcMem, hbrColor3); break;
+					case Gaming::Map::ColorType::Color4: SelectObject(hdcMem, hbrColor4); break;
 					default: continue;
 					}
 					Rectangle(hdcMem, leftPos, topPos, leftPos + pixelPerCell.x, topPos + pixelPerCell.y);
@@ -334,11 +334,11 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			HPEN hPenPlayerDirect = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 
 			auto gameObjList = game->GetGameObject();
-			int rowAllGrid = GameEngine::Map::Constant::numOfGridPerCell * game->GameMap->Rows;
-			int colAllGrid = GameEngine::Map::Constant::numOfGridPerCell * game->GameMap->Cols;
+			int rowAllGrid = THUnity2D::Constant::numOfGridPerCell * game->GameMap->Rows;
+			int colAllGrid = THUnity2D::Constant::numOfGridPerCell * game->GameMap->Cols;
 			for each (THUnity2D::GameObject^ gameObj in gameObjList)
 			{
-				if (gameObj->GetGameObjType() == THUnity2D::GameObject::GameObjType::Character)
+				if (gameObj->GetGameObjType() == THUnity2D::GameObjType::Character)
 				{
 					if (!static_cast<THUnity2D::Character^>(gameObj)->IsResetting)
 					{
@@ -358,7 +358,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				else
 				{
 					THUnity2D::Obj^ obj = (THUnity2D::Obj^)gameObj;
-					switch (obj->objType)
+					switch (obj->ObjType)
 					{
 					case THUnity2D::ObjType::Bullet:
 						SelectObject(hdcMem, hbrBullet);
@@ -383,8 +383,8 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 						switch (obj->Shape)
 						{
-						case THUnity2D::GameObject::ShapeType::Circle: PaintFunc = &Ellipse; break;
-						case THUnity2D::GameObject::ShapeType::Square: PaintFunc = &Rectangle; break;
+						case THUnity2D::ShapeType::Circle: PaintFunc = &Ellipse; break;
+						case THUnity2D::ShapeType::Square: PaintFunc = &Rectangle; break;
 						}
 						RECT rect;
 						rect.left = (y - rad) * (width - appendCx) / colAllGrid;
@@ -392,7 +392,7 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						rect.right = (y + rad) * (width - appendCx) / colAllGrid;
 						rect.bottom = (x + rad) * (height - appendCy) / rowAllGrid;
 						PaintFunc(hdcMem, rect.left, rect.top, rect.right, rect.bottom);
-						if (obj->objType == THUnity2D::ObjType::Prop && ((THUnity2D::Prop^)obj)->Laid == false)
+						if (obj->ObjType == THUnity2D::ObjType::Prop && ((THUnity2D::Prop^)obj)->Laid == false)
 						{
 							THUnity2D::Prop^ prop = (THUnity2D::Prop^)obj;
 							TCHAR ch = propToChar.find((int)(prop->GetPropType()))->second;

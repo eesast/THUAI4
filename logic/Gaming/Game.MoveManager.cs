@@ -27,13 +27,13 @@ namespace Gaming
 				switch (mine.GetPropType())
 				{
 					case PropType.Dirt:
-						player.AddMoveSpeed(Map.Constant.dirtMoveSpeedDebuff, Map.Constant.buffPropTime);
+						player.AddMoveSpeed(Constant.dirtMoveSpeedDebuff, Constant.buffPropTime);
 						break;
 					case PropType.Attenuator:
-						player.AddAP(Map.Constant.attenuatorAtkDebuff, Map.Constant.buffPropTime);
+						player.AddAP(Constant.attenuatorAtkDebuff, Constant.buffPropTime);
 						break;
 					case PropType.Divider:
-						player.ChangeCD(Map.Constant.dividerCdDiscount, Map.Constant.buffPropTime);
+						player.ChangeCD(Constant.dividerCdDiscount, Constant.buffPropTime);
 						break;
 				}
 			}

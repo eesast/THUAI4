@@ -7,8 +7,8 @@ namespace Logic.Server
 	{
 		public static GameObjInfo Auto(GameObject gameObj)		//自动判断转换的类型
 		{
-			if (gameObj.GetGameObjType() == THUnity2D.GameObject.GameObjType.Character) return Player((Character)gameObj);
-			switch (((Obj)gameObj).objType)
+			if (gameObj.GetGameObjType() == THUnity2D.GameObjType.Character) return Player((Character)gameObj);
+			switch (((Obj)gameObj).ObjType)
 			{
 			case THUnity2D.ObjType.Bullet: return Bullet((Bullet)gameObj);
 			case THUnity2D.ObjType.Prop: return Prop((Prop)gameObj);
@@ -17,7 +17,7 @@ namespace Logic.Server
 			default:		//错误情况，理论上不应该出现，为了过编译而设置
 			{
 				GameObjInfo ret = new GameObjInfo();
-				ret.GameObjType = GameObjType.OutOfBoundBlock;
+				ret.GameObjType = Communication.Proto.GameObjType.OutOfBoundBlock;
 				Basic(gameObj, ref ret);
 				return ret;
 			}
