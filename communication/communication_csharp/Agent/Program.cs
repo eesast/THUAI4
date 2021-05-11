@@ -18,6 +18,8 @@ namespace Communication.Agent
         private static readonly ConcurrentDictionary<UInt64, IntPtr> dict = new ConcurrentDictionary<UInt64, IntPtr>();
         //teamID和playID不能超过32位，否则会GG
 
+        private static AutoResetEvent allConnectionClosed = new AutoResetEvent(false);
+
         static int Main(string[] args)
         {
             var app = new CommandLineApplication();
@@ -83,6 +85,7 @@ namespace Communication.Agent
                         break;
                     }
                 }
+                if (dict.IsEmpty) allConnectionClosed.Set();
                 return HandleResult.Ok;
             };
             client.OnReceive += delegate (IClient sender, byte[] bytes)
@@ -151,7 +154,7 @@ namespace Communication.Agent
             {
                 Console.WriteLine("Agent starts unsuccessfully");
             }
-            Thread.Sleep(int.MaxValue);
+            allConnectionClosed.WaitOne();
             dict.Clear();
             server.Stop();
             server.Dispose();
