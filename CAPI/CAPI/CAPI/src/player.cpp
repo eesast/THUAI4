@@ -6,6 +6,7 @@ extern const bool asynchronous = true;
 
 #include <random>
 #include <iostream>
+#include <thread>
 
 /* 请于 VS2019 项目属性中开启 C++17 标准：/std:c++17 */
 
@@ -20,13 +21,8 @@ namespace
 
 void AI::play(GameApi& g)
 {
-	static int counter1 = 0;
-	static int counter2 = 0;
-	counter1 += g.MovePlayer(50, direction(e));
-	counter2 += 1;
-	if (g.GetCounterOfFrames() == 200) {
-		std::cout << counter1 << std::endl;
-		std::cout << counter2 << std::endl;
-		g.Wait();
+	while(true){
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::cout<<"I`m sleeping..."<<std::endl;
 	}
 }

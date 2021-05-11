@@ -35,6 +35,8 @@ private:
 	std::unique_ptr<LogicInterface> pApi;
 	std::unique_ptr<AIBase> pAI;
 
+	std::thread tAI;
+
 	volatile std::int32_t counter_state = 0;
 	volatile std::int32_t counter_buffer = 0;
 	State* pState;
