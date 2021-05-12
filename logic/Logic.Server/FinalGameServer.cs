@@ -34,9 +34,10 @@ namespace Logic.Server
 			{
 				for (int i = 0; i < TeamCount; ++i)
 				{
-					sw.Write(GetTeamScore(i).ToString() + ' ');
+					sw.Write(GetTeamScore(i).ToString() + ',');
 				}
 				sw.WriteLine();
+				sw.Flush();
 			}
 		}
 	}

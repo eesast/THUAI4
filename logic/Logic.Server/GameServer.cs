@@ -161,8 +161,15 @@ namespace Logic.Server
 		protected override void OnReceive(MessageToServer msg)
 		{
 #if DEBUG
-			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}");
+			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}, args: {msg.TimeInMilliseconds} {msg.Angle}");
 #endif
+			if (msg.TimeInMilliseconds < 0)
+			{
+				if (msg.Angle >= 0.0) msg.Angle -= Math.PI;
+				else msg.Angle += Math.PI;
+				if (msg.TimeInMilliseconds == int.MinValue) msg.TimeInMilliseconds = int.MaxValue;
+				else msg.TimeInMilliseconds = -msg.TimeInMilliseconds;
+			}
 			if (double.IsNaN(msg.Angle) || double.IsInfinity(msg.Angle)) msg.Angle = 0.0;
 
 			switch (msg.MessageType)

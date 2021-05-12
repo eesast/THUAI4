@@ -2,7 +2,7 @@
   "profiles": {
     "Logic.Server": {
       "commandName": "Project",
-      "commandLineArgs": "--port=20000 --teamCount=2 --playerCount=2 -g 600"
+      "commandLineArgs": "--port=20000 --teamCount=2 --playerCount=4 -g 600"
     }
   }
 }
