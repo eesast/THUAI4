@@ -4,7 +4,7 @@ BOOL BasicWindow::Init
 (
 	HINSTANCE hInstance, int nCmdShow,
 	int x, int y, int cx, int cy, DWORD dwStyle,
-	LPCTSTR c_lpszWndTitle, WNDCLASSEX wcex
+	LPCTSTR c_lpszWndTitle, WNDCLASSEX wcex, HWND hWndParent
 )
 {
 	wcex.lpfnWndProc = WndProc;
@@ -15,7 +15,7 @@ BOOL BasicWindow::Init
 	}
 
 	// 执行应用程序初始化:
-	if (!InitInstance(hInstance, nCmdShow, x, y, cx, cy, dwStyle, wcex.lpszClassName, c_lpszWndTitle))
+	if (!InitInstance(hInstance, nCmdShow, x, y, cx, cy, dwStyle, wcex.lpszClassName, c_lpszWndTitle, hWndParent))
 	{
 		MessageBox(NULL, TEXT("Window creating failed!"), c_lpszError, MB_OK | MB_ICONERROR);
 		return FALSE;
@@ -31,12 +31,12 @@ BOOL BasicWindow::Init
 //   目标: 保存实例句柄、主窗口句柄并创建主窗口
 //
 
-BOOL BasicWindow::InitInstance(HINSTANCE hInstance, int nCmdShow, int x, int y, int cx, int cy, DWORD dwStyle, LPCTSTR c_lpszWndClassName, LPCTSTR c_lpszWndTitle)
+BOOL BasicWindow::InitInstance(HINSTANCE hInstance, int nCmdShow, int x, int y, int cx, int cy, DWORD dwStyle, LPCTSTR c_lpszWndClassName, LPCTSTR c_lpszWndTitle, HWND hWndParent)
 {
 	m_hInst = hInstance;  //将实例句柄存储在成员变量中
 
 	HWND hWnd = CreateWindow(c_lpszWndClassName, c_lpszWndTitle, dwStyle,
-		x, y, cx, cy, NULL, NULL, hInstance, this);
+		x, y, cx, cy, hWndParent, NULL, hInstance, this);
 
 	if (!hWnd)
 	{

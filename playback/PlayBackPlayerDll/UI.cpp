@@ -165,6 +165,12 @@ int UI::Begin(System::String^ initialFileName)
 		GetObject(hBmBkGnd, sizeof(bkGnd), &bkGnd);
 	}
 
+	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
+		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME,
+		TEXT("THUAI Playback"), wcex, GetConsoleWindow());
+
+	SetMenu(m_hWnd, hMenu);
+
 	if (!chooseFileDlg.Begin(hRes, MAKEINTRESOURCE(IDD_CHOOSESPEEDDLG), m_hWnd))
 	{
 		if (MessageBox(GetConsoleWindow(), TEXT("The library PlayBackPlayerResources.dll might have been destroyed, continue?"), TEXT("Error"), MB_YESNO | MB_ICONERROR) != IDYES)
@@ -172,12 +178,6 @@ int UI::Begin(System::String^ initialFileName)
 			exit(1);
 		}
 	}
-
-	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
-		WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME,
-		TEXT("THUAI Playback"), wcex);
-
-	SetMenu(m_hWnd, hMenu);
 
 	FreeLibrary(hRes);
 
