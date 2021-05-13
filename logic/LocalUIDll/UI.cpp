@@ -41,7 +41,7 @@ int UI::Begin()
 
 	Init(GetModuleHandle(NULL), SW_NORMAL, 0, 0, width, height,
 		 WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX,
-		 TEXT("THUnity"), wcex);
+		 TEXT("THUnity"), wcex, GetConsoleWindow());
 
 	MSG msg;
 
