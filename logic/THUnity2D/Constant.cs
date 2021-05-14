@@ -8,7 +8,7 @@ namespace THUnity2D
 		public const int numOfGridPerCell = 1000;               //每个的坐标单位数
 		public const int numOfStepPerSecond = 20;               //每秒行走的步数
 		public const int addScoreWhenKillOnePlayer = 0;         //击杀一名玩家后的加分
-		public const int producePropTimeInterval = 10 * 1000;   //产生道具时间间隔（毫秒）
+		public const int producePropTimeInterval = 15 * 1000;   //产生道具时间间隔（毫秒）
 
 		public const int basicPlayerMoveSpeed = numOfGridPerCell * 4;
 		public const int basicBulletMoveSpeed = numOfGridPerCell * 6;
