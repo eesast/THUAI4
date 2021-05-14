@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 using Communication.Proto;
 
@@ -35,8 +34,17 @@ namespace Logic.Client
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             if (watch) this.Text = "Client---Watch Mode";
             else this.Text = "Client---TeamID: " + Convert.ToString(teamID) + " ---PlayerID: " + Convert.ToString(playerID) + " ---JobType: " + Convert.ToString(job);
+            //试图做出优化，但效果不好，且影响美观
+            //this.SetStyle(ControlStyles.UserPaint, true);
             //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             //this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            //this.DoubleBuffered = true;
+            panel = new Panel();
+            panel.Location = new Point(Interval, Interval);
+            panel.Size = new Size(50 * MapcellWidth, 50 * MapcellHeight);
+            panel.BackColor = Color.Transparent;
+            this.Controls.Add(panel);
+            panel.BringToFront();
             //绘制地图
             for (int i = 0; i < 50; i++)
             {
@@ -45,11 +53,14 @@ namespace Logic.Client
                     Maplabels[i, j] = new Label();
                     //设置大小位置
                     Maplabels[i, j].Size = new Size(MapcellWidth, MapcellHeight);
-                    Maplabels[i, j].Location = new Point(i * MapcellWidth + Interval, j * MapcellHeight + Interval);
+                    Maplabels[i, j].Location = new Point(i * MapcellWidth, j * MapcellHeight);
+                    //Maplabels[i, j].Location = new Point(i * MapcellWidth + Interval, j * MapcellHeight + Interval);
                     Maplabels[i, j].BackColor = Color.LightGray;
-                    this.Controls.Add(Maplabels[i, j]);
-                    int x = i * MapcellWidth + Interval, y = j * MapcellWidth + Interval;
-                    Maplabels[i, j].Click += new EventHandler(LabelClick);
+                    panel.Controls.Add(Maplabels[i, j]);
+                    //this.Controls.Add(Maplabels[i, j]);
+                    Maplabels[i,j].SendToBack();
+                    //int x = i * MapcellWidth + Interval, y = j * MapcellWidth + Interval;
+                    Maplabels[i, j].Click += new EventHandler(LabelClick_NEW);
                     //Maplabels[i, j].Click += delegate(object sender, EventArgs e) { LabelClick(sender, e, x, y); }; ;
                 }
             }
@@ -284,24 +295,12 @@ namespace Logic.Client
             }
             ObjectInfoWord[9].Size = new Size(MapcellWidth * 16, 3 * MapcellHeight);
             ObjectInfoWord[9].TextAlign = ContentAlignment.TopLeft;
-            //玩家示例代码
-            //子弹示例代码
-            //道具示例代码
-            //new Thread(() =>
-            //{
-            //    while (true)
-            //    {
-            //        this.Refresh();
-            //        Thread.Sleep(2000);
-            //    }
-            //}
-            //    ).Start();            
         }
         protected readonly int MapcellWidth = 13;  //单元格长度
         protected readonly int MapcellHeight = 13;  //单元格高度
         protected readonly int Interval = 10;  //单元格间距
         public Label[,] Maplabels = new Label[50, 50];  //地图
-        protected Label[] Examplelabels = new Label[20];  //图例        
+        protected Label[] Examplelabels = new Label[20];  //图例
         //显示地图信息
         protected Label MapInfoPic = new Label();
         protected Label MapInfoWord = new Label();
@@ -309,10 +308,12 @@ namespace Logic.Client
         //显示物品信息
         protected Label ObjectInfo = new Label();
         protected Label[] ObjectInfoWord = new Label[10];
+        protected Graphics Beatify;
+        protected Panel panel;
         //绘制窗体
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            Graphics Beatify = this.CreateGraphics();
+            Beatify = this.CreateGraphics();
             Pen Magicpen = new Pen(Color.WhiteSmoke, 2);
             Rectangle r1 = new Rectangle(Interval / 2 + 3, Interval / 2 + 3, Interval + 50 * MapcellWidth - 6, Interval + 50 * MapcellHeight - 6);
             Rectangle r2 = new Rectangle(Interval * 2 + 50 * MapcellWidth, Interval / 2 + 3, 18 * MapcellWidth, 12 * MapcellHeight);
@@ -355,7 +356,8 @@ namespace Logic.Client
             {
                 if (PlayerLabelSet.ContainsKey(player.id))
                 {
-                    PlayerLabelSet[player.id].label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    //PlayerLabelSet[player.id].label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2+Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    PlayerLabelSet[player.id].label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 , (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 );
                     PlayerLabelSet[player.id].label.BringToFront();
                     PlayerLabelSet[player.id].used = true;
                     PlayerLabelSet[player.id].label.Click += delegate (object sender, EventArgs e) { PlayerClick(sender, e, player); }; ;
@@ -364,7 +366,8 @@ namespace Logic.Client
                 {
                     BoolLabel label = new BoolLabel();
                     label.label.Size = new Size(MapcellWidth + 1, MapcellHeight + 1);
-                    label.label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    //label.label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    label.label.Location = new Point((player.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 , (player.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 );
                     label.label.Text = Convert.ToString(player.playernum);
                     label.label.ForeColor = Color.White;
                     label.label.TextAlign = ContentAlignment.TopRight;
@@ -385,7 +388,8 @@ namespace Logic.Client
                             label.label.BackColor = Color.Pink;
                             break;
                     }
-                    this.Controls.Add(label.label);
+                    //this.Controls.Add(label.label);
+                    panel.Controls.Add(label.label);
                     label.label.BringToFront();
                     PlayerLabelSet.Add(player.id, label);
                 }
@@ -395,9 +399,33 @@ namespace Logic.Client
         {
             this.Invoke(new Action(() =>
             {
+                //试图直接绘制子弹，但失败
+                //switch (bullet.teamnum)
+                //{
+                //    case 1:
+                //        Brush Magicbrush1 = new SolidBrush(Color.SteelBlue);
+                //        Drawbullet.FillRectangle(Magicbrush1, (bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2, 5, 5);
+                //        Magicbrush1.Dispose();
+                //        break;
+                //    case 2:
+                //        Brush Magicbrush2 = new SolidBrush(Color.Green);
+                //        Drawbullet.FillRectangle(Magicbrush2, (bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2, 5, 5);
+                //        Magicbrush2.Dispose();
+                //        break;
+                //    case 3:
+                //        Brush Magicbrush3 = new SolidBrush(Color.Blue);
+                //        Drawbullet.FillRectangle(Magicbrush3, (bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2, 5, 5);
+                //        Magicbrush3.Dispose();
+                //        break;
+                //    case 4:
+                //        Brush Magicbrush4 = new SolidBrush(Color.Pink);
+                //        Drawbullet.FillRectangle(Magicbrush4, (bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2, 5, 5);
+                //        Magicbrush4.Dispose();
+                //        break;
+                //}
                 if (BulletLabelSet.ContainsKey(bullet.id))
                 {
-                    BulletLabelSet[bullet.id].label.Location = new Point((bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 + Interval, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
+                    BulletLabelSet[bullet.id].label.Location = new Point((bullet.x * MapcellWidth + Program.cell / 2) / Program.cell - (MapcellWidth + 1) / 2 +Interval, (bullet.y * MapcellHeight + Program.cell / 2) / Program.cell - (MapcellHeight + 1) / 2 + Interval);
                     BulletLabelSet[bullet.id].label.BringToFront();
                     BulletLabelSet[bullet.id].used = true;
                 }
@@ -429,11 +457,12 @@ namespace Logic.Client
         }
         public void DrawItem(Item item)  //绘制道具
         {
+             
             this.Invoke(new Action(() =>
             {
                 if (ItemLabelSet.ContainsKey(item.id))
                 {
-                    ItemLabelSet[item.id].label.Location = new Point(item.xnum * MapcellWidth + Interval, item.ynum * MapcellHeight + Interval);
+                    ItemLabelSet[item.id].label.Location = new Point(item.xnum * MapcellWidth+Interval , item.ynum * MapcellHeight + Interval);
                     ItemLabelSet[item.id].label.BringToFront();
                     ItemLabelSet[item.id].used = true;
                 }
@@ -555,8 +584,77 @@ namespace Logic.Client
                     msg.PlayerID = playerid;
                     msg.TeamID = teamid;
                     msg.MessageType = MessageType.Move;
-                    msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - 7, x - PlayerLabelSet[selfguid].label.Location.Y - 6);//目前为弧度
-                    msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
+                    msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X -Interval - 7, x - PlayerLabelSet[selfguid].label.Location.Y - Interval - 6);//目前为弧度
+                    msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - Interval - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - Interval - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
+                    //TO DO:向server发移动指令消息
+                    Program.clientCommunicator.SendMessage(msg);
+                }
+            }
+        }
+        private void LabelClick_NEW(object sender, EventArgs e)  //标签单击事件处理
+        {
+            MouseEventArgs mouseEventArgs = (MouseEventArgs)e;
+            Label label = sender as Label;
+            if (mouseEventArgs.Button == MouseButtons.Left)
+            {
+                int x = label.Location.X + mouseEventArgs.X;
+                int y = label.Location.Y + mouseEventArgs.Y;
+                if (x < 0 || x > 50 * MapcellWidth) return;
+                if (y < 0 || y > 50 * MapcellHeight) return;
+                int xnum = x / MapcellWidth;
+                int ynum = y / MapcellHeight;
+                int colorstate = ColorState[xnum, ynum];
+                switch (colorstate)
+                {
+                    case -2:  //出生点:深灰色+边框
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
+                        MapInfoPic.BackColor = Color.DarkGray;
+                        MapInfoWord.Text = "这是出生点";
+                        break;
+                    case -1:  //墙体:黑色+边框
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.FixedSingle;
+                        MapInfoPic.BackColor = Color.Brown;
+                        MapInfoWord.Text = "这是墙体";
+                        break;
+                    case 0:   //未染色区域:淡灰
+                        MapInfoPic.BackColor = Color.LightGray;
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.None;
+                        MapInfoWord.Text = "这是未染色区域";
+                        break;
+                    case 1:   //队伍1:淡钢青色
+                        MapInfoPic.BackColor = Color.LightSteelBlue;
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.None;
+                        MapInfoWord.Text = "这是队伍1染色区域";
+                        break;
+                    case 2:   //队伍2:淡绿色
+                        MapInfoPic.BackColor = Color.LightGreen;
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.None;
+                        MapInfoWord.Text = "这是队伍2染色区域";
+                        break;
+                    case 3:   //队伍3:淡蓝色
+                        MapInfoPic.BackColor = Color.LightBlue;
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.None;
+                        MapInfoWord.Text = "这是队伍3染色区域";
+                        break;
+                    case 4:   //队伍4:淡粉色
+                        MapInfoPic.BackColor = Color.LightPink;
+                        MapInfoPic.BorderStyle = (BorderStyle)FormBorderStyle.None;
+                        MapInfoWord.Text = "这是队伍4染色区域";
+                        break;
+                }
+            }
+            else if (mouseEventArgs.Button == MouseButtons.Right && !watch)
+            {
+                if (PlayerLabelSet.ContainsKey(selfguid))
+                {
+                    int y = this.PointToClient(Control.MousePosition).X;
+                    int x = this.PointToClient(Control.MousePosition).Y;
+                    MessageToServer msg = new MessageToServer();
+                    msg.PlayerID = playerid;
+                    msg.TeamID = teamid;
+                    msg.MessageType = MessageType.Move;
+                    msg.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X - Interval - 7, x - PlayerLabelSet[selfguid].label.Location.Y - Interval - 6);//目前为弧度
+                    msg.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - Interval - 7), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - Interval - 6), 2)) * Program.cell / MapcellHeight / movespeed + 0.5);
                     //TO DO:向server发移动指令消息
                     Program.clientCommunicator.SendMessage(msg);
                 }
@@ -564,7 +662,7 @@ namespace Logic.Client
         }
         private void PlayerClick(object sender, EventArgs e, Player player) //玩家点击事件处理
         {
-            LabelClick(sender, e); //标签点击通用处理
+            LabelClick_NEW(sender, e); //标签点击通用处理
             ObjectInfoWord[1].Text = "ObjectType : Player";
             ObjectInfoWord[2].Text = "TeamNum : " + Convert.ToString(player.teamnum);
             ObjectInfoWord[3].Text = "PlayerNum : " + Convert.ToString(player.playernum);
@@ -677,8 +775,8 @@ namespace Logic.Client
                         msg1.PlayerID = playerid;
                         msg1.TeamID = teamid;
                         msg1.MessageType = MessageType.Attack;
-                        msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X, x - PlayerLabelSet[selfguid].label.Location.Y);//目前为弧度
-                        msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
+                        msg1.Angle = Math.Atan2(y - PlayerLabelSet[selfguid].label.Location.X-Interval, x - PlayerLabelSet[selfguid].label.Location.Y - Interval);//目前为弧度
+                        msg1.TimeInMilliseconds = (int)(1000.0 * Math.Sqrt(Math.Pow((double)(y - PlayerLabelSet[selfguid].label.Location.X - 5 - Interval), 2) + Math.Pow((double)(x - PlayerLabelSet[selfguid].label.Location.Y - 5 - Interval), 2)) * Program.cell / MapcellHeight / bulletspeed + 0.5);
                         Program.clientCommunicator.SendMessage(msg1);
                         break;
                     case 'w':
@@ -716,7 +814,7 @@ namespace Logic.Client
                 }
             }
         }
-        //地雷先不画出“🚩”——锅
+        //地雷不画出“🚩”——锅
         public void Rebuild()  //刷新界面
         {
             this.Invoke(new Action(() =>
@@ -729,7 +827,8 @@ namespace Logic.Client
                     }
                     else
                     {
-                        this.Controls.Remove(item.Value.label);
+                        //this.Controls.Remove(item.Value.label);
+                        panel.Controls.Remove(item.Value.label);
                         PlayerLabelSet.Remove(item.Key);
                     }
                 }
