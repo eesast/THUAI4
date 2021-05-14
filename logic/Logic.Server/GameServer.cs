@@ -343,7 +343,7 @@ namespace Logic.Server
 							{
 								if (overExceed)
 								{
-									Console.WriteLine("Fetal error: your computer runs too slow that server connot send message at a frame rate of 20!!!");
+									Console.WriteLine("Fetal error: your computer runs too slow that server cannot send message at a frame rate of 20!!!");
 								}
 #if DEBUG
 								else
