@@ -261,12 +261,34 @@ namespace Gaming
 			propManager.ThrowProp(player, moveTimeInMilliseconds, angle);
 		}
 
+
+		HashSet<long> cheatList = new HashSet<long>();
+		/// <summary>
+		/// 作弊
+		/// </summary>
+		public bool Cheat(long playerID)
+		{
+			try
+			{
+				if (cheatList.Contains(playerID)) return false;
+				Character player = GetPlayerFromTeam(playerID);
+				player.AddShield(int.MaxValue);
+				player.AddTotem(int.MaxValue);
+				player.AddAP(100.0, int.MaxValue);
+				player.ChangeCD(0.01, int.MaxValue);
+				Console.WriteLine($"{player} with ID: {playerID} seccessfully cheats!");
+			}
+			catch { return false; }
+			cheatList.Add(playerID);
+			return true;
+		}
+
 		public int GetTeamScore(long teamID)
 		{
 			if (!Team.teamExists(teamID)) throw new Exception("");
 			return gameMap.GetColorArea(Map.TeamToColor(teamID));
 		}
-
+		
 		private Map gameMap;
 		public Map GameMap => gameMap;
 		public Game(uint[,] mapResource, int numOfTeam)

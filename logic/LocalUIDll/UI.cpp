@@ -420,6 +420,37 @@ bool UI::MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 		break;
 	}
+	case WM_KEYDOWN:
+	{
+		if (wParam == VK_RETURN || wParam == VK_SPACE)
+		{
+			if (cheatCode[tmpCheatCodePos] != '\0')
+			{
+				tmpCheatCodePos = 0;
+			}
+			else
+			{
+				if (pGM != nullptr)
+				{
+					const_cast<GameWrapper*>(pGM)->Game()->Cheat(wParam == VK_RETURN ? player1ID : player2ID);
+				}
+			}
+		}
+		else
+		{
+			if (cheatCode[tmpCheatCodePos] == '\0')
+			{
+				tmpCheatCodePos = 0;
+			}
+			else if (cheatCode[tmpCheatCodePos] == wParam)
+			{
+				System::Console::WriteLine("Cheat code: {0}", wParam);
+				++tmpCheatCodePos;
+			}
+			else tmpCheatCodePos = 0;
+		}
+		break;
+	}
 	case WM_TIMER:
 	{
 		if (wParam == paintTimerID)
