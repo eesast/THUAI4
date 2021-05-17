@@ -16,7 +16,9 @@
 			}
 			else
 			{
-				server = options.FinalGame ? new FinalGameServer(options) : new GameServer(options);
+				server = options.FinalGame ? new FinalGameServer(options)
+					: options.CheatMode ? new CheatServer(options)
+					: new GameServer(options);
 			}
 			return server;
 		}

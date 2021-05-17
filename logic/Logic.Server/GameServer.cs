@@ -16,7 +16,7 @@ namespace Logic.Server
 	{
 		public const int SendMessageToClientIntervalInMilliseconds = 50;    //每隔xx毫秒向客户端发送信息
 
-		private readonly Game game;
+		protected readonly Game game;
 		private uint GetBirthPointIdx(long teamID, long playerID)       //获取出生点位置
 		{
 			return (uint)(teamID * options.PlayerCountPerTeam + playerID);
@@ -71,7 +71,7 @@ namespace Logic.Server
 			mwr?.Dispose();
 		}
 
-		private long[,] communicationToGameID;      //把通信所用ID映射到游戏ID，[i, j]代表第 i 个队伍的第 j 个玩家的 id
+		protected long[,] communicationToGameID;      //把通信所用ID映射到游戏ID，[i, j]代表第 i 个队伍的第 j 个玩家的 id
 		private object addPlayerLock = new object();
 		private bool ValidTeamIDAndPlayerID(long teamID, long playerID)     //判断是否是合法的TeamID与PlayerID
 		{

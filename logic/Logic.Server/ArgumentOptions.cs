@@ -46,5 +46,8 @@ namespace Logic.Server
 
 		[Option("finalGame", Required = false, HelpText = "Whether it is the final game")]
 		public bool FinalGame { get; set; } = false;
+
+		[Option("cheatMode", Required = false, HelpText = "Whether to open the cheat code")]
+		public bool CheatMode { get; set; } = false;
 	}
 }

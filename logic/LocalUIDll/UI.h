@@ -42,6 +42,8 @@ private:
 	volatile GameWrapper* pGM = nullptr;
 	void GetPGM(array<unsigned int, 2>^ mapResource, int numOfTeam);
 
+	static const inline char* const cheatCode = "MAKEEEHARDAGAIN";
+	int tmpCheatCodePos = 0;
 };
 
 #endif

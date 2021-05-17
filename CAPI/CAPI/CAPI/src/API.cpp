@@ -447,13 +447,13 @@ bool DebugApi<asyn>::Send(int toPlayerID, std::string message)
 	{ //应该没啥必要
 		if (toPlayerID < 0 || toPlayerID >= StateConstant::nPlayers)
 		{
-			OutStream << "[Warning: Illegal player ID.]" << std::endl;
+			OutStream << "[Error: Illegal player ID.]" << std::endl;
 			return false;
 		}
 		if (State::playerGUIDs[pState->self->teamID][toPlayerID] == pState->self->guid)
 		{
 			OutStream << "[Warning: You are sending a message to yourself.]" << std::endl;
-			return false;
+			// return false;
 		}
 	}
 	Protobuf::MessageToServer msg;
