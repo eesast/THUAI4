@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Threading;
 using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 using Timothy.FrameRateTask;
 
 namespace GameEngine
@@ -23,7 +25,7 @@ namespace GameEngine
 		/// </summary>
 		/// <param name="obj">移动物体，默认obj.Rigid为true</param>
 		/// <param name="moveVec">移动的位移向量</param>
-		private void MoveMax(GameObject obj,  Vector moveVec)
+		private void MoveMax(IMovable obj,  Vector moveVec)
 		{
 
 			/*由于四周是墙，所以人物永远不可能与越界方块碰撞*/
@@ -32,7 +34,7 @@ namespace GameEngine
 
 			uint maxLen = collisionChecker.FindMax(obj, nextPos, moveVec);
 
-			maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Map.Constant.numOfStepPerSecond));
+			maxLen = (uint)Math.Min(maxLen, (obj.MoveSpeed / Constant.numOfStepPerSecond));
 			obj.Move(new Vector(moveVec.angle, maxLen));
 		}
 
@@ -42,32 +44,32 @@ namespace GameEngine
 		/// <param name="obj">要移动的物体</param>
 		/// <param name="moveTime">移动的时间，毫秒</param>
 		/// <param name="moveDirection">移动的方向，弧度</param>
-		public void MoveObj(GameObject obj, int moveTime, double moveDirection)
+		public void MoveObj(IMovable obj, int moveTime, double moveDirection)
 		{
-			Task.Run
+			new Thread
 			(
 				() =>
 				{
-					lock (obj.moveLock)
+					lock (obj.MoveLock)
 					{
 						if (!obj.IsAvailable) return;
 						obj.IsMoving = true;     //开始移动
 					}
 
-					GameObject.Debug(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
+					Debugger.Output(obj, " begin to move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64.ToString());
 					double deltaLen = 0.0;      //储存行走的误差
 					Vector moveVec = new Vector(moveDirection, 0.0);
 					//先转向
-					if (gameMap.Timer.IsGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
-					GameObject? collisionObj = null;
+					if (gameTimer.IsGaming && obj.CanMove) deltaLen += moveVec.length - Math.Sqrt(obj.Move(moveVec));     //先转向
+					IGameObj? collisionObj = null;
 
 					bool isDestroyed = false;
 					new FrameRateTaskExecutor<int>
 					(
-						() => gameMap.Timer.IsGaming && obj.CanMove && !obj.IsResetting,
+						() => gameTimer.IsGaming && obj.CanMove && !obj.IsResetting,
 						() =>
 						{
-							moveVec.length = obj.MoveSpeed / Map.Constant.numOfStepPerSecond + deltaLen;
+							moveVec.length = obj.MoveSpeed / Constant.numOfStepPerSecond + deltaLen;
 							deltaLen = 0;
 
 							//越界情况处理：如果越界，则与越界方块碰撞
@@ -82,7 +84,7 @@ namespace GameEngine
 								{
 									case AfterCollision.ContinueCheck: goto Check;
 									case AfterCollision.Destroyed:
-										GameObject.Debug(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+										Debugger.Output(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
 										isDestroyed = true;
 										return false;
 									case AfterCollision.MoveMax:
@@ -96,20 +98,39 @@ namespace GameEngine
 
 							return true;
 						},
-						1000 / Map.Constant.numOfStepPerSecond,
+						1000 / Constant.numOfStepPerSecond,
 						() =>
 						{
+							int leftTime = moveTime % (1000 / Constant.numOfStepPerSecond);
 							if (!isDestroyed)
 							{
-								moveVec.length = deltaLen;
+							Check:
+								moveVec.length = deltaLen + leftTime * obj.MoveSpeed / Constant.numOfStepPerSecond / 50;
 								if ((collisionObj = collisionChecker.CheckCollision(obj, moveVec)) == null)
 								{
 									obj.Move(moveVec);
 								}
 								else
 								{
-									OnCollision(obj, collisionObj, moveVec);
+									switch (OnCollision(obj, collisionObj, moveVec))
+									{
+										case AfterCollision.ContinueCheck: goto Check;
+										case AfterCollision.Destroyed:
+											Debugger.Output(obj, " collide with " + collisionObj.ToString() + " and has been removed from the game.");
+											isDestroyed = true;
+											break;
+										case AfterCollision.MoveMax:
+											MoveMax(obj, moveVec);
+											moveVec.length = 0;
+											break;
+									}
 								}
+
+								if (leftTime != 0)
+								{
+									Thread.Sleep(leftTime);
+								}
+
 								obj.IsMoving = false;        //结束移动
 								EndMove(obj);
 							}
@@ -122,17 +143,25 @@ namespace GameEngine
 						MaxTolerantTimeExceedCount = ulong.MaxValue,
 						TimeExceedAction = b =>
 						{
-							Console.WriteLine("The computer runs so slow that the player cannot finish moving during this time!!!!!!");
+							if (b) Console.WriteLine("Fetal Error: The computer runs so slow that the object cannot finish moving during this time!!!!!!");
+
+#if DEBUG
+							else
+							{
+								Console.WriteLine("Debug info: Object moving time exceed for once.");
+							}
+#endif
 						}
 					}.Start();
 				}
-			);
+			)
+			{ IsBackground = true }.Start();
 		}
 
-		private Map gameMap;
-		private Action<GameObject> EndMove;
+		private ITimer gameTimer;
+		private Action<IMovable> EndMove;
 		private CollisionChecker collisionChecker;
-		private Func<GameObject, GameObject, Vector, AfterCollision> OnCollision;
+		private Func<IMovable, IGameObj, Vector, AfterCollision> OnCollision;
 
 
 		/// <summary>
@@ -141,19 +170,17 @@ namespace GameEngine
 		/// <param name="gameMap">游戏地图</param>
 		/// <param name="OnCollision">发生碰撞时要做的事情，第一个参数为移动的物体，第二个参数为撞到的物体，第三个参数为移动的位移向量，返回值见AfterCollision的定义</param>
 		/// <param name="EndMove">结束碰撞时要做的事情</param>
-		/// <param name="IgnoreCollision">是否忽略本次碰撞。第一个参数为移动的物体，第二个参数为撞到的物体。如果忽略本次碰撞，返回true；否则返回false</param>
 		public MoveEngine
 			(
-				Map gameMap,
-				Func<GameObject, GameObject, Vector, AfterCollision> OnCollision,
-				Action<GameObject> EndMove,
-				Func<GameObject, GameObject, bool> IgnoreCollision
+				IMap gameMap,
+				Func<IMovable, IGameObj, Vector, AfterCollision> OnCollision,
+				Action<IMovable> EndMove
 			)
 		{
-			this.gameMap = gameMap;
+			this.gameTimer = gameMap.Timer;
 			this.EndMove = EndMove;
 			this.OnCollision = OnCollision;
-			this.collisionChecker = new CollisionChecker(gameMap, IgnoreCollision);
+			this.collisionChecker = new CollisionChecker(gameMap);
 		}
 	}
 }

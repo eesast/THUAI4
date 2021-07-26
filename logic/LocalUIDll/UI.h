@@ -1,4 +1,4 @@
-#ifndef UI_H
+﻿#ifndef UI_H
 
 #define UI_H
 
@@ -27,6 +27,23 @@ private:
 
 	long long player1ID = 0;
 	long long player2ID = 0;
+
+public:
+	value class GameWrapper
+	{
+	public:
+		Gaming::Game^ Game() { return game; }
+		GameWrapper(array<unsigned int, 2>^ mapResource, int numOfTeam);
+	private:
+		Gaming::Game^ game;
+	};
+
+private:
+	volatile GameWrapper* pGM = nullptr;
+	void GetPGM(array<unsigned int, 2>^ mapResource, int numOfTeam);
+
+	static const inline char* const cheatCode = "MAKEEEHARDAGAIN";
+	int tmpCheatCodePos = 0;
 };
 
 #endif

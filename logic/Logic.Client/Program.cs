@@ -98,7 +98,7 @@ namespace Logic.Client
                         bulletspeed = Program.basicBulletMoveSpeed / 2;
                         break;
                     case JobType.Job4:
-                        bulletspeed = Program.basicBulletMoveSpeed * 4;
+                        bulletspeed = Program.basicBulletMoveSpeed * 3;
                         break;
                     case JobType.Job5:
                         bulletspeed = Program.basicBulletMoveSpeed;
@@ -190,6 +190,7 @@ namespace Logic.Client
             this.id = guid;
         }
     }
+
     public class Item  //道具类
     {
         public int xnum; //横坐标大格
@@ -234,7 +235,9 @@ namespace Logic.Client
         private Dictionary<Int64, Tuple<int, int>> Hashable;
         public Int64 selfguid;
         public bool searched = false;
+        public long LastMessageTime= System.Environment.TickCount64;
         public BlockingCollection<Tuple<IMsg, long>> messageline;
+        private static int tpf = 90;        //帧率控制
         public ClientData(Int64 teamID, Int64 playerID, JobType jobType, ushort port)
         {
             Program.teamID = teamID;
@@ -293,20 +296,27 @@ namespace Logic.Client
                     }
                     break;
                 case MessageType.Gaming:
-                    if (System.Environment.TickCount64 - clock > 50) break;
-                    if (Program.watch && Program.initneed)
+                    if (System.Environment.TickCount64 - clock > 20) break;
+                    if (System.Environment.TickCount64 - LastMessageTime < tpf) break;
+                    LastMessageTime = System.Environment.TickCount64;
+                    if (Program.initneed)
                     {
-                        Hashable = new Dictionary<Int64, Tuple<int, int>>();
-                        for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
+                        if (Program.watch)
                         {
-                            for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                            Hashable = new Dictionary<Int64, Tuple<int, int>>();
+                            for (int i = 0; i < msg.PlayerGUIDs.Count; i++)
                             {
-                                Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                                for (int j = 0; j < msg.PlayerGUIDs[0].TeammateGUIDs.Count; j++)
+                                {
+                                    Hashable.Add(msg.PlayerGUIDs[i].TeammateGUIDs[j], new Tuple<int, int>(i, j));
+                                }
                             }
                         }
+                        Refresh(msg);
                         Program.initneed = false;
+                        LastMessageTime = System.Environment.TickCount64 + 500;
                     }
-                    Refresh(msg);
+                    else Refresh(msg);
                     break;
                 case MessageType.EndGame:
                     Application.Exit();

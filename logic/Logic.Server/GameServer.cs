@@ -1,21 +1,22 @@
 ﻿using Communication.Proto;
-using GameEngine;
 using Gaming;
 using Newtonsoft.Json.Linq;
 using playback;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
-using THUnity2D;
+using THUnity2D.ObjClasses;
 using Timothy.FrameRateTask;
 
 namespace Logic.Server
 {
+	/// <summary>
+	/// 供天梯使用 Server
+	/// </summary>
 	class GameServer : ServerBase
 	{
 		public const int SendMessageToClientIntervalInMilliseconds = 50;    //每隔xx毫秒向客户端发送信息
 
-		private readonly Game game;
+		protected readonly Game game;
 		private uint GetBirthPointIdx(long teamID, long playerID)       //获取出生点位置
 		{
 			return (uint)(teamID * options.PlayerCountPerTeam + playerID);
@@ -27,7 +28,8 @@ namespace Logic.Server
 		}
 
 		public override int TeamCount => options.TeamCount;
-		public override bool IsWebCompetition => httpSender != null;
+		public bool IsWebCompetition => httpSender != null;
+		public override bool ForManualOperation => !IsWebCompetition;
 
 		private MessageWriter? mwr = null;
 		private HttpSender? httpSender = null;
@@ -61,19 +63,15 @@ namespace Logic.Server
 				httpSender = new HttpSender(options.Url, options.Token, "PUT");
 			}
 
-			while (!game.GameMap.Timer.IsGaming)
-			{
-				Thread.Sleep(500);
-			}
-			while (game.GameMap.Timer.IsGaming)
-			{
-				Thread.Sleep(1000);
-			}
+		}
+
+		public override void WaitForGame()
+		{
 			endGameInfoSema.WaitOne();
 			mwr?.Dispose();
 		}
 
-		private long[,] communicationToGameID;      //把通信所用ID映射到游戏ID，[i, j]代表第 i 个队伍的第 j 个玩家的 id
+		protected long[,] communicationToGameID;      //把通信所用ID映射到游戏ID，[i, j]代表第 i 个队伍的第 j 个玩家的 id
 		private object addPlayerLock = new object();
 		private bool ValidTeamIDAndPlayerID(long teamID, long playerID)     //判断是否是合法的TeamID与PlayerID
 		{
@@ -163,8 +161,17 @@ namespace Logic.Server
 		protected override void OnReceive(MessageToServer msg)
 		{
 #if DEBUG
-			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}");
+			Console.WriteLine($"Recieve message: from teamID {msg.TeamID}, playerID {msg.PlayerID}: {msg.MessageType}, args: {msg.TimeInMilliseconds} {msg.Angle}");
 #endif
+			if (msg.TimeInMilliseconds < 0)
+			{
+				if (msg.Angle >= 0.0) msg.Angle -= Math.PI;
+				else msg.Angle += Math.PI;
+				if (msg.TimeInMilliseconds == int.MinValue) msg.TimeInMilliseconds = int.MaxValue;
+				else msg.TimeInMilliseconds = -msg.TimeInMilliseconds;
+			}
+			if (double.IsNaN(msg.Angle) || double.IsInfinity(msg.Angle)) msg.Angle = 0.0;
+
 			switch (msg.MessageType)
 			{
 				case MessageType.AddPlayer:
@@ -270,10 +277,10 @@ namespace Logic.Server
 				}
 
 				Game.PlayerInitInfo playerInitInfo = new Game.PlayerInitInfo(GetBirthPointIdx(msg.TeamID, msg.PlayerID), ConvertTool.ToGameJobType(msg.JobType), msg.TeamID);
-				if (playerInitInfo.jobType == THUnity2D.JobType.InvalidJobType) return false;       //非法职业
+				if (playerInitInfo.jobType == THUnity2D.ObjClasses.JobType.InvalidJobType) return false;       //非法职业
 
 				bool legalJob = false;
-				foreach (var enumMem in typeof(THUnity2D.JobType).GetFields())
+				foreach (var enumMem in typeof(THUnity2D.ObjClasses.JobType).GetFields())
 				{
 					if (playerInitInfo.jobType.ToString() == enumMem.Name)
 					{
@@ -301,7 +308,7 @@ namespace Logic.Server
 				if (id == GameObject.invalidID) return;     //如果有未初始化的玩家，不开始游戏
 			}
 
-			Task.Run
+			new Thread
 				(
 					() =>
 					{
@@ -311,13 +318,14 @@ namespace Logic.Server
 						//游戏结束
 						OnGameEnd();
 					}
-				);
+				)
+			{ IsBackground = true }.Start();
 
 			while (!game.GameMap.Timer.IsGaming) Thread.Sleep(1); //游戏未开始，等待
 			SendMessageToAllClients(MessageType.StartGame);     //发送开始游戏信息
 
 			//开始每隔一定时间向客户端发送游戏情况
-			Task.Run
+			new Thread
 				(
 					() =>
 					{
@@ -335,7 +343,7 @@ namespace Logic.Server
 							{
 								if (overExceed)
 								{
-									Console.WriteLine("Fetal error: your computer runs too slow that server connot send message at a frame rate of 20!!!");
+									Console.WriteLine("Fetal error: your computer runs too slow that server cannot send message at a frame rate of 20!!!");
 								}
 #if DEBUG
 								else
@@ -346,7 +354,7 @@ namespace Logic.Server
 							}
 						};
 #if DEBUG
-						Task.Run
+						new Thread
 						(
 							() =>
 							{
@@ -356,11 +364,13 @@ namespace Logic.Server
 									Thread.Sleep(1000);
 								}
 							}
-						);
+						)
+						{ IsBackground = true }.Start();
 #endif
 						frt.Start();
 					}
-				);
+				)
+			{ IsBackground = true }.Start();
 		}
 
 		//private volatile bool finishSendingEndGameMessage = false;
@@ -370,11 +380,11 @@ namespace Logic.Server
 			//向所有玩家发送结束游戏消息
 			SendMessageToAllClients(MessageType.EndGame, false);
 			mwr?.Flush();
-			SendEndGameHttp();		// 向网站发送结束游戏消息
+			SendGameResult();		// 发送游戏结果
 			endGameInfoSema.Release();
 		}
 
-		private void SendEndGameHttp()
+		protected virtual void SendGameResult()		// 天梯的 Server 给网站发消息记录比赛结果
 		{
 			var scores = new JObject[options.TeamCount];
 			for (ushort i = 0; i < options.TeamCount; ++i)

@@ -35,6 +35,8 @@ private:
 	std::unique_ptr<LogicInterface> pApi;
 	std::unique_ptr<AIBase> pAI;
 
+	std::thread tAI;
+
 	volatile std::int32_t counter_state = 0;
 	volatile std::int32_t counter_buffer = 0;
 	State* pState;
@@ -66,6 +68,7 @@ private:
 
 	//辅助函数，知道了AI线程该不该开始后执行
 	void UnBlockAI();
+
 public:
 	Logic();
 	~Logic() = default;

@@ -2,8 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using THUnity2D;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 
 namespace Gaming
 {
@@ -37,7 +38,7 @@ namespace Gaming
 
 				//开始产生道具
 
-				Task.Run
+				new Thread
 				(
 					() =>
 					{
@@ -48,9 +49,9 @@ namespace Gaming
 							ProduceOneProp();
 							var endTime = Environment.TickCount64;
 							var deltaTime = endTime - beginTime;
-							if (deltaTime <= Map.Constant.producePropTimeInterval)
+							if (deltaTime <= Constant.producePropTimeInterval)
 							{
-								Thread.Sleep(Map.Constant.producePropTimeInterval - (int)deltaTime);
+								Thread.Sleep(Constant.producePropTimeInterval - (int)deltaTime);
 							}
 							else
 							{
@@ -58,7 +59,8 @@ namespace Gaming
 							}
 						}
 					}
-				);
+				)
+				{ IsBackground = true }.Start();
 
 				return true;
 			}
@@ -69,16 +71,16 @@ namespace Gaming
 				XYPosition newPropPos = new XYPosition();
 				while (true)
 				{
-					newPropPos.x = r.Next(0, gameMap.Rows * Map.Constant.numOfGridPerCell);
-					newPropPos.y = r.Next(0, gameMap.Cols * Map.Constant.numOfGridPerCell);
-					int cellX = Map.Constant.GridToCellX(newPropPos), cellY = Map.Constant.GridToCellY(newPropPos);
+					newPropPos.x = r.Next(0, gameMap.Rows * Constant.numOfGridPerCell);
+					newPropPos.y = r.Next(0, gameMap.Cols * Constant.numOfGridPerCell);
+					int cellX = Constant.GridToCellX(newPropPos), cellY = Constant.GridToCellY(newPropPos);
 					bool canLayProp = true;
 					gameMap.ObjListLock.EnterReadLock();
 					try
 					{
 						foreach (GameObject obj in gameMap.ObjList)
 						{
-							if (cellX == Map.Constant.GridToCellX(obj.Position) && cellY == Map.Constant.GridToCellY(obj.Position) && (obj is Wall || obj is BirthPoint))
+							if (cellX == Constant.GridToCellX(obj.Position) && cellY == Constant.GridToCellY(obj.Position) && (obj is Wall || obj is BirthPoint))
 							{
 								canLayProp = false;
 								break;
@@ -88,7 +90,7 @@ namespace Gaming
 					finally { gameMap.ObjListLock.ExitReadLock(); }
 					if (canLayProp)
 					{
-						newPropPos = Map.Constant.CellToGrid(cellX, cellY);
+						newPropPos = Constant.CellToGrid(cellX, cellY);
 						break;
 					}
 				}
@@ -98,16 +100,16 @@ namespace Gaming
 				Prop? newProp = null;
 				switch (propType)
 				{
-					case PropType.Bike: newProp = new Bike(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Amplifier: newProp = new Amplifier(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.JinKeLa: newProp = new JinKeLa(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Rice: newProp = new Rice(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Shield: newProp = new Shield(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Totem: newProp = new Totem(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Spear: newProp = new Spear(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Dirt: newProp = new Dirt(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Attenuator: newProp = new Attenuator(newPropPos, Map.Constant.unpickedPropRadius); break;
-					case PropType.Divider: newProp = new Divider(newPropPos, Map.Constant.unpickedPropRadius); break;
+					case PropType.Bike: newProp = new Bike(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Amplifier: newProp = new Amplifier(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.JinKeLa: newProp = new JinKeLa(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Rice: newProp = new Rice(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Shield: newProp = new Shield(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Totem: newProp = new Totem(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Spear: newProp = new Spear(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Dirt: newProp = new Dirt(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Attenuator: newProp = new Attenuator(newPropPos, Constant.unpickedPropRadius); break;
+					case PropType.Divider: newProp = new Divider(newPropPos, Constant.unpickedPropRadius); break;
 				}
 				if (newProp != null)
 				{
@@ -128,7 +130,7 @@ namespace Gaming
 					player.IsModifyingProp = true;
 				}
 
-				int cellX = Map.Constant.GridToCellX(player.Position), cellY = Map.Constant.GridToCellY(player.Position);
+				int cellX = Constant.GridToCellX(player.Position), cellY = Constant.GridToCellY(player.Position);
 
 #if DEBUG
 				Console.WriteLine("Try picking: {0} {1} Type: {2}", cellX, cellY, (int)propType);
@@ -145,7 +147,7 @@ namespace Gaming
 #endif
 
 						if (propNode.Value.GetPropType() != propType || propNode.Value.IsMoving) continue;
-						int cellXTmp = Map.Constant.GridToCellX(propNode.Value.Position), cellYTmp = Map.Constant.GridToCellY(propNode.Value.Position);
+						int cellXTmp = Constant.GridToCellX(propNode.Value.Position), cellYTmp = Constant.GridToCellY(propNode.Value.Position);
 
 #if DEBUG
 						Console.WriteLine("Ready to pick: {0} {1}, {2} {3}", cellX, cellY, cellXTmp, cellYTmp);
@@ -177,7 +179,7 @@ namespace Gaming
 				Prop? oldProp = player.UseProp();
 				if (oldProp == null) return;
 				oldProp.ResetPosition(player.Position);
-				oldProp.ResetMoveSpeed(Map.Constant.thrownPropMoveSpeed);
+				oldProp.ResetMoveSpeed(Constant.thrownPropMoveSpeed);
 
 				moveEngine.MoveObj(oldProp, moveTimeInMilliseconds, angle);
 
@@ -217,25 +219,25 @@ namespace Gaming
 						switch (prop.GetPropType())
 						{
 							case PropType.Bike:
-								player.AddMoveSpeed(Map.Constant.bikeMoveSpeedBuff, Map.Constant.buffPropTime);
+								player.AddMoveSpeed(Constant.bikeMoveSpeedBuff, Constant.buffPropTime);
 								break;
 							case PropType.Amplifier:
-								player.AddAP(Map.Constant.amplifierAtkBuff, Map.Constant.buffPropTime);
+								player.AddAP(Constant.amplifierAtkBuff, Constant.buffPropTime);
 								break;
 							case PropType.JinKeLa:
-								player.ChangeCD(Map.Constant.jinKeLaCdDiscount, Map.Constant.buffPropTime);
+								player.ChangeCD(Constant.jinKeLaCdDiscount, Constant.buffPropTime);
 								break;
 							case PropType.Rice:
-								player.AddHp(Map.Constant.riceHpAdd);
+								player.AddHp(Constant.riceHpAdd);
 								break;
 							case PropType.Shield:
-								player.AddShield(Map.Constant.shieldTime);
+								player.AddShield(Constant.shieldTime);
 								break;
 							case PropType.Totem:
-								player.AddTotem(Map.Constant.totemTime);
+								player.AddTotem(Constant.totemTime);
 								break;
 							case PropType.Spear:
-								player.AddSpear(Map.Constant.spearTime);
+								player.AddSpear(Constant.spearTime);
 								break;
 						}
 					}
@@ -254,7 +256,7 @@ namespace Gaming
 									}
 									finally { gameMap.ObjListLock.ExitWriteLock(); }
 
-									Thread.Sleep(Map.Constant.mineTime);
+									Thread.Sleep(Constant.mineTime);
 
 									gameMap.ObjListLock.EnterWriteLock();
 									try { gameMap.ObjList.Remove(mine); }
@@ -284,9 +286,8 @@ namespace Gaming
 					},
 					EndMove: obj =>
 					{
-						GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
-					},
-					IgnoreCollision: (obj, collisionObj) => true		// 道具行动，一切皆忽略
+						Debugger.Output(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
+					}
 				);
 				unpickedPropList = new LinkedList<Prop>();
 				unpickedPropListLock = new ReaderWriterLockSlim();

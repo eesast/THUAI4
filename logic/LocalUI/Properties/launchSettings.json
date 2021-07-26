@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LocalUI": {
+      "commandName": "Project",
+      "commandLineArgs": "--port=20000 --teamCount=2 --playerCount=1 -g 600 --cheatMode --fileName=cheat"
+    }
+  }
+}

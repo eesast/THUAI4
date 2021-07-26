@@ -136,6 +136,8 @@ bool  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2
 	if (!capi.Connect(address, port))
 	{
 		std::cout << "无法连接到Agent" << std::endl;
+		loop = false;
+		UnBlock();
 		tPM.join();
 		return false;
 	}
@@ -143,9 +145,12 @@ bool  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2
 }
 
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
-void  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Send(const Message2S& m)
+bool  Communication<Message2S, typeM2S, Message2C1, typeM2C1, Message2C2, typeM2C2>::Send(const Message2S& m)
 {
+	if (counter >= Limit) return false;
 	capi.Send(m);
+	counter++;
+	return true;
 }
 
 template<typename Message2S, int typeM2S, typename Message2C1, int typeM2C1, typename Message2C2, int typeM2C2>
@@ -182,6 +187,7 @@ Communication(std::function<void(Pointer2M)> OnReceive, std::function<void() > O
 
 		},
 		[this](Pointer2M p2M) {
+			if (p2M.index() == typeM2C1) counter = 0;
 			queue.push(p2M);
 			UnBlock();
 		})

@@ -29,6 +29,12 @@ namespace Logic.Server
 		[Option('b', "playBack", Required = false, HelpText = "Whether open the server in a playback mode.")]
 		public bool PlayBack { get; set; } = false;
 
+		[Option("playBackSpeed", Required = false, HelpText = "The speed of the playback, between 0.25 and 4.0")]
+		public double PlayBackSpeed { get; set; } = 1.0;
+
+		[Option("resultOnly", Required = false, HelpText = "In playback mode to get the result directly")]
+		public bool ResultOnly { get; set; } = false;
+
 		[Option('k', "token", Required = false, HelpText = "Web API Token")]
 		public string Token { get; set; } = DefaultArgumentOptions.Token;
 
@@ -37,5 +43,11 @@ namespace Logic.Server
 
 		[Option("requestOnly", Required = false, HelpText = "Only send  web requests")]
 		public bool RequestOnly { get; set; } = false;
+
+		[Option("finalGame", Required = false, HelpText = "Whether it is the final game")]
+		public bool FinalGame { get; set; } = false;
+
+		[Option("cheatMode", Required = false, HelpText = "Whether to open the cheat code")]
+		public bool CheatMode { get; set; } = false;
 	}
 }

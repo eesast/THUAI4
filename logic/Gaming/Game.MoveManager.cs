@@ -1,6 +1,8 @@
 ﻿using GameEngine;
 using System;
 using THUnity2D;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 
 namespace Gaming
 {
@@ -27,13 +29,13 @@ namespace Gaming
 				switch (mine.GetPropType())
 				{
 					case PropType.Dirt:
-						player.AddMoveSpeed(Map.Constant.dirtMoveSpeedDebuff, Map.Constant.buffPropTime);
+						player.AddMoveSpeed(Constant.dirtMoveSpeedDebuff, Constant.buffPropTime);
 						break;
 					case PropType.Attenuator:
-						player.AddAP(Map.Constant.attenuatorAtkDebuff, Map.Constant.buffPropTime);
+						player.AddAP(Constant.attenuatorAtkDebuff, Constant.buffPropTime);
 						break;
 					case PropType.Divider:
-						player.ChangeCD(Map.Constant.dividerCdDiscount, Map.Constant.buffPropTime);
+						player.ChangeCD(Constant.dividerCdDiscount, Constant.buffPropTime);
 						break;
 				}
 			}
@@ -58,23 +60,9 @@ namespace Gaming
 					},
 					EndMove: obj =>
 					{
-						GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
-					},
-					IgnoreCollision: (obj, collisionObj) =>
-					{
-						if (collisionObj is BirthPoint)         // 自己的出生点可以忽略碰撞
-						{
-							if (object.ReferenceEquals(((BirthPoint)collisionObj).Parent, obj)) return true;
-							return false;
-						}
-						else if (collisionObj is Mine)          // 自己队的炸弹忽略碰撞
-						{
-							if (((Mine)collisionObj).Parent.TeamID == ((Character)obj).TeamID) return true;
-						}
-						return false;
+						Debugger.Output(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 					}
 				);
-
 			}
 		}
 	}

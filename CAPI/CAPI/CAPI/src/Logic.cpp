@@ -5,7 +5,7 @@
 extern const bool asynchronous;
 
 //辅助函数
-std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo &goi)
 {
 	std::shared_ptr<THUAI4::Character> character = std::make_shared<THUAI4::Character>();
 	character->ap = goi.ap();
@@ -30,7 +30,7 @@ std::shared_ptr<THUAI4::Character> obj2C(const Protobuf::GameObjInfo& goi)
 	character->y = goi.y();
 	return character;
 }
-std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo &goi)
 {
 	std::shared_ptr<THUAI4::Wall> wall = std::make_shared<THUAI4::Wall>();
 	wall->guid = goi.guid();
@@ -40,7 +40,7 @@ std::shared_ptr<THUAI4::Wall> obj2W(const Protobuf::GameObjInfo& goi)
 	wall->y = goi.y();
 	return wall;
 }
-std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo &goi)
 {
 	std::shared_ptr<THUAI4::Prop> prop = std::make_shared<THUAI4::Prop>();
 	prop->facingDirection = goi.facingdirection();
@@ -55,7 +55,7 @@ std::shared_ptr<THUAI4::Prop> obj2P(const Protobuf::GameObjInfo& goi)
 	prop->y = goi.y();
 	return prop;
 }
-std::shared_ptr<THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo &goi)
 {
 	std::shared_ptr<THUAI4::Bullet> bullet = std::make_shared<THUAI4::Bullet>();
 	bullet->ap = goi.ap();
@@ -71,7 +71,7 @@ std::shared_ptr<THUAI4::Bullet> obj2Blt(const Protobuf::GameObjInfo& goi)
 	bullet->y = goi.y();
 	return bullet;
 }
-std::shared_ptr<THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi)
+std::shared_ptr<THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo &goi)
 {
 	std::shared_ptr<THUAI4::BirthPoint> birthpoint = std::make_shared<THUAI4::BirthPoint>();
 	birthpoint->guid = goi.guid();
@@ -82,7 +82,7 @@ std::shared_ptr<THUAI4::BirthPoint> obj2Bp(const Protobuf::GameObjInfo& goi)
 	birthpoint->y = goi.y();
 	return birthpoint;
 }
-bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo& g)
+bool visible(int32_t x, int32_t y, Protobuf::GameObjInfo &g)
 {
 	Protobuf::GameObjType gT = g.gameobjtype();
 	Protobuf::PropType pT = g.proptype();
@@ -107,7 +107,8 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 		//playerGuid只在这里记录
 		State::playerGUIDs.clear();
-		for (auto i : pM2C->playerguids()) {
+		for (auto i : pM2C->playerguids())
+		{
 			State::playerGUIDs.push_back(std::vector<int64_t>(i.teammateguids().cbegin(), i.teammateguids().cend()));
 		}
 		sw_AI = true;
@@ -121,14 +122,21 @@ void Logic::ProcessM2C(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 
 	case Protobuf::MessageType::EndGame:
 	{
+
+//服务器上跑直接就把 player 线程杀死，防止某些选手的代码是死循环不能正常退出
+#ifdef __linux__
+		pthread_cancel(tAI.native_handle());
+#else
 		sw_AI = false;
-		std::cout << "游戏结束" << std::endl;
 		{
 			std::lock_guard<std::mutex> lck(mtx_buffer);
 			FlagBufferUpdated = true;
 			counter_buffer = -1;
 		}
 		cv_buffer.notify_one();
+
+#endif
+		std::cout << "游戏结束" << std::endl;
 		break;
 	}
 
@@ -184,7 +192,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 #else
 				visible(selfX, selfY, it)
 #endif // _ALL_VISIBLE_
-				)
+			)
 			{
 				switch (it.gameobjtype())
 				{
@@ -207,7 +215,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 					std::cout << "Unknown GameObjType:" << (int)it.gameobjtype() << std::endl;
 				}
 			}
-	}
+		}
 
 		for (int i = 0; i < StateConstant::nCells; i++)
 		{
@@ -219,7 +227,7 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 #else
 					CellColorVisible(selfX, selfY, i, j)
 #endif
-					)
+				)
 				{
 #ifdef _COLOR_MAP_BY_HASHING_
 					pBuffer->cellColors.insert(std::pair((i << 16) + j, (THUAI4::ColorType)pM2C->cellcolors(i).rowcolors(j)));
@@ -234,8 +242,8 @@ void Logic::load(std::shared_ptr<Protobuf::MessageToClient> pM2C)
 					pBuffer->cellColors[i][j] = THUAI4::ColorType::Invisible;
 				}
 #endif // _COLOR_MAP_BY_HASHING_
+			}
 		}
-}
 
 		FlagBufferUpdated = true;
 		counter_buffer += 1;
@@ -285,7 +293,7 @@ void Logic::UnBlockAI()
 
 void Logic::Update()
 {
-	State* temp = pState;
+	State *temp = pState;
 	pState = pBuffer;
 	pBuffer = temp;
 	FlagBufferUpdated = false;
@@ -295,9 +303,14 @@ void Logic::Update()
 
 void Logic::PlayerWrapper(std::function<void()> player)
 {
+#ifdef __linux__
+	//收到后立刻执行，可能会 crash
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+#endif
 	{
 		std::unique_lock<std::mutex> lock(mtx_ai);
-		cv_ai.wait(lock, [this]() {return WhetherToStartKnown; });
+		cv_ai.wait(lock, [this]()
+				   { return WhetherToStartKnown; });
 	}
 	while (sw_AI)
 	{
@@ -305,8 +318,7 @@ void Logic::PlayerWrapper(std::function<void()> player)
 	}
 }
 
-
-void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename)
+void Logic::Main(const char *address, uint16_t port, int32_t playerID, int32_t teamID, THUAI4::JobType jobType, CreateAIFunc f, int debuglevel, std::string filename)
 {
 	//初始化
 
@@ -328,111 +340,156 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 			message.set_jobtype((Protobuf::JobType)jobType);
 			pComm->Send(message);
 		},
-			[this]()
+		[this]()
 		{
 			sw_AI = false;
 			UnBlockMtxBufferUpdated();
-		}
-		);
+		});
 
 	std::ofstream OutFile;
-	//又臭又长
-	if (
-		auto tu = [this]() {
+	{
+		//又臭又长
+		std::function<void()> tu = [this]()
+		{
 			if (mtx_buffer.try_lock())
 			{
-				if (FlagBufferUpdated)Update();
-					mtx_buffer.unlock();
+				if (FlagBufferUpdated)
+					Update();
+				mtx_buffer.unlock();
 			}
 		};
-		asynchronous)
-	{
-		if (!debuglevel)
+		std::function<void()> wait = [this]()
 		{
-			pApi = std::make_unique<API<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu);
+			std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
+			cv_buffer.wait(lck_buffer, [this]()
+						   { return FlagBufferUpdated; });
+			Update();
+		};
+		if (asynchronous)
+		{
+			if (!debuglevel)
+			{
+				pApi = std::make_unique<API<true>>([this, playerID, teamID](Protobuf::MessageToServer &M2C)
+												   {
+													   M2C.set_playerid(playerID);
+													   M2C.set_teamid(teamID);
+													   return pComm->Send(M2C);
+												   },
+												   [this]()
+												   { return MessageStorage.empty(); },
+												   [this](std::string &s)
+												   { return MessageStorage.try_pop(s); },
+												   [this]()
+												   { return counter_state; },
+												   (const State *&)pState, mtx_state, tu, wait);
+			}
+			else
+			{
+				bool flag = filename == "";
+				if (!flag)
+				{
+					OutFile.open(filename);
+					if (OutFile.fail())
+					{
+						std::cout << "Failed to open the file " << filename << std::endl;
+						flag = true;
+					}
+				}
+				pApi = std::make_unique<DebugApi<true>>([this, playerID, teamID](Protobuf::MessageToServer &M2C)
+														{
+															M2C.set_playerid(playerID);
+															M2C.set_teamid(teamID);
+															return pComm->Send(M2C);
+														},
+														[this]()
+														{ return MessageStorage.empty(); },
+														[this](std::string &s)
+														{ return MessageStorage.try_pop(s); },
+														[this]()
+														{ return counter_state; },
+														(const State *&)pState, mtx_state, tu, wait, debuglevel != 1, flag ? std::cout : OutFile);
+			}
 		}
 		else
 		{
-			bool flag = filename == "";
-			if (!flag)
+			if (!debuglevel)
 			{
-				OutFile.open(filename);
-				if (OutFile.fail())
-				{
-					std::cout << "Failed to open the file " << filename << std::endl;
-					flag = true;
-				}
+				pApi = std::make_unique<API<false>>([this, playerID, teamID](Protobuf::MessageToServer &M2C)
+													{
+														M2C.set_playerid(playerID);
+														M2C.set_teamid(teamID);
+														return pComm->Send(M2C);
+													},
+													[this]()
+													{ return MessageStorage.empty(); },
+													[this](std::string &s)
+													{ return MessageStorage.try_pop(s); },
+													[this]()
+													{ return counter_state; },
+													(const State *&)pState, mtx_state, tu, wait);
 			}
-			pApi = std::make_unique<DebugApi<true>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu, debuglevel != 1,
-				flag ? std::cout : OutFile);
-		}
-	}
-	else
-	{
-		if (!debuglevel)
-		{
-			pApi = std::make_unique<API<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu);
-		}
-		else
-		{
-			bool flag = filename == "";
-			if (!flag)
+			else
 			{
-				OutFile.open(filename);
-				if (OutFile.fail())
+				bool flag = filename == "";
+				if (!flag)
 				{
-					std::cout << "Failed to open the file " << filename << std::endl;
-					flag = true;
+					OutFile.open(filename);
+					if (OutFile.fail())
+					{
+						std::cout << "Failed to open the file " << filename << std::endl;
+						flag = true;
+					}
 				}
+				pApi = std::make_unique<DebugApi<false>>([this, playerID, teamID](Protobuf::MessageToServer &M2C)
+														 {
+															 M2C.set_playerid(playerID);
+															 M2C.set_teamid(teamID);
+															 return pComm->Send(M2C);
+														 },
+														 [this]()
+														 { return MessageStorage.empty(); },
+														 [this](std::string &s)
+														 { return MessageStorage.try_pop(s); },
+														 [this]()
+														 { return counter_state; },
+														 (const State *&)pState, mtx_state, tu, wait, debuglevel != 1, flag ? std::cout : OutFile);
 			}
-			pApi = std::make_unique<DebugApi<false>>([this, playerID, teamID](Protobuf::MessageToServer& M2C) {M2C.set_playerid(playerID); M2C.set_teamid(teamID); pComm->Send(M2C); },
-				[this]() { return MessageStorage.empty(); },
-				[this](std::string& s) { return MessageStorage.try_pop(s); }, [this]() { return counter_state; },
-				(const State*&)pState, mtx_state, tu, debuglevel != 1,
-				flag ? std::cout : OutFile);
 		}
 	}
 
 	//启动AI线程（但要等到游戏开始才会正式执行）
-	std::thread tAI(&Logic::PlayerWrapper, this,
-		asynchronous ?
-		(std::function<void()>)[this]() {
-			//异步似乎反而逻辑变简洁了
-			pApi->StartTimer();
-			pAI->play(*pApi);
-			pApi->EndTimer();
-		}
-		:
-		(std::function<void()>)[this]() {
-			std::lock_guard<std::mutex> lck_state(mtx_state);
-			if (!CurrentStateAccessed)
+	tAI = std::thread(
+		&Logic::PlayerWrapper, this,
+		asynchronous ? (std::function<void()>)[this]()
 			{
-				pApi->StartTimer();//再细一些的分类可以把这里去掉，但似乎没太大意义
+				//异步似乎反而逻辑变简洁了
+				pApi->StartTimer();
 				pAI->play(*pApi);
 				pApi->EndTimer();
-				CurrentStateAccessed = true;
 			}
-			else
+					 : (std::function<void()>)[this]()
 			{
-				std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
-				//如果buffer没更新就等
-				cv_buffer.wait(lck_buffer, [this]() { return FlagBufferUpdated; });
-				Update();
-			}
-		}
-		);
+				std::lock_guard<std::mutex> lck_state(mtx_state);
+				if (!CurrentStateAccessed)
+				{
+					CurrentStateAccessed = true;
+					pApi->StartTimer(); //再细一些的分类可以把这里去掉，但似乎没太大意义
+					pAI->play(*pApi);
+					pApi->EndTimer();
+				}
+				else
+				{
+					std::unique_lock<std::mutex> lck_buffer(mtx_buffer);
+					//如果buffer没更新就等
+					cv_buffer.wait(lck_buffer, [this]()
+								   { return FlagBufferUpdated; });
+					Update();
+				}
+			});
 
 	//试图连接Agent
-	if (!pComm->Start(address, port)) {
+	if (!pComm->Start(address, port))
+	{
 		sw_AI = false;
 		UnBlockAI();
 		tAI.join();
@@ -441,7 +498,8 @@ void Logic::Main(const char* address, uint16_t port, int32_t playerID, int32_t t
 	}
 	std::cout << "Connect to the agent successfully." << std::endl;
 
-	tAI.join();
+	if (tAI.joinable())
+		tAI.join();
 	OutFile.close();
 	pComm->Join();
 }

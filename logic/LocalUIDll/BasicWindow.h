@@ -1,4 +1,4 @@
-//////////////////////////////
+﻿//////////////////////////////
 //
 //  封装Windows API
 //
@@ -29,7 +29,7 @@ protected:
 	(
 		HINSTANCE hInstance, int nCmdShow,
 		int x, int y, int cx, int cy, DWORD dwStyle,
-		LPCTSTR c_lpszWndTitle, WNDCLASSEX wcex
+		LPCTSTR c_lpszWndTitle, WNDCLASSEX wcex, HWND hWndParent
 	);
 
 	//处理了消息返回true，没有处理则返回false
@@ -37,11 +37,9 @@ protected:
 
 private:
 
-	BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, int x, int y, int cx, int cy, DWORD dwStyle, LPCTSTR c_lpszWndClassName, LPCTSTR c_c_lpszWndTitle);
+	BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, int x, int y, int cx, int cy, DWORD dwStyle, LPCTSTR c_lpszWndClassName, LPCTSTR c_c_lpszWndTitle, HWND hWndParent);
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 };
 
 #endif // #ifndef BASIC_WINDOW_H
-
-

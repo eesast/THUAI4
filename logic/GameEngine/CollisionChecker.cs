@@ -1,74 +1,40 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
-using THUnity2D;
+using THUnity2D.Interfaces;
+using THUnity2D.Utility;
 
 namespace GameEngine
 {
 	internal class CollisionChecker
 	{
-
-		/// <summary>
-		/// 检查obj下一步位于nextPos时是否会与listObj碰撞
-		/// </summary>
-		/// <param name="obj">主动碰撞物，默认obj.Rigid为true</param>
-		/// <param name="listObj">被动碰撞物</param>
-		/// <param name="nextPos">obj下一步想走的位置</param>
-		/// <returns>如果会碰撞，返回true</returns>
-		public bool WillCollide(GameObject obj, GameObject listObj, XYPosition nextPos)
-		{
-			if (!listObj.IsRigid || listObj.ID == obj.ID) return false; //不检查自己和非刚体
-
-			if (IgnoreCollision(obj, listObj)) return false;            // 可以忽略碰撞
-
-			int deltaX = Math.Abs(nextPos.x - listObj.Position.x), deltaY = Math.Abs(nextPos.y - listObj.Position.y);
-
-			//默认obj是圆形的，因为能移动的物体目前只有圆形；且会移动的道具尚未被捡起，其形状没有意义，可默认为圆形
-
-			switch (listObj.Shape)
-			{
-				case GameObject.ShapeType.Circle:       //圆与圆碰撞
-					{
-						return (long)deltaX * deltaX + (long)deltaY * deltaY < ((long)obj.Radius + listObj.Radius) * ((long)obj.Radius + listObj.Radius);
-					}
-				case GameObject.ShapeType.Sqare:        //圆与正方形碰撞
-					{
-						if (deltaX >= listObj.Radius + obj.Radius || deltaY >= listObj.Radius + obj.Radius) return false;
-						if (deltaX < listObj.Radius || deltaY < listObj.Radius) return true;
-						return (long)(deltaX - listObj.Radius) * (deltaX - listObj.Radius) + (long)(deltaY - listObj.Radius) * (deltaY - listObj.Radius) < (long)obj.Radius * (long)obj.Radius;
-					}
-			}
-			return false;
-		}
-
-
 		/// <summary>
 		/// 碰撞检测，如果这样行走是否会与之碰撞，返回与之碰撞的物体
 		/// </summary>
 		/// <param name="obj">移动的物体</param>
 		/// <param name="moveVec">移动的位移向量</param>
 		/// <returns>和它碰撞的物体</returns>
-		public GameObject? CheckCollision(GameObject obj, Vector moveVec)
+		public IGameObj? CheckCollision(IMovable obj, Vector moveVec)
 		{
 			XYPosition nextPos = obj.Position + Vector.Vector2XY(moveVec);
 
 			if (!obj.IsRigid)
 			{
-				if (gameMap.OutOfBound(obj)) return new OutOfBoundBlock(nextPos);
+				if (gameMap.OutOfBound(obj)) return gameMap.GetOutOfBoundBlock(nextPos);
 				return null;
 			}
 
 			//在某列表中检查碰撞
-			Func<ArrayList, ReaderWriterLockSlim, GameObject> CheckCollisionInList =
-				(ArrayList lst, ReaderWriterLockSlim listLock) =>
+			Func<IEnumerable<IGameObj>, ReaderWriterLockSlim, IGameObj?> CheckCollisionInList =
+				(IEnumerable<IGameObj> lst, ReaderWriterLockSlim listLock) =>
 				{
-					GameObject? collisionObj = null;
+					IGameObj? collisionObj = null;
 					listLock.EnterReadLock();
 					try
 					{
-						foreach (GameObject listObj in lst)
+						foreach (var listObj in lst)
 						{
-							if (WillCollide(obj, listObj, nextPos))
+							if (obj.WillCollideWith(listObj, nextPos))
 							{
 								collisionObj = listObj;
 								break;
@@ -79,7 +45,7 @@ namespace GameEngine
 					return collisionObj;
 				};
 
-			GameObject collisionObj = null;
+			IGameObj? collisionObj = null;
 			foreach (var list in lists)
 			{
 				if ((collisionObj = CheckCollisionInList(list.Item1, list.Item2)) != null)
@@ -91,7 +57,7 @@ namespace GameEngine
 			//如果越界，则与越界方块碰撞
 			if (gameMap.OutOfBound(obj))
 			{
-				return new OutOfBoundBlock(nextPos);
+				return gameMap.GetOutOfBoundBlock(nextPos);
 			}
 
 			return null;
@@ -104,7 +70,7 @@ namespace GameEngine
 		/// <param name="nextPos">下一步要到达的位置</param>
 		/// <param name="moveVec">移动的位移向量，默认与nextPos协调</param>
 		/// <returns>最大可能的移动距离</returns>
-		public uint FindMax(GameObject obj, XYPosition nextPos, Vector moveVec)
+		public uint FindMax(IMovable obj, XYPosition nextPos, Vector moveVec)
 		{
 			uint maxLen = uint.MaxValue;
 			uint tmpMax;
@@ -115,14 +81,14 @@ namespace GameEngine
 				listLock.EnterReadLock();
 				try
 				{
-					foreach (GameObject listObj in lst)
+					foreach (IGameObj listObj in lst)
 					{
 						//如果再走一步发生碰撞
-						if (WillCollide(obj, listObj, nextPos))
+						if (obj.WillCollideWith(listObj, nextPos))
 						{
 							switch (listObj.Shape)  //默认obj为圆形
 							{
-								case GameObject.ShapeType.Circle:
+								case ShapeType.Circle:
 									{
 										//计算两者之间的距离
 										int orgDeltaX = listObj.Position.x - obj.Position.x;
@@ -157,10 +123,10 @@ namespace GameEngine
 										}
 										break;
 									}
-								case GameObject.ShapeType.Sqare:
+								case ShapeType.Square:
 									{
 										//如果当前已经贴合，那么不能再行走了
-										if (WillCollide(obj, listObj, obj.Position)) tmpMax = 0;
+										if (obj.WillCollideWith(listObj, obj.Position)) tmpMax = 0;
 										else
 										{
 											//二分查找最大可能移动距离
@@ -168,7 +134,7 @@ namespace GameEngine
 											while (left < right - 1)
 											{
 												int mid = (right - left) / 2 + left;
-												if (WillCollide(obj, listObj, obj.Position + new XYPosition((int)(mid * Math.Cos(moveVec.angle)), (int)(mid * Math.Sin(moveVec.angle)))))
+												if (obj.WillCollideWith(listObj, obj.Position + new XYPosition((int)(mid * Math.Cos(moveVec.angle)), (int)(mid * Math.Sin(moveVec.angle)))))
 												{
 													right = mid;
 												}
@@ -192,19 +158,17 @@ namespace GameEngine
 			return maxLen;
 		}
 
-		Map gameMap;
-		private Tuple<ArrayList, ReaderWriterLockSlim>[] lists;
-		private Func<GameObject, GameObject, bool> IgnoreCollision;
+		IMap gameMap;
+		private Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>[] lists;
 
-		public CollisionChecker(Map gameMap, Func<GameObject, GameObject, bool> IgnoreCollision)
+		public CollisionChecker(IMap gameMap)
 		{
 			this.gameMap = gameMap;
-			lists = new Tuple<ArrayList, ReaderWriterLockSlim>[]
+			lists = new Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>[]
 			{
-				new Tuple<ArrayList, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
-				new Tuple<ArrayList, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
+				new Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>(gameMap.ObjList, gameMap.ObjListLock),
+				new Tuple<IEnumerable<IGameObj>, ReaderWriterLockSlim>(gameMap.PlayerList, gameMap.PlayerListLock)
 			};
-			this.IgnoreCollision = IgnoreCollision;
 		}
 	}
 }

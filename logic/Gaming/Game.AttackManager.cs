@@ -1,9 +1,10 @@
 ﻿using GameEngine;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using THUnity2D;
+using THUnity2D.ObjClasses;
+using THUnity2D.Utility;
 using Timothy.FrameRateTask;
 
 namespace Gaming
@@ -17,79 +18,73 @@ namespace Gaming
 			public bool Attack(Character playerWillAttack, int timeInMilliseconds, double angle)
 			{
 				if (!playerWillAttack.IsAvailable) return false;
-				if (playerWillAttack.Attack())
-				{
-					Bullet newBullet = new Bullet(
-						playerWillAttack.Position + new XYPosition((int)(Map.Constant.numOfGridPerCell * Math.Cos(angle)), (int)(Map.Constant.numOfGridPerCell * Math.Sin(angle))),
-						Map.Constant.bulletRadius, Map.Constant.basicBulletMoveSpeed, playerWillAttack.bulletType, playerWillAttack.AP, playerWillAttack.HasSpear);
 
+				Bullet? newBullet = playerWillAttack.Attack
+					(
+						new XYPosition((int)(Constant.numOfGridPerCell * Math.Cos(angle)),
+						(int)(Constant.numOfGridPerCell * Math.Sin(angle))),
+						Constant.bulletRadius,
+						Constant.basicBulletMoveSpeed
+					);
+				if (newBullet != null)
+				{
 					// 由于子弹的出发点位于人物面前的亦歌位置，所以子弹移动时间需要扣减
-					if (timeInMilliseconds <= Map.Constant.numOfGridPerCell * 1000 / newBullet.MoveSpeed) timeInMilliseconds = 0;
-					else timeInMilliseconds -= Map.Constant.numOfGridPerCell * 1000 / newBullet.MoveSpeed;
+					if (timeInMilliseconds <= Constant.numOfGridPerCell * 1000 / newBullet.MoveSpeed) timeInMilliseconds = 0;
+					else timeInMilliseconds -= Constant.numOfGridPerCell * 1000 / newBullet.MoveSpeed;
 
 					newBullet.Parent = playerWillAttack;
 
-					switch (playerWillAttack.bulletType)
+					newBullet.BeforeShooting(ref timeInMilliseconds, ref angle);
+					if (newBullet.CanColorPath)		//不断检测它所位于的格子，并将其染色
 					{
-						case BulletType.Bullet0:
-						case BulletType.Bullet6:
-							timeInMilliseconds = int.MaxValue;
-							break;
-						case BulletType.Bullet5:
-							timeInMilliseconds = 0;
-							angle = playerWillAttack.FacingDirection;
-							break;
-						case BulletType.Bullet3:        //不断检测它所位于的格子，并将其染色
-							timeInMilliseconds = int.MaxValue;
-							Task.Run
+						new Thread
+						(
+							() =>
+							{
+								for (int i = 0; i < 50 && !newBullet.CanMove; ++i)      //等待子弹开始移动，最多等待50次
+								{
+									Thread.Sleep(1000 / Constant.numOfStepPerSecond);
+								}
+
+								new FrameRateTaskExecutor<int>
 								(
+									() => newBullet.CanMove,
 									() =>
 									{
-										for (int i = 0; i < 50 && !newBullet.CanMove; ++i)      //等待子弹开始移动，最多等待50次
-									{
-											Thread.Sleep(1000 / Map.Constant.numOfStepPerSecond);
-										}
+										int cellX = Constant.GridToCellX(newBullet.Position), cellY = Constant.GridToCellY(newBullet.Position);
 
-										new FrameRateTaskExecutor<int>
-										(
-											() => newBullet.CanMove,
-											() =>
+										if (cellX >= 0 && cellX < gameMap.Rows && cellY >= 0 && cellY < gameMap.Cols)
+										{
+											bool canColor = true;
+											gameMap.ObjListLock.EnterReadLock();
+											try
 											{
-												int cellX = Map.Constant.GridToCellX(newBullet.Position), cellY = Map.Constant.GridToCellY(newBullet.Position);
-
-												if (cellX >= 0 && cellX < gameMap.Rows && cellY >= 0 && cellY < gameMap.Cols)
+												foreach (GameObject obj in gameMap.ObjList)
 												{
-													bool canColor = true;
-													gameMap.ObjListLock.EnterReadLock();
-													try
+													if (obj.IsRigid
+													&& Constant.GridToCellX(obj.Position) == cellX
+													&& Constant.GridToCellY(obj.Position) == cellY
+													&& (obj is Wall || obj is BirthPoint))
 													{
-														foreach (GameObject obj in gameMap.ObjList)
-														{
-															if (obj.IsRigid
-															&& Map.Constant.GridToCellX(obj.Position) == cellX
-															&& Map.Constant.GridToCellY(obj.Position) == cellY
-															&& (obj is Wall || obj is BirthPoint))
-															{
-																canColor = false;
-																break;
-															}
-														}
-													}
-													finally { gameMap.ObjListLock.ExitReadLock(); }
-
-													if (canColor)
-													{
-														gameMap.SetCellColor(cellX, cellY, Map.TeamToColor(newBullet.Parent.TeamID));
+														canColor = false;
+														break;
 													}
 												}
-											},
-											1000 / Map.Constant.numOfStepPerSecond,
-											() => 0
-										).Start();
-									}
-								);
+											}
+											finally { gameMap.ObjListLock.ExitReadLock(); }
 
-							break;
+											if (canColor)
+											{
+												gameMap.SetCellColor(cellX, cellY, Map.TeamToColor(newBullet.Parent.TeamID));
+											}
+										}
+									},
+									1000 / Constant.numOfStepPerSecond,
+									() => 0
+								).Start();
+							}
+						)
+						{ IsBackground = true }.Start();
 					}
 
 					gameMap.ObjListLock.EnterWriteLock(); try { gameMap.ObjList.Add(newBullet); } finally { gameMap.ObjListLock.ExitWriteLock(); }
@@ -108,48 +103,44 @@ namespace Gaming
 			/// <param name="playerBeingShot">被打到的玩家</param>
 			private void BombOnePlayer(Bullet bullet, Character playerBeingShot)
 			{
-				if (playerBeingShot.TeamID != bullet.Parent.TeamID)     //如果击中的不是队友
+				if (playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, (Character?)bullet.Parent))                //如果打死了
 				{
-					playerBeingShot.BeAttack(bullet.AP, bullet.HasSpear, bullet.Parent);
-					if (playerBeingShot.HP <= 0)                //如果打死了
+					//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
+					playerBeingShot.CanMove = false;
+					playerBeingShot.IsResetting = true;
+					gameMap.PlayerListLock.EnterWriteLock();
+					try
 					{
-						//人被打死时会停滞1秒钟，停滞的时段内暂从列表中删除，以防止其产生任何动作（行走、攻击等）
-						playerBeingShot.CanMove = false;
-						playerBeingShot.IsResetting = true;
-						gameMap.PlayerListLock.EnterWriteLock();
-						try
-						{
-							gameMap.PlayerList.Remove(playerBeingShot);
-						}
-						finally { gameMap.PlayerListLock.ExitWriteLock(); }
-						playerBeingShot.Reset();
-
-						bullet.Parent.AddScore(Map.Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
-
-						new Thread
-							(() =>
-							{
-
-								Thread.Sleep(Map.Constant.deadRestoreTime);
-
-								playerBeingShot.AddShield(Map.Constant.shieldTimeAtBirth);  //复活加个盾
-
-									gameMap.PlayerListLock.EnterWriteLock();
-								try
-								{
-									gameMap.PlayerList.Add(playerBeingShot);
-								}
-								finally { gameMap.PlayerListLock.ExitWriteLock(); }
-
-								if (gameMap.Timer.IsGaming)
-								{
-									playerBeingShot.CanMove = true;
-								}
-								playerBeingShot.IsResetting = false;
-							}
-							)
-						{ IsBackground = true }.Start();
+						gameMap.PlayerList.Remove(playerBeingShot);
 					}
+					finally { gameMap.PlayerListLock.ExitWriteLock(); }
+					playerBeingShot.Reset();
+
+					((Character?)bullet.Parent)?.AddScore(Constant.addScoreWhenKillOnePlayer);  //给击杀者加分
+
+					new Thread
+						(() =>
+						{
+
+							Thread.Sleep(Constant.deadRestoreTime);
+
+							playerBeingShot.AddShield(Constant.shieldTimeAtBirth);  //复活加个盾
+
+							gameMap.PlayerListLock.EnterWriteLock();
+							try
+							{
+								gameMap.PlayerList.Add(playerBeingShot);
+							}
+							finally { gameMap.PlayerListLock.ExitWriteLock(); }
+
+							if (gameMap.Timer.IsGaming)
+							{
+								playerBeingShot.CanMove = true;
+							}
+							playerBeingShot.IsResetting = false;
+						}
+						)
+					{ IsBackground = true }.Start();
 				}
 			}
 
@@ -160,7 +151,7 @@ namespace Gaming
 			/// <param name="objBeingShot">子弹打到的物体，如果为null，则未打到物体便爆炸，例如越界或被其他子弹引爆</param>
 			private void BulletBomb(Bullet bullet, GameObject? objBeingShot)
 			{
-				GameObject.Debug(bullet, " bombed!");
+				Debugger.Output(bullet, " bombed!");
 				/*子弹要爆炸时的行为*/
 
 				bullet.CanMove = false;
@@ -168,7 +159,7 @@ namespace Gaming
 				gameMap.ObjListLock.EnterWriteLock();
 				try
 				{
-					foreach (GameObject obj in gameMap.ObjList)
+					foreach (Obj obj in gameMap.ObjList)
 					{
 						if (obj.ID == bullet.ID)
 						{
@@ -194,7 +185,7 @@ namespace Gaming
 
 				/*改变地图颜色*/
 
-				int cellX = Map.Constant.GridToCellX(bullet.Position), cellY = Map.Constant.GridToCellY(bullet.Position);
+				int cellX = Constant.GridToCellX(bullet.Position), cellY = Constant.GridToCellY(bullet.Position);
 				var colorRange = bullet.GetColorRange();
 
 				/*哪些颜色不能够被改变*/
@@ -207,7 +198,7 @@ namespace Gaming
 					{
 						if (obj.IsRigid && (obj is Wall || obj is BirthPoint))
 						{
-							cannotColor[Map.Constant.GridToCellX(obj.Position), Map.Constant.GridToCellY(obj.Position)] = true;
+							cannotColor[Constant.GridToCellX(obj.Position), Constant.GridToCellY(obj.Position)] = true;
 						}
 					}
 				}
@@ -219,7 +210,8 @@ namespace Gaming
 					if (colorCellX < 0 || colorCellX >= gameMap.Rows || colorCellY < 0 || colorCellY >= gameMap.Cols) continue;
 					if (!cannotColor[colorCellX, colorCellY])
 					{
-						gameMap.SetCellColor(colorCellX, colorCellY, Map.TeamToColor(bullet.Parent.TeamID));
+						if (bullet.Parent != null)
+							gameMap.SetCellColor(colorCellX, colorCellY, Map.TeamToColor(bullet.Parent.TeamID));
 					}
 				}
 
@@ -229,13 +221,13 @@ namespace Gaming
 					attackRange[i].x += cellX;
 					attackRange[i].y += cellY;
 				}
-				ArrayList willBeAttacked = new ArrayList();
+				var willBeAttacked = new List<GameObject>();
 				gameMap.PlayerListLock.EnterReadLock();
 				try
 				{
 					foreach (Character player in gameMap.PlayerList)
 					{
-						int playerCellX = Map.Constant.GridToCellX(player.Position), playerCellY = Map.Constant.GridToCellY(player.Position);
+						int playerCellX = Constant.GridToCellX(player.Position), playerCellY = Constant.GridToCellY(player.Position);
 						foreach (var pos in attackRange)
 						{
 							if (pos.x == playerCellX && pos.y == playerCellY && !object.ReferenceEquals(player, objBeingShot)) { willBeAttacked.Add(player); }
@@ -256,7 +248,7 @@ namespace Gaming
 					{
 						if (obj.IsRigid && obj is Bullet)
 						{
-							int objCellX = Map.Constant.GridToCellX(obj.Position), objCellY = Map.Constant.GridToCellY(obj.Position);
+							int objCellX = Constant.GridToCellX(obj.Position), objCellY = Constant.GridToCellY(obj.Position);
 							foreach (var pos in attackRange)
 							{
 								if (pos.x == objCellX && pos.y == objCellY && !object.ReferenceEquals(obj, objBeingShot)) { willBeAttacked.Add(obj); }
@@ -283,18 +275,13 @@ namespace Gaming
 						gameMap: gameMap,
 						OnCollision: (obj, collisionObj, moveVec) =>
 						{
-							BulletBomb((Bullet)obj, collisionObj);
+							BulletBomb((Bullet)obj, (GameObject)collisionObj);
 							return MoveEngine.AfterCollision.Destroyed;
 						},
 						EndMove: obj =>
 						{
-							GameObject.Debug(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
+							Debugger.Output(obj, " end move at " + obj.Position.ToString() + " At time: " + Environment.TickCount64);
 							BulletBomb((Bullet)obj, null);
-						},
-						IgnoreCollision: (obj, collisionObj) =>
-						{
-							if (collisionObj is BirthPoint || collisionObj is Mine) return true;    // 子弹不和出生点与地雷碰撞
-							return false;
 						}
 					);
 			}

@@ -52,7 +52,7 @@ namespace Constants
 		M_SCI std::int32_t bullet1 = basicBulletMoveSpeed * 2;
 		M_SCI std::int32_t bullet2 = basicBulletMoveSpeed / 2;
 		M_SCI std::int32_t bullet3 = basicBulletMoveSpeed / 2;
-		M_SCI std::int32_t bullet4 = basicBulletMoveSpeed * 4;
+		M_SCI std::int32_t bullet4 = basicBulletMoveSpeed * 3;
 		M_SCI std::int32_t bullet5 = basicBulletMoveSpeed;
 		M_SCI std::int32_t bullet6 = basicBulletMoveSpeed;
 
@@ -60,7 +60,7 @@ namespace Constants
 		M_SCI std::int32_t happyBullet = bullet1;		// 12 * 1000
 		M_SCI std::int32_t coloredRibbon = bullet2;		// 3 * 1000
 		M_SCI std::int32_t bucket = bullet3;			// 3 * 1000
-		M_SCI std::int32_t peach = bullet4;				// 24 * 1000
+		M_SCI std::int32_t peach = bullet4;				// 18 * 1000
 		M_SCI std::int32_t rollCircle = bullet5;		// 6 * 1000
 		M_SCI std::int32_t palmLeafMan = bullet6;		// 6 * 1000
 	};
@@ -79,19 +79,19 @@ namespace Constants
 
 			M_SCI std::int32_t job0 = basicPlayerMoveSpeed;
 			M_SCI std::int32_t job1 = basicPlayerMoveSpeed;
-			M_SCI std::int32_t job2 = basicPlayerMoveSpeed * 2 / 3;
+			M_SCI std::int32_t job2 = basicPlayerMoveSpeed / 3;
 			M_SCI std::int32_t job3 = basicPlayerMoveSpeed * 3 / 2;
 			M_SCI std::int32_t job4 = basicPlayerMoveSpeed * 2;
 			M_SCI std::int32_t job5 = basicPlayerMoveSpeed * 2;
-			M_SCI std::int32_t job6 = basicPlayerMoveSpeed * 3 / 4;
+			M_SCI std::int32_t job6 = basicPlayerMoveSpeed;
 
 			M_SCI std::int32_t OrdinaryJob = job0;		// 4000
 			M_SCI std::int32_t HappyMan = job1;			// 4000
-			M_SCI std::int32_t LazyGoat = job2;			// 2666
+			M_SCI std::int32_t LazyGoat = job2;			// 1333
 			M_SCI std::int32_t PurpleFish = job3;		// 6000
 			M_SCI std::int32_t MonkeyDoctor = job4;		// 8000
 			M_SCI std::int32_t EggMan = job5;			// 8000
-			M_SCI std::int32_t PrincessIronFan = job6;	// 3000
+			M_SCI std::int32_t PrincessIronFan = job6;	// 4000
 		};
 
 		// 耐污值
@@ -99,25 +99,25 @@ namespace Constants
 		struct Hp
 		{
 		private:
-			M_SCI std::int32_t basicHP = 5000;
+			M_SCI std::int32_t basicHP = 6000;
 
 		public:
 
 			M_SCI std::int32_t job0 = basicHP;
-			M_SCI std::int32_t job1 = basicHP;
+			M_SCI std::int32_t job1 = basicHP * 4 / 3;
 			M_SCI std::int32_t job2 = basicHP;
-			M_SCI std::int32_t job3 = basicHP / 2;
+			M_SCI std::int32_t job3 = basicHP * 2 / 5;
 			M_SCI std::int32_t job4 = basicHP * 2 / 3;
 			M_SCI std::int32_t job5 = basicHP * 2 / 3;
-			M_SCI std::int32_t job6 = basicHP * 3;
+			M_SCI std::int32_t job6 = basicHP * 2;
 
-			M_SCI std::int32_t OrdinaryJob = job0;		// 5000
-			M_SCI std::int32_t HappyMan = job1;			// 5000
-			M_SCI std::int32_t LazyGoat = job2;			// 5000
-			M_SCI std::int32_t PurpleFish = job3;		// 2500
-			M_SCI std::int32_t MonkeyDoctor = job4;		// 3333
-			M_SCI std::int32_t EggMan = job5;			// 3333
-			M_SCI std::int32_t PrincessIronFan = job6;	// 15000
+			M_SCI std::int32_t OrdinaryJob = job0;		// 6000
+			M_SCI std::int32_t HappyMan = job1;			// 8000
+			M_SCI std::int32_t LazyGoat = job2;			// 6000
+			M_SCI std::int32_t PurpleFish = job3;		// 2400
+			M_SCI std::int32_t MonkeyDoctor = job4;		// 4000
+			M_SCI std::int32_t EggMan = job5;			// 4000
+			M_SCI std::int32_t PrincessIronFan = job6;	// 12000
 		};
 
 		// 初始对衣物的浸染力（攻击力）
@@ -131,20 +131,20 @@ namespace Constants
 		public:
 
 			M_SCI std::int32_t job0 = basicAP;
-			M_SCI std::int32_t job1 = basicAP;
-			M_SCI std::int32_t job2 = basicAP * 2;
-			M_SCI std::int32_t job3 = basicAP / 2;
-			M_SCI std::int32_t job4 = basicAP * 3;
-			M_SCI std::int32_t job5 = basicAP * 3;
-			M_SCI std::int32_t job6 = basicAP;
+			M_SCI std::int32_t job1 = basicAP * 3 / 4;
+			M_SCI std::int32_t job2 = basicAP * 5 / 4;
+			M_SCI std::int32_t job3 = basicAP * 3 / 8;
+			M_SCI std::int32_t job4 = basicAP * 7 / 2;
+			M_SCI std::int32_t job5 = basicAP * 4;
+			M_SCI std::int32_t job6 = basicAP / 2;
 
 			M_SCI std::int32_t OrdinaryJob = job0;			// 1000
-			M_SCI std::int32_t HappyMan = job1;				// 1000
-			M_SCI std::int32_t LazyGoat = job2;				// 2000
-			M_SCI std::int32_t PurpleFish = job3;			// 500
-			M_SCI std::int32_t MonkeyDoctor = job4;			// 3000
-			M_SCI std::int32_t EggMan = job5;				// 3000
-			M_SCI std::int32_t PrincessIronFan = job6;		// 1000
+			M_SCI std::int32_t HappyMan = job1;				// 750
+			M_SCI std::int32_t LazyGoat = job2;				// 1250
+			M_SCI std::int32_t PurpleFish = job3;			// 375
+			M_SCI std::int32_t MonkeyDoctor = job4;			// 3500
+			M_SCI std::int32_t EggMan = job5;				// 4000
+			M_SCI std::int32_t PrincessIronFan = job6;		// 500
 		};
 
 		// 在自己队伍颜色的格子内回复一颗子弹所需要的时间（毫秒）
@@ -153,25 +153,25 @@ namespace Constants
 		{
 		private:
 
-			M_SCI std::int32_t basicCD = 2;
+			M_SCI std::int32_t basicCD = 1;
 
 		public:
 
 			M_SCI std::int32_t job0 = basicCD;
 			M_SCI std::int32_t job1 = basicCD;
 			M_SCI std::int32_t job2 = basicCD * 2;
-			M_SCI std::int32_t job3 = basicCD * 2;
-			M_SCI std::int32_t job4 = basicCD * 2;
+			M_SCI std::int32_t job3 = basicCD * 3;
+			M_SCI std::int32_t job4 = basicCD * 4;
 			M_SCI std::int32_t job5 = basicCD * 2;
 			M_SCI std::int32_t job6 = basicCD;
 
-			M_SCI std::int32_t OrdinaryJob = job0;			// 2
-			M_SCI std::int32_t HappyMan = job1;				// 2
-			M_SCI std::int32_t LazyGoat = job2;				// 4
-			M_SCI std::int32_t PurpleFish = job3;			// 4
+			M_SCI std::int32_t OrdinaryJob = job0;			// 1
+			M_SCI std::int32_t HappyMan = job1;				// 1
+			M_SCI std::int32_t LazyGoat = job2;				// 2
+			M_SCI std::int32_t PurpleFish = job3;			// 3
 			M_SCI std::int32_t MonkeyDoctor = job4;			// 4
-			M_SCI std::int32_t EggMan = job5;				// 4
-			M_SCI std::int32_t PrincessIronFan = job6;		// 2
+			M_SCI std::int32_t EggMan = job5;				// 2
+			M_SCI std::int32_t PrincessIronFan = job6;		// 1
 		};
 
 		// 最大子弹数
@@ -180,25 +180,25 @@ namespace Constants
 		{
 		private:
 
-			M_SCI std::int32_t basicBulletNum = 15;
+			M_SCI std::int32_t basicBulletNum = 12;
 
 		public:
 
 			M_SCI std::int32_t job0 = basicBulletNum;
 			M_SCI std::int32_t job1 = basicBulletNum;
-			M_SCI std::int32_t job2 = basicBulletNum;
+			M_SCI std::int32_t job2 = basicBulletNum * 2 / 3;
 			M_SCI std::int32_t job3 = basicBulletNum / 2;
-			M_SCI std::int32_t job4 = basicBulletNum / 3;
+			M_SCI std::int32_t job4 = basicBulletNum / 4;
 			M_SCI std::int32_t job5 = basicBulletNum / 3;
 			M_SCI std::int32_t job6 = basicBulletNum;
 
-			M_SCI std::int32_t OrdinaryJob = job0;			// 15
-			M_SCI std::int32_t HappyMan = job1;				// 15
-			M_SCI std::int32_t LazyGoat = job2;				// 15
-			M_SCI std::int32_t PurpleFish = job3;			// 7
-			M_SCI std::int32_t MonkeyDoctor = job4;			// 5
-			M_SCI std::int32_t EggMan = job5;				// 5
-			M_SCI std::int32_t PrincessIronFan = job6;		// 5
+			M_SCI std::int32_t OrdinaryJob = job0;			// 12
+			M_SCI std::int32_t HappyMan = job1;				// 12
+			M_SCI std::int32_t LazyGoat = job2;				// 8
+			M_SCI std::int32_t PurpleFish = job3;			// 6
+			M_SCI std::int32_t MonkeyDoctor = job4;			// 3
+			M_SCI std::int32_t EggMan = job5;				// 4
+			M_SCI std::int32_t PrincessIronFan = job6;		// 12
 		};
 	};
 
