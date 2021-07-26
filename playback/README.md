@@ -6,7 +6,9 @@ THUAI4 原电子系第22届队式程序设计大赛
 
 - 回放文件包含每次更新发送的message
 - server运行比赛时生成回放文件
-- unity客户端读取回放文件
+- unity客户端读取回放文件  
+
+具体设计参见 docs 目录内的 docs.md  
 
 ## 开发组成员
 Timothy-LiuXuefeng（刘雪枫）

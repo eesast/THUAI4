@@ -30,8 +30,8 @@ namespace playback
 			fs = new FileStream(fileName, FileMode.Create, FileAccess.Write);
 			fs.Write(PlayBackConstant.Prefix);		// 写入前缀
 			
-			fs.Write(BitConverter.GetBytes((UInt32)teamCount));    // 写入队伍人数
-			fs.Write(BitConverter.GetBytes((UInt32)playerCount));    // 写入玩家人数
+			fs.Write(BitConverter.GetBytes((UInt32)teamCount));    // 写入队伍数
+			fs.Write(BitConverter.GetBytes((UInt32)playerCount));    // 写入每队的玩家人数
 			ms = new MemoryStream(memoryCapacity);
 			cos = new CodedOutputStream(ms);
 			gzs = new GZipStream(fs, CompressionMode.Compress);

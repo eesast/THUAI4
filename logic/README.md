@@ -28,5 +28,5 @@ Timothy-LiuXuefeng（刘雪枫）、谢童欣、李晨阳
 
 ## 说明
 
-代码结构详见 docs  
+代码结构详见 docs 目录内的 docs.md  
 
