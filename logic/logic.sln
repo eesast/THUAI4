@@ -37,6 +37,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gaming", "Gaming\Gaming.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "playback", "..\playback\playback\playback.csproj", "{61F9CEDA-0098-48CE-A18D-BA9A51A104BB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A7B51682-A536-4637-B58D-2480C26C7DE3}"
+	ProjectSection(SolutionItems) = preProject
+		docs\docs.md = docs\docs.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

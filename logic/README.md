@@ -28,4 +28,5 @@ Timothy-LiuXuefeng（刘雪枫）、谢童欣、李晨阳
 
 ## 说明
 
-详见各个项目内的README.md
+代码结构详见 docs 目录内的 docs.md  
+
