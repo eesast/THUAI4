@@ -20,13 +20,13 @@ public:
 
     void clear()
     {
-        std::lock_guard<std::mutex> lg(mtx);
+        ::std::lock_guard<::std::mutex> lg(mtx);
         while (!q.empty()) q.pop();
     }
 
     [[nodiscard]] bool empty() const
     {
-        std::lock_guard<std::mutex> lg(mtx);
+        ::std::lock_guard<::std::mutex> lg(mtx);
         bool ret = q.empty();
         return ret;
     }
@@ -34,23 +34,23 @@ public:
     template <typename... Ts>
     void push(Ts&&... args)
     {
-        std::lock_guard<std::mutex> lg(mtx);
-        q.emplace(std::forward<Ts>(args)...);
+        ::std::lock_guard<::std::mutex> lg(mtx);
+        q.emplace(::std::forward<Ts>(args)...);
     }
 
     bool try_pop(Elem& out)
     {
-        std::lock_guard<std::mutex> lg(mtx);
+        ::std::lock_guard<::std::mutex> lg(mtx);
         if (q.empty()) return false;
-        out = std::move(q.front());
+        out = ::std::move(q.front());
         q.pop();
         return true;
     }
 
 private:
 
-    std::queue<Elem> q;
-    mutable std::mutex mtx;
+    ::std::queue<Elem> q;
+    mutable ::std::mutex mtx;
 };
 
 CONCURRENT_NAMESPACE_END
